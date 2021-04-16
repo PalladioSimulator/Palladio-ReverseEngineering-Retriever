@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+	<extension point="org.eclipse.debug.core.launchConfigurationTypes">
+	    <launchConfigurationType
+           delegate="org.palladiosimulator.somox.analyzer.rules.gui.RuleEngineConfigurationDelegate"
+           id="org.palladiosimulator.somox.analyzer.rules.runconfig.LaunchRuleEngineAnalyzer"
+           modes="run, debug"
+           name="Launch Rule Engine"
+           public="true">        
+	    </launchConfigurationType>
+   </extension>
+   <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+	    <launchConfigurationTabGroup
+	        type="org.palladiosimulator.somox.analyzer.rules.runconfig.LaunchRuleEngineAnalyzer"
+	        class="org.palladiosimulator.somox.analyzer.rules.gui.RuleEngineTabGroup"
+	        id="org.palladiosimulator.somox.analyzer.rules.runconfig.LaunchRuleEngineTabGroup">
+	    </launchConfigurationTabGroup>
+	</extension>
+	<extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+		<launchConfigurationTypeImage
+	        icon="icons/RuleEngine_16x16.gif"
+	        configTypeID="org.palladiosimulator.somox.analyzer.rules.runconfig.LaunchRuleEngineAnalyzer"
+	        id="org.palladiosimulator.somox.analyzer.rules.runconfig.LaunchRuleEngineTypeImages">
+	    </launchConfigurationTypeImage>
+	</extension>
+</plugin>

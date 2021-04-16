@@ -18,4 +18,12 @@ Require-Bundle: jamopp.parser,
  org.palladiosimulator.somox.analyzer.rules.spring,
  org.somox.sourcecodedecorator,
  org.palladiosimulator.somox.analyzer.rules.all,
- org.apache.log4j
+ org.apache.log4j,
+ org.somox.core,
+ de.uka.ipd.sdq.workflow,
+ org.somox.ui,
+ de.uka.ipd.sdq.workflow.launchconfig,
+ org.eclipse.debug.ui,
+ org.eclipse.equinox.app,
+ org.somox.gast2seff,
+ org.eclipse.swt;bundle-version="3.115.100"

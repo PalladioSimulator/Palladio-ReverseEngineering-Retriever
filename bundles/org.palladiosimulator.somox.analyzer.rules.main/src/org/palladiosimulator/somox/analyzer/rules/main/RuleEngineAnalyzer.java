@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,6 +19,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -28,13 +30,22 @@ import org.emftext.language.java.containers.ContainersPackage;
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
-import org.palladiosimulator.somox.analyzer.rules.engine.DecoratorModelFiller;
+import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.engine.DockerParser;
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
-import org.palladiosimulator.somox.analyzer.rules.engine.PCMDetectorSimple;
 import org.palladiosimulator.somox.analyzer.rules.engine.PCMInstanceCreator;
 import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
 import org.apache.log4j.Logger;
+import org.somox.analyzer.AnalysisResult;
+import org.somox.analyzer.ModelAnalyzer;
+import org.somox.analyzer.ModelAnalyzer.Status;
+import static org.somox.analyzer.ModelAnalyzer.Status.FINISHED;
+import static org.somox.analyzer.ModelAnalyzer.Status.READY;
+import static org.somox.analyzer.ModelAnalyzer.Status.RUNNING;
+import static org.somox.analyzer.ModelAnalyzer.Status.WAITING;
+import org.somox.analyzer.ModelAnalyzerException;
+import org.somox.analyzer.SimpleAnalysisResult;
+import org.somox.extractor.ExtractionResult;
 import org.somox.sourcecodedecorator.SourceCodeDecoratorRepository;
 
 import jamopp.resource.JavaResource2Factory;
@@ -50,12 +61,48 @@ import jamopp.resource.JavaResource2Factory;
 * The second option is using executeWith(dir, model, ruleDoc) for which a user has to provide the project directory, a model and rules beforehand.
 * To simplify the use of the second option, the engine provides the public methods loadRules() and loadModel().
 */
-public class RuleEngine {
+public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration> {
+    private static final Logger LOG = Logger.getLogger(RuleEngineAnalyzer.class);
+
+    private Status status;
+
+    public RuleEngineAnalyzer() {
+        init();
+    }
+
+    @Override
+    public void init() {
+        this.status = READY;
+    }
+
+    @Override
+    public AnalysisResult analyze(RuleEngineConfiguration moxConfiguration,
+            HashMap<String, ExtractionResult> extractionResultMap, IProgressMonitor progressMonitor)
+            throws ModelAnalyzerException {
+
+        this.status = RUNNING;
+
+        // TODO
+        try {
+            this.execute();
+        } catch (Exception e) {
+            throw new ModelAnalyzerException(e.getMessage());
+        } finally {
+            this.status = FINISHED;
+        }
+
+        return this.initializeAnalysisResult();
+    }
+
+    @Override
+    public Status getStatus() {
+        return this.status;
+    }
+
     private static Repository pcm;
 
     private static SourceCodeDecoratorRepository deco;
 
-    private static final Logger LOG = Logger.getLogger(RuleEngine.class);
 
 
     public static void main(String[] args) {
@@ -310,5 +357,7 @@ public class RuleEngine {
     public static SourceCodeDecoratorRepository getDecoratorRepository() {
         return deco;
     }
+
+
 
 }
