@@ -124,7 +124,11 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
     private void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName, Text textWidget) {
         try {
-            configuration.setAttribute(attributeName, getAbsolutePath(textWidget));
+            if (textWidget.getText().isEmpty()) {
+                configuration.setAttribute(attributeName, "");
+            } else {
+                configuration.setAttribute(attributeName, getAbsolutePath(textWidget).toString());
+            }
         } catch (final Exception e) {
             error(e.getLocalizedMessage());
         }
