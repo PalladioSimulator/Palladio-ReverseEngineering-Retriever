@@ -37,10 +37,10 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         super.applyAttributeMap(attributeMap);
 
         if (attributeMap.get(RULE_ENGINE_INPUT_PATH) != null) {
-            setInputFolder((Path) attributeMap.get(RULE_ENGINE_INPUT_PATH));
+            setInputFolder(Path.of((String) attributeMap.get(RULE_ENGINE_INPUT_PATH)));
         }
         if (attributeMap.get(RULE_ENGINE_OUTPUT_PATH) != null) {
-            setOutputFolder((Path) attributeMap.get(RULE_ENGINE_OUTPUT_PATH));
+            setOutputFolder(Path.of((String) attributeMap.get(RULE_ENGINE_OUTPUT_PATH)));
         }
     }
 
