@@ -82,7 +82,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
         try {
             URI uri = getURI(widget);
-            Path path = Paths.get(URI.decode(CommonPlugin.asLocalURI(uri).path()));
+            Path path = Paths.get(URI.decode(CommonPlugin.asLocalURI(uri).devicePath()));
             
             if (!Files.exists(path)) {
                 return error("The file located by '" + uri + "'does not exist.");
@@ -101,10 +101,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     private URI getURI(Text widget) {
         String text = widget.getText();
         URI uri = URI.createURI(text);
-        if (uri.isPlatform())
-            return uri;
-        else
-            return URI.createFileURI(new File(text).getAbsolutePath());
+        return uri;
     }
 
     public boolean isValid(ILaunchConfiguration launchConfig) {

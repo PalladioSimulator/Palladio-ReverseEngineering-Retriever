@@ -21,6 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -85,7 +86,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
 
         try {
             // TODO Refactor, such that this can be a URI
-            String in = ruleEngineConfiguration.getInputFolder().toString();
+            String in = CommonPlugin.asLocalURI(ruleEngineConfiguration.getInputFolder()).devicePath();
 
             // TODO Add rules to GUI
             IRule ruleDoc = DefaultRule.JAX_RS.getRule();
