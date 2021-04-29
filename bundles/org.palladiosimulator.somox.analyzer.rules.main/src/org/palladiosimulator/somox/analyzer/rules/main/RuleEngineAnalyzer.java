@@ -84,7 +84,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         this.status = RUNNING;
 
         try {
-            // TODO Refactor, such that this can be a Path
+            // TODO Refactor, such that this can be a URI
             String in = ruleEngineConfiguration.getInputFolder().toString();
 
             // TODO Add rules to GUI

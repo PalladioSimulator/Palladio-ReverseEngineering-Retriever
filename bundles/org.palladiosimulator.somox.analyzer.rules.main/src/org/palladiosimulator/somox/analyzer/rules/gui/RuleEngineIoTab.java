@@ -13,6 +13,7 @@ import de.uka.ipd.sdq.workflow.launchconfig.ImageRegistryHelper;
 import de.uka.ipd.sdq.workflow.launchconfig.LaunchConfigPlugin;
 import de.uka.ipd.sdq.workflow.launchconfig.tabs.TabHelper;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,6 +21,8 @@ import java.nio.file.Paths;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
+import org.eclipse.emf.common.CommonPlugin;
+import org.eclipse.emf.common.util.URI;
 
 public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
@@ -63,12 +66,12 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
         // Create file input area for input
         in = new Text(container, SWT.SINGLE | SWT.BORDER);
-        TabHelper.createFileInputSection(container, modifyListener, "File In", new String[] {}, in, getShell(),
+        TabHelper.createFolderInputSection(container, modifyListener, "File In", in, "File In", getShell(),
                 defaultPath);
 
         // Create file input area for output
         out = new Text(container, SWT.SINGLE | SWT.BORDER);
-        TabHelper.createFileInputSection(container, modifyListener, "File Out", new String[] {}, out, getShell(),
+        TabHelper.createFolderInputSection(container, modifyListener, "File Out", out, "File Out", getShell(),
                 defaultPath);
     }
 
@@ -78,9 +81,11 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         }
 
         try {
-            Path p = getAbsolutePath(widget);
-            if (Files.notExists(p)) {
-                return error("The file located by '" + p + "'does not exist.");
+            URI uri = getURI(widget);
+            Path path = Paths.get(URI.decode(CommonPlugin.asLocalURI(uri).path()));
+            
+            if (!Files.exists(path)) {
+                return error("The file located by '" + uri + "'does not exist.");
             }
         } catch (Exception e) {
             return error(e.getLocalizedMessage());
@@ -93,8 +98,13 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         return message == null;
     }
 
-    private Path getAbsolutePath(Text widget) {
-        return Paths.get(widget.getText()).toAbsolutePath().normalize();
+    private URI getURI(Text widget) {
+        String text = widget.getText();
+        URI uri = URI.createURI(text);
+        if (uri.isPlatform())
+            return uri;
+        else
+            return URI.createFileURI(new File(text).getAbsolutePath());
     }
 
     public boolean isValid(ILaunchConfiguration launchConfig) {
@@ -127,7 +137,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
             if (textWidget.getText().isEmpty()) {
                 configuration.setAttribute(attributeName, "");
             } else {
-                configuration.setAttribute(attributeName, getAbsolutePath(textWidget).toString());
+                configuration.setAttribute(attributeName, getURI(textWidget).toString());
             }
         } catch (final Exception e) {
             error(e.getLocalizedMessage());

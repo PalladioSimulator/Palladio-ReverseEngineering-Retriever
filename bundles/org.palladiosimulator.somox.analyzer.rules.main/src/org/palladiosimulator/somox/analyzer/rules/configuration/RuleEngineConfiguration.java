@@ -1,11 +1,11 @@
 package org.palladiosimulator.somox.analyzer.rules.configuration;
 
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import org.eclipse.emf.common.util.URI;
 import org.somox.configuration.AbstractMoxConfiguration;
 
 import de.uka.ipd.sdq.workflow.extension.ExtendableJobConfiguration;
@@ -15,8 +15,8 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
     public static final String RULE_ENGINE_INPUT_PATH = "org.palladiosimulator.somox.analyzer.rules.configuration.input.path";
     public static final String RULE_ENGINE_OUTPUT_PATH = "org.palladiosimulator.somox.analyzer.rules.configuration.output.path";
 
-    private Path inputFolder;
-    private Path outputFolder;
+    private URI inputFolder;
+    private URI outputFolder;
 
     private final Map<String, Object> attributes;
 
@@ -37,10 +37,10 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         super.applyAttributeMap(attributeMap);
 
         if (attributeMap.get(RULE_ENGINE_INPUT_PATH) != null) {
-            setInputFolder(Path.of((String) attributeMap.get(RULE_ENGINE_INPUT_PATH)));
+            setInputFolder(URI.createURI((String) attributeMap.get(RULE_ENGINE_INPUT_PATH)));
         }
         if (attributeMap.get(RULE_ENGINE_OUTPUT_PATH) != null) {
-            setOutputFolder(Path.of((String) attributeMap.get(RULE_ENGINE_OUTPUT_PATH)));
+            setOutputFolder(URI.createURI((String) attributeMap.get(RULE_ENGINE_OUTPUT_PATH)));
         }
     }
 
@@ -49,19 +49,19 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         return attributes;
     }
 
-    public Path getInputFolder() {
+    public URI getInputFolder() {
         return inputFolder;
     }
 
-    public Path getOutputFolder() {
+    public URI getOutputFolder() {
         return outputFolder;
     }
 
-    public void setInputFolder(Path inputFolder) {
+    public void setInputFolder(URI inputFolder) {
         this.inputFolder = inputFolder;
     }
 
-    public void setOutputFolder(Path outputFolder) {
+    public void setOutputFolder(URI outputFolder) {
         this.outputFolder = outputFolder;
     }
 
