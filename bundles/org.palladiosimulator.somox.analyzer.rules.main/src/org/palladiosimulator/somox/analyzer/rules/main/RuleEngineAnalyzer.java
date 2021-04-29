@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,15 +77,22 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
     }
 
     @Override
-    public AnalysisResult analyze(RuleEngineConfiguration moxConfiguration,
+    public AnalysisResult analyze(RuleEngineConfiguration ruleEngineConfiguration,
             HashMap<String, ExtractionResult> extractionResultMap, IProgressMonitor progressMonitor)
             throws ModelAnalyzerException {
 
         this.status = RUNNING;
 
-        // TODO
         try {
-            this.execute();
+            // TODO Refactor, such that this can be a Path
+            String in = ruleEngineConfiguration.getInputFolder().toString();
+
+            // TODO Add rules to GUI
+            IRule ruleDoc = DefaultRule.JAX_RS.getRule();
+
+            final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForProject(in);
+
+            executeWith(in, roots, ruleDoc);
         } catch (Exception e) {
             throw new ModelAnalyzerException(e.getMessage());
         } finally {
@@ -124,14 +132,14 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         // Provide input path to project
         final String in = showDirDialog();
         if (in.equals("")) {
-        	LOG.info("No directory selected. Closing apllication...");
+        	LOG.info("No directory selected. Closing application...");
             return;
         }
 
         // Select a rule file to work with
         final String selectedRule = showRuleSelectionDialog();
         if (selectedRule.equals("")) {
-        	LOG.info("No rules selected. Closing apllication...");
+        	LOG.info("No rules selected. Closing application...");
             return;
         }
 
