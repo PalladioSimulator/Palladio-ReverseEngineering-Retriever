@@ -8,6 +8,8 @@ import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.swing.DefaultComboBoxModel;
@@ -81,16 +83,15 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         this.status = RUNNING;
 
         try {
-            URI in = CommonPlugin.asLocalURI(ruleEngineConfiguration.getInputFolder());
+            final URI in = CommonPlugin.asLocalURI(ruleEngineConfiguration.getInputFolder());
             
-            URI out = CommonPlugin.asLocalURI(ruleEngineConfiguration.getOutputFolder());
+            final URI out = CommonPlugin.asLocalURI(ruleEngineConfiguration.getOutputFolder());
 
-            // TODO Add rules to GUI
-            IRule ruleDoc = DefaultRule.JAX_RS.getRule();
+            final Set<IRule> rules = ruleEngineConfiguration.getSelectedRules();
 
             final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForProject(in);
 
-            executeWith(in, out, roots, ruleDoc);
+            executeWith(in, out, roots, rules);
         } catch (Exception e) {
             throw new ModelAnalyzerException(e.getMessage());
         } finally {
@@ -142,11 +143,12 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
             return;
         }
 
-        IRule ruleDoc = DefaultRule.valueOf(selectedRule).getRule();
+        Set<IRule> rules = new TreeSet<>();
+        rules.add(DefaultRule.valueOf(selectedRule).getRule());
 
         final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForProject(inUri);
 
-        executeWith(inUri, URI.createFileURI("./"), roots, ruleDoc);
+        executeWith(inUri, URI.createFileURI("./"), roots, rules);
 
         LOG.info("finish");
     }
@@ -158,11 +160,13 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
     * @param  model 		the JaMoPP model
     * @param  ruleDoc 		the object containing the rules
     */
-    public static void executeWith(URI projectPath, URI outPath, List<CompilationUnitImpl> model, IRule ruleDoc) {
+    public static void executeWith(URI projectPath, URI outPath, List<CompilationUnitImpl> model, Set<IRule> rules) {
 
         // for each unit, execute rules data
         for (final CompilationUnitImpl u : model) {
-            ruleDoc.processRules(u);
+            for (final IRule rule : rules) {
+                rule.processRules(u);
+            }
         }
         LOG.info("Applied rules to the compilation units");
 

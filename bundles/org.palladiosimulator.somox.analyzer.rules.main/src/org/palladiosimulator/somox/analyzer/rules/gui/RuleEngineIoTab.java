@@ -5,19 +5,21 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
+import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 
 import de.uka.ipd.sdq.workflow.launchconfig.ImageRegistryHelper;
 import de.uka.ipd.sdq.workflow.launchconfig.LaunchConfigPlugin;
 import de.uka.ipd.sdq.workflow.launchconfig.tabs.TabHelper;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
@@ -35,6 +37,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     private ModifyListener modifyListener;
 
     private Text in;
+    private Group ruleSelection;
     private Text out;
 
     public RuleEngineIoTab() {
@@ -68,6 +71,16 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         in = new Text(container, SWT.SINGLE | SWT.BORDER);
         TabHelper.createFolderInputSection(container, modifyListener, "File In", in, "File In", getShell(),
                 defaultPath);
+
+        // Create rule selection area
+        ruleSelection = new Group(container, SWT.NONE);
+        ruleSelection.setText("Rules");
+        ruleSelection.setLayout(new RowLayout());
+        for (DefaultRule rule : DefaultRule.values()) {
+            final Button selectionButton = new Button(ruleSelection, SWT.CHECK);
+            selectionButton.setText(rule.name());
+            selectionButton.addSelectionListener(new RuleSelectionListener());
+        }
 
         // Create file input area for output
         out = new Text(container, SWT.SINGLE | SWT.BORDER);
