@@ -82,13 +82,15 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
 
         try {
             URI in = CommonPlugin.asLocalURI(ruleEngineConfiguration.getInputFolder());
+            
+            URI out = CommonPlugin.asLocalURI(ruleEngineConfiguration.getOutputFolder());
 
             // TODO Add rules to GUI
             IRule ruleDoc = DefaultRule.JAX_RS.getRule();
 
             final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForProject(in);
 
-            executeWith(in, roots, ruleDoc);
+            executeWith(in, out, roots, ruleDoc);
         } catch (Exception e) {
             throw new ModelAnalyzerException(e.getMessage());
         } finally {
@@ -144,7 +146,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
 
         final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForProject(inUri);
 
-        executeWith(inUri, roots, ruleDoc);
+        executeWith(inUri, URI.createFileURI("./"), roots, ruleDoc);
 
         LOG.info("finish");
     }
@@ -156,7 +158,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
     * @param  model 		the JaMoPP model
     * @param  ruleDoc 		the object containing the rules
     */
-    public static void executeWith(URI projectPath, List<CompilationUnitImpl> model, IRule ruleDoc) {
+    public static void executeWith(URI projectPath, URI outPath, List<CompilationUnitImpl> model, IRule ruleDoc) {
 
         // for each unit, execute rules data
         for (final CompilationUnitImpl u : model) {
@@ -179,7 +181,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         pcm = PCMInstanceCreator.createPCM(mapping);
 
         // Persist the repository at ./pcm.repository
-        PCMInstanceCreator.saveRepository(pcm, "./", "pcm.repository", true);
+        PCMInstanceCreator.saveRepository(pcm, outPath, "pcm.repository", true);
 
         /*
         LOG.info("Created PCM");

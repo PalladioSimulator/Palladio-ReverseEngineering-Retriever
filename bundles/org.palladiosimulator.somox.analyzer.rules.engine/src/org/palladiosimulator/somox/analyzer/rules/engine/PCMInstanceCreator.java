@@ -85,7 +85,8 @@ public class PCMInstanceCreator {
 
         Repository repo = repository.createRepositoryNow();
 
-        saveRepository(repo, "/home/nightcrawler/Dokumente/", "meaninglessExample.repository", false);
+        // TODO remove
+        saveRepository(repo, URI.createFileURI("/home/nightcrawler/Dokumente/"), "meaninglessExample.repository", false);
 
         return repo;
     }
@@ -182,8 +183,8 @@ public class PCMInstanceCreator {
     }
 
     // Copied out from fluent api project
-    public static void saveRepository(Repository repo, String path, String name, boolean printToConsole) {
-		String outputFile = path + name;
+    public static void saveRepository(Repository repo, URI path, String name, boolean printToConsole) {
+		String outputFile = path.appendSegment(name).devicePath();
 		String[] fileExtensions = new String[] { "repository", "xml" };
 
 		// Create File
