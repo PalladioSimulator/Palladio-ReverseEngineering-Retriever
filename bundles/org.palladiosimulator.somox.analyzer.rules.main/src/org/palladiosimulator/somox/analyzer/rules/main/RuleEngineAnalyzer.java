@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,13 +39,10 @@ import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
 import org.apache.log4j.Logger;
 import org.somox.analyzer.AnalysisResult;
 import org.somox.analyzer.ModelAnalyzer;
-import org.somox.analyzer.ModelAnalyzer.Status;
 import static org.somox.analyzer.ModelAnalyzer.Status.FINISHED;
 import static org.somox.analyzer.ModelAnalyzer.Status.READY;
 import static org.somox.analyzer.ModelAnalyzer.Status.RUNNING;
-import static org.somox.analyzer.ModelAnalyzer.Status.WAITING;
 import org.somox.analyzer.ModelAnalyzerException;
-import org.somox.analyzer.SimpleAnalysisResult;
 import org.somox.extractor.ExtractionResult;
 import org.somox.sourcecodedecorator.SourceCodeDecoratorRepository;
 
@@ -85,8 +81,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         this.status = RUNNING;
 
         try {
-            // TODO Refactor, such that this can be a URI
-            String in = CommonPlugin.asLocalURI(ruleEngineConfiguration.getInputFolder()).devicePath();
+            URI in = CommonPlugin.asLocalURI(ruleEngineConfiguration.getInputFolder());
 
             // TODO Add rules to GUI
             IRule ruleDoc = DefaultRule.JAX_RS.getRule();
@@ -136,6 +131,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         	LOG.info("No directory selected. Closing application...");
             return;
         }
+        final URI inUri = URI.createFileURI(in);
 
         // Select a rule file to work with
         final String selectedRule = showRuleSelectionDialog();
@@ -146,9 +142,9 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
 
         IRule ruleDoc = DefaultRule.valueOf(selectedRule).getRule();
 
-        final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForProject(in);
+        final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForProject(inUri);
 
-        executeWith(in, roots, ruleDoc);
+        executeWith(inUri, roots, ruleDoc);
 
         LOG.info("finish");
     }
@@ -156,11 +152,11 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
     /**
     * Extracts PCM elements out of an existing JaMoPP model using an IRule file.
     *
-    * @param  projectPath 	the file system path to the project directory
+    * @param  projectPath 	the project directory
     * @param  model 		the JaMoPP model
     * @param  ruleDoc 		the object containing the rules
     */
-    public static void executeWith(String projectPath, List<CompilationUnitImpl> model, IRule ruleDoc) {
+    public static void executeWith(URI projectPath, List<CompilationUnitImpl> model, IRule ruleDoc) {
 
         // for each unit, execute rules data
         for (final CompilationUnitImpl u : model) {

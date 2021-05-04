@@ -26,7 +26,7 @@ public class ParserAdapter {
 
     private static final Logger LOG = Logger.getLogger(ParserAdapter.class);
 
-    public static List<CompilationUnitImpl> generateModelForProject(String in) {
+    public static List<CompilationUnitImpl> generateModelForProject(URI in) {
 
         // create
         final List<CompilationUnitImpl> roots = new ArrayList<>();
@@ -35,7 +35,7 @@ public class ParserAdapter {
 
         // parse
         final JaMoPPParserAPI parser = new JaMoPPJDTParser();
-        final ResourceSet units = parser.parseDirectory(Paths.get(in));
+        final ResourceSet units = parser.parseDirectory(Paths.get(in.devicePath()));
 
         // filter
         units.getAllContents().forEachRemaining(u -> {
