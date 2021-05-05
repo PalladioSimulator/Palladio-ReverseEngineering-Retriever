@@ -1,6 +1,7 @@
 package org.palladiosimulator.somox.analyzer.rules.engine;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,7 @@ public class ParserAdapter {
 
     private static final Logger LOG = Logger.getLogger(ParserAdapter.class);
 
-    public static List<CompilationUnitImpl> generateModelForProject(URI in) {
+    public static List<CompilationUnitImpl> generateModelForProject(Path in) {
 
         // create
         final List<CompilationUnitImpl> roots = new ArrayList<>();
@@ -35,7 +36,7 @@ public class ParserAdapter {
 
         // parse
         final JaMoPPParserAPI parser = new JaMoPPJDTParser();
-        final ResourceSet units = parser.parseDirectory(Paths.get(in.devicePath()));
+        final ResourceSet units = parser.parseDirectory(in);
 
         // filter
         units.getAllContents().forEachRemaining(u -> {

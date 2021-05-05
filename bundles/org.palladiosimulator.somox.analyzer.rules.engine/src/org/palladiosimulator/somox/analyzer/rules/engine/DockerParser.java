@@ -27,12 +27,12 @@ import org.eclipse.emf.common.util.URI;
 */
 public class DockerParser {
     private final String FILE_NAME = "docker-compose";
-    private final URI path;
+    private final Path path;
     Map<String, List<CompilationUnitImpl>> mapping;
 
     private static final Logger LOG = Logger.getLogger(DockerParser.class);
 
-    public DockerParser(URI path) {
+    public DockerParser(Path path) {
 
     	LOG.info("starting docker process");
 
@@ -50,7 +50,7 @@ public class DockerParser {
     private InputStream getDockerFile() {
 
         List<Path> paths = new ArrayList<>();
-        try (Stream<Path> files = Files.walk(Paths.get(path.devicePath()))) {
+        try (Stream<Path> files = Files.walk(path)) {
             paths = files.filter(f -> f.getFileName().toString().contains(FILE_NAME)).collect(Collectors.toList());
         } catch (final IOException e) {
             e.printStackTrace();
@@ -80,8 +80,10 @@ public class DockerParser {
     */
     @SuppressWarnings("unchecked")
     private List<String> extractServiceNames(InputStream stream) {
-    	System.out.println(stream.toString());
-
+        if (stream != null) {
+            System.out.println(stream.toString());
+        }
+    	
         // final Yaml yaml = new Yaml();
         final Map<String, Object> object = new HashMap<>(); // (Map<String, Object>) yaml.load(stream);
 
@@ -108,7 +110,7 @@ public class DockerParser {
         final Map<String, List<CompilationUnitImpl>> serviceToCompMapping = new HashMap<>();
 
         components.forEach(comp -> {
-            try (Stream<Path> files = Files.walk(Paths.get(path.devicePath()))) {
+            try (Stream<Path> files = Files.walk(path)) {
                 final Path foundPath = files.filter(f -> f.toString().contains(comp.getName()))
                         .collect(Collectors.toList()).get(0);
 

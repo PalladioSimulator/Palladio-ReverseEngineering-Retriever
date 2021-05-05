@@ -1,6 +1,8 @@
 package org.palladiosimulator.somox.analyzer.rules.engine;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -84,9 +86,6 @@ public class PCMInstanceCreator {
         createPCMComponents(components);
 
         Repository repo = repository.createRepositoryNow();
-
-        // TODO remove
-        saveRepository(repo, URI.createFileURI("/home/nightcrawler/Dokumente/"), "meaninglessExample.repository", false);
 
         return repo;
     }
@@ -183,8 +182,8 @@ public class PCMInstanceCreator {
     }
 
     // Copied out from fluent api project
-    public static void saveRepository(Repository repo, URI path, String name, boolean printToConsole) {
-		String outputFile = path.appendSegment(name).devicePath();
+    public static void saveRepository(Repository repo, Path path, String name, boolean printToConsole) {
+		String outputFile = path.resolve(name).toString();
 		String[] fileExtensions = new String[] { "repository", "xml" };
 
 		// Create File

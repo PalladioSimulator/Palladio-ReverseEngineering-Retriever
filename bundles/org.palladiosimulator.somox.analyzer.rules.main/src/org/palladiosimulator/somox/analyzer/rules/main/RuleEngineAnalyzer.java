@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,14 +86,16 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
 
         try {
             final URI in = CommonPlugin.asLocalURI(ruleEngineConfiguration.getInputFolder());
+            final Path inPath = Paths.get(in.devicePath());
             
             final URI out = CommonPlugin.asLocalURI(ruleEngineConfiguration.getOutputFolder());
+            final Path outPath = Paths.get(out.devicePath());
 
             final Set<IRule> rules = ruleEngineConfiguration.getSelectedRules();
 
-            final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForProject(in);
+            final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForProject(inPath);
 
-            executeWith(in, out, roots, rules);
+            executeWith(inPath, outPath, roots, rules);
         } catch (Exception e) {
             throw new ModelAnalyzerException(e.getMessage());
         } finally {
@@ -129,12 +133,13 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("java", new JavaResource2Factory());
 
         // Provide input path to project
-        final String in = showDirDialog();
-        if (in.equals("")) {
-        	LOG.info("No directory selected. Closing application...");
+        Path in;
+        try {
+            in = showDirDialog();
+        } catch (ModelAnalyzerException e) {
+            LOG.info("No directory selected. Closing application...");
             return;
         }
-        final URI inUri = URI.createFileURI(in);
 
         // Select a rule file to work with
         final String selectedRule = showRuleSelectionDialog();
@@ -146,9 +151,9 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         Set<IRule> rules = new TreeSet<>();
         rules.add(DefaultRule.valueOf(selectedRule).getRule());
 
-        final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForProject(inUri);
+        final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForProject(in);
 
-        executeWith(inUri, URI.createFileURI("./"), roots, rules);
+        executeWith(in, Paths.get("./"), roots, rules);
 
         LOG.info("finish");
     }
@@ -157,10 +162,11 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
     * Extracts PCM elements out of an existing JaMoPP model using an IRule file.
     *
     * @param  projectPath 	the project directory
+    * @param  outPath       the output directory
     * @param  model 		the JaMoPP model
     * @param  ruleDoc 		the object containing the rules
     */
-    public static void executeWith(URI projectPath, URI outPath, List<CompilationUnitImpl> model, Set<IRule> rules) {
+    public static void executeWith(Path projectPath, Path outPath, List<CompilationUnitImpl> model, Set<IRule> rules) {
 
         // for each unit, execute rules data
         for (final CompilationUnitImpl u : model) {
@@ -254,8 +260,9 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
      * Creates a GUI for selecting the project directory
      *
      * @return the String containing the path to the project
+     * @throws ModelAnalyzerException if no project was selected
      */
-    private static String showDirDialog() {
+    private static Path showDirDialog() throws ModelAnalyzerException {
         LOG.info("Directory Chooser opened");
         final JFileChooser chooser = new JFileChooser();
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -263,9 +270,9 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         chooser.setDialogTitle("Select the project directory");
         chooser.setAcceptAllFileFilterUsed(false);
         if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            return chooser.getSelectedFile().getAbsolutePath();
+            return chooser.getSelectedFile().toPath();
         }
-        return "";
+        throw new ModelAnalyzerException("No project selected!");
     }
 
     /**
