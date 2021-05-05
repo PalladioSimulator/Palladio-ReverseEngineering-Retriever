@@ -8,6 +8,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -91,7 +92,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
             final URI out = CommonPlugin.asLocalURI(ruleEngineConfiguration.getOutputFolder());
             final Path outPath = Paths.get(out.devicePath());
 
-            final Set<IRule> rules = ruleEngineConfiguration.getSelectedRules();
+            final Set<DefaultRule> rules = ruleEngineConfiguration.getSelectedRules();
 
             final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForProject(inPath);
 
@@ -102,6 +103,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
             this.status = FINISHED;
         }
 
+        // FIXME actually return something meaningful. This fixes the ResourceException the occurs on run.
         return this.initializeAnalysisResult();
     }
 
@@ -148,8 +150,8 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
             return;
         }
 
-        Set<IRule> rules = new TreeSet<>();
-        rules.add(DefaultRule.valueOf(selectedRule).getRule());
+        Set<DefaultRule> rules = new HashSet<>();
+        rules.add(DefaultRule.valueOf(selectedRule));
 
         final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForProject(in);
 
@@ -166,12 +168,12 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
     * @param  model 		the JaMoPP model
     * @param  ruleDoc 		the object containing the rules
     */
-    public static void executeWith(Path projectPath, Path outPath, List<CompilationUnitImpl> model, Set<IRule> rules) {
+    public static void executeWith(Path projectPath, Path outPath, List<CompilationUnitImpl> model, Set<DefaultRule> rules) {
 
         // for each unit, execute rules data
         for (final CompilationUnitImpl u : model) {
-            for (final IRule rule : rules) {
-                rule.processRules(u);
+            for (final DefaultRule rule : rules) {
+                rule.getRule().processRules(u);
             }
         }
         LOG.info("Applied rules to the compilation units");

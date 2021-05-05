@@ -12,6 +12,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
 
 import de.uka.ipd.sdq.workflow.launchconfig.ImageRegistryHelper;
 import de.uka.ipd.sdq.workflow.launchconfig.LaunchConfigPlugin;
@@ -20,6 +21,9 @@ import de.uka.ipd.sdq.workflow.launchconfig.tabs.TabHelper;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
@@ -37,17 +41,22 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     private ModifyListener modifyListener;
 
     private Text in;
-    private Group ruleSelection;
+    private Set<DefaultRule> rules;
+    private Set<Button> ruleButtons;
     private Text out;
 
     public RuleEngineIoTab() {
         // Create the default path of this Eclipse application
         defaultPath = Paths.get(".").toAbsolutePath().normalize().toString();
 
+        // Initialize the selected rules
+        rules = new HashSet<>();
+
         // Create a listener for GUI modification events
         modifyListener = new ModifyListener() {
             @Override
             public void modifyText(final ModifyEvent e) {
+                // e may be null here!
                 setDirty(true);
                 updateLaunchConfigurationDialog();
             }
@@ -73,13 +82,15 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
                 defaultPath);
 
         // Create rule selection area
-        ruleSelection = new Group(container, SWT.NONE);
+        Group ruleSelection = new Group(container, SWT.NONE);
         ruleSelection.setText("Rules");
         ruleSelection.setLayout(new RowLayout());
+        ruleButtons = new HashSet<>();
         for (DefaultRule rule : DefaultRule.values()) {
             final Button selectionButton = new Button(ruleSelection, SWT.CHECK);
-            selectionButton.setText(rule.name());
-            selectionButton.addSelectionListener(new RuleSelectionListener());
+            selectionButton.setText(rule.toString());
+            selectionButton.addSelectionListener(new RuleSelectionListener(selectionButton, modifyListener, rules, rule));
+            ruleButtons.add(selectionButton);
         }
 
         // Create file input area for output
@@ -130,6 +141,26 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     public void initializeFrom(ILaunchConfiguration configuration) {
         setText(configuration, in, RuleEngineConfiguration.RULE_ENGINE_INPUT_PATH);
         setText(configuration, out, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH);
+        
+        for (Button ruleButton : ruleButtons) {
+            setButton(configuration, ruleButton, RuleEngineConfiguration.RULE_ENGINE_SELECTED_RULES);
+        }
+    }
+
+    private void setButton(ILaunchConfiguration configuration, Button ruleButton, String attributeName) {
+        try {
+            Set<String> configRules = (Set<String>)configuration.getAttribute(attributeName, new HashSet<>());
+            if (configRules.contains(ruleButton.getText())) {
+                ruleButton.setSelection(true);
+                rules.add(DefaultRule.valueOf(ruleButton.getText()));
+            } else {
+                ruleButton.setSelection(false);
+                rules.remove(DefaultRule.valueOf(ruleButton.getText()));
+            }
+        } catch (final Exception e) {
+            LaunchConfigPlugin.errorLogger(getName(), attributeName, e.getMessage());
+            error(e.getLocalizedMessage());
+        }
     }
 
     private void setText(ILaunchConfiguration configuration, Text textWidget, String attributeName) {
@@ -145,7 +176,8 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     public void performApply(ILaunchConfigurationWorkingCopy configuration) {
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_INPUT_PATH, in);
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH, out);
-    }
+        setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_SELECTED_RULES, rules);
+      }
 
     private void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName, Text textWidget) {
         try {
@@ -159,6 +191,14 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         }
     }
 
+    private void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName, Set<DefaultRule> rules) {
+        try {
+            configuration.setAttribute(attributeName, RuleEngineConfiguration.serializeRules(rules));
+        } catch (final Exception e) {
+            error(e.getLocalizedMessage());
+        }
+    }
+
     @Override
     public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
         setText(in, defaultPath);
@@ -166,6 +206,10 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
         setText(out, defaultPath);
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH, out);
+        
+        // By default, no rule is selected
+        rules = new HashSet<>();
+        setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH, rules);
     }
 
     private void setText(final Text textWidget, final String attributeName) {

@@ -1,10 +1,10 @@
 package org.palladiosimulator.somox.analyzer.rules.configuration;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.eclipse.emf.common.util.URI;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
@@ -22,7 +22,7 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
 
     private URI inputFolder;
     private URI outputFolder;
-    private Set<IRule> rules;
+    private Set<DefaultRule> rules;
 
     private final Map<String, Object> attributes;
 
@@ -35,6 +35,7 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         applyAttributeMap(attributes);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void applyAttributeMap(final Map<String, Object> attributeMap) {
         if ((attributeMap == null)) {
@@ -49,28 +50,11 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
             setOutputFolder(URI.createURI((String) attributeMap.get(RULE_ENGINE_OUTPUT_PATH)));
         }
         if (attributeMap.get(RULE_ENGINE_SELECTED_RULES) != null) {
-            setSelectedRules(parseRules((String) attributeMap.get(RULE_ENGINE_SELECTED_RULES)));
+            setSelectedRules(parseRules((Set<String>) attributeMap.get(RULE_ENGINE_SELECTED_RULES)));
         }
     }
 
-    private Set<IRule> parseRules(String string) {
-        Set<IRule> rules = new TreeSet<>();
-        for (String rule : string.split(RULE_LIST_SEPARATOR)) {
-            rules.add(DefaultRule.valueOf(rule).getRule());
-        }
-        return rules;
-    }
-
-    private String serializeRules(Set<IRule> rules) {
-        StringBuilder sb = new StringBuilder();
-        for (IRule rule : rules) {
-            sb.append(rule).append(RULE_LIST_SEPARATOR);
-        }
-        sb.delete(sb.length() - RULE_LIST_SEPARATOR.length(), sb.length());
-        return sb.toString();
-    }
-
-    private void setSelectedRules(Set<IRule> rules) {
+    private void setSelectedRules(Set<DefaultRule> rules) {
         this.rules = rules;
     }
 
@@ -106,7 +90,23 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         return result;
     }
 
-    public Set<IRule> getSelectedRules() {
-        return null;
+    public Set<DefaultRule> getSelectedRules() {
+        return rules;
+    }
+
+    public static Set<DefaultRule> parseRules(Set<String> strRules) {
+        Set<DefaultRule> rules = new HashSet<>();
+        for (String rule : strRules){
+            rules.add(DefaultRule.valueOf(rule));
+        }
+        return rules;
+    }
+
+    public static Set<String> serializeRules(Set<DefaultRule> rules) {
+        Set<String> strRules = new HashSet<>();
+        for (DefaultRule rule : rules) {
+            strRules.add(rule.toString());
+        }
+        return strRules;
     }
 }
