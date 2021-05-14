@@ -8,8 +8,8 @@ import java.util.Set;
 
 import org.eclipse.emf.common.util.URI;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
-import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
 import org.somox.configuration.AbstractMoxConfiguration;
+import org.somox.configuration.FileLocationConfiguration;
 
 import de.uka.ipd.sdq.workflow.extension.ExtendableJobConfiguration;
 
@@ -22,6 +22,7 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
 
     private URI inputFolder;
     private URI outputFolder;
+    private FileLocationConfiguration fileLocations;
     private Set<DefaultRule> rules;
 
     private final Map<String, Object> attributes;
@@ -32,6 +33,7 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
 
     public RuleEngineConfiguration(Map<String, Object> attributes) {
         this.attributes = Objects.requireNonNull(attributes);
+        this.fileLocations = new FileLocationConfiguration();
         applyAttributeMap(attributes);
     }
 
@@ -73,10 +75,17 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
 
     public void setInputFolder(URI inputFolder) {
         this.inputFolder = inputFolder;
+        // FIXME THIS IS A HACK!
+        // This line only works for folders selected via the "Workspace..." button.
+        // Support for external files is hard, since this value is later expected to be a project-relative path.
+        // This might have to be discussed.
+        fileLocations.setAnalyserInputFile(inputFolder.toString().substring("platform:/resource".length()));
     }
 
     public void setOutputFolder(URI outputFolder) {
         this.outputFolder = outputFolder;
+        // FIXME see setInputFolder
+        fileLocations.setOutputFolder(inputFolder.toString().substring("platform:/resource".length()));
     }
 
     @Override
@@ -88,6 +97,11 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         result.put(RULE_ENGINE_SELECTED_RULES, serializeRules(rules));
 
         return result;
+    }
+    
+    @Override
+    public FileLocationConfiguration getFileLocations() {
+        return fileLocations;
     }
 
     public Set<DefaultRule> getSelectedRules() {

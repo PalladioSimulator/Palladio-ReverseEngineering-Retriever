@@ -26,4 +26,5 @@ Require-Bundle: jamopp.parser,
  org.eclipse.debug.ui,
  org.eclipse.equinox.app,
  org.somox.gast2seff,
- org.eclipse.swt;bundle-version="3.115.100"
+ org.eclipse.swt;bundle-version="3.115.100",
+ org.palladiosimulator.commons
