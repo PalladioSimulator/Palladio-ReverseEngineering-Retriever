@@ -85,7 +85,7 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
     public void setOutputFolder(URI outputFolder) {
         this.outputFolder = outputFolder;
         // FIXME see setInputFolder
-        fileLocations.setOutputFolder(inputFolder.toString().substring("platform:/resource".length()));
+        fileLocations.setOutputFolder(outputFolder.toString().substring("platform:/resource".length()));
     }
 
     @Override
