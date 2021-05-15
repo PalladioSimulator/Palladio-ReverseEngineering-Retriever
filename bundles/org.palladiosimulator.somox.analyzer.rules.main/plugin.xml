@@ -24,4 +24,18 @@
 	        id="org.palladiosimulator.somox.analyzer.rules.runconfig.LaunchRuleEngineTypeImages">
 	    </launchConfigurationTypeImage>
 	</extension>
+ <extension
+       id="application"
+       name="RuleEngine"
+       point="org.eclipse.core.runtime.applications">
+    <application
+          cardinality="singleton-global"
+          icon="icons/RuleEngine_16x16.gif"
+          thread="main"
+          visible="true">
+	    <run
+	     class="org.palladiosimulator.somox.analyzer.rules.cli.RuleEngineApplication">
+	    </run>
+    </application>
+ </extension>
 </plugin>
