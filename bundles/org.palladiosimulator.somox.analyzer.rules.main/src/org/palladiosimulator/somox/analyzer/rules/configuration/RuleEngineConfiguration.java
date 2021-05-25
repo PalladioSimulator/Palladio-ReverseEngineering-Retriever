@@ -75,17 +75,12 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
 
     public void setInputFolder(URI inputFolder) {
         this.inputFolder = inputFolder;
-        // FIXME THIS IS A HACK!
-        // This line only works for folders selected via the "Workspace..." button.
-        // Support for external files is hard, since this value is later expected to be a project-relative path.
-        // This might have to be discussed.
-        fileLocations.setAnalyserInputFile(inputFolder.toString().substring("platform:/resource".length()));
+        fileLocations.setAnalyserInputFile(inputFolder.toString());
     }
 
     public void setOutputFolder(URI outputFolder) {
         this.outputFolder = outputFolder;
-        // FIXME see setInputFolder
-        fileLocations.setOutputFolder(outputFolder.toString().substring("platform:/resource".length()));
+        fileLocations.setOutputFolder(outputFolder.toString());
     }
 
     @Override
