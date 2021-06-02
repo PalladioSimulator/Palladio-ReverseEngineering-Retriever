@@ -1,0 +1,9 @@
+-runee: JavaSE-11
+-runfw: org.eclipse.osgi
+-runsystemcapabilities: ${native_capability}
+
+-resolve.effective: active;skip:="osgi.service"
+
+
+-runproperties: \
+osgi.console=

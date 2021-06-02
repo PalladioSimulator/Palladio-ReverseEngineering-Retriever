@@ -1,0 +1,71 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.palladiosimulator</groupId>
+		<artifactId>eclipse-parent-updatesite</artifactId>
+		<version>0.7.3</version>
+		<relativePath>../../</relativePath>
+	</parent>
+
+	<groupId>org.somox</groupId>
+	<artifactId>org.palladiosimulator.somox.analyzer.rules.product</artifactId>
+	<name>[product] SoMoX Rule CLI</name>
+	<version>5.0.0</version>
+	<packaging>eclipse-repository</packaging>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-p2-repository-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<configuration>
+					<includeAllDependencies>true</includeAllDependencies>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-p2-director-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<executions>
+					<execution>
+						<id>materialize-products</id>
+						<goals>
+							<goal>materialize-products</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>archive-products</id>
+						<goals>
+							<goal>archive-products</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-export-maven-plugin</artifactId>
+				<version>4.3.1</version>
+				<configuration>
+					<failOnChanges>false</failOnChanges>
+					<bndruns>
+						<bndrun>headless.bndrun</bndrun>
+					</bndruns>
+					<bundles>
+						<include>${project.build.directory}/repository/plugins/*</include>
+					</bundles>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>export</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
