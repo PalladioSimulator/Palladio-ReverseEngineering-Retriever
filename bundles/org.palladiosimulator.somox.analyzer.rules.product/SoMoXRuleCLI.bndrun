@@ -4,6 +4,22 @@
 
 -resolve.effective: active;skip:="osgi.service"
 
+-runrequires: \
+    osgi.identity;filter:='(osgi.identity=org.palladiosimulator.somox.analyzer.rules.main)'
+
+-runbundles: \
+	org.palladiosimulator.somox.analyzer.rules.main, \
+	org.palladiosimulator.somox.analyzer.rules.jax_rs, \
+	org.palladiosimulator.somox.analyzer.rules.spring, \
+	org.palladiosimulator.somox.analyzer.rules.all, \
+	org.palladiosimulator.somox.analyzer.rules.engine, \
+	org.apache.felix.gogo.command,\
+	org.apache.felix.gogo.runtime,\
+	org.apache.felix.gogo.shell,\
+	org.eclipse.equinox.console,\
+	org.eclipse.osgi.services,\
+	org.eclipse.osgi.util,\
+	org.apache.felix.scr
 
 -runproperties: \
 osgi.console=

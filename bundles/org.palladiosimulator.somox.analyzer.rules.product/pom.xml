@@ -16,6 +16,7 @@
 	<version>5.0.0</version>
 	<packaging>eclipse-repository</packaging>
 
+	<!-- Used http://blog.vogella.com/2020/01/20/building-a-headless-rcp-application-with-tycho/ as a reference -->
 	<build>
 		<plugins>
 			<plugin>
@@ -52,7 +53,7 @@
 				<configuration>
 					<failOnChanges>false</failOnChanges>
 					<bndruns>
-						<bndrun>headless.bndrun</bndrun>
+						<bndrun>SoMoXRuleCLI.bndrun</bndrun>
 					</bndruns>
 					<bundles>
 						<include>${project.build.directory}/repository/plugins/*</include>
