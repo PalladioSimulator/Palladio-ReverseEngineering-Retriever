@@ -14,5 +14,5 @@
     <booleanAttribute key="M2_WORKSPACE_RESOLUTION" value="false"/>
     <stringAttribute key="org.eclipse.debug.core.ATTR_REFRESH_SCOPE" value="${workspace}"/>
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_CLASSPATH_ONLY_JAR" value="false"/>
-    <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${project_loc:Palladio-ReverseEngineering-SoMoX-JaMoPP}"/>
+    <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${project_loc:Palladio-ReverseEngineering-SoMoX-RuleEngine}"/>
 </launchConfiguration>
