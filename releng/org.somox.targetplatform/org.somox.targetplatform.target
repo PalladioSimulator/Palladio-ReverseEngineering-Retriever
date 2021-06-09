@@ -82,5 +82,15 @@
                 version="1.27.0.v20201111-1638" />
             <repository location="http://download.eclipse.org/releases/2020-12/202012161000/" />
         </location>
+        <location includeAllPlatforms="false"
+            includeConfigurePhase="true"
+            includeMode="planner"
+            includeSource="false"
+            refresh="true"
+            type="InstallableUnit">
+            <unit id="org.palladiosimulator.somox.core.feature.feature.group"
+                version="5.0.0.202106021302" />
+            <repository location="https://updatesite.palladio-simulator.com/palladio-reverseengineering-somox-jamopp/nightly/" />
+        </location>
     </locations>
 </target>
