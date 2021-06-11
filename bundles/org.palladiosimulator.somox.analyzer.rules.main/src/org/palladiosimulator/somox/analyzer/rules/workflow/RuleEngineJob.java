@@ -7,10 +7,7 @@ import de.uka.ipd.sdq.workflow.extension.AbstractExtendableJob;
 
 public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
 
-    private final RuleEngineAnalyzerConfiguration configuration;
-
     public RuleEngineJob(RuleEngineAnalyzerConfiguration configuration) {
-        this.configuration = configuration;
         setBlackboard(new RuleEngineBlackboard());
 
         this.add(new RuleEngineBlackboardInteractingJob(configuration));

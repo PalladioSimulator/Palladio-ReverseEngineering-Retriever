@@ -12,7 +12,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
-import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
 
 import de.uka.ipd.sdq.workflow.launchconfig.ImageRegistryHelper;
 import de.uka.ipd.sdq.workflow.launchconfig.LaunchConfigPlugin;
@@ -133,6 +132,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         return URI.createFileURI(text);
     }
 
+    @Override
     public boolean isValid(ILaunchConfiguration launchConfig) {
         return validateFolderInput(in) && validateFolderInput(out);
     }
