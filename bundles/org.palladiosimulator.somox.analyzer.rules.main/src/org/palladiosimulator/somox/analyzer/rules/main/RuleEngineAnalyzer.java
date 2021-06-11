@@ -1,6 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.main;
 
-import java.awt.BorderLayout;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -8,20 +7,10 @@ import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.CommonPlugin;
@@ -50,23 +39,23 @@ import org.somox.analyzer.ModelAnalyzerException;
 import org.somox.extractor.ExtractionResult;
 import org.somox.sourcecodedecorator.SourceCodeDecoratorRepository;
 
-import jamopp.resource.JavaResource2Factory;
-
 
 /**
 * The rule engine identifies PCM elements like components and interfaces inside source code via rules specified by a user before.
 * The output of this procedure is a SourceCodeDecoratorRepositoryModel and a PCMRepository model.
-* For this, the engine needs a project directory, a JaMoPP model and a IRule file.
-* There are two ways for using the engine.
+* For this, the engine needs a project directory, an output directory, a JaMoPP model and a IRule file.
 *
-* The first option is using the method execute() in which the model gets generated from the project and the rules can be selected inside a UI.
-* The second option is using executeWith(dir, model, ruleDoc) for which a user has to provide the project directory, a model and rules beforehand.
-* To simplify the use of the second option, the engine provides the public methods loadRules() and loadModel().
+* To use the engine, invoke executeWith(projectPath, outPath, model, rules).
+* To simplify the use, the engine provides the public methods loadRules() and loadModel().
 */
 public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration> {
     private static final Logger LOG = Logger.getLogger(RuleEngineAnalyzer.class);
 
     private Status status;
+
+    private static Repository pcm;
+
+    private static SourceCodeDecoratorRepository deco;
 
     public RuleEngineAnalyzer() {
         init();
@@ -75,6 +64,29 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
     @Override
     public void init() {
         this.status = READY;
+    }
+
+    @Override
+    public Status getStatus() {
+        return this.status;
+    }
+
+    /**
+     * Returns the current PCM repository model of the engine
+     *
+     * @return the PCM repository model
+     */
+    public static Repository getPCMRepository() {
+        return pcm;
+    }
+
+    /**
+     * Returns the current SourceCodeDecoratorRepository model of the engine
+     *
+     * @return the SourceCodeDecoratorRepository model
+     */
+    public static SourceCodeDecoratorRepository getDecoratorRepository() {
+        return deco;
     }
 
     @Override
@@ -102,61 +114,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
             this.status = FINISHED;
         }
 
-        // FIXME actually return something meaningful. This fixes the ResourceException the occurs on run.
         return this.initializeAnalysisResult();
-    }
-
-    @Override
-    public Status getStatus() {
-        return this.status;
-    }
-
-    private static Repository pcm;
-
-    private static SourceCodeDecoratorRepository deco;
-
-
-
-    public static void main(String[] args) {
-        execute();
-    }
-
-    /**
-     * Starts the PCM repository extraction process
-     */
-    public static void execute() {
-
-    	LOG.info("start");
-
-        pcm = null;
-        deco = null;
-
-        Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("java", new JavaResource2Factory());
-
-        // Provide input path to project
-        Path in;
-        try {
-            in = showDirDialog();
-        } catch (ModelAnalyzerException e) {
-            LOG.info("No directory selected. Closing application...");
-            return;
-        }
-
-        // Select a rule file to work with
-        final String selectedRule = showRuleSelectionDialog();
-        if (selectedRule.equals("")) {
-        	LOG.info("No rules selected. Closing application...");
-            return;
-        }
-
-        Set<DefaultRule> rules = new HashSet<>();
-        rules.add(DefaultRule.valueOf(selectedRule));
-
-        final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForProject(in);
-
-        executeWith(in, Paths.get("./"), roots, rules);
-
-        LOG.info("finish");
     }
 
     /**
@@ -169,7 +127,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
     */
     public static void executeWith(Path projectPath, Path outPath, List<CompilationUnitImpl> model, Set<DefaultRule> rules) {
 
-        // for each unit, execute rules data
+        // For each unit, execute rules
         for (final CompilationUnitImpl u : model) {
             for (final DefaultRule rule : rules) {
                 rule.getRule().processRules(u);
@@ -193,30 +151,18 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
 
         // Persist the repository at ./pcm.repository
         PCMInstanceCreator.saveRepository(pcm, outPath, "pcm.repository", true);
-
-        /*
-        LOG.info("Created PCM");
-
-        // Creates a decorator model (krogmann) for upcoming processing purposes
-        deco = DecoratorModelFiller.fillModel(pcm);
-        System.out.println();
-        LOG.info("Created Decorator Model");
-
-        PCMDetectorSimple.showInsides();
-        */
     }
-
-
 
     /**
     * Loads an external rules class file. For that the full qualified name of the xtend class has to be known
     *
     * @param  	namespace the string containing the namespace of the class implementing the IRule Interface
+    * @param    rules the path to a .class file containing the rules
     * @return	the rules from the specified (via gui) file system place
     */
-    public static IRule loadRules(String namespace) {
+    public static IRule loadRules(String namespace, Path rulesFile) {
 
-        final File file = new File(showFileDialog("rules"));
+        final File file = rulesFile.toFile();
 
         try (URLClassLoader loader = new URLClassLoader(new URL[] { file.toURI().toURL() })) {
             final Class<?> c = loader.loadClass(namespace + file.getName().replace(".class", ""));
@@ -237,15 +183,12 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
      *
      * @return the JaMoPP model instances for each java file
      */
-    public static List<CompilationUnitImpl> loadModel() {
+    public static List<CompilationUnitImpl> loadModel(URI model) {
         final ResourceSet rs = new ResourceSetImpl();
         rs.getPackageRegistry().put(ContainersPackage.eNS_URI, ContainersPackage.eINSTANCE);
         rs.getResourceFactoryRegistry().getExtensionToFactoryMap().put("containers", new XMIResourceFactoryImpl());
 
-        final String modelIn = showFileDialog("model");
-
-        final URI uri = URI.createFileURI(modelIn);
-        final Resource res = rs.createResource(uri);
+        final Resource res = rs.createResource(model);
         try {
             res.load(null);
         } catch (final IOException e) {
@@ -256,127 +199,4 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         return contents.stream().map(content -> (CompilationUnitImpl) content).filter(compi -> compi.getName() != null)
                 .collect(Collectors.toList());
     }
-
-    /**
-     * Creates a GUI for selecting the project directory
-     *
-     * @return the String containing the path to the project
-     * @throws ModelAnalyzerException if no project was selected
-     */
-    private static Path showDirDialog() throws ModelAnalyzerException {
-        LOG.info("Directory Chooser opened");
-        final JFileChooser chooser = new JFileChooser();
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        chooser.setCurrentDirectory(new java.io.File("."));
-        chooser.setDialogTitle("Select the project directory");
-        chooser.setAcceptAllFileFilterUsed(false);
-        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            return chooser.getSelectedFile().toPath();
-        }
-        throw new ModelAnalyzerException("No project selected!");
-    }
-
-    /**
-     * Creates a GUI for selecting a file, which in this context, can be a rules file or a model file
-     *
-     * @param  	purpose the string containing the type of file to select
-     * @return	the string containing the path to the selected file
-     */
-    private static String showFileDialog(String purpose) {
-        LOG.info("File Chooser for file of type: "+purpose+" opened");
-        final JFileChooser chooser = new JFileChooser();
-        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        chooser.setCurrentDirectory(new java.io.File("."));
-        chooser.setDialogTitle("Select the "+purpose+" file");
-        chooser.setAcceptAllFileFilterUsed(false);
-        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            return chooser.getSelectedFile().getAbsolutePath();
-        }
-        return "";
-    }
-
-    /**
-     * Outputs the content of a given PCM repository to the console
-     *
-     * @param repo the PCM repository
-     */
-    private static void printResult(Repository repo) {
-    	System.out.println("\nResult:");
-        repo.getComponents__Repository().forEach(comp -> {
-            System.out.println("Component: " + comp.getEntityName());
-            System.out.println("Provides:");
-            comp.getProvidedRoles_InterfaceProvidingEntity().forEach(prov -> {
-                System.out.println(prov.getEntityName());
-            });
-            System.out.println("Requires");
-            comp.getRequiredRoles_InterfaceRequiringEntity().forEach(re -> {
-                System.out.println(re.getEntityName());
-            });
-            System.out.println();
-        });
-        repo.getInterfaces__Repository().forEach(in -> {
-            System.out.println("Interface: " + in.getEntityName());
-        });
-    }
-
-    /**
-     * Creates a GUI for selecting a default rule technology
-     *
-     * @return	the string containing the name of the selected default rule technology
-     */
-    private static String showRuleSelectionDialog() {
-
-        String selectedItem = "";
-
-        final JFrame iframe = new JFrame();
-        iframe.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        iframe.setAlwaysOnTop(true);
-
-        final int btns = JOptionPane.OK_CANCEL_OPTION;
-
-        final String dialogMessage = "<html>Select the desired item from the Drop-Down "
-                + "list<br>you want to work with:<br><br></html>";
-        final String dialogTitle = "Select relevant rules";
-
-        final BorderLayout layout = new BorderLayout();
-        final JPanel topPanel = new JPanel(layout);
-        final JLabel label = new JLabel(dialogMessage);
-        topPanel.add(label, BorderLayout.NORTH);
-        final JPanel centerPanel = new JPanel(new BorderLayout(5, 5));
-        final JComboBox<String> cb = new JComboBox<>();
-        cb.setModel(new DefaultComboBoxModel<>(DefaultRule.valuesAsString()));
-        cb.setSelectedIndex(0);
-        centerPanel.add(cb, BorderLayout.CENTER);
-        topPanel.add(centerPanel);
-
-        final int res = JOptionPane.showConfirmDialog(iframe, topPanel, dialogTitle, btns);
-
-        if (res == JOptionPane.OK_OPTION) {
-            selectedItem = cb.getSelectedItem().toString();
-        }
-
-        iframe.dispose();
-        return selectedItem;
-    }
-
-    /**
-     * Returns the current PCM repository model of the engine
-     *
-     * @return the PCM repository model
-     */
-    public static Repository getPCMRepository() {
-        return pcm;
-    }
-
-    /**
-     * Returns the current SourceCodeDecoratorRepository model of the engine
-     *
-     * @return the SourceCodeDecoratorRepository model
-     */
-    public static SourceCodeDecoratorRepository getDecoratorRepository() {
-        return deco;
-    }
-
-
-
 }
