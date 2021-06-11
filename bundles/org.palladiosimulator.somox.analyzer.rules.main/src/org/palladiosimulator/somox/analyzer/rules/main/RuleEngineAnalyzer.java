@@ -140,12 +140,6 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         final DockerParser dockerParser = new DockerParser(projectPath);
         final Map<String, List<CompilationUnitImpl>> mapping = dockerParser.getMapping();
 
-        System.out.println("mapping:");
-        mapping.entrySet().forEach(entry->{
-        	System.out.println(entry.getKey());
-        	entry.getValue().forEach(val->System.out.println(val));
-        });
-
         // Creates a PCM repository with components, interfaces and roles
         pcm = PCMInstanceCreator.createPCM(mapping);
 
