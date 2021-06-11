@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="SoMoX Rule CLI" uid="org.palladiosimulator.somox.analyzer.rules.product" application="org.palladiosimulator.somox.analyzer.rules.main.application" version="5.0.0.qualifier" useFeatures="false" includeLaunchers="false">
+<product name="SoMoX Rule CLI" uid="org.palladiosimulator.somox.analyzer.rules.product" application="org.palladiosimulator.somox.analyzer.rules.main.application" version="5.0.0.qualifier" useFeatures="false" includeLaunchers="true">
+
 
    <configIni use="default">
    </configIni>
@@ -13,11 +14,13 @@
 
    <windowImages/>
 
+
    <launcher>
       <win useIco="false">
          <bmp/>
       </win>
    </launcher>
+
 
    <vm>
       <windows include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11</windows>
@@ -44,7 +47,7 @@
       <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.event" autoStart="true" startLevel="2" />
-      <property name="eclipse.ignoreApp" value="true" />
+      <property name="eclipse.ignoreApp" value="false" />
       <property name="eclipse.noShutdown" value="false" />
    </configurations>
 

@@ -13,10 +13,18 @@
 	<groupId>org.somox</groupId>
 	<artifactId>org.palladiosimulator.somox.analyzer.rules.product</artifactId>
 	<name>[product] SoMoX Rule CLI</name>
-	<version>5.0.0</version>
+	<version>5.0.0-SNAPSHOT</version>
 	<packaging>eclipse-repository</packaging>
 
-	<!-- Used http://blog.vogella.com/2020/01/20/building-a-headless-rcp-application-with-tycho/ as a reference -->
+	<!-- Without this, the native launcher artifacts can not be found -->
+	<repositories>
+		<repository>
+			<id>eclipse-release</id>
+			<url>http://download.eclipse.org/releases/2020-12/202012161000/</url>
+			<layout>p2</layout>
+		</repository>
+	</repositories>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -42,27 +50,6 @@
 						<id>archive-products</id>
 						<goals>
 							<goal>archive-products</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bnd-export-maven-plugin</artifactId>
-				<version>4.3.1</version>
-				<configuration>
-					<failOnChanges>false</failOnChanges>
-					<bndruns>
-						<bndrun>SoMoXRuleCLI.bndrun</bndrun>
-					</bndruns>
-					<bundles>
-						<include>${project.build.directory}/repository/plugins/*</include>
-					</bundles>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>export</goal>
 						</goals>
 					</execution>
 				</executions>
