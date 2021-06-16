@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.palladiosimulator.somox.analyzer.rules.feature"
+      label="SoMoX Rule Feature"
+      version="5.0.0.qualifier"
+      plugin="org.palladiosimulator.branding"
+      license-feature="org.palladiosimulator.license"
+      license-feature-version="1.0.0">
+
+   <license url="">
+      
+   </license>
+
+   <requires>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.xtend.lib"/>
+      <import plugin="org.emftext.language.java"/>
+      <import plugin="org.palladiosimulator.pcm"/>
+      <import plugin="jamopp.parser"/>
+      <import plugin="jamopp.parser.jdt"/>
+      <import plugin="jamopp.resource"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.palladiosimulator.generator.fluent_api"/>
+      <import plugin="org.somox.sourcecodedecorator"/>
+      <import plugin="org.apache.log4j"/>
+      <import plugin="org.somox.core"/>
+      <import plugin="de.uka.ipd.sdq.workflow"/>
+      <import plugin="org.somox.ui"/>
+      <import plugin="de.uka.ipd.sdq.workflow.launchconfig"/>
+      <import plugin="org.eclipse.debug.ui"/>
+      <import plugin="org.eclipse.equinox.app"/>
+      <import plugin="org.somox.gast2seff"/>
+      <import plugin="org.eclipse.swt" version="3.115.100" match="greaterOrEqual"/>
+      <import plugin="org.palladiosimulator.commons"/>
+   </requires>
+
+   <plugin
+         id="org.palladiosimulator.somox.analyzer.rules.all"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.palladiosimulator.somox.analyzer.rules.engine"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.palladiosimulator.somox.analyzer.rules.jax_rs"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.palladiosimulator.somox.analyzer.rules.main"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.palladiosimulator.somox.analyzer.rules.spring"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
