@@ -12,5 +12,5 @@ Require-Bundle: org.eclipse.core.resources,
  org.emftext.language.java,
  org.palladiosimulator.pcm,
  org.palladiosimulator.somox.analyzer.rules.engine,
- org.palladiosimulator.somox.analyzer.rules.jax_rs;bundle-version="5.0.0",
- org.palladiosimulator.somox.analyzer.rules.spring;bundle-version="5.0.0"
+ org.palladiosimulator.somox.analyzer.rules.jax_rs,
+ org.palladiosimulator.somox.analyzer.rules.spring
