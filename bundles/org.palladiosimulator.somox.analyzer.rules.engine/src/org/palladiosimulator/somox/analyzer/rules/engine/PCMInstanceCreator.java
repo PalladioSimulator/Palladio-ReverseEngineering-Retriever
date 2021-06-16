@@ -23,7 +23,6 @@ import org.emftext.language.java.classifiers.Interface;
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.emftext.language.java.generics.QualifiedTypeArgument;
 import org.emftext.language.java.generics.TypeArgument;
-import org.emftext.language.java.members.Field;
 import org.emftext.language.java.members.Method;
 import org.emftext.language.java.parameters.Parameter;
 import org.emftext.language.java.types.Boolean;
@@ -97,8 +96,6 @@ public class PCMInstanceCreator {
 
                 // parameter type
                 for (final Parameter p : m.getParameters()) {
-
-                    final TypeReference ref = p.getTypeReference();
                     signature = handleSignatureDataType(signature, p.getName(), p.getTypeReference(), false);
                 }
 
@@ -133,14 +130,6 @@ public class PCMInstanceCreator {
 
             repository.addToRepository(pcmComp);
         }
-    }
-
-    private static String getProvidesName(String compName, String opName) {
-        return (compName + " provides " + opName);
-    }
-
-    private static String getRequiresName(String compName, String opName) {
-        return (compName + " requires " + opName);
     }
 
     private static String getCompName(CompilationUnitImpl comp) {
@@ -351,31 +340,4 @@ public class PCMInstanceCreator {
 
     	return create.fetchOfCompositeDataType(classifierName);
     }
-
-    private static CompositeDataTypeCreator createTypesRecursively(ConcreteClassifier type) {
-    	if(existingDataTypesMap.containsKey(type.getName())) {
-    		return existingDataTypesMap.get(type.getName());
-    	}
-
-    	CompositeDataTypeCreator currentDataType = create.newCompositeDataType().withName(type.getName());
-    	for(Field f: type.getFields()) {
-
-    		if(f.getTypeReference() instanceof PrimitiveType) {
-    			currentDataType = currentDataType.withInnerDeclaration(f.getName(), convertPrimitive((PrimitiveType) f.getTypeReference()));
-    		}
-    		else if(f.getTypeReference().getTarget().toString().equals("String")) {
-    			currentDataType = currentDataType.withInnerDeclaration(f.getName(), Primitive.STRING);
-    		}
-    		else if(f.getTypeReference().getTarget().toString().equals("List")) {
-    			currentDataType = currentDataType.withInnerDeclaration(f.getName(), create.newCollectionDataType(f.getName(), Primitive.BYTE));
-    		}
-    		else{
-    			currentDataType = currentDataType.withInnerDeclaration(f.getName(), createTypesRecursively(getConcreteFromVar(f)).build());
-    		}
-    	}
-
-    	repository.addToRepository(currentDataType);
-    	return currentDataType;
-    }
-
 }
