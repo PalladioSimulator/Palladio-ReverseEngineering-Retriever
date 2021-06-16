@@ -352,6 +352,7 @@ public class PCMInstanceCreator {
     	return create.fetchOfCompositeDataType(classifierName);
     }
 
+    // TODO creation of CompositeDataTypes
     private static CompositeDataTypeCreator createTypesRecursively(ConcreteClassifier type) {
     	if(existingDataTypesMap.containsKey(type.getName())) {
     		return existingDataTypesMap.get(type.getName());
