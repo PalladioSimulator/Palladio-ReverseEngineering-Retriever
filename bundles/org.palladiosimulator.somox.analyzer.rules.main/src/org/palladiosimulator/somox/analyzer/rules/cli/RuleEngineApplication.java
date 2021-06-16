@@ -26,6 +26,7 @@ public class RuleEngineApplication implements IApplication {
         
         if (args.length < 2) {
             System.err.println("Too few arguments!\n" + FORMAT_EXPLANATION);
+            return -1;
         }
         
         // Extract and check path arguments
