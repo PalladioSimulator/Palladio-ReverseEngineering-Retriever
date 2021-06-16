@@ -1,17 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.palladiosimulator.somox.analyzer.rules.feature"
-      label="SoMoX Rule Feature"
+      label="SoMoX Rule Engine Feature"
       version="5.0.0.qualifier"
       plugin="org.palladiosimulator.branding"
       license-feature="org.palladiosimulator.license"
       license-feature-version="1.0.0">
+
+   <license url="">
+      
+   </license>
 
    <requires>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.xtend.lib"/>
       <import plugin="org.emftext.language.java"/>
       <import plugin="org.palladiosimulator.pcm"/>
+      <import plugin="org.palladiosimulator.somox.analyzer.rules.jax_rs"/>
+      <import plugin="org.palladiosimulator.somox.analyzer.rules.spring"/>
       <import plugin="jamopp.parser"/>
       <import plugin="jamopp.parser.jdt"/>
       <import plugin="jamopp.resource"/>
@@ -26,7 +32,7 @@
       <import plugin="org.eclipse.debug.ui"/>
       <import plugin="org.eclipse.equinox.app"/>
       <import plugin="org.somox.gast2seff"/>
-      <import plugin="org.eclipse.swt" />
+      <import plugin="org.eclipse.swt"/>
       <import plugin="org.palladiosimulator.commons"/>
    </requires>
 
