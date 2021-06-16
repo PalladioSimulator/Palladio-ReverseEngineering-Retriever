@@ -6,7 +6,7 @@ import org.somox.gast2seff.visitors.InterfaceOfExternalCallFindingFactory;
 
 public class SeffCreatorJob extends GAST2SEFFJob {
 
-    // TODO
+    // TODO integration SEFF extraction
     public SeffCreatorJob(final boolean createResourceDemandingInternalBehaviour,
             final IFunctionClassificationStrategyFactory iFunctionClassificationStrategyFactory,
             final InterfaceOfExternalCallFindingFactory interfaceOfExternalCallFindingFactory) {

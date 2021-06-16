@@ -36,7 +36,8 @@ public class RuleEngineBlackboardInteractingJob extends AbstractBlackboardIntera
 
     @Override
     public void cleanup(IProgressMonitor monitor) throws CleanupFailedException {
-        // TODO extractionResults.clear();
+        // TODO check whether this has no side effects and/or is necessary to clean up
+        // extractionResults.clear();
     }
 
     @Override

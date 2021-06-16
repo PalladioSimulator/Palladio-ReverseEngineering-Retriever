@@ -12,7 +12,7 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
 
         this.add(new RuleEngineBlackboardInteractingJob(configuration));
 
-        // TODO
+        // TODO integration SEFF extraction
         // this.add(new SeffCreatorJob(false, null, null));
 
         this.add(new ModelSaverJob(configuration.getMoxConfiguration()));

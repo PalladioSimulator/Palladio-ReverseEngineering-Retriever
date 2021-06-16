@@ -64,7 +64,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
     @Override
     public Image getImage() {
-        // TODO
+        // TODO create an image
         return ImageRegistryHelper.getTabImage(PLUGIN_ID, FILENAME_TAB_IMAGE_PATH);
     }
 

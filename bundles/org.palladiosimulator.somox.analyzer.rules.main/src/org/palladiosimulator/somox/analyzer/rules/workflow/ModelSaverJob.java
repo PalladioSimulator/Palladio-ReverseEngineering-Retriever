@@ -5,7 +5,7 @@ import org.somox.gast2seff.jobs.SaveSoMoXModelsJob;
 
 public class ModelSaverJob extends SaveSoMoXModelsJob {
 
-    // TODO
+    // TODO extract saving from RuleEngine to this job
     public ModelSaverJob(AbstractMoxConfiguration somoxConfiguration) {
         super(somoxConfiguration);
     }
