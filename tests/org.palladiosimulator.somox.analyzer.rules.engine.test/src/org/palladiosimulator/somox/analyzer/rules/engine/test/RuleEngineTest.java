@@ -1,7 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.engine.test;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
 import org.junit.jupiter.api.Test;
 
 class RuleEngineTest {

@@ -1,10 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.all;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
 import org.palladiosimulator.somox.analyzer.rules.jax_rs.JaxRSRules;
 import org.palladiosimulator.somox.analyzer.rules.spring.SpringRules;
