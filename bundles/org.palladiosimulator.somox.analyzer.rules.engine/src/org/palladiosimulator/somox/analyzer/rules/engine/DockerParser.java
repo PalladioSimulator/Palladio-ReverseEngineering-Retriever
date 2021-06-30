@@ -109,17 +109,19 @@ public class DockerParser {
 
         components.forEach(comp -> {
             try (Stream<Path> files = Files.walk(path)) {
-                final Path foundPath = files.filter(f -> f.toString().contains(comp.getName()))
-                        .collect(Collectors.toList()).get(0);
-
-                serviceNames.forEach(serviceName -> {
-                    if (foundPath.toString().contains(serviceName)) {
-                        if (!serviceToCompMapping.containsKey(serviceName)) {
-                            serviceToCompMapping.put(serviceName, new ArrayList<>());
+                final List<Path> foundPaths = files.filter(f -> f.toString().contains(comp.getName()))
+                        .collect(Collectors.toList());
+                
+                if (foundPaths.size() > 0) {
+                    serviceNames.forEach(serviceName -> {
+                        if (foundPaths.get(0).toString().contains(serviceName)) {
+                            if (!serviceToCompMapping.containsKey(serviceName)) {
+                                serviceToCompMapping.put(serviceName, new ArrayList<>());
+                            }
+                            serviceToCompMapping.get(serviceName).add(comp);
                         }
-                        serviceToCompMapping.get(serviceName).add(comp);
-                    }
-                });
+                    });
+                }
             } catch (final Exception e) {
                 e.printStackTrace();
             }
