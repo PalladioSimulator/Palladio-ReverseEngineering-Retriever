@@ -16,8 +16,8 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.pcm.reliability.FailureType;
 import org.palladiosimulator.pcm.repository.DataType;
@@ -48,7 +48,7 @@ class RuleEngineTest {
 	}
 
 	@Test
-    @Ignore("Due to static repository in RuleEngineAnalyzer")
+	@Disabled("Due to static repository in RuleEngineAnalyzer")
 	void testSpringRule() {
         final Path inPath = Paths.get(TEST_DIR, "SpringProject");
         final List<CompilationUnitImpl> model = ParserAdapter.generateModelForPath(inPath);
@@ -75,7 +75,7 @@ class RuleEngineTest {
 	}
 
     @Test
-    @Ignore("Due to a potential bug in PCMInstanceCreator")
+    @Disabled("Due to a potential bug in PCMInstanceCreator")
     void testJaxRsRule() {
         final Path inPath = Paths.get(TEST_DIR, "JaxRsProject");
         final List<CompilationUnitImpl> model = ParserAdapter.generateModelForPath(inPath);
