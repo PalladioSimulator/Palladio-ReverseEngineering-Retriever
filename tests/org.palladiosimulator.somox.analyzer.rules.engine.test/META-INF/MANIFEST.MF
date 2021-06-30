@@ -22,4 +22,7 @@ Require-Bundle: org.emftext.language.java,
  org.eclipse.core.resources,
  org.palladiosimulator.somox.analyzer.rules.engine,
  org.palladiosimulator.somox.analyzer.rules.jax_rs,
- org.palladiosimulator.somox.analyzer.rules.spring
+ org.palladiosimulator.somox.analyzer.rules.spring,
+ org.palladiosimulator.somox.analyzer.rules.main,
+ org.palladiosimulator.somox.analyzer.rules.all,
+ org.eclipse.emf.ecore
