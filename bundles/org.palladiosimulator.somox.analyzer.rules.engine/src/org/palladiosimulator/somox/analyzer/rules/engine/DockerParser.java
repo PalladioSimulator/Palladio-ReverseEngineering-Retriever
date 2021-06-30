@@ -88,7 +88,7 @@ public class DockerParser {
         // get all service names from the map
         if (!object.containsKey("services")) {
         	LOG.info("No property with name 'services' in docker compose file. File not usable");
-            return null;
+        	return new ArrayList<String>();
         }
         final List<String> serviceNames = new ArrayList<>();
         serviceNames.addAll(((Map<String, Object>) object.get("services")).keySet());
