@@ -105,7 +105,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
 
             final Set<DefaultRule> rules = ruleEngineConfiguration.getSelectedRules();
 
-            final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForProject(inPath);
+            final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForPath(inPath);
 
             executeWith(inPath, outPath, roots, rules);
         } catch (Exception e) {

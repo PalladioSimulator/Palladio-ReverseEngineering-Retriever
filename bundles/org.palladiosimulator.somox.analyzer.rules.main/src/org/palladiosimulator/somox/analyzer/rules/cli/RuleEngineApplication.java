@@ -56,7 +56,7 @@ public class RuleEngineApplication implements IApplication {
             }
         }
         
-        final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForProject(in);
+        final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForPath(in);
         
         RuleEngineAnalyzer.executeWith(in, out, roots, rules);
         

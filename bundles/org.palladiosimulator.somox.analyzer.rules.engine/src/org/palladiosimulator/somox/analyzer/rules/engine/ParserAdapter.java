@@ -26,7 +26,7 @@ public class ParserAdapter {
 
     private static final Logger LOG = Logger.getLogger(ParserAdapter.class);
 
-    public static List<CompilationUnitImpl> generateModelForProject(Path in) {
+    public static List<CompilationUnitImpl> generateModelForPath(Path in) {
 
         // create
         final List<CompilationUnitImpl> roots = new ArrayList<>();
