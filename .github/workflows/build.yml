@@ -3,8 +3,6 @@ name: Java CI with Maven Tycho
 
 on:
   push:
-    branches:
-      - master
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v21.07.08
   workflow_dispatch: # manual trigger
