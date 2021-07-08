@@ -1,5 +1,5 @@
 # This workflow will verify a Java project with Maven
-name: Verify with Maven Tycho
+name: Verify with Maven and CodeQL
 
 on:
   push:
@@ -20,5 +20,9 @@ jobs:
       with:
         java-version: '11'
         distribution: 'adopt'
-    - name: Maven Clean Verify
+    - name: Maven Verify
       run: mvn -B -U clean verify
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v1
