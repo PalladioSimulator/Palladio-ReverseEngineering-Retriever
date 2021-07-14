@@ -56,23 +56,28 @@ import repositoryStructure.types.CompositeDataTypeCreator;
 public class PCMInstanceCreator {
 
 	private final static String REPO_NAME = "Software Architecture Repository";
-    private static final FluentRepositoryFactory create = new FluentRepositoryFactory();
-    private static Repo repository = create.newRepository().withName(REPO_NAME);
-    private static Map<String, CompositeDataTypeCreator> existingDataTypesMap;
-    private static Map<String, DataType> existingCollectionDataTypes;
+    private final FluentRepositoryFactory create;
+    private final Repo repository;
+    private final Map<String, CompositeDataTypeCreator> existingDataTypesMap;
+    private final Map<String, DataType> existingCollectionDataTypes;
 
+    public PCMInstanceCreator() {
+        existingDataTypesMap = new HashMap<>();
+        existingCollectionDataTypes = new HashMap<>();
+        create = new FluentRepositoryFactory();
+        repository = create.newRepository().withName(REPO_NAME);
+        repository.addToRepository(create.newCompositeDataType().withName("Void"));
+    }
+    
     /**
     * Returns a PCM Repository model. It first creates the interfaces, then the components.
     *
     * @param  mapping  	a mapping between microservice names and java model instances
     * @return      		the PCM repository model
     */
-    public static Repository createPCM(Map<String, List<CompilationUnitImpl>> mapping) {
+    public Repository createPCM(Map<String, List<CompilationUnitImpl>> mapping) {
         final List<CompilationUnitImpl> components = PCMDetectorSimple.getComponents();
         final List<Classifier> interfaces = PCMDetectorSimple.getOperationInterfaces();
-        existingDataTypesMap = new HashMap<>();
-        existingCollectionDataTypes = new HashMap<>();
-        repository.addToRepository(create.newCompositeDataType().withName("Void"));
 
         createPCMInterfaces(interfaces);
 
@@ -83,7 +88,7 @@ public class PCMInstanceCreator {
         return repo;
     }
 
-    private static void createPCMInterfaces(List<Classifier> interfaces) {
+    private void createPCMInterfaces(List<Classifier> interfaces) {
         interfaces.forEach(inter -> {
             final ConcreteClassifier concreteInter = (ConcreteClassifier) inter;
             final String interfaceName = concreteInter.getQualifiedName().replaceAll("\\.", "_");
@@ -112,7 +117,7 @@ public class PCMInstanceCreator {
         });
     }
 
-    private static void createPCMComponents(List<CompilationUnitImpl> components) {
+    private void createPCMComponents(List<CompilationUnitImpl> components) {
         for (final CompilationUnitImpl comp : components) {
             BasicComponentCreator pcmComp = create.newBasicComponent().withName(getCompName(comp));
 
@@ -207,7 +212,7 @@ public class PCMInstanceCreator {
 		}
 	}
 
-    private static OperationSignatureCreator handleSignatureDataType(OperationSignatureCreator signature, String varName, TypeReference var, boolean asReturnType) {
+    private OperationSignatureCreator handleSignatureDataType(OperationSignatureCreator signature, String varName, TypeReference var, boolean asReturnType) {
 
     	// Check if type is a primitive type
     	Primitive prim = handlePrimitive(var);
@@ -246,7 +251,7 @@ public class PCMInstanceCreator {
         return null;
     }
 
-    private static DataType handleCollectionType(TypeReference ref) {
+    private DataType handleCollectionType(TypeReference ref) {
 
     	Classifier classifier = ref.getPureClassifierReference().getTarget();
 
@@ -339,7 +344,7 @@ public class PCMInstanceCreator {
     	return null;
     }
 
-    private static DataType handleCompositeType(TypeReference ref) {
+    private DataType handleCompositeType(TypeReference ref) {
     	Classifier classifier = ref.getPureClassifierReference().getTarget();
     	String classifierName = classifier.getName();
 
@@ -353,7 +358,7 @@ public class PCMInstanceCreator {
     }
 
     // TODO creation of CompositeDataTypes
-    private static CompositeDataTypeCreator createTypesRecursively(ConcreteClassifier type) {
+    private CompositeDataTypeCreator createTypesRecursively(ConcreteClassifier type) {
     	if(existingDataTypesMap.containsKey(type.getName())) {
     		return existingDataTypesMap.get(type.getName());
     	}

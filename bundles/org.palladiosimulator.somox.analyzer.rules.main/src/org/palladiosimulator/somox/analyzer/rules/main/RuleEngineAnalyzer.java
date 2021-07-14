@@ -35,6 +35,7 @@ import org.somox.analyzer.ModelAnalyzer;
 import static org.somox.analyzer.ModelAnalyzer.Status.FINISHED;
 import static org.somox.analyzer.ModelAnalyzer.Status.READY;
 import static org.somox.analyzer.ModelAnalyzer.Status.RUNNING;
+
 import org.somox.analyzer.ModelAnalyzerException;
 import org.somox.extractor.ExtractionResult;
 import org.somox.sourcecodedecorator.SourceCodeDecoratorRepository;
@@ -139,9 +140,9 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         // for creating composite components for each microservice
         final DockerParser dockerParser = new DockerParser(projectPath);
         final Map<String, List<CompilationUnitImpl>> mapping = dockerParser.getMapping();
-
+        
         // Creates a PCM repository with components, interfaces and roles
-        pcm = PCMInstanceCreator.createPCM(mapping);
+        pcm = new PCMInstanceCreator().createPCM(mapping);
 
         // Persist the repository at ./pcm.repository
         PCMInstanceCreator.saveRepository(pcm, outPath, "pcm.repository", true);
