@@ -1,13 +1,16 @@
 package org.palladiosimulator.somox.analyzer.rules.jax_rs
 
-import java.util.stream.Collectors
 import org.emftext.language.java.containers.impl.CompilationUnitImpl
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule
 
-import static org.palladiosimulator.somox.analyzer.rules.engine.PCMDetectorSimple.*
 import static org.palladiosimulator.somox.analyzer.rules.engine.RuleHelper.*
+import org.palladiosimulator.somox.analyzer.rules.engine.PCMDetectorSimple
 
-class JaxRSRules implements IRule{
+class JaxRSRules extends IRule{
+	
+	new(PCMDetectorSimple pcmDetector) {
+		super(pcmDetector)
+	}
 	
 	override processRules(CompilationUnitImpl unitImpl) {
 
@@ -15,56 +18,57 @@ class JaxRSRules implements IRule{
 		val isConverter = isUnitAnnotatedWithName(unitImpl, "Converter")
 		if(isConverter){
 			detectDefault(unitImpl)
-		return
+		return true
 		}
 		
 		// detect controller component	
 		val isUnitController = isUnitAnnotatedWithName(unitImpl, "Path")
 		if(isUnitController){
-			detectComponent(unitImpl) 
-			detectOperationInterface(unitImpl)
+			pcmDetector.detectComponent(unitImpl) 
+			pcmDetector.detectOperationInterface(unitImpl)
 			getMethods(unitImpl).forEach[m|
-			if(isMethodAnnotatedWithName(m,"DELETE","GET","HEAD","PUT","POST","OPTIONS")) detectProvidedInterface(unitImpl,m)]
-			getFields(unitImpl).forEach[f|if(isFieldAbstract(f)) detectRequiredInterface(unitImpl, f)]
-		return
+			if(isMethodAnnotatedWithName(m,"DELETE","GET","HEAD","PUT","POST","OPTIONS")) pcmDetector.detectProvidedInterface(unitImpl,m)]
+			getFields(unitImpl).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unitImpl, f)]
+		return true
 		} 
 		
 		val isWebListener = isUnitAnnotatedWithName(unitImpl, "WebListener","WebServlet")
 		if(isWebListener){
-			detectComponent(unitImpl)
-			detectOperationInterface(unitImpl)
+			pcmDetector.detectComponent(unitImpl)
+			pcmDetector.detectOperationInterface(unitImpl)
 			getMethods(unitImpl).forEach[m|
-			if(isMethodModifiedExactlyWith(m,"public") || isMethodModifiedExactlyWith(m,"protected")) detectProvidedInterface(unitImpl,m)]
-			getFields(unitImpl).forEach[f|if(isFieldAbstract(f)) detectRequiredInterface(unitImpl, f)]
-		return
+			if(isMethodModifiedExactlyWith(m,"public") || isMethodModifiedExactlyWith(m,"protected")) pcmDetector.detectProvidedInterface(unitImpl,m)]
+			getFields(unitImpl).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unitImpl, f)]
+		return true
 		}
 		
 		// detect implementing component
 		val isUnitImpl = isClassImplementing(unitImpl)
 		if(isUnitImpl && !isUnitController && !isWebListener){
-			detectComponent(unitImpl)
+			pcmDetector.detectComponent(unitImpl)
 			val firstIn = getAllInterfaces(unitImpl).get(0)
-			detectOperationInterface(firstIn)
-			getMethods(firstIn).forEach[m|detectProvidedInterface(unitImpl, firstIn, m)]
-			getFields(unitImpl).forEach[f|if(isFieldAbstract(f)) detectRequiredInterface(unitImpl, f)]
-			return
+			pcmDetector.detectOperationInterface(firstIn)
+			getMethods(firstIn).forEach[m|pcmDetector.detectProvidedInterface(unitImpl, firstIn, m)]
+			getFields(unitImpl).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unitImpl, f)]
+			return true
 		}
 		
 		// detect normal components
 		val classModified = isClassModifiedExactlyWith(unitImpl, "public","final");
 		if(!isUnitImpl && !isUnitController && !isWebListener && classModified){
-			detectComponent(unitImpl)
+			pcmDetector.detectComponent(unitImpl)
 			detectDefault(unitImpl)
-			return
+			return true
 		} 
+		return false
 		
 	}
 	
 	def detectDefault(CompilationUnitImpl unitImpl) {
-		detectComponent(unitImpl)
-		detectOperationInterface(unitImpl)
-		getAllPublicMethods(unitImpl).forEach[m|detectProvidedInterface(unitImpl,m)]
-		getFields(unitImpl).forEach[f|if(isFieldAbstract(f)) detectRequiredInterface(unitImpl, f)]
+		pcmDetector.detectComponent(unitImpl)
+		pcmDetector.detectOperationInterface(unitImpl)
+		getAllPublicMethods(unitImpl).forEach[m|pcmDetector.detectProvidedInterface(unitImpl,m)]
+		getFields(unitImpl).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unitImpl, f)]
 	}
 	
 }

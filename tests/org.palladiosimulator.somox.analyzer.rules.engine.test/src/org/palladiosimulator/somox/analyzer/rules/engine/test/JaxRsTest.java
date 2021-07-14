@@ -23,6 +23,6 @@ public class JaxRsTest extends RuleEngineTest {
         assertEquals(0, getFailuretypes().size());
         assertTrue(2 <= getInterfaces().size());
         
-        assertTrue(getComponents().stream().anyMatch(x -> x.getEntityName() == "jax_rs_AConverter"));
+        assertTrue(getComponents().stream().anyMatch(x -> x.getEntityName().equals("jax_rs_AConverter")));
     }
 }

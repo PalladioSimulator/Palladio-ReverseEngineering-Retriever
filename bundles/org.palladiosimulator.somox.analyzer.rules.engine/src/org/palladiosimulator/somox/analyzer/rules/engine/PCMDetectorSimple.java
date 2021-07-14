@@ -22,21 +22,21 @@ import org.emftext.language.java.variables.Variable;
 * After all rules are parsed, this class holds the results as "simple" java objects not yet transformed to real PCM objects like PCM Basic Components.
 */
 public class PCMDetectorSimple {
-    private static List<CompilationUnitImpl> components = new ArrayList<>();
+    private List<CompilationUnitImpl> components = new ArrayList<>();
 
-    private static Map<String, List<ProvidesRelation>> providedRelations = new HashMap<>();
+    private Map<String, List<ProvidesRelation>> providedRelations = new HashMap<>();
 
-    private static Map<String, List<Variable>> requiredInterfaces = new HashMap<>();
+    private Map<String, List<Variable>> requiredInterfaces = new HashMap<>();
 
-    private static List<Classifier> operationInterfaces = new ArrayList<>();
+    private List<Classifier> operationInterfaces = new ArrayList<>();
     
-    private static Set<String> interfaceNames = new HashSet<>();
+    private Set<String> interfaceNames = new HashSet<>();
 
-    private static String getFullUnitName(CompilationUnitImpl unit) {
+    private String getFullUnitName(CompilationUnitImpl unit) {
         return unit.getNamespacesAsString() + "." +unit.getName();
     }
 
-    public static void detectComponent(CompilationUnitImpl unit) {
+    public void detectComponent(CompilationUnitImpl unit) {
         for (final ConcreteClassifier classi : unit.getClassifiers()) {
             if ((classi instanceof Class) || (classi instanceof Interface)) {
                 components.add(unit);
@@ -44,14 +44,14 @@ public class PCMDetectorSimple {
         }
     }
 
-    public static void detectOperationInterface(CompilationUnitImpl unit) {
+    public void detectOperationInterface(CompilationUnitImpl unit) {
         for (final ConcreteClassifier classi : unit.getClassifiers()) {
             detectOperationInterface(classi);
         }
 
     }
     
-    private static void detectOperationInterface(Classifier classifier) {
+    private void detectOperationInterface(Classifier classifier) {
     	if(interfaceNames.contains(classifier.getName())) {
     		return;
     	}
@@ -61,11 +61,11 @@ public class PCMDetectorSimple {
         }
     }
 
-    public static void detectOperationInterface(Interface in) {
+    public void detectOperationInterface(Interface in) {
     	detectOperationInterface((Classifier) in);
     }
 
-    public static void detectRequiredInterface(CompilationUnitImpl unit, Variable v) {
+    public void detectRequiredInterface(CompilationUnitImpl unit, Variable v) {
         final String unitName = getFullUnitName(unit);
         if (requiredInterfaces.get(unitName) == null) {
             final List<Variable> fields = new ArrayList<>();
@@ -77,11 +77,11 @@ public class PCMDetectorSimple {
 
     }
 
-    public static void detectProvidedInterface(CompilationUnitImpl unit, Method method) {
+    public void detectProvidedInterface(CompilationUnitImpl unit, Method method) {
         detectProvidedInterface(unit, unit.getClassifiers().get(0), method);
     }
 
-    public static void detectProvidedInterface(CompilationUnitImpl unit, Classifier opI, Method method) {
+    public void detectProvidedInterface(CompilationUnitImpl unit, Classifier opI, Method method) {
         final String unitName = getFullUnitName(unit);
         final ProvidesRelation relation = new ProvidesRelation(opI, method);
         if (providedRelations.get(unitName) == null) {
@@ -91,11 +91,11 @@ public class PCMDetectorSimple {
 
     }
 
-    protected static List<CompilationUnitImpl> getComponents() {
+    protected List<CompilationUnitImpl> getComponents() {
         return components;
     }
 
-    protected static List<ProvidesRelation> getProvidedInterfaces(CompilationUnitImpl unit) {
+    protected List<ProvidesRelation> getProvidedInterfaces(CompilationUnitImpl unit) {
         final String name = getFullUnitName(unit);
         if (providedRelations.get(name) == null) {
             return new ArrayList<>();
@@ -103,7 +103,7 @@ public class PCMDetectorSimple {
         return providedRelations.get(name);
     }
 
-    protected static List<Variable> getRequiredInterfaces(CompilationUnitImpl unit) {
+    protected List<Variable> getRequiredInterfaces(CompilationUnitImpl unit) {
         final String name = getFullUnitName(unit);
         if (requiredInterfaces.get(name) == null) {
             return new ArrayList<>();
@@ -111,11 +111,11 @@ public class PCMDetectorSimple {
         return requiredInterfaces.get(name);
     }
 
-    protected static List<Classifier> getOperationInterfaces() {
+    protected List<Classifier> getOperationInterfaces() {
         return operationInterfaces.stream().distinct().collect(Collectors.toList());
     }
     
-    public static void showInsides() {
+    public void showInsides() {
     	System.out.println("\ncomps:");
     	components.forEach(comp->{
     		System.out.println(comp.getNamespacesAsString()+"."+comp.getName());

@@ -27,6 +27,7 @@ import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.engine.DockerParser;
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
+import org.palladiosimulator.somox.analyzer.rules.engine.PCMDetectorSimple;
 import org.palladiosimulator.somox.analyzer.rules.engine.PCMInstanceCreator;
 import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
 import org.apache.log4j.Logger;
@@ -128,24 +129,26 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
     */
     public static void executeWith(Path projectPath, Path outPath, List<CompilationUnitImpl> model, Set<DefaultRule> rules) {
 
+        PCMDetectorSimple pcmDetector = new PCMDetectorSimple();
+        
         // For each unit, execute rules
         for (final CompilationUnitImpl u : model) {
             for (final DefaultRule rule : rules) {
-                rule.getRule().processRules(u);
+                rule.getRule(pcmDetector).processRules(u);
             }
         }
         LOG.info("Applied rules to the compilation units");
-
+        
         // Parses the docker-compose file to get a mapping between microservice names and components
         // for creating composite components for each microservice
-        final DockerParser dockerParser = new DockerParser(projectPath);
+        final DockerParser dockerParser = new DockerParser(projectPath, pcmDetector);
         final Map<String, List<CompilationUnitImpl>> mapping = dockerParser.getMapping();
         
         // Creates a PCM repository with components, interfaces and roles
-        pcm = new PCMInstanceCreator().createPCM(mapping);
+        pcm = new PCMInstanceCreator(pcmDetector).createPCM(mapping);
 
         // Persist the repository at ./pcm.repository
-        PCMInstanceCreator.saveRepository(pcm, outPath, "pcm.repository", true);
+        PCMInstanceCreator.saveRepository(pcm, outPath, "pcm.repository", false);
     }
 
     /**

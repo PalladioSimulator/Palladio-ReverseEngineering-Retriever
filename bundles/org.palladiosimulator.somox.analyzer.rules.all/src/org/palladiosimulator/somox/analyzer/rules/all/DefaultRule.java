@@ -1,6 +1,9 @@
 package org.palladiosimulator.somox.analyzer.rules.all;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
+import org.palladiosimulator.somox.analyzer.rules.engine.PCMDetectorSimple;
 import org.palladiosimulator.somox.analyzer.rules.jax_rs.JaxRSRules;
 import org.palladiosimulator.somox.analyzer.rules.spring.SpringRules;
 
@@ -14,13 +17,13 @@ import org.palladiosimulator.somox.analyzer.rules.spring.SpringRules;
 */
 public enum DefaultRule {
 
-	SPRING(new SpringRules()),
-	JAX_RS(new JaxRSRules());
+	SPRING(SpringRules.class),
+	JAX_RS(JaxRSRules.class);
 
-	private final IRule rule;
+	private final Class<? extends IRule> ruleClass;
 
-	private DefaultRule(IRule rule){
-		this.rule = rule;
+	private DefaultRule(Class<? extends IRule> ruleClass){
+		this.ruleClass = ruleClass;
 	}
 
 	/**
@@ -38,8 +41,15 @@ public enum DefaultRule {
 		return names;
 	}
 
-	public IRule getRule() {
-		return this.rule;
+	public IRule getRule(PCMDetectorSimple pcmDetector) {
+		try {
+            return ruleClass.getDeclaredConstructor(PCMDetectorSimple.class).newInstance(pcmDetector);
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                | NoSuchMethodException | SecurityException e) {
+            // TODO Maybe solve this a little bit better..?
+            e.printStackTrace();
+        }
+		return null;
 	}
 
 }

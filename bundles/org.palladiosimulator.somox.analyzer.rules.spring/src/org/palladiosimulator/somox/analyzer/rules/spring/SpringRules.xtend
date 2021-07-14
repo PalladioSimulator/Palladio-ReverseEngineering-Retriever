@@ -7,25 +7,28 @@ import org.emftext.language.java.containers.impl.CompilationUnitImpl
 import org.emftext.language.java.members.Method
 import org.emftext.language.java.members.Field
 import org.emftext.language.java.parameters.Parameter
-import static org.palladiosimulator.somox.analyzer.rules.engine.PCMDetectorSimple.*
-import sun.security.jca.GetInstance.Instance
+import org.palladiosimulator.somox.analyzer.rules.engine.PCMDetectorSimple
 
-class SpringRules implements IRule{
+class SpringRules extends IRule {
 	
-	override processRules(CompilationUnitImpl unitImpl) {
+	new(PCMDetectorSimple pcmDetector) {
+		super(pcmDetector)
+	}
+	
+	override boolean processRules(CompilationUnitImpl unitImpl) {
 		
 		val isAbstract = isAbstraction(unitImpl)
 		
 		// Component detection
 		val isComponent = !isAbstract && isUnitAnnotatedWithName(unitImpl, "Component","Service","Controller","RestController","RequestMapping","ControllerAdvice")
 		
-		if(isComponent) detectComponent(unitImpl)
+		if(isComponent) pcmDetector.detectComponent(unitImpl)
 		
 		// Component Detection for Spring Repository
 		if((isUnitAnnotatedWithName(unitImpl,"FeignClient","Repository") || (isUnitNamedWith(unitImpl, "Repository")) && isAbstract)) {
-			detectComponent(unitImpl) 
-			detectOperationInterface(unitImpl)
-			getMethods(unitImpl).forEach[m|detectProvidedInterface(unitImpl, m)]
+			pcmDetector.detectComponent(unitImpl) 
+			pcmDetector.detectOperationInterface(unitImpl)
+			getMethods(unitImpl).forEach[m|pcmDetector.detectProvidedInterface(unitImpl, m)]
 		}
 		
 		// Operation Interface Detection
@@ -34,9 +37,9 @@ class SpringRules implements IRule{
 		val isImplementingOne = inFs.size==1
 		if(isComponent && isImplementingOne) {
 			var firstIn = inFs.get(0)
-			detectOperationInterface(firstIn)
+			pcmDetector.detectOperationInterface(firstIn)
 			for(Method m: getMethods(firstIn)){
-				detectProvidedInterface(unitImpl, firstIn, m)
+				pcmDetector.detectProvidedInterface(unitImpl, firstIn, m)
 			}
 		}
 			
@@ -46,7 +49,7 @@ class SpringRules implements IRule{
 				val annoWithName = isMethodAnnotatedWithName(m,"RequestMapping","GetMapping","PutMapping","PostMapping","DeleteMapping","PatchMapping")
 
 				if(annoWithName || (!annoWithName && m.public)) 
-					detectProvidedInterface(unitImpl, m) detectOperationInterface(unitImpl)
+					pcmDetector.detectProvidedInterface(unitImpl, m) pcmDetector.detectOperationInterface(unitImpl)
 			}
 				
 		
@@ -57,16 +60,16 @@ class SpringRules implements IRule{
 			for(Field f: getFields(unitImpl)){
 				val annotated = isFieldAnnotatedWithName(f, "Autowired")
 				if(annotated){
-					detectRequiredInterface(unitImpl, f)
+					pcmDetector.detectRequiredInterface(unitImpl, f)
 				}
 				val abstr = isFieldAbstract(f)
 				val modi = isFieldModifiedExactlyWith(f, "private","final")
 				if(!annotated && abstr && modi){
-					detectRequiredInterface(unitImpl, f)
+					pcmDetector.detectRequiredInterface(unitImpl, f)
 				}
 				// if class of field is annotated
 				if(!abstr && modi && isClassOfFieldAnnotatedWithName(f,"Component","Service","Controller","RestController","RequestMapping","ControllerAdvice")){
-					detectRequiredInterface(unitImpl, f)
+					pcmDetector.detectRequiredInterface(unitImpl, f)
 				}
 				
 			}
@@ -78,11 +81,11 @@ class SpringRules implements IRule{
 						// if abstract type
 						val isParaAbstract = isParameterAbstract(p)
 						if(isParaAbstract){
-							detectRequiredInterface(unitImpl, p)
+							pcmDetector.detectRequiredInterface(unitImpl, p)
 						}
 						// if type is component
 						if(!isParaAbstract && isParameterAClassAnnotatedWith(p,"Component","Service","Controller","RestController","RequestMapping","ControllerAdvice")){
-							detectRequiredInterface(unitImpl, p)
+							pcmDetector.detectRequiredInterface(unitImpl, p)
 						}
 					}
 				}
@@ -93,14 +96,15 @@ class SpringRules implements IRule{
 				if(isConstructorAnnotatedWithName(constructor,"Autowired")){
 					constructor.parameters.forEach[para | {
 					if(isParameterAbstract(para) || isParameterAClassAnnotatedWith(para,"Component","Service","Controller","RestController","RequestMapping","ControllerAdvice")){
-						detectRequiredInterface(unitImpl, para)
+						pcmDetector.detectRequiredInterface(unitImpl, para)
 					}
 					if(!isParameterAbstract(para) && isParameterAnnotatedWith(para,"LoadBalanced")){
-						detectRequiredInterface(unitImpl, para)
+						pcmDetector.detectRequiredInterface(unitImpl, para)
 					} 
 				}]
 				}
 			}];
 		}
+		return true;
 	}
 }

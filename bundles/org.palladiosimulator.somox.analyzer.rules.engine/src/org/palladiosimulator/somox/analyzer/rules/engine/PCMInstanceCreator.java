@@ -58,15 +58,17 @@ public class PCMInstanceCreator {
 	private final static String REPO_NAME = "Software Architecture Repository";
     private final FluentRepositoryFactory create;
     private final Repo repository;
+    private final PCMDetectorSimple pcmDetector;
     private final Map<String, CompositeDataTypeCreator> existingDataTypesMap;
     private final Map<String, DataType> existingCollectionDataTypes;
 
-    public PCMInstanceCreator() {
+    public PCMInstanceCreator(PCMDetectorSimple pcmDetector) {
         existingDataTypesMap = new HashMap<>();
         existingCollectionDataTypes = new HashMap<>();
         create = new FluentRepositoryFactory();
         repository = create.newRepository().withName(REPO_NAME);
         repository.addToRepository(create.newCompositeDataType().withName("Void"));
+        this.pcmDetector = pcmDetector;
     }
     
     /**
@@ -76,8 +78,8 @@ public class PCMInstanceCreator {
     * @return      		the PCM repository model
     */
     public Repository createPCM(Map<String, List<CompilationUnitImpl>> mapping) {
-        final List<CompilationUnitImpl> components = PCMDetectorSimple.getComponents();
-        final List<Classifier> interfaces = PCMDetectorSimple.getOperationInterfaces();
+        final List<CompilationUnitImpl> components = pcmDetector.getComponents();
+        final List<Classifier> interfaces = pcmDetector.getOperationInterfaces();
 
         createPCMInterfaces(interfaces);
 
@@ -122,14 +124,14 @@ public class PCMInstanceCreator {
             BasicComponentCreator pcmComp = create.newBasicComponent().withName(getCompName(comp));
 
 
-            final List<ProvidesRelation> providedRelations = PCMDetectorSimple.getProvidedInterfaces(comp);
+            final List<ProvidesRelation> providedRelations = pcmDetector.getProvidedInterfaces(comp);
 
             Set<ConcreteClassifier> realInterfaces =  providedRelations.stream().map(relation->(ConcreteClassifier) relation.getOperationInterface()).collect(Collectors.toSet());
             for(ConcreteClassifier realInterface : realInterfaces) {
             	pcmComp.provides(create.fetchOfOperationInterface(realInterface.getQualifiedName().replaceAll("\\.", "_")),"dummy name");
             }
 
-            final List<Variable> requiredIs = PCMDetectorSimple.getRequiredInterfaces(comp);
+            final List<Variable> requiredIs = pcmDetector.getRequiredInterfaces(comp);
             Set<ConcreteClassifier> requireInterfaces = requiredIs.stream().map(variable -> getConcreteFromVar(variable)).collect(Collectors.toSet());
 
             for(ConcreteClassifier requInter: requireInterfaces) {

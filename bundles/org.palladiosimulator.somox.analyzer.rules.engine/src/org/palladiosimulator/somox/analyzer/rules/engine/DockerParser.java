@@ -26,15 +26,17 @@ import org.apache.log4j.Logger;
 public class DockerParser {
     private final String FILE_NAME = "docker-compose";
     private final Path path;
+    private final PCMDetectorSimple pcmDetector;
     Map<String, List<CompilationUnitImpl>> mapping;
 
     private static final Logger LOG = Logger.getLogger(DockerParser.class);
 
-    public DockerParser(Path path) {
+    public DockerParser(Path path, PCMDetectorSimple pcmDetector) {
 
     	LOG.info("starting docker process");
 
         this.path = path;
+        this.pcmDetector = pcmDetector;
         final InputStream input = getDockerFile();
         final List<String> services = extractServiceNames(input);
         mapping = createServiceComponentMapping(services);
@@ -103,7 +105,7 @@ public class DockerParser {
     */
     private Map<String, List<CompilationUnitImpl>> createServiceComponentMapping(List<String> serviceNames) {
 
-        final List<CompilationUnitImpl> components = PCMDetectorSimple.getComponents();
+        final List<CompilationUnitImpl> components = pcmDetector.getComponents();
 
         final Map<String, List<CompilationUnitImpl>> serviceToCompMapping = new HashMap<>();
 

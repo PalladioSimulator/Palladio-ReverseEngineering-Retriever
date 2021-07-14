@@ -104,8 +104,7 @@ abstract class RuleEngineTest {
         assertEquals(1, contents.size());
         assertTrue(contents.get(0) instanceof RepositoryImpl);
         
-        // TODO Models sometimes have duplicate signatures, this is a bug.
-        // validate(contents.get(0));
+        validate(contents.get(0));
         
         return (RepositoryImpl) contents.get(0);
     }
