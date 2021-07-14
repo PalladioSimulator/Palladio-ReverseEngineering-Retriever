@@ -48,7 +48,6 @@ class RuleEngineTest {
 	}
 
 	@Test
-	@Disabled("Due to static repository in RuleEngineAnalyzer")
 	void testSpringRule() {
         final Path inPath = Paths.get(TEST_DIR, "SpringProject");
         final List<CompilationUnitImpl> model = ParserAdapter.generateModelForPath(inPath);
@@ -75,7 +74,7 @@ class RuleEngineTest {
 	}
 
     @Test
-    @Disabled("Due to a potential bug in PCMInstanceCreator")
+    @Disabled("Generated repository produces errors when validated!")
     void testJaxRsRule() {
         final Path inPath = Paths.get(TEST_DIR, "JaxRsProject");
         final List<CompilationUnitImpl> model = ParserAdapter.generateModelForPath(inPath);
@@ -93,12 +92,12 @@ class RuleEngineTest {
         List<FailureType> failuretypes = repo.getFailureTypes__Repository();
         List<Interface> interfaces = repo.getInterfaces__Repository();
 
-        assertEquals(3, components.size());
-        assertEquals(1, datatypes.size());
+        assertTrue(3 <= components.size());
+        assertTrue(1 <= datatypes.size());
         assertEquals(0, failuretypes.size());
-        assertEquals(2, interfaces.size());
+        assertTrue(2 <= interfaces.size());
         
-        assertEquals("spring_AComponent",  components.get(0).getEntityName());
+        assertTrue(components.stream().anyMatch(x -> x.getEntityName() == "jax_rs_AConverter"));
     }
 	
 	@AfterAll
@@ -120,6 +119,6 @@ class RuleEngineTest {
 	private static void validate(EObject eObject) 
 	{
 	    EcoreUtil.resolveAll(eObject);
-	    assertEquals(Diagnostician.INSTANCE.validate(eObject).getSeverity(), Diagnostic.OK);
+	    assertEquals(Diagnostic.OK, Diagnostician.INSTANCE.validate(eObject).getSeverity());
 	}
 }
