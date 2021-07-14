@@ -1,0 +1,15 @@
+[submodule "tests/org.palladiosimulator.somox.analyzer.rules.engine.test/res/--force"]
+	path = tests/org.palladiosimulator.somox.analyzer.rules.engine.test/res/--force
+	url = https://github.com/acmeair/acmeair
+[submodule "tests/org.palladiosimulator.somox.analyzer.rules.engine.test/res/TeaStore"]
+	path = tests/org.palladiosimulator.somox.analyzer.rules.engine.test/res/TeaStore
+	url = https://github.com/DescartesResearch/TeaStore/
+[submodule "tests/org.palladiosimulator.somox.analyzer.rules.engine.test/res/acmeair"]
+	path = tests/org.palladiosimulator.somox.analyzer.rules.engine.test/res/acmeair
+	url = https://github.com/acmeair/acmeair
+[submodule "tests/org.palladiosimulator.somox.analyzer.rules.engine.test/res/piggymetrics"]
+	path = tests/org.palladiosimulator.somox.analyzer.rules.engine.test/res/piggymetrics
+	url = https://github.com/sqshq/piggymetrics
+[submodule "tests/org.palladiosimulator.somox.analyzer.rules.engine.test/res/spring-petclinic-microservices"]
+	path = tests/org.palladiosimulator.somox.analyzer.rules.engine.test/res/spring-petclinic-microservices
+	url = https://github.com/spring-petclinic/spring-petclinic-microservices
