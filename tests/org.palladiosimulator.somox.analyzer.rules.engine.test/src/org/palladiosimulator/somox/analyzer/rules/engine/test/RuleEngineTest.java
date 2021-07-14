@@ -47,11 +47,11 @@ abstract class RuleEngineTest {
      * 
      * @param projectDirectory the name of the project directory that will be analyzed
      */
-    protected RuleEngineTest(String projectDirectory, Set<DefaultRule> rules) {
+    protected RuleEngineTest(String projectDirectory, DefaultRule... rules) {
         final Path inPath = TEST_DIR.resolve(projectDirectory);
         final List<CompilationUnitImpl> model = ParserAdapter.generateModelForPath(inPath);
-        this.rules = rules;
-        RuleEngineAnalyzer.executeWith(inPath, OUT_DIR, model, rules);
+        this.rules = Set.of(rules);
+        RuleEngineAnalyzer.executeWith(inPath, OUT_DIR, model, this.rules);
 
         Path repoPath = Paths.get(OUT_DIR.toString(), "pcm.repository");
         assertTrue(repoPath.toFile().exists());

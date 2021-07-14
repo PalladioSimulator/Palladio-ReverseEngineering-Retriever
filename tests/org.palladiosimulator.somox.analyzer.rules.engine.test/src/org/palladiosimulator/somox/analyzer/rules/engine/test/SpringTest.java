@@ -2,14 +2,12 @@ package org.palladiosimulator.somox.analyzer.rules.engine.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Set;
-
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 
 public class SpringTest extends RuleEngineTest {
 
     protected SpringTest() {
-        super("SpringProject", Set.of(DefaultRule.SPRING));
+        super("SpringProject", DefaultRule.SPRING);
     }
 
     /**
