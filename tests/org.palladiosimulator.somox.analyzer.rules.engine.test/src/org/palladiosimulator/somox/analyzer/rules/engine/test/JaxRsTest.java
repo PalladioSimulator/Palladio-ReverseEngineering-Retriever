@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 
 public class JaxRsTest extends RuleEngineTest {
@@ -16,6 +17,7 @@ public class JaxRsTest extends RuleEngineTest {
      * Tests the basic functionality of the RuleEngineAnalyzer when executing the JAX_RS rule.
      * Requires it to execute without an exception and produce an output file with the correct contents.
      */
+    @Test
     @Disabled("Generated repository produces errors when validated!")
     void test() {
         assertTrue(3 <= getComponents().size());

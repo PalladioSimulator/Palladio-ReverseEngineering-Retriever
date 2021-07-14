@@ -64,7 +64,6 @@ abstract class RuleEngineTest {
         interfaces = repo.getInterfaces__Repository();
     }
     
-    @Test
     abstract void test();
 	
 	@AfterEach
