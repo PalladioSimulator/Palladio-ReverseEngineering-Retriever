@@ -3,6 +3,7 @@ package org.palladiosimulator.somox.analyzer.rules.engine.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -68,7 +69,9 @@ abstract class RuleEngineTest {
 	
 	@AfterEach
 	void cleanUp() {
-	    OUT_DIR.toFile().delete();
+        File[] files = OUT_DIR.toFile().listFiles();
+        if(files != null) // Some JVMs return null for empty dirs
+            for(File f : files) assertTrue(f.delete());
 	}
 
     public RepositoryImpl getRepo() {
