@@ -27,6 +27,10 @@ Require-Bundle: jamopp.parser,
  org.eclipse.equinox.app,
  org.somox.gast2seff,
  org.eclipse.swt,
- org.palladiosimulator.commons
-Export-Package: org.palladiosimulator.somox.analyzer.rules.cli;uses:="org.eclipse.equinox.app",
- org.palladiosimulator.somox.analyzer.rules.main
+ org.palladiosimulator.commons,
+ org.eclipse.emf.ecore
+Export-Package: org.palladiosimulator.somox.analyzer.rules.blackboard,
+ org.palladiosimulator.somox.analyzer.rules.cli;uses:="org.eclipse.equinox.app",
+ org.palladiosimulator.somox.analyzer.rules.configuration,
+ org.palladiosimulator.somox.analyzer.rules.main,
+ org.palladiosimulator.somox.analyzer.rules.workflow

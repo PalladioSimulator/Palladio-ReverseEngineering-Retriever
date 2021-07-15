@@ -19,18 +19,19 @@ import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
 import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 public class RuleEngineBlackboardInteractingJob extends AbstractBlackboardInteractingJob<RuleEngineBlackboard> {
-
+	
     private static final String NAME = "Rule Engine Blackboard Interacting";
 
     private final RuleEngineConfiguration configuration;
     private final HashMap<String, ExtractionResult> extractionResults;
 
-    public RuleEngineBlackboardInteractingJob(RuleEngineAnalyzerConfiguration configuration) {
-        this(configuration.getMoxConfiguration());
+    public RuleEngineBlackboardInteractingJob(RuleEngineAnalyzerConfiguration configuration, RuleEngineBlackboard blackboard) {
+        this(configuration.getMoxConfiguration(), blackboard);
     }
 
-    public RuleEngineBlackboardInteractingJob(RuleEngineConfiguration configuration) {
+    public RuleEngineBlackboardInteractingJob(RuleEngineConfiguration configuration, RuleEngineBlackboard blackboard) {
         this.configuration = Objects.requireNonNull(configuration);
+        setBlackboard(blackboard);
         extractionResults = new HashMap<>();
     }
 
