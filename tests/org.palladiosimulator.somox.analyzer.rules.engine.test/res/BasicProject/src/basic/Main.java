@@ -38,4 +38,21 @@ public final class Main implements Serializable, Runnable {
 		Main.main(args);
 	}
 
+	void conflictingMethod(int intArg) {
+	}
+
+	void conflictingMethod(short intArg) {
+	}
+
+	void conflictingMethod(int[] intArray) {
+	}
+
+	void conflictingMethod(short[] intArray) {
+	}
+
+	void conflictingMethod(int... intVararg) {
+	}
+
+	void conflictingMethod(short... intVararg) {
+	}
 }
