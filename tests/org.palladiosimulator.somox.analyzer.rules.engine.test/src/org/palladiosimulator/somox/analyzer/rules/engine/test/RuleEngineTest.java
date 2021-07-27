@@ -18,7 +18,6 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
 import org.palladiosimulator.pcm.reliability.FailureType;
 import org.palladiosimulator.pcm.repository.DataType;
 import org.palladiosimulator.pcm.repository.Interface;
@@ -27,8 +26,11 @@ import org.palladiosimulator.pcm.repository.impl.RepositoryImpl;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
+import org.apache.log4j.Logger;
 
 abstract class RuleEngineTest {
+    // Seperate instances for every child test
+    private final Logger log = Logger.getLogger(this.getClass());
     
     public static final Path TEST_DIR = Paths.get("res/");
     public static final Path OUT_DIR = TEST_DIR.resolve("out");
@@ -63,6 +65,11 @@ abstract class RuleEngineTest {
         datatypes = repo.getDataTypes__Repository();
         failuretypes = repo.getFailureTypes__Repository();
         interfaces = repo.getInterfaces__Repository();
+
+        log.error("components: " + components.size());
+        log.error("datatypes: " + datatypes.size());
+        log.error("failuretypes: " + failuretypes.size());
+        log.error("interfaces: " + interfaces.size());
     }
     
     abstract void test();
@@ -72,6 +79,7 @@ abstract class RuleEngineTest {
         File[] files = OUT_DIR.toFile().listFiles();
         if(files != null) // Some JVMs return null for empty dirs
             for(File f : files) assertTrue(f.delete());
+//            for(File f : files) assertTrue(f.renameTo(new File(f.getParentFile(), String.valueOf(System.currentTimeMillis()) + ".repository")));
 	}
 
     public RepositoryImpl getRepo() {

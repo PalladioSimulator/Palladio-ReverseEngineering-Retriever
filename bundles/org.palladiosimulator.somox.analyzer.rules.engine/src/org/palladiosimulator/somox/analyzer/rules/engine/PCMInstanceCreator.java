@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -54,6 +55,7 @@ import repositoryStructure.types.CompositeDataTypeCreator;
 
 // Class to create a pcm instance out of all results from the detector class
 public class PCMInstanceCreator {
+    private static final Logger LOG = Logger.getLogger(PCMInstanceCreator.class);
 
 	private final static String REPO_NAME = "Software Architecture Repository";
     private final FluentRepositoryFactory create;
@@ -95,7 +97,7 @@ public class PCMInstanceCreator {
             final ConcreteClassifier concreteInter = (ConcreteClassifier) inter;
             final String interfaceName = concreteInter.getQualifiedName().replaceAll("\\.", "_");
 
-            System.out.println("Current PCM Interface: "+interfaceName);
+            LOG.info("Current PCM Interface: "+interfaceName);
 
             OperationInterfaceCreator pcmInterface = create.newOperationInterface().withName(interfaceName);
 
@@ -275,7 +277,7 @@ public class PCMInstanceCreator {
     				return existingCollectionDataTypes.get(finalCollectionTypeName);
     			}
 
-    			System.out.println("Current Argument type name: " + argumentTypeName);
+    			LOG.info("Current Argument type name: " + argumentTypeName);
 
     			// Type argument is primitive
     			Primitive primitiveArg = handlePrimitive(qualiType.getTypeReference());

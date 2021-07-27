@@ -37,4 +37,4 @@ Require-Bundle:  com.google.guava,
  org.somox.sourcecodedecorator,
  org.somox.sourcecodedecorator.edit,
  org.somox.sourcecodedecorator.editor
-
+Import-Package: org.apache.log4j
