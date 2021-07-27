@@ -31,5 +31,5 @@ Require-Bundle:  com.google.guava,
  org.somox.filter,
  org.somox.sourcecodedecorator,
  org.somox.sourcecodedecorator.edit,
- org.somox.sourcecodedecorator.editor
+ org.somox.sourcecodedecorator.editor,
  org.apache.log4j
