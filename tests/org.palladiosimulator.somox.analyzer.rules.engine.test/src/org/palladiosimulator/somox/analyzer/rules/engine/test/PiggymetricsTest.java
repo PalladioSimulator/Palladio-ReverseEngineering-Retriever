@@ -17,11 +17,9 @@ public class PiggymetricsTest extends RuleEngineTest {
      */
     @Test
     void test() {
-        /*
-        assertEquals(1, getComponents().size());
-        assertEquals(1, getDatatypes().size());
+        assertEquals(27, getComponents().size());
+        assertEquals(20, getDatatypes().size());
         assertEquals(0, getFailuretypes().size());
-        assertEquals(0, getInterfaces().size());
-        */
+        assertEquals(27, getInterfaces().size());
     }
 }
