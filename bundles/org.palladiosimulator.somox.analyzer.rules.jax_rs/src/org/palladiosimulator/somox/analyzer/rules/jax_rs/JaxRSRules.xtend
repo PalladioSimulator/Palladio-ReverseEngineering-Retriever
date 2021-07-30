@@ -44,17 +44,13 @@ class JaxRSRules extends IRule{
 		
 		// detect implementing component
 		val isUnitImpl = isClassImplementing(unitImpl)
-		if(isUnitImpl && !isUnitController && !isWebListener){
+		if(isUnitImpl && !isUnitController && !isWebListener && getAllInterfaces(unitImpl).size() > 0){
 			pcmDetector.detectComponent(unitImpl)
-			if(getAllInterfaces(unitImpl).size() == 0) {
-				System.err.println("Inconsistent interface: " + unitImpl);
-			} else {
-				val firstIn = getAllInterfaces(unitImpl).get(0)
-				pcmDetector.detectOperationInterface(firstIn)
-				getMethods(firstIn).forEach[m|pcmDetector.detectProvidedInterface(unitImpl, firstIn, m)]
-				getFields(unitImpl).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unitImpl, f)]
-				return true
-			}
+			val firstIn = getAllInterfaces(unitImpl).get(0)
+			pcmDetector.detectOperationInterface(firstIn)
+			getMethods(firstIn).forEach[m|pcmDetector.detectProvidedInterface(unitImpl, firstIn, m)]
+			getFields(unitImpl).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unitImpl, f)]
+			return true
 		}
 		
 		// detect normal components
