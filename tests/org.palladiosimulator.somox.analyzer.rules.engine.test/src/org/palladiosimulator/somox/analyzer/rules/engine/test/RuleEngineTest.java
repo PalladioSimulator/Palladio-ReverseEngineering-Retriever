@@ -43,28 +43,14 @@ abstract class RuleEngineTest {
     private List<FailureType> failuretypes;
     private List<Interface> interfaces;
 
-    /**
-     * Tests the basic functionality of the RuleEngineAnalyzer.
-     * Requires it to execute without an exception and produce an output file.
-     * Validates the created repository.
-     * 
-     * @param projectDirectory the name of the project directory that will be analyzed
-     * @param rules the rules that will be processed
-     */
-    protected RuleEngineTest(String projectDirectory, DefaultRule... rules) {
-        this(projectDirectory, true, rules);
-    }
 
     /**
      * Tests the basic functionality of the RuleEngineAnalyzer.
      * Requires it to execute without an exception and produce an output file.
-     * Validates the created repository iff {@code validate} is {@code true}
      * 
      * @param projectDirectory the name of the project directory that will be analyzed
-     * @param rules the rules that will be processed
-     * @param validate the created repository will be validated iff this is {@code true}
      */
-    protected RuleEngineTest(String projectDirectory, boolean validate, DefaultRule... rules) {
+    protected RuleEngineTest(String projectDirectory, DefaultRule... rules) {
         final Path inPath = TEST_DIR.resolve(projectDirectory);
         final List<CompilationUnitImpl> model = ParserAdapter.generateModelForPath(inPath);
         this.rules = Set.of(rules);
