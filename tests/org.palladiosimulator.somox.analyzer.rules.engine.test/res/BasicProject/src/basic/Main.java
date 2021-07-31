@@ -8,7 +8,7 @@ import java.io.Serializable;
 /**
  * @author dr6817
  */
-public final class Main implements Serializable, Runnable {
+public final class Main implements Serializable, Runnable, ConflictingInterface {
 
 	/**
 	 * @see java.io.Serializable
@@ -36,23 +36,5 @@ public final class Main implements Serializable, Runnable {
 	@Override
 	public void run() {
 		Main.main(args);
-	}
-
-	void conflictingMethod(int intArg) {
-	}
-
-	void conflictingMethod(short intArg) {
-	}
-
-	void conflictingMethod(int[] intArray) {
-	}
-
-	void conflictingMethod(short[] intArray) {
-	}
-
-	void conflictingMethod(int... intVararg) {
-	}
-
-	void conflictingMethod(short... intVararg) {
 	}
 }
