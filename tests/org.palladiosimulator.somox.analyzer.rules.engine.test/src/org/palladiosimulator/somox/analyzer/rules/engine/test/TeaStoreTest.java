@@ -9,7 +9,8 @@ import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 public class TeaStoreTest extends RuleEngineTest {
 
     protected TeaStoreTest() {
-        super("TeaStore", DefaultRule.JAX_RS);
+        // TODO change this to "TeaStore" to activate the test
+        super("BasicTest", DefaultRule.JAX_RS);
     }
 
     /**
