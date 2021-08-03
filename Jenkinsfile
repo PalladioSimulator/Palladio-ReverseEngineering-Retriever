@@ -1,3 +1,3 @@
 PalladioPipeline {
-    deployUpdatesite 'releng/org.somox.updatesite/target/repository'
+    deployUpdatesite 'releng/org.palladiosimulator.somox.updatesite/target/repository'
 }
