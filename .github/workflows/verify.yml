@@ -24,7 +24,7 @@ jobs:
         distribution: 'adopt'
     - name: Maven Verify
       run: mvn -B -U clean verify
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+    #- name: Initialize CodeQL
+    #  uses: github/codeql-action/init@v1
+    #- name: Perform CodeQL Analysis
+    #  uses: github/codeql-action/analyze@v1
