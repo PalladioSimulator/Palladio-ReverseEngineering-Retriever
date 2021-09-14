@@ -10,7 +10,7 @@ public class TeaStoreTest extends RuleEngineTest {
 
     protected TeaStoreTest() {
         // TODO change this to "TeaStore" to activate the test
-        super("BasicTest", DefaultRule.JAX_RS);
+        super("BasicProject", DefaultRule.JAX_RS);
     }
 
     /**
