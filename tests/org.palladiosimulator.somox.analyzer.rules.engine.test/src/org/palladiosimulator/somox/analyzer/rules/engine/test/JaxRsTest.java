@@ -19,7 +19,7 @@ public class JaxRsTest extends RuleEngineTest {
     @Test
     void test() {
         assertEquals(3, getComponents().size());
-        assertEquals(1, getDatatypes().size());
+        assertEquals(0, getDatatypes().size());
         assertEquals(0, getFailuretypes().size());
         assertEquals(2, getInterfaces().size());
         

@@ -69,7 +69,6 @@ public class PCMInstanceCreator {
         existingCollectionDataTypes = new HashMap<>();
         create = new FluentRepositoryFactory();
         repository = create.newRepository().withName(REPO_NAME);
-        repository.addToRepository(create.newCompositeDataType().withName("Void"));
         this.pcmDetector = pcmDetector;
     }
     
@@ -171,12 +170,14 @@ public class PCMInstanceCreator {
         } else if (primT instanceof Double) {
             return Primitive.DOUBLE;
         } else if (primT instanceof Float) {
+            // TODO replace with Primitive.FLOAT as soon as that exists
             return Primitive.DOUBLE;
         } else if (primT instanceof Int) {
             return Primitive.INTEGER;
         } else if (primT instanceof Long) {
             return Primitive.LONG;
         } else if (primT instanceof Short) {
+            // TODO replace with Primitive.SHORT as soon as that exists
             return Primitive.INTEGER;
         }
 
@@ -228,10 +229,11 @@ public class PCMInstanceCreator {
     	}
 
     	// Check if type is void (not part of pcm primitives)
-    	if(var instanceof Void) {
-    		if(asReturnType) {
-    			return signature.withReturnType(create.fetchOfDataType("Void"));
-    		}
+    	if(var instanceof Void && asReturnType) {
+    	    if (!create.containsDataType("Void")) {
+    	        repository.addToRepository(create.newCompositeDataType().withName("Void"));
+    	    }
+  		    return signature.withReturnType(create.fetchOfDataType("Void"));
     	}
 
         // Parameter is a collection

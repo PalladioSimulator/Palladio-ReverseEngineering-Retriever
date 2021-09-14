@@ -18,7 +18,7 @@ public class SpringTest extends RuleEngineTest {
     @Test
     void test() {
         assertEquals(1, getComponents().size());
-        assertEquals(1, getDatatypes().size());
+        assertEquals(0, getDatatypes().size());
         assertEquals(0, getFailuretypes().size());
         assertEquals(0, getInterfaces().size());
         
