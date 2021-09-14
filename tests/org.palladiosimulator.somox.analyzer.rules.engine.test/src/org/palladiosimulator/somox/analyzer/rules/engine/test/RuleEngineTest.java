@@ -107,7 +107,7 @@ abstract class RuleEngineTest {
         return Collections.unmodifiableList(interfaces);
     }
     
-    private static RepositoryImpl loadRepository(URI repoXMI) {
+    public static RepositoryImpl loadRepository(URI repoXMI) {
         final List<EObject> contents = new ResourceSetImpl().getResource(repoXMI, true).getContents();
         
         assertEquals(1, contents.size());

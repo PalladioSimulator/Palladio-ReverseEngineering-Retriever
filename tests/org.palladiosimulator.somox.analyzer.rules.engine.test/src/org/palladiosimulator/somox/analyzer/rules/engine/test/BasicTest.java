@@ -5,10 +5,11 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.emftext.language.java.parameters.impl.OrdinaryParameterImpl;
-import org.emftext.language.java.parameters.impl.VariableLengthParameterImpl;
-import org.emftext.language.java.types.impl.IntImpl;
-import org.emftext.language.java.types.impl.ShortImpl;
+import java.nio.file.Path;
+import java.util.List;
+
+import org.eclipse.emf.common.util.URI;
+import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.pcm.repository.CollectionDataType;
@@ -18,12 +19,18 @@ import org.palladiosimulator.pcm.repository.OperationSignature;
 import org.palladiosimulator.pcm.repository.Parameter;
 import org.palladiosimulator.pcm.repository.PrimitiveDataType;
 import org.palladiosimulator.pcm.repository.PrimitiveTypeEnum;
+import org.palladiosimulator.pcm.repository.impl.RepositoryImpl;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
+import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
+import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
 
 public class BasicTest extends RuleEngineTest {
+    
+    private static final String PROJECT_NAME = "BasicProject";
+    private static final DefaultRule[] RULES = {DefaultRule.JAX_RS};
 
     protected BasicTest() {
-        super("BasicProject", DefaultRule.JAX_RS);
+        super(PROJECT_NAME, RULES);
     }
 
     /**
@@ -43,7 +50,7 @@ public class BasicTest extends RuleEngineTest {
     @Test
     @Disabled("This bug is inherited from Palladio, this can only be fixed after it is fixed there.")
     void testShort() {
-        OperationInterface conflictingMethods = getConflictingMethods();
+        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (Parameter param : sig.getParameters__OperationSignature()) {
                 if (param.getParameterName().equals("shortArg")) {
@@ -57,7 +64,7 @@ public class BasicTest extends RuleEngineTest {
     
     @Test
     void testArray() {
-        OperationInterface conflictingMethods = getConflictingMethods();
+        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (Parameter param : sig.getParameters__OperationSignature()) {
                 if (param.getParameterName().equals("intArray")) {
@@ -73,7 +80,7 @@ public class BasicTest extends RuleEngineTest {
     
     @Test
     void testVararg() {
-        OperationInterface conflictingMethods = getConflictingMethods();
+        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (Parameter param : sig.getParameters__OperationSignature()) {
                 if (param.getParameterName().equals("longVararg")) {
@@ -87,9 +94,46 @@ public class BasicTest extends RuleEngineTest {
         }
     }
     
-    private OperationInterface getConflictingMethods() {
+    /**
+     * The RuleEngine produces inconsistent results if executed multiple times.
+     * Arguments and methods appear multiple times. This probably has something to do
+     * with (discouraged) static states somewhere in the stack.
+     */
+    @Test
+    void testRepeatability() {
+        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
+        int firstIntArgCount = 0;
+        for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
+            for (Parameter param : sig.getParameters__OperationSignature()) {
+                if (param.getParameterName().equals("intArg")) {
+                    firstIntArgCount++;
+                }
+            }
+        }
+
+        // Run the RuleEngine again on the same project
+        final Path inPath = TEST_DIR.resolve(PROJECT_NAME);
+        final List<CompilationUnitImpl> model = ParserAdapter.generateModelForPath(inPath);
+        RuleEngineAnalyzer.executeWith(inPath, OUT_DIR, model, getRules());
+        Path repoPath = OUT_DIR.resolve("pcm.repository");
+        RepositoryImpl repo = loadRepository(URI.createFileURI(repoPath.toString()));
+        conflictingMethods = getConflictingMethods(repo.getInterfaces__Repository());
+
+        int secondIntArgCount = 0;
+        for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
+            for (Parameter param : sig.getParameters__OperationSignature()) {
+                if (param.getParameterName().equals("intArg")) {
+                    secondIntArgCount++;
+                }
+            }
+        }
+
+        assertEquals(firstIntArgCount, secondIntArgCount);
+    }
+    
+    private OperationInterface getConflictingMethods(List<Interface> interfaces) {
         OperationInterface conflictingMethods = null;
-        for (Interface iface : getInterfaces()) {
+        for (Interface iface : interfaces) {
             if (iface.getEntityName().equals("basic_ConflictingMethods")) {
                 assertTrue(iface instanceof OperationInterface);
                 conflictingMethods = (OperationInterface) iface;
