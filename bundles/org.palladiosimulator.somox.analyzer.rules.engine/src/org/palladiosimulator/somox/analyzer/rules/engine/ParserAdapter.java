@@ -11,6 +11,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
+import org.emftext.language.java.JavaClasspath;
 import org.emftext.language.java.containers.CompilationUnit;
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.apache.log4j.Logger;
@@ -32,6 +33,7 @@ public class ParserAdapter {
         final List<CompilationUnitImpl> roots = new ArrayList<>();
         final ResourceSet rs = new ResourceSetImpl();
         rs.getResourceFactoryRegistry().getExtensionToFactoryMap().put("containers", new XMIResourceFactoryImpl());
+        JavaClasspath.get().clear();
 
         // parse
         final JaMoPPParserAPI parser = new JaMoPPJDTParser();

@@ -18,10 +18,11 @@ public class JaxRsTest extends RuleEngineTest {
      */
     @Test
     void test() {
-        assertEquals(3, getComponents().size());
-        assertEquals(0, getDatatypes().size());
+        // if this fails, the STL might have changed...
+        assertEquals(283, getComponents().size());
+        assertEquals(267, getDatatypes().size());
         assertEquals(0, getFailuretypes().size());
-        assertEquals(2, getInterfaces().size());
+        assertEquals(137, getInterfaces().size());
         
         assertTrue(getComponents().stream().anyMatch(x -> x.getEntityName().equals("jax_rs_AConverter")));
     }

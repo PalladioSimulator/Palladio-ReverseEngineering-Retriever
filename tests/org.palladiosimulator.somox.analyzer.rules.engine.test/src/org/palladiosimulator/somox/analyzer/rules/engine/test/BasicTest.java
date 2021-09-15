@@ -39,10 +39,11 @@ public class BasicTest extends RuleEngineTest {
      */
     @Test
     void test() {
-        assertEquals(2, getComponents().size());
-        assertEquals(1, getDatatypes().size());
+        // if this fails, the STL might have changed...
+        assertEquals(284, getComponents().size());
+        assertEquals(267, getDatatypes().size());
         assertEquals(0, getFailuretypes().size());
-        assertEquals(2, getInterfaces().size());
+        assertEquals(137, getInterfaces().size());
         
         assertTrue(OUT_DIR.resolve("pcm.repository").toFile().exists());
     }
