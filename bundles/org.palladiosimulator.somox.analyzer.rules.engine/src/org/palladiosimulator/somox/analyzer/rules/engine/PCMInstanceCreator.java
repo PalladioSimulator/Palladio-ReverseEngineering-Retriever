@@ -136,9 +136,15 @@ public class PCMInstanceCreator {
             Set<ConcreteClassifier> requireInterfaces = requiredIs.stream().map(variable -> getConcreteFromVar(variable)).collect(Collectors.toSet());
 
             for(ConcreteClassifier requInter: requireInterfaces) {
-            	pcmComp.requires(create.fetchOfOperationInterface(requInter.getQualifiedName().replaceAll("\\.", "_")),"dummy require name");
+                try {
+                    pcmComp.requires(create.fetchOfOperationInterface(requInter.getQualifiedName().replaceAll("\\.", "_")),"dummy require name");
+                } catch (RuntimeException e) {
+                    // TODO currently we ensure that an interface exists by simply adding it if it is missing. Solve this more properly.
+                    OperationInterfaceCreator pcmInterface = create.newOperationInterface().withName(requInter.getQualifiedName().replaceAll("\\.", "_"));
+                    repository.addToRepository(pcmInterface);
+                    pcmComp.requires(pcmInterface, "dummy require name");
+                }
             }
-
             repository.addToRepository(pcmComp);
         }
     }
