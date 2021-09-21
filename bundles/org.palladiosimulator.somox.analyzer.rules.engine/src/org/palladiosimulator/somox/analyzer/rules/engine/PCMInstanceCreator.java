@@ -18,6 +18,7 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.XMLResourceFactoryImpl;
 import org.emftext.language.java.classifiers.Classifier;
+import org.emftext.language.java.arrays.ArrayDimension;
 import org.emftext.language.java.classifiers.Class;
 import org.emftext.language.java.classifiers.ConcreteClassifier;
 import org.emftext.language.java.classifiers.Interface;
@@ -27,6 +28,7 @@ import org.emftext.language.java.generics.TypeArgument;
 import org.emftext.language.java.members.Field;
 import org.emftext.language.java.members.Method;
 import org.emftext.language.java.parameters.Parameter;
+import org.emftext.language.java.parameters.impl.OrdinaryParameterImpl;
 import org.emftext.language.java.types.Boolean;
 import org.emftext.language.java.types.Byte;
 import org.emftext.language.java.types.Char;
@@ -107,11 +109,12 @@ public class PCMInstanceCreator {
                 for (final Parameter p : m.getParameters()) {
 
                     final TypeReference ref = p.getTypeReference();
-                    signature = handleSignatureDataType(signature, p.getName(), p.getTypeReference(), false);
+                    signature = handleSignatureDataType(signature, p.getClass(), p.getName(), p.getTypeReference(), p.getArrayDimensionsBefore(), false);
                 }
 
                 // Return type: Cast Method Return Type to Variable
-                signature = handleSignatureDataType(signature, "", m.getTypeReference(), true);
+                // OrdinaryParameterImpl is sufficient since return types cannot be varargs.
+                signature = handleSignatureDataType(signature, OrdinaryParameterImpl.class, "", m.getTypeReference(), m.getArrayDimensionsBefore(), true);
 
                 pcmInterface.withOperationSignature(signature);
             }
@@ -223,7 +226,10 @@ public class PCMInstanceCreator {
 		}
 	}
 
-    private OperationSignatureCreator handleSignatureDataType(OperationSignatureCreator signature, String varName, TypeReference var, boolean asReturnType) {
+    private OperationSignatureCreator handleSignatureDataType(OperationSignatureCreator signature,
+            java.lang.Class<? extends Parameter> varClass, String varName,
+            TypeReference var, List<ArrayDimension> varDimensions, boolean asReturnType) {
+        // TODO distinguish between varargs, arrays and simple types
 
     	// Check if type is a primitive type
     	Primitive prim = handlePrimitive(var);
