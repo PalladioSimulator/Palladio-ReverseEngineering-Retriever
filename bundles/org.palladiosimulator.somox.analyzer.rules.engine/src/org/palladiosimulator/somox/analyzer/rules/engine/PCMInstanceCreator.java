@@ -29,6 +29,7 @@ import org.emftext.language.java.members.Field;
 import org.emftext.language.java.members.Method;
 import org.emftext.language.java.parameters.Parameter;
 import org.emftext.language.java.parameters.impl.OrdinaryParameterImpl;
+import org.emftext.language.java.parameters.impl.VariableLengthParameterImpl;
 import org.emftext.language.java.types.Boolean;
 import org.emftext.language.java.types.Byte;
 import org.emftext.language.java.types.Char;
@@ -229,94 +230,116 @@ public class PCMInstanceCreator {
     private OperationSignatureCreator handleSignatureDataType(OperationSignatureCreator signature,
             java.lang.Class<? extends Parameter> varClass, String varName,
             TypeReference var, List<ArrayDimension> varDimensions, boolean asReturnType) {
-        // TODO distinguish between varargs, arrays and simple types
 
-    	// Check if type is a primitive type
-    	Primitive prim = handlePrimitive(var);
-    	if(prim!=null) {
-    		if(asReturnType) {
-        		return signature.withReturnType(prim);
-        	}
-            return signature.withParameter(varName, prim, ParameterModifier.IN);
-    	}
-
-    	// Check if type is void (not part of pcm primitives)
-    	if(var instanceof Void && asReturnType) {
-    	    if (!create.containsDataType("Void")) {
-    	        repository.addToRepository(create.newCompositeDataType().withName("Void"));
-    	    }
-  		    return signature.withReturnType(create.fetchOfDataType("Void"));
-    	}
-
-        // Parameter is a collection
-        DataType collectionType = handleCollectionType(var);
+        // Parameter is a collection (extends Collection, is an array or a vararg)
+        DataType collectionType = handleCollectionType(varClass, var, varDimensions);
         if(collectionType != null) {
-        	if(asReturnType) {
-        		return signature.withReturnType(collectionType);
-        	}
-        	return signature.withParameter(varName, collectionType, ParameterModifier.IN);
+            if(asReturnType) {
+                return signature.withReturnType(collectionType);
+            }
+            return signature.withParameter(varName, collectionType, ParameterModifier.IN);
+        }
+
+        // Check if type is a primitive type
+        Primitive prim = handlePrimitive(var);
+        if(prim!=null) {
+            if(asReturnType) {
+                return signature.withReturnType(prim);
+            }
+            return signature.withParameter(varName, prim, ParameterModifier.IN);
+        }
+
+        // Check if type is void (not part of pcm primitives)
+        if(var instanceof Void && asReturnType) {
+            if (!create.containsDataType("Void")) {
+                repository.addToRepository(create.newCompositeDataType().withName("Void"));
+            }
+            return signature.withReturnType(create.fetchOfDataType("Void"));
         }
 
         // Parameter is Composite Type
         DataType compositeType = handleCompositeType(var);
         if(compositeType != null) {
-        	if(asReturnType) {
-        		return signature.withReturnType(compositeType);
-        	}
+            if(asReturnType) {
+                return signature.withReturnType(compositeType);
+            }
             return signature.withParameter(varName,compositeType,ParameterModifier.IN);
         }
 
         return null;
     }
 
-    private DataType handleCollectionType(TypeReference ref) {
+    private DataType handleCollectionType(java.lang.Class<? extends Parameter> varClass, TypeReference ref, List<ArrayDimension> dimensions) {
+        // name of the collection data type
+        String typeName = "primitive"; // TODO somehow acquire name of contained type
 
-    	Classifier classifier = ref.getPureClassifierReference().getTarget();
+        CollectionDataType collectionType = null;
+        String collectionTypeName = null;
 
-    	if(!isCollectionType(classifier)) {
-    		return null;
-    	}
-    	// name of the collection data type
-    	String typeName = classifier.getName();
+        if (varClass == VariableLengthParameterImpl.class) {
+            collectionTypeName = typeName + "...";
+            if(existingCollectionDataTypes.containsKey(collectionTypeName)) {
+                return existingCollectionDataTypes.get(collectionTypeName);
+            }
 
-    	CollectionDataType collectionType = null;
+            collectionType = createCollectionWithTypeArg(collectionTypeName, ref, dimensions);
+        }
+        else if (dimensions != null && !dimensions.isEmpty()) {
+            collectionTypeName = typeName + "[]";
+            if(existingCollectionDataTypes.containsKey(collectionTypeName)) {
+                return existingCollectionDataTypes.get(collectionTypeName);
+            }
 
-    	for(TypeArgument typeArg : ref.getPureClassifierReference().getTypeArguments()) {
-    		if(typeArg instanceof QualifiedTypeArgument) {
-    			QualifiedTypeArgument qualiType = (QualifiedTypeArgument) typeArg;
-    			String argumentTypeName = qualiType.getTypeReference().getPureClassifierReference().getTarget().getName();
-    			String finalCollectionTypeName = typeName+"<"+argumentTypeName+">";
+            collectionType = createCollectionWithTypeArg(collectionTypeName, ref, dimensions.subList(1, dimensions.size()));
+        }
+        // TODO: I do not think this works properly for deeper collection types (e.g. List<String>[]), especially the naming.
+        else if(ref.getPureClassifierReference() != null && isCollectionType(ref.getPureClassifierReference().getTarget())) {
+            typeName = ref.getPureClassifierReference().getTarget().getName();
+            for(TypeArgument typeArg : ref.getPureClassifierReference().getTypeArguments()) {
+                if(typeArg instanceof QualifiedTypeArgument) {
+                    QualifiedTypeArgument qualiType = (QualifiedTypeArgument) typeArg;
+                    String argumentTypeName = qualiType.getTypeReference().getPureClassifierReference().getTarget().getName();
+                    collectionTypeName = typeName+"<"+argumentTypeName+">";
 
-    			if(existingCollectionDataTypes.containsKey(finalCollectionTypeName)) {
-    				return existingCollectionDataTypes.get(finalCollectionTypeName);
-    			}
+                    LOG.info("Current Argument type name: " + argumentTypeName);
 
-    			LOG.info("Current Argument type name: " + argumentTypeName);
+                    if(existingCollectionDataTypes.containsKey(collectionTypeName)) {
+                        return existingCollectionDataTypes.get(collectionTypeName);
+                    }
 
-    			// Type argument is primitive
-    			Primitive primitiveArg = handlePrimitive(qualiType.getTypeReference());
-    			if(primitiveArg != null) {
-    				collectionType = create.newCollectionDataType(finalCollectionTypeName, primitiveArg);
-    			}
+                    collectionType = createCollectionWithTypeArg(collectionTypeName, qualiType.getTypeReference(), qualiType.getArrayDimensionsBefore());
+                    break;
+                }
+            }
+        }
+        if (collectionType != null) {
+            existingCollectionDataTypes.put(collectionTypeName, collectionType);
+            repository.addToRepository(collectionType);
+        }
+        return collectionType;
+    }
 
-    			// Type argument is a collection again
-    			DataType collectionArg = handleCollectionType(qualiType.getTypeReference());
-    			if(collectionArg != null) {
-    				collectionType = create.newCollectionDataType(finalCollectionTypeName, collectionArg);
-    			}
+    private CollectionDataType createCollectionWithTypeArg(String collectionTypeName, TypeReference typeArg, List<ArrayDimension> typeArgDimensions) {
+        // Type argument is primitive
+        Primitive primitiveArg = handlePrimitive(typeArg);
+        if(primitiveArg != null) {
+            return create.newCollectionDataType(collectionTypeName, primitiveArg);
+        }
 
-    			// Type argument is a composite data type
-    			DataType compositeArg = handleCompositeType(qualiType.getTypeReference());
-    			if(compositeArg != null) {
-    				collectionType = create.newCollectionDataType(finalCollectionTypeName, compositeArg);
-    			}
+        // Type argument is a collection again
+        // A type argument cannot be a vararg, therefore it is "ordinary"
+        DataType collectionArg = handleCollectionType(OrdinaryParameterImpl.class, typeArg, typeArgDimensions);
+        if(collectionArg != null) {
+            return create.newCollectionDataType(collectionTypeName, collectionArg);
+        }
 
-    			existingCollectionDataTypes.put(finalCollectionTypeName, collectionType);
-    			repository.addToRepository(collectionType);
-    			return collectionType;
-    		}
-    	}
-    	return null;
+        // Type argument is a composite data type
+        DataType compositeArg = handleCompositeType(typeArg);
+        if(compositeArg != null) {
+            return create.newCollectionDataType(collectionTypeName, compositeArg);
+        }
+
+        return null;
     }
 
     private static boolean isCollectionType(Classifier varClassifier) {
