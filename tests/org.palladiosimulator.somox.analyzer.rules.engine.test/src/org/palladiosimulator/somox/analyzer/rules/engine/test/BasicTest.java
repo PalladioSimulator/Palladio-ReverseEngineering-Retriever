@@ -39,9 +39,9 @@ public class BasicTest extends RuleEngineTest {
      */
     @Test
     void test() {
-        // if this fails, the STL might have changed...
+        // if this fails, the STL might have changed... these numbers are for JDK 11.0.2
         assertEquals(284, getComponents().size());
-        assertEquals(267, getDatatypes().size());
+        assertEquals(310, getDatatypes().size());
         assertEquals(0, getFailuretypes().size());
         assertEquals(137, getInterfaces().size());
         
