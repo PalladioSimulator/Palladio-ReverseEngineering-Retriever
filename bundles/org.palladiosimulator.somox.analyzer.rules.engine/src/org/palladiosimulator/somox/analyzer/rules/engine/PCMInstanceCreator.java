@@ -270,13 +270,19 @@ public class PCMInstanceCreator {
     }
 
     private DataType handleCollectionType(java.lang.Class<? extends Parameter> varClass, TypeReference ref, List<ArrayDimension> dimensions) {
-        // name of the collection data type
-        String typeName = "primitive"; // TODO somehow acquire name of contained type
-
+        // Base for the name of the collection data type
+        String typeName = ref.getClass().getName();
+        if (ref.getPureClassifierReference() != null) {
+            typeName = ref.getPureClassifierReference().getTarget().getName();
+        }
         CollectionDataType collectionType = null;
         String collectionTypeName = null;
 
         if (varClass == VariableLengthParameterImpl.class) {
+            if (ref instanceof PrimitiveType) {
+                typeName = convertPrimitive((PrimitiveType) ref).name();
+            }
+
             collectionTypeName = typeName + "...";
             if(existingCollectionDataTypes.containsKey(collectionTypeName)) {
                 return existingCollectionDataTypes.get(collectionTypeName);
@@ -285,6 +291,10 @@ public class PCMInstanceCreator {
             collectionType = createCollectionWithTypeArg(collectionTypeName, ref, dimensions);
         }
         else if (dimensions != null && !dimensions.isEmpty()) {
+            if (ref instanceof PrimitiveType) {
+                typeName = convertPrimitive((PrimitiveType) ref).name();
+            }
+
             collectionTypeName = typeName + "[]";
             if(existingCollectionDataTypes.containsKey(collectionTypeName)) {
                 return existingCollectionDataTypes.get(collectionTypeName);
