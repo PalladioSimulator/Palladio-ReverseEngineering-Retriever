@@ -1,5 +1,5 @@
 # This workflow will verify a Java project with Maven
-name: Verify with Maven and CodeQL
+name: Maven Verify
 
 on:
   push:
