@@ -48,13 +48,13 @@ import org.palladiosimulator.pcm.repository.DataType;
 import org.palladiosimulator.pcm.repository.ParameterModifier;
 import org.palladiosimulator.pcm.repository.Repository;
 
-import apiControlFlowInterfaces.Repo;
-import factory.FluentRepositoryFactory;
-import repositoryStructure.components.BasicComponentCreator;
-import repositoryStructure.interfaces.OperationInterfaceCreator;
-import repositoryStructure.interfaces.OperationSignatureCreator;
-import repositoryStructure.internals.Primitive;
-import repositoryStructure.types.CompositeDataTypeCreator;
+import org.palladiosimulator.generator.fluent.repository.api.Repo;
+import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
+import org.palladiosimulator.generator.fluent.repository.structure.components.BasicComponentCreator;
+import org.palladiosimulator.generator.fluent.repository.structure.interfaces.OperationInterfaceCreator;
+import org.palladiosimulator.generator.fluent.repository.structure.interfaces.OperationSignatureCreator;
+import org.palladiosimulator.generator.fluent.repository.structure.internals.Primitive;
+import org.palladiosimulator.generator.fluent.repository.structure.types.CompositeDataTypeCreator;
 
 // Class to create a pcm instance out of all results from the detector class
 public class PCMInstanceCreator {

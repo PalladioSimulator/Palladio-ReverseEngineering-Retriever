@@ -8,7 +8,7 @@
       license-feature-version="1.0.0">
 
    <license url="">
-      
+
    </license>
 
    <requires>
@@ -22,7 +22,7 @@
       <import plugin="jamopp.parser.jdt"/>
       <import plugin="jamopp.resource"/>
       <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.palladiosimulator.generator.fluent_api"/>
+      <import plugin="org.palladiosimulator.generator.fluent"/>
       <import plugin="org.somox.sourcecodedecorator"/>
       <import plugin="org.apache.log4j"/>
       <import plugin="org.somox.core"/>
