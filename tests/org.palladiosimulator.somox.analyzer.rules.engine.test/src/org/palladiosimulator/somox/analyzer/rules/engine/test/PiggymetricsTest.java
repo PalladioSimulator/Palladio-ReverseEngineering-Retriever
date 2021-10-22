@@ -17,7 +17,7 @@ public class PiggymetricsTest extends RuleEngineTest {
      * Tests the basic functionality of the RuleEngineAnalyzer when executing the SPRING rule.
      * Requires it to execute without an exception and produce an output file with the correct contents.
      */
-    @Test @Disabled("XML saving has a bug, waiting for JDTParser update")
+    @Disabled("XML saving has a bug, waiting for JDTParser update")
     void test() {
         assertEquals(27, getComponents().size());
         assertEquals(20, getDatatypes().size());

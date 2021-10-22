@@ -17,7 +17,6 @@ public class TeaStoreTest extends RuleEngineTest {
      * Tests the basic functionality of the RuleEngineAnalyzer when executing the JAX_RS rule.
      * Requires it to execute without an exception and produce an output file with the correct contents.
      */
-    @Test
     @Disabled("TeaStore will be dealt with later, they had a big update")
     void test() {
         /*
