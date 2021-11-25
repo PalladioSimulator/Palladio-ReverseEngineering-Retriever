@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.palladiosimulator</groupId>
 		<artifactId>eclipse-parent-updatesite</artifactId>
-		<version>0.7.3</version>
+		<version>0.7.4</version>
 		<relativePath>../../</relativePath>
 	</parent>
 
@@ -20,7 +20,7 @@
 	<repositories>
 		<repository>
 			<id>eclipse-release</id>
-			<url>http://download.eclipse.org/releases/2020-12/202012161000/</url>
+			<url>http://download.eclipse.org/releases/2021-09/202109151000/</url>
 			<layout>p2</layout>
 		</repository>
 	</repositories>
