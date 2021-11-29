@@ -1,10 +1,8 @@
 package org.palladiosimulator.somox.analyzer.rules.engine.test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 
 public class JaxRsTest extends RuleEngineTest {

@@ -11,7 +11,6 @@ import java.util.List;
 import org.eclipse.emf.common.util.URI;
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import org.palladiosimulator.pcm.repository.CollectionDataType;
 import org.palladiosimulator.pcm.repository.Interface;
 import org.palladiosimulator.pcm.repository.OperationInterface;

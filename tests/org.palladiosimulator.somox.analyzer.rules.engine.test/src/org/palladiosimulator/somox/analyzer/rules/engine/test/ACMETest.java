@@ -1,7 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.engine.test;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 
