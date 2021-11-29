@@ -44,7 +44,7 @@ public class RuleEngineBlackboardInteractingJob extends AbstractBlackboardIntera
     @Override
     public void execute(IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
         try {
-            myBlackboard.setAnalysisResult(new RuleEngineAnalyzer().analyze(configuration, extractionResults, monitor));
+            myBlackboard.setAnalysisResult(new RuleEngineAnalyzer(getBlackboard()).analyze(configuration, extractionResults, monitor));
         } catch (final ModelAnalyzerException e) {
             throw new JobFailedException(NAME + " Failed", e);
         }

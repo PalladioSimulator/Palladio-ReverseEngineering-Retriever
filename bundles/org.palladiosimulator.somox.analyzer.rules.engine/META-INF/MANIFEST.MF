@@ -6,7 +6,8 @@ Bundle-Version: 5.0.0.qualifier
 Bundle-Vendor: palladiosimulator.org
 Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.engine
 Bundle-RequiredExecutionEnvironment: JavaSE-11
-Export-Package: org.palladiosimulator.somox.analyzer.rules.engine
+Export-Package: org.palladiosimulator.somox.analyzer.rules.blackboard,
+ org.palladiosimulator.somox.analyzer.rules.engine
 Require-Bundle: jamopp.parser,
  jamopp.parser.jdt,
  jamopp.resource,
@@ -16,4 +17,6 @@ Require-Bundle: jamopp.parser,
  org.palladiosimulator.pcm,
  org.somox.sourcecodedecorator,
  org.apache.log4j,
- org.palladiosimulator.generator.fluent
+ org.palladiosimulator.generator.fluent,
+ org.somox.gast2seff,
+ org.somox.core

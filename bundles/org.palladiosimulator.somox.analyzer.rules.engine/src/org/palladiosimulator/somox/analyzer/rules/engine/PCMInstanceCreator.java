@@ -43,11 +43,12 @@ import org.emftext.language.java.types.TypeReference;
 import org.emftext.language.java.types.TypedElement;
 import org.emftext.language.java.types.Void;
 import org.emftext.language.java.variables.Variable;
+import org.palladiosimulator.pcm.repository.BasicComponent;
 import org.palladiosimulator.pcm.repository.CollectionDataType;
 import org.palladiosimulator.pcm.repository.DataType;
 import org.palladiosimulator.pcm.repository.ParameterModifier;
 import org.palladiosimulator.pcm.repository.Repository;
-
+import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.generator.fluent.repository.api.Repo;
 import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
 import org.palladiosimulator.generator.fluent.repository.structure.components.BasicComponentCreator;
@@ -63,15 +64,17 @@ public class PCMInstanceCreator {
 	private final static String REPO_NAME = "Software Architecture Repository";
     private final FluentRepositoryFactory create;
     private final Repo repository;
+    private final RuleEngineBlackboard blackboard;
     private final PCMDetectorSimple pcmDetector;
     private final Map<String, CompositeDataTypeCreator> existingDataTypesMap;
     private final Map<String, DataType> existingCollectionDataTypes;
 
-    public PCMInstanceCreator(PCMDetectorSimple pcmDetector) {
+    public PCMInstanceCreator(PCMDetectorSimple pcmDetector, RuleEngineBlackboard blackboard) {
         existingDataTypesMap = new HashMap<>();
         existingCollectionDataTypes = new HashMap<>();
         create = new FluentRepositoryFactory();
         repository = create.newRepository().withName(REPO_NAME);
+        this.blackboard = blackboard;
         this.pcmDetector = pcmDetector;
     }
     
@@ -149,7 +152,9 @@ public class PCMInstanceCreator {
                     pcmComp.requires(pcmInterface, "dummy require name");
                 }
             }
-            repository.addToRepository(pcmComp);
+            BasicComponent builtComp = pcmComp.build();
+            blackboard.putEntityLocation(builtComp, comp);
+            repository.addToRepository(builtComp);
         }
     }
 

@@ -1,5 +1,6 @@
 package org.palladiosimulator.somox.analyzer.rules.configuration;
 
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -118,4 +119,14 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         }
         return strRules;
     }
+
+	public Path getSnykPath() {
+		// TODO actually do something
+		return Path.of("./");
+	}
+
+	public boolean isSnykEnabled() {
+		// TODO
+		return true;
+	}
 }
