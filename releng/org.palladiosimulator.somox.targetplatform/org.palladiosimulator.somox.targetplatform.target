@@ -102,5 +102,25 @@
                 version="5.0.0.202111291006" />
             <repository location="https://updatesite.palladio-simulator.com/fluidtrust/palladio-reverseengineering-docker-vulnerability/nightly/" />
         </location>
+        <location includeAllPlatforms="false"
+            includeConfigurePhase="true"
+            includeMode="planner"
+            includeSource="false"
+            refresh="true"
+            type="InstallableUnit">
+			<unit id="org.palladiosimulator.pcm.confidentiality.context.editor.feature.feature.group"
+                version="5.0.0.202111291006" />
+			<repository location="https://updatesite.palladio-simulator.com/fluidtrust/palladio-addons-contextconfidentiality-metamodel/nightly/"/>
+        </location>
+        <location includeAllPlatforms="false"
+            includeConfigurePhase="true"
+            includeMode="planner"
+            includeSource="false"
+            refresh="true"
+            type="InstallableUnit">
+			<unit id="tools.mdsd.library.emfeditutils"
+				version="5.0.0.202111291006"/>
+			<repository location="https://updatesite.mdsd.tools/library-emfeditutils/nightly/"/>
+		</location>
     </locations>
 </target>
