@@ -6,7 +6,8 @@ import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 public class ACMETest extends RuleEngineTest {
 
     protected ACMETest() {
-        super("acmeair", DefaultRule.JAX_RS);
+        // TODO change this to "acmeair" to activate the test
+        super("BasicProject", DefaultRule.JAX_RS);
     }
 
     /**
