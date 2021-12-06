@@ -28,9 +28,10 @@ Require-Bundle: jamopp.parser,
  org.somox.gast2seff,
  org.eclipse.swt,
  org.palladiosimulator.commons,
- org.eclipse.emf.ecore
-Export-Package: org.palladiosimulator.somox.analyzer.rules.blackboard,
- org.palladiosimulator.somox.analyzer.rules.cli;uses:="org.eclipse.equinox.app",
+ org.eclipse.emf.ecore,
+ org.palladiosimulator.pcm.confidentiality.reverseengineering.feature.staticcodeanalysis,
+ org.palladiosimulator.pcm.confidentiality.reverseengineering.feature.staticcodeanalysis.iface
+Export-Package: org.palladiosimulator.somox.analyzer.rules.cli;uses:="org.eclipse.equinox.app",
  org.palladiosimulator.somox.analyzer.rules.configuration,
  org.palladiosimulator.somox.analyzer.rules.main,
  org.palladiosimulator.somox.analyzer.rules.workflow

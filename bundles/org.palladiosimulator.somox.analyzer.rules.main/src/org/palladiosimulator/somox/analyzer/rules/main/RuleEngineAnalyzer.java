@@ -24,6 +24,7 @@ import org.emftext.language.java.containers.ContainersPackage;
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
+import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.engine.DockerParser;
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
@@ -55,11 +56,14 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
 
     private Status status;
 
+    private RuleEngineBlackboard blackboard;
+
     private static Repository pcm;
 
     private static SourceCodeDecoratorRepository deco;
 
-    public RuleEngineAnalyzer() {
+    public RuleEngineAnalyzer(RuleEngineBlackboard blackboard) {
+        this.blackboard = blackboard;
         init();
     }
 
@@ -109,7 +113,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
 
             final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForPath(inPath);
 
-            executeWith(inPath, outPath, roots, rules);
+            executeWith(inPath, outPath, roots, rules, blackboard);
         } catch (Exception e) {
             throw new ModelAnalyzerException(e.getMessage());
         } finally {
@@ -128,6 +132,21 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
     * @param  ruleDoc 		the object containing the rules
     */
     public static void executeWith(Path projectPath, Path outPath, List<CompilationUnitImpl> model, Set<DefaultRule> rules) {
+        executeWith(projectPath, outPath, model, rules, new RuleEngineBlackboard());
+    }
+
+    /**
+    * Extracts PCM elements out of an existing JaMoPP model using an IRule file.
+    *
+    * @param  projectPath 	the project directory
+    * @param  outPath       the output directory
+    * @param  model 		the JaMoPP model
+    * @param  ruleDoc 		the object containing the rules
+    * @param  blackboard	the rule engine blackboard
+    */
+    private static void executeWith(Path projectPath, Path outPath, List<CompilationUnitImpl> model,
+            Set<DefaultRule> rules, RuleEngineBlackboard blackboard) {
+
 
         PCMDetectorSimple pcmDetector = new PCMDetectorSimple();
         
@@ -145,7 +164,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         final Map<String, List<CompilationUnitImpl>> mapping = dockerParser.getMapping();
         
         // Creates a PCM repository with components, interfaces and roles
-        pcm = new PCMInstanceCreator(pcmDetector).createPCM(mapping);
+        pcm = new PCMInstanceCreator(pcmDetector, blackboard).createPCM(mapping);
 
         // Persist the repository at ./pcm.repository
         PCMInstanceCreator.saveRepository(pcm, outPath, "pcm.repository", false);

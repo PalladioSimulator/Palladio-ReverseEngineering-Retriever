@@ -27,7 +27,7 @@ public class DockerParser {
     private final String FILE_NAME = "docker-compose";
     private final Path path;
     private final PCMDetectorSimple pcmDetector;
-    Map<String, List<CompilationUnitImpl>> mapping;
+    private final Map<String, List<CompilationUnitImpl>> mapping;
 
     private static final Logger LOG = Logger.getLogger(DockerParser.class);
 
@@ -111,6 +111,7 @@ public class DockerParser {
 
         components.forEach(comp -> {
             try (Stream<Path> files = Files.walk(path)) {
+                // TODO try to find a more robust heuristic
                 final List<Path> foundPaths = files.filter(f -> f.toString().contains(comp.getName()))
                         .collect(Collectors.toList());
                 

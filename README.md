@@ -18,7 +18,7 @@ Source code based on EMF metamodels is generated during the build process and is
 The rules for the model-to-model transformations are implemented in [Xtend](https://www.eclipse.org/xtend/), which can be compiled into Java-compatible source code.
 
 ### Extractors
-* [JDT-Based Java Extractor](https://github.com/PalladioSimulator/Palladio-Supporting-EclipseJavaDevelopmentTools)
+* [JDT-Based Java Extractor](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Java)
 * [Docker File Extractor](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Docker)
 
 ### Rules
@@ -35,11 +35,12 @@ The rules for the model-to-model transformations are implemented in [Xtend](http
 ### Installation
 #### For Development
 * Install the [Fluent Api Model Generator](https://github.com/PalladioSimulator/Palladio-Addons-FluentApiModelGenerator) from the [update site](https://updatesite.palladio-simulator.com/palladio-addons-fluentapimodelgenerator/nightly/)
-* Install the [JDT-Based Java Extractor](https://github.com/PalladioSimulator/Palladio-Supporting-EclipseJavaDevelopmentTools) from the [update site](https://updatesite.palladio-simulator.com/palladio-supporting-eclipsejavadevelopmenttools/nightly/)
-* Install the [SoMoX Core Feature](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-JaMoPP) from the [update site](https://updatesite.palladio-simulator.com/palladio-reverseengineering-somox-jamopp/nightly/)
+* Install the [JDT-Based Java Extractor](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Java) from the [update site](https://updatesite.palladio-simulator.com/palladio-reverseengineering-java/nightly/)
+* Install the [SoMoX Core Feature](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX) from the [update site](https://updatesite.palladio-simulator.com/palladio-reverseengineering-somox/nightly/)
 * Install the [Xtend IDE](https://www.eclipse.org/xtend/download.html) from the [update site](https://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/)
 * Keep the current installation and, if necessary, change the items to be installed so that they are compatible
-* Check out [this repository](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine.git) and [import the existing projects](https://help.eclipse.org/latest/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm) into Eclipse
+* Check out [this repository](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-
+-RuleEngine.git) and [import the existing projects](https://help.eclipse.org/latest/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm) into Eclipse
 * Make changes to the imported code in Eclipse
 * Locally verify all projects in the repository with [Maven](https://maven.apache.org/): `mvn clean verify`
 * Launch a new [Eclipse runtime application](https://help.eclipse.org/latest/topic/org.eclipse.pde.doc.user/guide/tools/launchers/eclipse_application_launcher.htm)
@@ -47,8 +48,8 @@ The rules for the model-to-model transformations are implemented in [Xtend](http
 #### For Direct Use
 * [Adding these update sites](https://help.eclipse.org/latest/topic/org.eclipse.platform.doc.user/tasks/tasks-127.htm), without any further installation:
   * The [update site](https://updatesite.palladio-simulator.com/palladio-addons-fluentapimodelgenerator/nightly/) for the [Fluent Api Model Generator](https://github.com/PalladioSimulator/Palladio-Addons-FluentApiModelGenerator)
-  * The [update site](https://updatesite.palladio-simulator.com/palladio-supporting-eclipsejavadevelopmenttools/nightly/) for the [JDT-Based Java Extractor](https://github.com/PalladioSimulator/Palladio-Supporting-EclipseJavaDevelopmentTools)
-  * The [update site](https://updatesite.palladio-simulator.com/palladio-reverseengineering-somox-jamopp/nightly/) for the [SoMoX Core Feature](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-JaMoPP)
+  * The [update site](https://updatesite.palladio-simulator.com/palladio-reverseengineering-java/nightly/) for the [JDT-Based Java Extractor](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Java)
+  * The [update site](https://updatesite.palladio-simulator.com/palladio-reverseengineering-somox/nightly/) for the [SoMoX Core Feature](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX)
 * Install this Rule Engine from the [update site](https://updatesite.palladio-simulator.com/palladio-reverseengineering-somox-ruleengine/nightly/)
   * This will automatically install all the required dependencies
 
