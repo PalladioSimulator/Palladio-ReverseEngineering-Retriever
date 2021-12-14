@@ -25,6 +25,9 @@ The rules for the model-to-model transformations are implemented in [Xtend](http
 * [Spring Boot and Framework](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/tree/master/bundles/org.palladiosimulator.somox.analyzer.rules.spring)
 * [Jakarta RESTful Web Services](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/tree/master/bundles/org.palladiosimulator.somox.analyzer.rules.jax_rs)
 
+### Analyzer
+* [Docker Vulnerability](https://github.com/FluidTrust/Palladio-ReverseEngineering-Docker-Vulnerability)
+
 ## Getting Started
 ### Preconditions
 * [Installation of PCM Nightly](https://sdqweb.ipd.kit.edu/wiki/PCM_Installation#PCM_Nightly)
@@ -39,8 +42,7 @@ The rules for the model-to-model transformations are implemented in [Xtend](http
 * Install the [SoMoX Core Feature](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX) from the [update site](https://updatesite.palladio-simulator.com/palladio-reverseengineering-somox/nightly/)
 * Install the [Xtend IDE](https://www.eclipse.org/xtend/download.html) from the [update site](https://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/)
 * Keep the current installation and, if necessary, change the items to be installed so that they are compatible
-* Check out [this repository](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-
--RuleEngine.git) and [import the existing projects](https://help.eclipse.org/latest/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm) into Eclipse
+* Check out [this repository](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine.git) and [import the existing projects](https://help.eclipse.org/latest/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm) into Eclipse
 * Make changes to the imported code in Eclipse
 * Locally verify all projects in the repository with [Maven](https://maven.apache.org/): `mvn clean verify`
 * Launch a new [Eclipse runtime application](https://help.eclipse.org/latest/topic/org.eclipse.pde.doc.user/guide/tools/launchers/eclipse_application_launcher.htm)
@@ -73,7 +75,7 @@ Alternatively, you can read the GitHub documentation on how to [create a pull re
 
 ## Links
 * Palladio homepage: https://www.palladio-simulator.com/home/
-* Comprehensive documentation: https://sdqweb.ipd.kit.edu/wiki/Palladio_Component_Model/
+* Comprehensive documentation: https://sdqweb.ipd.kit.edu/wiki/Palladio_Component_Model
 * Issue tracker: https://palladio-simulator.atlassian.net/jira/
 * Build server: https://build.palladio-simulator.com/job/PalladioSimulator/job/Palladio-ReverseEngineering-SoMoX-RuleEngine/
 * Update site: https://updatesite.palladio-simulator.com/palladio-reverseengineering-somox-ruleengine/nightly/
