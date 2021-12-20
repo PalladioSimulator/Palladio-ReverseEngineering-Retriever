@@ -20,9 +20,11 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
 
         this.add(new ModelSaverJob(configuration.getMoxConfiguration()));
         
+        /* TODO iterate through extension point implementations
         if (configuration.getMoxConfiguration().isSnykEnabled()) {
             this.add(new SnykCodeAnalystJob(configuration.getMoxConfiguration(), getBlackboard()));
         }
+        */
     }
 
     

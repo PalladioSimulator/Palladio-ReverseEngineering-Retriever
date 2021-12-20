@@ -119,14 +119,4 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         }
         return strRules;
     }
-
-	public Path getSnykPath() {
-		// TODO actually do something
-		return Path.of("./");
-	}
-
-	public boolean isSnykEnabled() {
-		// TODO
-		return true;
-	}
 }
