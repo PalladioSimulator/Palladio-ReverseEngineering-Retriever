@@ -4,7 +4,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineAnalyzerConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 
 import de.uka.ipd.sdq.workflow.extension.AbstractExtendableJob;
@@ -14,22 +13,22 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
 
     private static final String ANALYST_EXTENSION_POINT = "org.palladiosimulator.somox.analyzer.rules.analyst";
 
-    public RuleEngineJob(RuleEngineAnalyzerConfiguration configuration) throws CoreException {
+    public RuleEngineJob(RuleEngineConfiguration configuration) throws CoreException {
         setBlackboard(new RuleEngineBlackboard());
 
         this.add(discoveryJobs(configuration));
 
-        this.add(new RuleEngineBlackboardInteractingJob(configuration.getMoxConfiguration(), getBlackboard()));
+        this.add(new RuleEngineBlackboardInteractingJob(configuration, getBlackboard()));
 
         // TODO integration SEFF extraction
         // this.add(new SeffCreatorJob(false, null, null));
 
-        this.add(new ModelSaverJob(configuration.getMoxConfiguration()));
+        this.add(new ModelSaverJob(configuration));
 
-        addAnalysts(configuration.getMoxConfiguration());
+        addAnalysts(configuration);
     }
 
-    private ParallelJob discoveryJobs(RuleEngineAnalyzerConfiguration configuration) {
+    private ParallelJob discoveryJobs(RuleEngineConfiguration configuration) {
         ParallelJob discoveryJobs = new ParallelJob();
 
         discoveryJobs.add(new JdtParserJob(configuration, getBlackboard()));

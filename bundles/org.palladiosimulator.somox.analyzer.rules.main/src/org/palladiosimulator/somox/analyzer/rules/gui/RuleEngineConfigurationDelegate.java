@@ -16,7 +16,7 @@ public class RuleEngineConfigurationDelegate
 
     @Override
     protected IJob createWorkflowJob(RuleEngineAnalyzerConfiguration config, ILaunch launch) throws CoreException {
-        return new RuleEngineJob(config);
+        return new RuleEngineJob(config.getMoxConfiguration());
     }
 
     @Override

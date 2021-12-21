@@ -7,7 +7,6 @@ import java.util.Objects;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineAnalyzerConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
 import org.somox.analyzer.ModelAnalyzerException;
@@ -24,10 +23,6 @@ public class RuleEngineBlackboardInteractingJob extends AbstractBlackboardIntera
 
     private final RuleEngineConfiguration configuration;
     private final HashMap<String, ExtractionResult> extractionResults;
-
-    public RuleEngineBlackboardInteractingJob(RuleEngineAnalyzerConfiguration configuration, RuleEngineBlackboard blackboard) {
-        this(configuration.getMoxConfiguration(), blackboard);
-    }
 
     public RuleEngineBlackboardInteractingJob(RuleEngineConfiguration configuration, RuleEngineBlackboard blackboard) {
         this.configuration = Objects.requireNonNull(configuration);

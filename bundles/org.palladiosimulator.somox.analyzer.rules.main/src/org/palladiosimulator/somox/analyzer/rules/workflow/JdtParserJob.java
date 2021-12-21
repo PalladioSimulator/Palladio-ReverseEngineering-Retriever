@@ -17,7 +17,6 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.emftext.language.java.containers.CompilationUnit;
 import org.emftext.language.java.containers.ContainersFactory;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineAnalyzerConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
@@ -41,10 +40,6 @@ public class JdtParserJob extends AbstractBlackboardInteractingJob<RuleEngineBla
 	}
 
 	private final Path inputDirectory;
-
-	public JdtParserJob(RuleEngineAnalyzerConfiguration configuration, RuleEngineBlackboard blackboard) {
-		this(configuration.getMoxConfiguration(), blackboard);
-	}
 
 	public JdtParserJob(RuleEngineConfiguration configuration, RuleEngineBlackboard blackboard) {
 		inputDirectory = Paths.get(configuration.getInputFolder().devicePath()).toAbsolutePath().normalize();

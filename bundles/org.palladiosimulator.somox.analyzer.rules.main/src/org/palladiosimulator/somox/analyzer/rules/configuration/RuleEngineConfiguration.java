@@ -1,6 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.configuration;
 
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
