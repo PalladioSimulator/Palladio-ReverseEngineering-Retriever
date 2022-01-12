@@ -10,8 +10,13 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.TreeItem;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.workflow.Analyst;
+import org.palladiosimulator.somox.analyzer.rules.workflow.AnalystCollection;
 
 import de.uka.ipd.sdq.workflow.launchconfig.ImageRegistryHelper;
 import de.uka.ipd.sdq.workflow.launchconfig.LaunchConfigPlugin;
@@ -20,9 +25,15 @@ import de.uka.ipd.sdq.workflow.launchconfig.tabs.TabHelper;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
@@ -43,10 +54,14 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     private Set<DefaultRule> rules;
     private Set<Button> ruleButtons;
     private Text out;
+    private Map<String, Map<String, TreeItem>> analystTreeItems;
 
     public RuleEngineIoTab() {
         // Create the default path of this Eclipse application
-        defaultPath = Paths.get(".").toAbsolutePath().normalize().toString();
+        defaultPath = Paths.get(".")
+            .toAbsolutePath()
+            .normalize()
+            .toString();
 
         // Initialize the selected rules
         rules = new HashSet<>();
@@ -88,7 +103,8 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         for (DefaultRule rule : DefaultRule.values()) {
             final Button selectionButton = new Button(ruleSelection, SWT.CHECK);
             selectionButton.setText(rule.toString());
-            selectionButton.addSelectionListener(new RuleSelectionListener(selectionButton, modifyListener, rules, rule));
+            selectionButton
+                .addSelectionListener(new RuleSelectionListener(selectionButton, modifyListener, rules, rule));
             ruleButtons.add(selectionButton);
         }
 
@@ -96,17 +112,55 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         out = new Text(container, SWT.SINGLE | SWT.BORDER);
         TabHelper.createFolderInputSection(container, modifyListener, "File Out", out, "File Out", getShell(),
                 defaultPath);
+
+        // Create tree view for analyst configuration
+        List<Analyst> analysts;
+        try {
+            AnalystCollection analystCollection = new AnalystCollection();
+            analysts = new ArrayList<Analyst>(analystCollection.getAnalysts());
+        } catch (CoreException e) {
+            Logger.getLogger(RuleEngineIoTab.class)
+                .error("Exception occurred while discovering analysts!");
+            analysts = new ArrayList<>();
+        }
+
+        Tree tree = new Tree(container, SWT.BORDER | SWT.FULL_SELECTION);
+        TreeColumn nameColumn = new TreeColumn(tree, SWT.NONE);
+        nameColumn.setWidth(200);
+        TreeColumn valueColumn = new TreeColumn(tree, SWT.NONE);
+        valueColumn.setWidth(200);
+
+        tree.addListener(SWT.Selection, new TreeEditListener(tree, modifyListener));
+
+        for (int i = 0; i < analysts.size(); i++) {
+            TreeItem analystItem = new TreeItem(tree, SWT.NONE);
+            analystItem.setText(0, analysts.get(i)
+                .getClass()
+                .getSimpleName());
+            for (String configKey : analysts.get(i)
+                .getConfigurationKeys()) {
+                TreeItem propertyItem = new TreeItem(analystItem, SWT.NONE);
+                propertyItem.setText(0, configKey);
+                analystTreeItems.putIfAbsent(analysts.get(i)
+                    .getID(), new HashMap<>());
+                analystTreeItems.get(analysts.get(i)
+                    .getID())
+                    .put(configKey, propertyItem);
+            }
+        }
     }
 
     private boolean validateFolderInput(Text widget) {
-        if (widget == null || widget.getText() == null || widget.getText().isBlank()) {
+        if (widget == null || widget.getText() == null || widget.getText()
+            .isBlank()) {
             return error("Blank input.");
         }
 
         try {
             URI uri = getURI(widget);
-            Path path = Paths.get(CommonPlugin.asLocalURI(uri).devicePath());
-            
+            Path path = Paths.get(CommonPlugin.asLocalURI(uri)
+                .devicePath());
+
             if (!Files.exists(path)) {
                 return error("The file located by '" + uri + "'does not exist.");
             }
@@ -141,7 +195,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     public void initializeFrom(ILaunchConfiguration configuration) {
         setText(configuration, in, RuleEngineConfiguration.RULE_ENGINE_INPUT_PATH);
         setText(configuration, out, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH);
-        
+
         for (Button ruleButton : ruleButtons) {
             setButton(configuration, ruleButton, RuleEngineConfiguration.RULE_ENGINE_SELECTED_RULES);
         }
@@ -149,7 +203,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
     private void setButton(ILaunchConfiguration configuration, Button ruleButton, String attributeName) {
         try {
-            Set<String> configRules = (Set<String>)configuration.getAttribute(attributeName, new HashSet<>());
+            Set<String> configRules = (Set<String>) configuration.getAttribute(attributeName, new HashSet<>());
             if (configRules.contains(ruleButton.getText())) {
                 ruleButton.setSelection(true);
                 rules.add(DefaultRule.valueOf(ruleButton.getText()));
@@ -177,11 +231,15 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_INPUT_PATH, in);
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH, out);
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_SELECTED_RULES, rules);
-      }
+        // TODO Implement parsing and saving
+        // configuration.getAttribute(RuleEngineConfiguration.RULE_ENGINE_ANALYST_CONFIG_PREFIX, new
+        // HashMap<String, String>());
+    }
 
     private void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName, Text textWidget) {
         try {
-            if (textWidget.getText().isEmpty()) {
+            if (textWidget.getText()
+                .isEmpty()) {
                 configuration.setAttribute(attributeName, "");
             } else {
                 configuration.setAttribute(attributeName, getURI(textWidget).toString());
@@ -191,7 +249,8 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         }
     }
 
-    private void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName, Set<DefaultRule> rules) {
+    private void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName,
+            Set<DefaultRule> rules) {
         try {
             configuration.setAttribute(attributeName, RuleEngineConfiguration.serializeRules(rules));
         } catch (final Exception e) {
@@ -206,7 +265,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
         setText(out, defaultPath);
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH, out);
-        
+
         // By default, no rule is selected
         rules = new HashSet<>();
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH, rules);

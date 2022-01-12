@@ -1,17 +1,15 @@
 package org.palladiosimulator.somox.analyzer.rules.workflow;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.Platform;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 
 import de.uka.ipd.sdq.workflow.extension.AbstractExtendableJob;
+import de.uka.ipd.sdq.workflow.jobs.AbstractJob;
 import de.uka.ipd.sdq.workflow.jobs.ParallelJob;
 
 public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
 
-    private static final String ANALYST_EXTENSION_POINT = "org.palladiosimulator.somox.analyzer.rules.analyst";
 
     public RuleEngineJob(RuleEngineConfiguration configuration) throws CoreException {
         setBlackboard(new RuleEngineBlackboard());
@@ -38,13 +36,11 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
     }
     
     private void addAnalysts(RuleEngineConfiguration configuration) throws CoreException {
-        for (IConfigurationElement extension : Platform.getExtensionRegistry()
-            .getConfigurationElementsFor(ANALYST_EXTENSION_POINT)) {
-            final Object o = extension.createExecutableExtension("class");
-            if (o instanceof Analyst) {
-                logger.info(String.format("Adding analyst %s", extension.getDeclaringExtension().getUniqueIdentifier()));
-                this.add(((Analyst) o).create(configuration, getBlackboard()));
-            }
+        AnalystCollection analystCollection = new AnalystCollection();
+        for (Analyst analyst : analystCollection.getAnalysts()) {
+            AbstractJob analystJob = analyst.create(configuration, myBlackboard);
+            this.add(analystJob);
+            logger.info("Adding analyst job \"" + analystJob.getName() + "\"");
         }
     }
 }

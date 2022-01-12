@@ -1,5 +1,7 @@
 package org.palladiosimulator.somox.analyzer.rules.workflow;
 
+import java.util.Set;
+
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 
@@ -14,4 +16,8 @@ import de.uka.ipd.sdq.workflow.jobs.AbstractJob;
  */
 public interface Analyst {
     AbstractJob create(RuleEngineConfiguration configuration, RuleEngineBlackboard blackboard);
+
+    public Set<String> getConfigurationKeys();
+    public String getName();
+    public String getID();
 }
