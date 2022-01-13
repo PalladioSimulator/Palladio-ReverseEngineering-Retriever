@@ -65,6 +65,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
         // Initialize the selected rules
         rules = new HashSet<>();
+        analystTreeItems = new HashMap<>();
 
         // Create a listener for GUI modification events
         modifyListener = new ModifyListener() {
