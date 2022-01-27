@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -45,6 +46,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     public static final String NAME = "Rule Engine IO";
     public static final String PLUGIN_ID = "org.palladiosimulator.somox.analyzer.rules.runconfig.LaunchRuleEngineAnalyzer";
     private static final String FILENAME_TAB_IMAGE_PATH = "icons/RuleEngine_16x16.gif";
+    private static final int ANALYST_CONFIGURATION_VALUE_COLUMN = 1;
 
     private String defaultPath;
     private Composite container;
@@ -55,6 +57,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     private Set<Button> ruleButtons;
     private Text out;
     private Map<String, Map<String, TreeItem>> analystTreeItems;
+    private List<Analyst> analysts;
 
     public RuleEngineIoTab() {
         // Create the default path of this Eclipse application
@@ -65,7 +68,17 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
         // Initialize the selected rules
         rules = new HashSet<>();
+        // Initialize the analyst configuration map
         analystTreeItems = new HashMap<>();
+        // Collect the available analysts
+        try {
+            AnalystCollection analystCollection = new AnalystCollection();
+            analysts = new ArrayList<Analyst>(analystCollection.getAnalysts());
+        } catch (CoreException e) {
+            Logger.getLogger(RuleEngineIoTab.class)
+                .error("Exception occurred while discovering analysts!");
+            analysts = new ArrayList<>();
+        }
 
         // Create a listener for GUI modification events
         modifyListener = new ModifyListener() {
@@ -115,15 +128,6 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
                 defaultPath);
 
         // Create tree view for analyst configuration
-        List<Analyst> analysts;
-        try {
-            AnalystCollection analystCollection = new AnalystCollection();
-            analysts = new ArrayList<Analyst>(analystCollection.getAnalysts());
-        } catch (CoreException e) {
-            Logger.getLogger(RuleEngineIoTab.class)
-                .error("Exception occurred while discovering analysts!");
-            analysts = new ArrayList<>();
-        }
 
         Tree tree = new Tree(container, SWT.BORDER | SWT.FULL_SELECTION);
         TreeColumn nameColumn = new TreeColumn(tree, SWT.NONE);
@@ -131,7 +135,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         TreeColumn valueColumn = new TreeColumn(tree, SWT.NONE);
         valueColumn.setWidth(200);
 
-        tree.addListener(SWT.Selection, new TreeEditListener(tree, modifyListener));
+        tree.addListener(SWT.Selection, new TreeEditListener(tree, modifyListener, ANALYST_CONFIGURATION_VALUE_COLUMN));
 
         for (int i = 0; i < analysts.size(); i++) {
             TreeItem analystItem = new TreeItem(tree, SWT.NONE);
@@ -142,10 +146,10 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
                 .getConfigurationKeys()) {
                 TreeItem propertyItem = new TreeItem(analystItem, SWT.NONE);
                 propertyItem.setText(0, configKey);
-                analystTreeItems.putIfAbsent(analysts.get(i)
-                    .getID(), new HashMap<>());
-                analystTreeItems.get(analysts.get(i)
-                    .getID())
+                String analystId = analysts.get(i)
+                    .getID();
+                analystTreeItems.putIfAbsent(analystId, new HashMap<>());
+                analystTreeItems.get(analystId)
                     .put(configKey, propertyItem);
             }
         }
@@ -200,6 +204,11 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         for (Button ruleButton : ruleButtons) {
             setButton(configuration, ruleButton, RuleEngineConfiguration.RULE_ENGINE_SELECTED_RULES);
         }
+
+        for (Analyst analyst : analysts) {
+            setTreeItems(configuration, analystTreeItems.get(analyst.getID()),
+                    RuleEngineConfiguration.RULE_ENGINE_ANALYST_CONFIG_PREFIX + analyst.getID());
+        }
     }
 
     private void setButton(ILaunchConfiguration configuration, Button ruleButton, String attributeName) {
@@ -227,14 +236,37 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         }
     }
 
+    private void setTreeItems(ILaunchConfiguration configuration, Map<String, TreeItem> treeItems,
+            String attributeName) {
+        Map<String, String> strings;
+        try {
+            strings = configuration.getAttribute(attributeName, new HashMap<>());
+            for (Entry<String, TreeItem> entry : treeItems.entrySet()) {
+                String value = strings.get(entry.getKey());
+                if (value == null) {
+                    entry.getValue()
+                        .setText(ANALYST_CONFIGURATION_VALUE_COLUMN, "");
+                } else {
+                    entry.getValue()
+                        .setText(ANALYST_CONFIGURATION_VALUE_COLUMN, value);
+                }
+            }
+        } catch (final Exception e) {
+            LaunchConfigPlugin.errorLogger(getName(), attributeName, e.getMessage());
+            error(e.getLocalizedMessage());
+            return;
+        }
+    }
+
     @Override
     public void performApply(ILaunchConfigurationWorkingCopy configuration) {
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_INPUT_PATH, in);
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH, out);
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_SELECTED_RULES, rules);
-        // TODO Implement parsing and saving
-        // configuration.getAttribute(RuleEngineConfiguration.RULE_ENGINE_ANALYST_CONFIG_PREFIX, new
-        // HashMap<String, String>());
+        for (Analyst analyst : analysts) {
+            setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_ANALYST_CONFIG_PREFIX + analyst.getID(),
+                    analystTreeItems.get(analyst.getID()));
+        }
     }
 
     private void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName, Text textWidget) {
@@ -259,6 +291,16 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         }
     }
 
+    private void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName,
+            Map<String, TreeItem> treeItems) {
+        Map<String, String> strings = new HashMap<>();
+        for (Entry<String, TreeItem> entry : treeItems.entrySet()) {
+            strings.put(entry.getKey(), entry.getValue()
+                .getText(ANALYST_CONFIGURATION_VALUE_COLUMN));
+        }
+        configuration.setAttribute(attributeName, strings);
+    }
+
     @Override
     public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
         setText(in, defaultPath);
@@ -270,6 +312,13 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         // By default, no rule is selected
         rules = new HashSet<>();
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH, rules);
+
+        for (Analyst analyst : analysts) {
+            Map<String, TreeItem> treeItems = analystTreeItems.get(analyst.getID());
+            clearTreeItems(treeItems);
+            setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_ANALYST_CONFIG_PREFIX + analyst.getID(),
+                    treeItems);
+        }
     }
 
     private void setText(final Text textWidget, final String attributeName) {
@@ -277,6 +326,13 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
             textWidget.setText(attributeName);
         } catch (final Exception e) {
             error(e.getMessage());
+        }
+    }
+
+    private void clearTreeItems(Map<String, TreeItem> treeItems) {
+        for (Entry<String, TreeItem> entry : treeItems.entrySet()) {
+            entry.getValue()
+                .setText("");
         }
     }
 

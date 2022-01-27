@@ -6,7 +6,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -112,6 +114,8 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
             final Set<DefaultRule> rules = ruleEngineConfiguration.getSelectedRules();
 
             final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForPath(inPath);
+            
+            findFilesForCompilationUnits(roots, inPath, blackboard);
 
             executeWith(inPath, outPath, roots, rules, blackboard);
         } catch (Exception e) {
@@ -121,6 +125,32 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         }
 
         return this.initializeAnalysisResult();
+    }
+
+    /**
+     * Tries to find the files for the {@code compilationUnits} in the {@code root} directory.
+     * Saves the associations in the given {@code blackboard}.
+     * 
+     * @param compilationUnits  the CompilationUnits to search for
+     * @param roots             the directory to search in
+     * @param blackboard        the blackboard to save to
+     */
+    private static void findFilesForCompilationUnits(List<CompilationUnitImpl> compilationUnits, Path root,
+            RuleEngineBlackboard blackboard) {
+        for (CompilationUnitImpl compilationUnit : compilationUnits) {
+            List<String> pathSegments = new LinkedList<>(compilationUnit.getContainingPackageName());
+            pathSegments.add(compilationUnit.getName());
+            String guessedPath = String.join(File.separator, pathSegments) + ".java";
+
+            try {
+                Files.walk(root)
+                .filter(Files::isRegularFile)
+                .filter(x -> x.endsWith(guessedPath))
+                .forEach(x -> blackboard.addCompilationUnitLocation(compilationUnit, x));
+            } catch (IOException e) {
+                LOG.warn("An IOException occurred while searching for the files containing the CompilationUnits!");
+            }
+        }
     }
 
     /**

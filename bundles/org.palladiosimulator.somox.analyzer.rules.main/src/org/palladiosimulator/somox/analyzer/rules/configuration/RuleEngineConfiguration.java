@@ -1,14 +1,20 @@
 package org.palladiosimulator.somox.analyzer.rules.configuration;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.common.util.URI;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
+import org.palladiosimulator.somox.analyzer.rules.workflow.Analyst;
+import org.palladiosimulator.somox.analyzer.rules.workflow.AnalystCollection;
 import org.somox.configuration.AbstractMoxConfiguration;
 import org.somox.configuration.FileLocationConfiguration;
 
@@ -25,6 +31,7 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
     private FileLocationConfiguration fileLocations;
     private Set<DefaultRule> rules;
     private Map<String, Map<String, String>> analystConfigs;
+    private List<Analyst> analysts;
 
     private final Map<String, Object> attributes;
 
@@ -36,6 +43,12 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         this.attributes = Objects.requireNonNull(attributes);
         this.fileLocations = new FileLocationConfiguration();
         this.analystConfigs = new HashMap<>();
+        try {
+            this.analysts = new ArrayList<>(new AnalystCollection().getAnalysts());
+        } catch (CoreException e) {
+            Logger.getLogger(RuleEngineConfiguration.class).error("An exception occurred while collecting analysts");
+            this.analysts = new ArrayList<>();
+        }
         applyAttributeMap(attributes);
     }
 
@@ -56,7 +69,8 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         if (attributeMap.get(RULE_ENGINE_SELECTED_RULES) != null) {
             setSelectedRules(parseRules((Set<String>) attributeMap.get(RULE_ENGINE_SELECTED_RULES)));
         }
-        for (String analystId : analystConfigs.keySet()) {
+        for (Analyst analyst : analysts) {
+            String analystId = analyst.getID();
             if (attributeMap.get(RULE_ENGINE_ANALYST_CONFIG_PREFIX + analystId) != null) {
                 analystConfigs.put(analystId, (Map<String, String>) attributeMap.get(RULE_ENGINE_ANALYST_CONFIG_PREFIX + analystId));
             }

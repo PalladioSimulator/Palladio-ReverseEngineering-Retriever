@@ -19,10 +19,12 @@ public class TreeEditListener implements Listener {
     private final TreeEditor editor;
     private final Tree tree;
     private final ModifyListener modifyListener;
+    private final int column;
 
-    public TreeEditListener(Tree tree, ModifyListener modifyListener) {
+    public TreeEditListener(Tree tree, ModifyListener modifyListener, int column) {
         this.tree = tree;
         this.modifyListener = modifyListener;
+        this.column = column;
         editor = new TreeEditor(tree);
     }
 
@@ -46,7 +48,7 @@ public class TreeEditListener implements Listener {
             Listener textListener = e2 -> {
                 switch (e2.type) {
                 case SWT.FocusOut:
-                    item.setText(1, text.getText());
+                    item.setText(column, text.getText());
                     modifyListener.modifyText(null);
                     composite.dispose();
                     break;
@@ -59,8 +61,8 @@ public class TreeEditListener implements Listener {
                     gc.dispose();
                     size = text.computeSize(size.x, SWT.DEFAULT);
                     editor.horizontalAlignment = SWT.LEFT;
-                    editor.setColumn(1);
-                    Rectangle itemRect = item.getBounds(1), rect2 = tree.getClientArea();
+                    editor.setColumn(column);
+                    Rectangle itemRect = item.getBounds(column), rect2 = tree.getClientArea();
                     editor.minimumWidth = Math.max(size.x, itemRect.width) + inset * 2;
                     int left = itemRect.x, right = rect2.x + rect2.width;
                     editor.minimumWidth = Math.min(editor.minimumWidth, right - left);
@@ -70,7 +72,7 @@ public class TreeEditListener implements Listener {
                 case SWT.Traverse:
                     switch (e2.detail) {
                     case SWT.TRAVERSE_RETURN:
-                        item.setText(1, text.getText());
+                        item.setText(column, text.getText());
                         modifyListener.modifyText(null);
                         // FALL THROUGH
                     case SWT.TRAVERSE_ESCAPE:
@@ -84,7 +86,7 @@ public class TreeEditListener implements Listener {
             text.addListener(SWT.Traverse, textListener);
             text.addListener(SWT.Verify, textListener);
             editor.setEditor(composite, item);
-            text.setText(item.getText(1));
+            text.setText(item.getText(column));
             text.selectAll();
             text.setFocus();
         }
