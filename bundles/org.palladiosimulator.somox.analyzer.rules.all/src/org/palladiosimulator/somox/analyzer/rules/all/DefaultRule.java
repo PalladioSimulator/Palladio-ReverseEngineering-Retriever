@@ -2,6 +2,7 @@ package org.palladiosimulator.somox.analyzer.rules.all;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
 import org.palladiosimulator.somox.analyzer.rules.engine.PCMDetectorSimple;
 import org.palladiosimulator.somox.analyzer.rules.jax_rs.JaxRSRules;
@@ -41,9 +42,9 @@ public enum DefaultRule {
 		return names;
 	}
 
-	public IRule getRule(PCMDetectorSimple pcmDetector) {
+	public IRule getRule(RuleEngineBlackboard blackboard) {
 		try {
-            return ruleClass.getDeclaredConstructor(PCMDetectorSimple.class).newInstance(pcmDetector);
+            return ruleClass.getDeclaredConstructor(RuleEngineBlackboard.class).newInstance(blackboard);
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             // TODO Maybe solve this a little bit better..?

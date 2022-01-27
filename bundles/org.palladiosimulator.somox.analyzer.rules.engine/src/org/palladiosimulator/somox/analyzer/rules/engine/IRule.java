@@ -1,6 +1,8 @@
 package org.palladiosimulator.somox.analyzer.rules.engine;
 
-import org.emftext.language.java.containers.impl.CompilationUnitImpl;
+import java.nio.file.Path;
+
+import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 
 /**
 * This interface has to be implemented in order to write rules.
@@ -8,11 +10,11 @@ import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 */
 public abstract class IRule {
     
-    protected PCMDetectorSimple pcmDetector;
+    protected RuleEngineBlackboard blackboard;
     
-    public IRule(PCMDetectorSimple pcmDetector) {
-        this.pcmDetector = pcmDetector;
+    public IRule(RuleEngineBlackboard blackboard) {
+        this.blackboard = blackboard;
     }
     
-    public abstract boolean processRules(CompilationUnitImpl unitImpl);
+    public abstract boolean processRules(Path path);
 }

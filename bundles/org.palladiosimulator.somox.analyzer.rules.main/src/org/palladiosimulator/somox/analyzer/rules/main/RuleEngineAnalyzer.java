@@ -114,8 +114,6 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
             final Set<DefaultRule> rules = ruleEngineConfiguration.getSelectedRules();
 
             final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForPath(inPath);
-            
-            findFilesForCompilationUnits(roots, inPath, blackboard);
 
             executeWith(inPath, outPath, roots, rules, blackboard);
         } catch (Exception e) {
@@ -161,7 +159,8 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
     * @param  model 		the JaMoPP model
     * @param  ruleDoc 		the object containing the rules
     */
-    public static void executeWith(Path projectPath, Path outPath, List<CompilationUnitImpl> model, Set<DefaultRule> rules) {
+    public static void executeWith(Path projectPath, Path outPath, List<CompilationUnitImpl> model,
+            Set<DefaultRule> rules) {
         executeWith(projectPath, outPath, model, rules, new RuleEngineBlackboard());
     }
 
@@ -177,24 +176,43 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
     private static void executeWith(Path projectPath, Path outPath, List<CompilationUnitImpl> model,
             Set<DefaultRule> rules, RuleEngineBlackboard blackboard) {
 
+        blackboard.setPCMDetector(new PCMDetectorSimple());
 
-        PCMDetectorSimple pcmDetector = new PCMDetectorSimple();
+        findFilesForCompilationUnits(model, projectPath, blackboard);
         
         // For each unit, execute rules
         for (final CompilationUnitImpl u : model) {
             for (final DefaultRule rule : rules) {
-                rule.getRule(pcmDetector).processRules(u);
+                Set<Path> unitPaths = blackboard.getCompilationUnitLocations(u);
+                if (unitPaths == null) {
+                    // No file is associated with the compilation unit.
+                    // This is the case for external units, e.g. from the standard library.
+                    // They can therefore not be analyzed.
+                    continue;
+                }
+                for (final Path path : unitPaths) {
+                    rule.getRule(blackboard).processRules(path);
+                }
             }
         }
         LOG.info("Applied rules to the compilation units");
+
+        // TODO Look for build files in projectPath
+        // For each build file, execute rules
+        for (final Path path : new java.util.HashSet<Path>()) {
+            for (final DefaultRule rule : rules) {
+                rule.getRule(blackboard).processRules(path);
+            }
+        }
+        LOG.info("Applied rules to the build files");
         
         // Parses the docker-compose file to get a mapping between microservice names and components
         // for creating composite components for each microservice
-        final DockerParser dockerParser = new DockerParser(projectPath, pcmDetector);
+        final DockerParser dockerParser = new DockerParser(projectPath, blackboard.getPCMDetector());
         final Map<String, List<CompilationUnitImpl>> mapping = dockerParser.getMapping();
         
         // Creates a PCM repository with components, interfaces and roles
-        pcm = new PCMInstanceCreator(pcmDetector, blackboard).createPCM(mapping);
+        pcm = new PCMInstanceCreator(blackboard).createPCM(mapping);
 
         // Persist the repository at ./pcm.repository
         PCMInstanceCreator.saveRepository(pcm, outPath, "pcm.repository", false);

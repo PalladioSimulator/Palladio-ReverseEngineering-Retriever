@@ -7,15 +7,23 @@ import org.emftext.language.java.containers.impl.CompilationUnitImpl
 import org.emftext.language.java.members.Method
 import org.emftext.language.java.members.Field
 import org.emftext.language.java.parameters.Parameter
-import org.palladiosimulator.somox.analyzer.rules.engine.PCMDetectorSimple
+import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard
+import java.nio.file.Path;
 
 class SpringRules extends IRule {
 	
-	new(PCMDetectorSimple pcmDetector) {
-		super(pcmDetector)
+	new(RuleEngineBlackboard blackboard) {
+		super(blackboard)
 	}
 	
-	override boolean processRules(CompilationUnitImpl unitImpl) {
+	override boolean processRules(Path path) {
+		val pcmDetector = blackboard.getPCMDetector()
+		val unitImpl = blackboard.getCompilationUnitAt(path)
+		
+		// Abort if there is no CompilationUnit at the specified path
+		if (unitImpl === null) {
+			return false
+		}
 		
 		val isAbstract = isAbstraction(unitImpl)
 		

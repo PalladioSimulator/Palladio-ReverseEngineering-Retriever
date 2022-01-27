@@ -65,17 +65,15 @@ public class PCMInstanceCreator {
     private final FluentRepositoryFactory create;
     private final Repo repository;
     private final RuleEngineBlackboard blackboard;
-    private final PCMDetectorSimple pcmDetector;
     private final Map<String, CompositeDataTypeCreator> existingDataTypesMap;
     private final Map<String, DataType> existingCollectionDataTypes;
 
-    public PCMInstanceCreator(PCMDetectorSimple pcmDetector, RuleEngineBlackboard blackboard) {
+    public PCMInstanceCreator(RuleEngineBlackboard blackboard) {
         existingDataTypesMap = new HashMap<>();
         existingCollectionDataTypes = new HashMap<>();
         create = new FluentRepositoryFactory();
         repository = create.newRepository().withName(REPO_NAME);
         this.blackboard = blackboard;
-        this.pcmDetector = pcmDetector;
     }
     
     /**
@@ -85,8 +83,8 @@ public class PCMInstanceCreator {
     * @return      		the PCM repository model
     */
     public Repository createPCM(Map<String, List<CompilationUnitImpl>> mapping) {
-        final List<CompilationUnitImpl> components = pcmDetector.getComponents();
-        final List<Classifier> interfaces = pcmDetector.getOperationInterfaces();
+        final List<CompilationUnitImpl> components = blackboard.getPCMDetector().getComponents();
+        final List<Classifier> interfaces = blackboard.getPCMDetector().getOperationInterfaces();
 
         createPCMInterfaces(interfaces);
 
@@ -132,14 +130,14 @@ public class PCMInstanceCreator {
             BasicComponentCreator pcmComp = create.newBasicComponent().withName(getCompName(comp));
 
 
-            final List<ProvidesRelation> providedRelations = pcmDetector.getProvidedInterfaces(comp);
+            final List<ProvidesRelation> providedRelations = blackboard.getPCMDetector().getProvidedInterfaces(comp);
 
             Set<ConcreteClassifier> realInterfaces =  providedRelations.stream().map(relation->(ConcreteClassifier) relation.getOperationInterface()).collect(Collectors.toSet());
             for(ConcreteClassifier realInterface : realInterfaces) {
             	pcmComp.provides(create.fetchOfOperationInterface(realInterface.getQualifiedName().replaceAll("\\.", "_")),"dummy name");
             }
 
-            final List<Variable> requiredIs = pcmDetector.getRequiredInterfaces(comp);
+            final List<Variable> requiredIs = blackboard.getPCMDetector().getRequiredInterfaces(comp);
             Set<ConcreteClassifier> requireInterfaces = requiredIs.stream().map(variable -> getConcreteFromVar(variable)).collect(Collectors.toSet());
 
             for(ConcreteClassifier requInter: requireInterfaces) {

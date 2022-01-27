@@ -4,15 +4,23 @@ import org.emftext.language.java.containers.impl.CompilationUnitImpl
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule
 
 import static org.palladiosimulator.somox.analyzer.rules.engine.RuleHelper.*
-import org.palladiosimulator.somox.analyzer.rules.engine.PCMDetectorSimple
+import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard
+import java.nio.file.Path;
 
 class JaxRSRules extends IRule{
 	
-	new(PCMDetectorSimple pcmDetector) {
-		super(pcmDetector)
+	new(RuleEngineBlackboard blackboard) {
+		super(blackboard)
 	}
 	
-	override processRules(CompilationUnitImpl unitImpl) {
+	override boolean processRules(Path path) {
+		val pcmDetector = blackboard.getPCMDetector()
+		val unitImpl = blackboard.getCompilationUnitAt(path)
+		
+		// Abort if there is no CompilationUnit at the specified path
+		if (unitImpl === null) {
+			return false
+		}
 
 		// technology based and general recognition
 		val isConverter = isUnitAnnotatedWithName(unitImpl, "Converter")
@@ -65,6 +73,8 @@ class JaxRSRules extends IRule{
 	}
 	
 	def detectDefault(CompilationUnitImpl unitImpl) {
+		val pcmDetector = blackboard.getPCMDetector()
+
 		pcmDetector.detectComponent(unitImpl)
 		pcmDetector.detectOperationInterface(unitImpl)
 		getAllPublicMethods(unitImpl).forEach[m|pcmDetector.detectProvidedInterface(unitImpl,m)]
