@@ -14,13 +14,18 @@ class JaxRSRules extends IRule{
 	}
 	
 	override boolean processRules(Path path) {
-		val pcmDetector = blackboard.getPCMDetector()
-		val unitImpl = blackboard.getCompilationUnitAt(path)
+		val unitImpls = blackboard.getCompilationUnitAt(path)
 		
-		// Abort if there is no CompilationUnit at the specified path
-		if (unitImpl === null) {
-			return false
+		var containedSuccessful = false
+		for (unitImpl : unitImpls) {
+			containedSuccessful = processRuleForCompUnit(unitImpl) || containedSuccessful
 		}
+		
+		return containedSuccessful
+	}
+	
+	def boolean processRuleForCompUnit(CompilationUnitImpl unitImpl) {
+		val pcmDetector = blackboard.getPCMDetector()
 
 		// technology based and general recognition
 		val isConverter = isUnitAnnotatedWithName(unitImpl, "Converter")

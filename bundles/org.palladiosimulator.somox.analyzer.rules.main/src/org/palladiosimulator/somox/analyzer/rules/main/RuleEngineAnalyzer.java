@@ -126,16 +126,15 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
     }
 
     /**
-     * Tries to find the files for the {@code compilationUnits} in the {@code root} directory.
-     * Saves the associations in the given {@code blackboard}.
+     * Tries to find the files for the CompilationUnits in the {@code root} directory.
+     * Both takes the CompilationUnits from and saves the associations
+     * to the given {@code blackboard}.
      * 
-     * @param compilationUnits  the CompilationUnits to search for
      * @param roots             the directory to search in
      * @param blackboard        the blackboard to save to
      */
-    private static void findFilesForCompilationUnits(List<CompilationUnitImpl> compilationUnits, Path root,
-            RuleEngineBlackboard blackboard) {
-        for (CompilationUnitImpl compilationUnit : compilationUnits) {
+    private static void findFilesForCompilationUnits(Path root, RuleEngineBlackboard blackboard) {
+        for (CompilationUnitImpl compilationUnit : blackboard.getCompilationUnits()) {
             List<String> pathSegments = new LinkedList<>(compilationUnit.getContainingPackageName());
             pathSegments.add(compilationUnit.getName());
             String guessedPath = String.join(File.separator, pathSegments) + ".java";
@@ -176,20 +175,26 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
     private static void executeWith(Path projectPath, Path outPath, List<CompilationUnitImpl> model,
             Set<DefaultRule> rules, RuleEngineBlackboard blackboard) {
 
+        // Set up blackboard
         blackboard.setPCMDetector(new PCMDetectorSimple());
+        blackboard.addCompilationUnits(model);
+        findFilesForCompilationUnits(projectPath, blackboard);
 
-        findFilesForCompilationUnits(model, projectPath, blackboard);
-        
+        boolean processedLocationless = false;
         // For each unit, execute rules
         for (final CompilationUnitImpl u : model) {
-            for (final DefaultRule rule : rules) {
-                Set<Path> unitPaths = blackboard.getCompilationUnitLocations(u);
-                if (unitPaths == null) {
-                    // No file is associated with the compilation unit.
-                    // This is the case for external units, e.g. from the standard library.
-                    // They can therefore not be analyzed.
-                    continue;
+            Set<Path> unitPaths = blackboard.getCompilationUnitLocations(u);
+            if (unitPaths.isEmpty()) {
+                if (!processedLocationless) {
+                    // Execute rules for all CompilationUnits without associated files
+                    for (final DefaultRule rule : rules) {
+                        rule.getRule(blackboard).processRules(null);
+                    }
+                    processedLocationless = true;
                 }
+                continue;
+            }
+            for (final DefaultRule rule : rules) {
                 for (final Path path : unitPaths) {
                     rule.getRule(blackboard).processRules(path);
                 }

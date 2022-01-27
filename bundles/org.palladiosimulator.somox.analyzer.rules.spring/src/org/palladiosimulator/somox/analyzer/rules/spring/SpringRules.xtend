@@ -17,8 +17,18 @@ class SpringRules extends IRule {
 	}
 	
 	override boolean processRules(Path path) {
+		val unitImpls = blackboard.getCompilationUnitAt(path)
+	
+		var containedSuccessful = false
+		for (unitImpl : unitImpls) {
+			containedSuccessful = processRuleForCompUnit(unitImpl) || containedSuccessful
+		}
+		
+		return containedSuccessful
+	}
+	
+	def boolean processRuleForCompUnit(CompilationUnitImpl unitImpl) {
 		val pcmDetector = blackboard.getPCMDetector()
-		val unitImpl = blackboard.getCompilationUnitAt(path)
 		
 		// Abort if there is no CompilationUnit at the specified path
 		if (unitImpl === null) {
