@@ -10,7 +10,6 @@ import de.uka.ipd.sdq.workflow.jobs.ParallelJob;
 
 public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
 
-
     public RuleEngineJob(RuleEngineConfiguration configuration) throws CoreException {
         setBlackboard(new RuleEngineBlackboard());
 
@@ -29,12 +28,12 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
     private ParallelJob discoveryJobs(RuleEngineConfiguration configuration) {
         ParallelJob discoveryJobs = new ParallelJob();
 
-        discoveryJobs.add(new JdtParserJob(configuration, getBlackboard()));
-        // TODO Add Job for Docker discovery
+        // FIXME this throws XML parsing errors when run on more complex projects (e.g. acmeair)
+        // discoveryJobs.add(new JdtParserJob(configuration, getBlackboard()));
 
         return discoveryJobs;
     }
-    
+
     private void addAnalysts(RuleEngineConfiguration configuration) throws CoreException {
         AnalystCollection analystCollection = new AnalystCollection();
         for (Analyst analyst : analystCollection.getAnalysts()) {

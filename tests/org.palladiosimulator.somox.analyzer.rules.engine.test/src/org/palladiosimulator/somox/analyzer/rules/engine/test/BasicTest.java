@@ -115,7 +115,7 @@ public class BasicTest extends RuleEngineTest {
 
         // Run the RuleEngine again on the same project
         final Path inPath = TEST_DIR.resolve(PROJECT_NAME);
-        final List<CompilationUnitImpl> model = ParserAdapter.generateModelForPath(inPath);
+        final List<CompilationUnitImpl> model = ParserAdapter.generateModelForPath(inPath, OUT_DIR);
         RuleEngineAnalyzer.executeWith(inPath, OUT_DIR, model, getRules());
         Path repoPath = OUT_DIR.resolve("pcm.repository");
         RepositoryImpl repo = loadRepository(URI.createFileURI(repoPath.toString()));

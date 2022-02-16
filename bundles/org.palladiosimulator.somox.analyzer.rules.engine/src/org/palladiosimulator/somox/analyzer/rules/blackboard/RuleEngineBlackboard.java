@@ -11,6 +11,8 @@ import java.util.Set;
 
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.palladiosimulator.pcm.core.entity.Entity;
+import org.palladiosimulator.pcm.repository.RepositoryComponent;
+import org.palladiosimulator.pcm.system.System;
 import org.palladiosimulator.somox.analyzer.rules.engine.PCMDetectorSimple;
 import org.somox.extractor.ExtractionResult;
 import org.somox.gast2seff.jobs.SoMoXBlackboard;
@@ -22,14 +24,20 @@ public class RuleEngineBlackboard extends SoMoXBlackboard {
     private Map<String, ExtractionResult> extractionResults;
     private Set<CompilationUnitImpl> compilationUnits;
     private Map<CompilationUnitImpl, Set<Path>> compilationUnitLocations;
+    private Map<RepositoryComponent, CompilationUnitImpl> repositoryComponentLocations;
     private Map<Entity, CompilationUnitImpl> entityLocations;
+    private Map<Path, Set<CompilationUnitImpl>> systemAssociations;
+    private Map<System, Path> systemPaths;
     private PCMDetectorSimple pcmDetector;
 
     public RuleEngineBlackboard() {
         extractionResults = new HashMap<>();
         compilationUnits = new HashSet<>();
         compilationUnitLocations = new HashMap<>();
+        repositoryComponentLocations = new HashMap<>();
         entityLocations = new HashMap<>();
+        systemAssociations = new HashMap<>();
+        systemPaths = new HashMap<>();
     }
 
     public ExtractionResult putExtractionResult(String identifier, ExtractionResult extractionResult) {
@@ -58,8 +66,14 @@ public class RuleEngineBlackboard extends SoMoXBlackboard {
         }
     }
 
-    public CompilationUnitImpl putEntityLocation(Entity entity, CompilationUnitImpl compilationUnit) {
-        return entityLocations.put(entity, compilationUnit);
+    public CompilationUnitImpl putRepositoryComponentLocation(RepositoryComponent repoComp,
+            CompilationUnitImpl compilationUnit) {
+        entityLocations.put(repoComp, compilationUnit);
+        return repositoryComponentLocations.put(repoComp, compilationUnit);
+    }
+
+    public Map<RepositoryComponent, CompilationUnitImpl> getRepositoryComponentLocations() {
+        return Collections.unmodifiableMap(repositoryComponentLocations);
     }
 
     public Map<Entity, Set<Path>> getEntityPaths() {
@@ -73,6 +87,10 @@ public class RuleEngineBlackboard extends SoMoXBlackboard {
             if (path == null)
                 continue;
             entityPaths.put(entity, path);
+        }
+
+        for (Entry<System, Path> entry : systemPaths.entrySet()) {
+            entityPaths.put(entry.getKey(), Set.of(entry.getValue()));
         }
 
         return Collections.unmodifiableMap(entityPaths);
@@ -113,16 +131,28 @@ public class RuleEngineBlackboard extends SoMoXBlackboard {
 
         return compUnit;
     }
-    
+
     public void addCompilationUnit(CompilationUnitImpl compilationUnit) {
         compilationUnits.add(compilationUnit);
     }
-    
+
     public void addCompilationUnits(Collection<CompilationUnitImpl> compilationUnits) {
         this.compilationUnits.addAll(compilationUnits);
     }
 
     public Set<CompilationUnitImpl> getCompilationUnits() {
         return Collections.unmodifiableSet(compilationUnits);
+    }
+
+    public void addSystemAssociations(Path path, Set<CompilationUnitImpl> compilationUnits) {
+        systemAssociations.put(path, Collections.unmodifiableSet(compilationUnits));
+    }
+
+    public Map<Path, Set<CompilationUnitImpl>> getSystemAssociations() {
+        return Collections.unmodifiableMap(systemAssociations);
+    }
+
+    public void putSystemPath(System system, Path path) {
+        systemPaths.put(system, path);
     }
 }

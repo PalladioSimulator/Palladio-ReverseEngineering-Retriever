@@ -27,7 +27,7 @@ public class ParserAdapter {
 
     private static final Logger LOG = Logger.getLogger(ParserAdapter.class);
 
-    public static List<CompilationUnitImpl> generateModelForPath(Path in) {
+    public static List<CompilationUnitImpl> generateModelForPath(Path in, Path outDir) {
 
         // create
         final List<CompilationUnitImpl> roots = new ArrayList<>();
@@ -55,20 +55,20 @@ public class ParserAdapter {
 
         LOG.info("Parsed project directory");
 
-        saveModelToDisk(units);
+        saveModelToDisk(units, outDir);
 
-        LOG.info("Saved generated model to ./standalone_output/model.containers");
+        LOG.info("Saved generated model to model.containers");
 
         return roots;
     }
 
-    private static void saveModelToDisk(ResourceSet rs) {
+    private static void saveModelToDisk(ResourceSet rs, Path outDir) {
         Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("java", new JavaResource2Factory());
         Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("containers", new XMIResourceFactoryImpl());
 
         EcoreUtil.resolveAll(rs);
 
-        final File outputFile = new File("." + File.separator + "./standalone_output" + File.separator + "model");
+        final File outputFile = outDir.resolve("model").toFile();
         outputFile.getParentFile().mkdirs();
         final URI xmiFileURI = URI.createFileURI(outputFile.getAbsolutePath()).appendFileExtension("containers");
         final Resource xmiResource = rs.createResource(xmiFileURI);
@@ -77,7 +77,7 @@ public class ParserAdapter {
 
             if (javaResource.getContents().isEmpty()) {
 
-            	LOG.warn("WARNING: Emtpy Resource: " + javaResource.getURI());
+            	LOG.warn("WARNING: Empty Resource: " + javaResource.getURI());
 
                 continue;
             }

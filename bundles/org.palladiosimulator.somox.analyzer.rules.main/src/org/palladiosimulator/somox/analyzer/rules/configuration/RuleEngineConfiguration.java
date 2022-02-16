@@ -46,7 +46,8 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         try {
             this.analysts = new ArrayList<>(new AnalystCollection().getAnalysts());
         } catch (CoreException e) {
-            Logger.getLogger(RuleEngineConfiguration.class).error("An exception occurred while collecting analysts");
+            Logger.getLogger(RuleEngineConfiguration.class)
+                .error("An exception occurred while collecting analysts");
             this.analysts = new ArrayList<>();
         }
         applyAttributeMap(attributes);
@@ -72,7 +73,8 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         for (Analyst analyst : analysts) {
             String analystId = analyst.getID();
             if (attributeMap.get(RULE_ENGINE_ANALYST_CONFIG_PREFIX + analystId) != null) {
-                analystConfigs.put(analystId, (Map<String, String>) attributeMap.get(RULE_ENGINE_ANALYST_CONFIG_PREFIX + analystId));
+                analystConfigs.put(analystId,
+                        (Map<String, String>) attributeMap.get(RULE_ENGINE_ANALYST_CONFIG_PREFIX + analystId));
             }
         }
     }

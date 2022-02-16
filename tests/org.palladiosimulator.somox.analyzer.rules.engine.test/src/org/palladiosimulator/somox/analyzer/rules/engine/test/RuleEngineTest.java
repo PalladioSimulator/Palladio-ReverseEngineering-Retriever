@@ -52,7 +52,7 @@ abstract class RuleEngineTest {
      */
     protected RuleEngineTest(String projectDirectory, DefaultRule... rules) {
         final Path inPath = TEST_DIR.resolve(projectDirectory);
-        final List<CompilationUnitImpl> model = ParserAdapter.generateModelForPath(inPath);
+        final List<CompilationUnitImpl> model = ParserAdapter.generateModelForPath(inPath, OUT_DIR);
         this.rules = Set.of(rules);
         RuleEngineAnalyzer.executeWith(inPath, OUT_DIR, model, this.rules);
 

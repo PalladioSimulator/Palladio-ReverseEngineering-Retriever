@@ -6,6 +6,7 @@ import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboar
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
 import org.palladiosimulator.somox.analyzer.rules.jax_rs.JaxRSRules;
 import org.palladiosimulator.somox.analyzer.rules.spring.SpringRules;
+import org.palladiosimulator.somox.analyzer.rules.maven.MavenRules;
 
 /**
 * This enum contains all default rule technologies the rule engine provides
@@ -18,7 +19,8 @@ import org.palladiosimulator.somox.analyzer.rules.spring.SpringRules;
 public enum DefaultRule {
 
 	SPRING(SpringRules.class),
-	JAX_RS(JaxRSRules.class);
+	JAX_RS(JaxRSRules.class),
+	MAVEN(MavenRules.class);
 
 	private final Class<? extends IRule> ruleClass;
 

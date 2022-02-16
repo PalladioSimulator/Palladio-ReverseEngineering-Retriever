@@ -15,20 +15,21 @@ import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
 
 public class RuleEngineApplication implements IApplication {
-    
+
     private static final String FORMAT_EXPLANATION = "The following format is expected:"
             + "\n<input directory> <output directory> [rules]\n\nSupported rules: "
             + String.join(", ", DefaultRule.valuesAsString());
 
     @Override
     public Object start(IApplicationContext context) throws Exception {
-        String[] args = (String[]) context.getArguments().get(IApplicationContext.APPLICATION_ARGS);
-        
+        String[] args = (String[]) context.getArguments()
+            .get(IApplicationContext.APPLICATION_ARGS);
+
         if (args.length < 2) {
             System.err.println("Too few arguments!\n" + FORMAT_EXPLANATION);
             return -1;
         }
-        
+
         // Extract and check path arguments
         final Path in;
         try {
@@ -44,7 +45,7 @@ public class RuleEngineApplication implements IApplication {
             System.err.println("Invalid path: \"" + args[1] + "\"\n" + FORMAT_EXPLANATION);
             return -1;
         }
-        
+
         // Extract and check rules
         final Set<DefaultRule> rules = new HashSet<DefaultRule>();
         for (int i = 2; i < args.length; i++) {
@@ -55,11 +56,11 @@ public class RuleEngineApplication implements IApplication {
                 return -1;
             }
         }
-        
-        final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForPath(in);
-        
+
+        final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForPath(in, out);
+
         RuleEngineAnalyzer.executeWith(in, out, roots, rules);
-        
+
         return 0;
     }
 

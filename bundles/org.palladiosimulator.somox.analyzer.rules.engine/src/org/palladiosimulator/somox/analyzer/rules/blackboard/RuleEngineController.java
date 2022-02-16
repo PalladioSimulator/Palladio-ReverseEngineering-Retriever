@@ -7,18 +7,18 @@ import org.somox.configuration.ConfigurationDefinition;
 
 public class RuleEngineController implements ConfigurableComponent {
 
-	private final LinkedList<ConfigurationDefinition> configurations;
-	private final RuleEngineBlackboard blackboard;
+    private final LinkedList<ConfigurationDefinition> configurations;
+    private final RuleEngineBlackboard blackboard;
 
-	public RuleEngineController() {
-		configurations = new LinkedList<>();
-		blackboard = new RuleEngineBlackboard();
-	}
+    public RuleEngineController() {
+        configurations = new LinkedList<>();
+        blackboard = new RuleEngineBlackboard();
+    }
 
-	@Override
-	public LinkedList<ConfigurationDefinition> getConfigurationDefinitions() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public LinkedList<ConfigurationDefinition> getConfigurationDefinitions() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }
