@@ -11,6 +11,7 @@ import java.util.List;
 import org.eclipse.emf.common.util.URI;
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.palladiosimulator.pcm.repository.CollectionDataType;
 import org.palladiosimulator.pcm.repository.Interface;
 import org.palladiosimulator.pcm.repository.OperationInterface;
@@ -36,21 +37,13 @@ public class BasicTest extends RuleEngineTest {
      * Tests the basic functionality of the RuleEngineAnalyzer.
      * Requires it to execute without an exception and produce an output file.
      */
-    @Disabled("Disabled due to build server using OpenJDK")
+    @Test
     void test() {
-        // if this fails, the STL might have changed... these numbers are for JDK 11.0.2
-        // Disabled due to build server using OpenJDK
-        /*
-        assertEquals(284, getComponents().size());
-        assertEquals(310, getDatatypes().size());
-        assertEquals(0, getFailuretypes().size());
-        assertEquals(137, getInterfaces().size());
-        */
-        
         assertTrue(OUT_DIR.resolve("pcm.repository").toFile().exists());
     }
 
     @Disabled("This bug is inherited from Palladio, this can only be fixed after it is fixed there.")
+    @Test
     void testShort() {
         OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
@@ -64,7 +57,7 @@ public class BasicTest extends RuleEngineTest {
         }
     }
     
-    @Disabled("Disabled due to build server using OpenJDK")
+    @Test
     void testArray() {
         OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
@@ -80,7 +73,7 @@ public class BasicTest extends RuleEngineTest {
         }
     }
     
-    @Disabled("Disabled due to build server using OpenJDK")
+    @Test
     void testVararg() {
         OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
@@ -97,11 +90,11 @@ public class BasicTest extends RuleEngineTest {
     }
     
     /**
-     * The RuleEngine produces inconsistent results if executed multiple times.
+     * The RuleEngine produced inconsistent results if executed multiple times.
      * Arguments and methods appear multiple times. This probably has something to do
      * with (discouraged) static states somewhere in the stack.
      */
-    @Disabled("Disabled due to build server using OpenJDK")
+    @Test
     void testRepeatability() {
         OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
         int firstIntArgCount = 0;
