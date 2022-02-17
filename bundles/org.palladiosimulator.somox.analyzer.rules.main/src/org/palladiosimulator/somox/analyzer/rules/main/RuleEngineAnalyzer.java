@@ -26,11 +26,9 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.emftext.language.java.containers.ContainersPackage;
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
-import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
 import org.palladiosimulator.generator.fluent.shared.util.ModelSaver;
 import org.palladiosimulator.generator.fluent.system.api.ISystem;
 import org.palladiosimulator.generator.fluent.system.factory.FluentSystemFactory;
-import org.palladiosimulator.pcm.core.entity.Entity;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
@@ -202,6 +200,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         Set<Path> buildPaths;
         try {
             buildPaths = Files.walk(projectPath)
+                .filter(Files::isRegularFile)
                 .collect(Collectors.toSet());
         } catch (final IOException e) {
             buildPaths = new HashSet<Path>();
