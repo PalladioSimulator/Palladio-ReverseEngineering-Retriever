@@ -21,8 +21,9 @@ import jamopp.parser.jdt.JaMoPPJDTParser;
 import jamopp.resource.JavaResource2Factory;
 
 /**
-* This class wraps the JaMoPPJDTParser to parse a project directory and additionally filters and saves the resulting model instances.
-*/
+ * This class wraps the JaMoPPJDTParser to parse a project directory and additionally filters and
+ * saves the resulting model instances.
+ */
 public class ParserAdapter {
 
     private static final Logger LOG = Logger.getLogger(ParserAdapter.class);
@@ -32,26 +33,32 @@ public class ParserAdapter {
         // create
         final List<CompilationUnitImpl> roots = new ArrayList<>();
         final ResourceSet rs = new ResourceSetImpl();
-        rs.getResourceFactoryRegistry().getExtensionToFactoryMap().put("containers", new XMIResourceFactoryImpl());
-        JavaClasspath.get().clear();
+        rs.getResourceFactoryRegistry()
+            .getExtensionToFactoryMap()
+            .put("containers", new XMIResourceFactoryImpl());
+        JavaClasspath.get()
+            .clear();
 
         // parse
         final JaMoPPParserAPI parser = new JaMoPPJDTParser();
         final ResourceSet units = parser.parseDirectory(in);
 
         // filter
-        units.getAllContents().forEachRemaining(u -> {
-            if (u instanceof CompilationUnitImpl) {
-                final CompilationUnitImpl root = (CompilationUnitImpl) u;
-                if (isUnitRelevant(root)) {
+        units.getAllContents()
+            .forEachRemaining(u -> {
+                if (u instanceof CompilationUnitImpl) {
+                    final CompilationUnitImpl root = (CompilationUnitImpl) u;
+                    if (isUnitRelevant(root)) {
 
-                    final String name = root.getClassifiers().get(0).getName();
-                    root.setName(name);
+                        final String name = root.getClassifiers()
+                            .get(0)
+                            .getName();
+                        root.setName(name);
 
-                    roots.add(root);
+                        roots.add(root);
+                    }
                 }
-            }
-        });
+            });
 
         LOG.info("Parsed project directory");
 
@@ -63,26 +70,34 @@ public class ParserAdapter {
     }
 
     private static void saveModelToDisk(ResourceSet rs, Path outDir) {
-        Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("java", new JavaResource2Factory());
-        Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("containers", new XMIResourceFactoryImpl());
+        Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap()
+            .put("java", new JavaResource2Factory());
+        Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap()
+            .put("containers", new XMIResourceFactoryImpl());
 
         EcoreUtil.resolveAll(rs);
 
-        final File outputFile = outDir.resolve("model").toFile();
-        outputFile.getParentFile().mkdirs();
-        final URI xmiFileURI = URI.createFileURI(outputFile.getAbsolutePath()).appendFileExtension("containers");
+        final File outputFile = outDir.resolve("model")
+            .toFile();
+        outputFile.getParentFile()
+            .mkdirs();
+        final URI xmiFileURI = URI.createFileURI(outputFile.getAbsolutePath())
+            .appendFileExtension("containers");
         final Resource xmiResource = rs.createResource(xmiFileURI);
 
         for (final Resource javaResource : new ArrayList<>(rs.getResources())) {
 
-            if (javaResource.getContents().isEmpty()) {
+            if (javaResource.getContents()
+                .isEmpty()) {
 
-            	LOG.warn("WARNING: Empty Resource: " + javaResource.getURI());
+                LOG.warn("WARNING: Empty Resource: " + javaResource.getURI());
 
                 continue;
             }
 
-            if (!javaResource.getURI().scheme().equals("file")) {
+            if (!javaResource.getURI()
+                .scheme()
+                .equals("file")) {
                 continue;
             }
 
@@ -92,7 +107,8 @@ public class ParserAdapter {
                     continue;
                 }
             }
-            xmiResource.getContents().addAll(javaResource.getContents());
+            xmiResource.getContents()
+                .addAll(javaResource.getContents());
         }
 
         try {
@@ -103,10 +119,16 @@ public class ParserAdapter {
     }
 
     /**
-    * This method was important for earlier versions of the JaMoPP model as some model instances did not have a name for example
-    */
+     * This method was important for earlier versions of the JaMoPP model as some model instances
+     * did not have a name for example
+     */
     private static boolean isUnitRelevant(CompilationUnit root) {
-        return ((root.getClassifiers().size() > 0) && (root.getClassifiers().get(0).getName() != null)
-                && !root.getNamespacesAsString().isEmpty());
+        return ((root.getClassifiers()
+            .size() > 0)
+                && (root.getClassifiers()
+                    .get(0)
+                    .getName() != null)
+                && !root.getNamespacesAsString()
+                    .isEmpty());
     }
 }
