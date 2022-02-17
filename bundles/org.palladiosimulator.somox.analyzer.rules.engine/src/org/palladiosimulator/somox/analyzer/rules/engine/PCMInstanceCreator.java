@@ -137,19 +137,8 @@ public class PCMInstanceCreator {
                 .map(relation -> (ConcreteClassifier) relation.getOperationInterface())
                 .collect(Collectors.toSet());
             for (ConcreteClassifier realInterface : realInterfaces) {
-                try {
-                    pcmComp.provides(create.fetchOfOperationInterface(realInterface.getQualifiedName()
-                        .replaceAll("\\.", "_")), "dummy name");
-                } catch (RuntimeException e) {
-                    // TODO currently we ensure that an interface exists by simply adding it if it
-                    // is missing. Solve this more properly.
-                    LOG.warn("Did not find providing interface \"" + realInterface.getQualifiedName()
-                        .replaceAll("\\.", "_") + "\", faking it.");
-                    OperationInterfaceCreator pcmInterface = create.newOperationInterface()
-                        .withName(realInterface.getQualifiedName()
-                            .replaceAll("\\.", "_"));
-                    pcmComp.provides(pcmInterface, "dummy name");
-                }
+                pcmComp.provides(create.fetchOfOperationInterface(realInterface.getQualifiedName()
+                    .replaceAll("\\.", "_")), "dummy name");
             }
 
             final List<Variable> requiredIs = blackboard.getPCMDetector()
@@ -159,19 +148,8 @@ public class PCMInstanceCreator {
                 .collect(Collectors.toSet());
 
             for (ConcreteClassifier requInter : requireInterfaces) {
-                try {
-                    pcmComp.requires(create.fetchOfOperationInterface(requInter.getQualifiedName()
-                        .replaceAll("\\.", "_")), "dummy require name");
-                } catch (RuntimeException e) {
-                    // TODO currently we ensure that an interface exists by simply adding it if it
-                    // is missing. Solve this more properly.
-                    LOG.warn("Did not find required interface \"" + requInter.getQualifiedName()
-                        .replaceAll("\\.", "_") + "\", faking it.");
-                    OperationInterfaceCreator pcmInterface = create.newOperationInterface()
-                        .withName(requInter.getQualifiedName()
-                            .replaceAll("\\.", "_"));
-                    pcmComp.requires(pcmInterface, "dummy require name");
-                }
+                pcmComp.requires(create.fetchOfOperationInterface(requInter.getQualifiedName()
+                    .replaceAll("\\.", "_")), "dummy require name");
             }
             BasicComponent builtComp = pcmComp.build();
             blackboard.putRepositoryComponentLocation(builtComp, comp);
