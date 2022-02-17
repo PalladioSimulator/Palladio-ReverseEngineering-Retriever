@@ -3,6 +3,7 @@ package org.palladiosimulator.somox.analyzer.rules.engine;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,12 +54,16 @@ public class PCMDetectorSimple {
     }
 
     private void detectOperationInterface(Classifier classifier) {
-        if (interfaceNames.contains(classifier.getName())) {
+        List<String> names = new LinkedList<>(classifier.getContainingPackageName());
+        names.add(classifier.getName());
+        String name = String.join(".", names);
+
+        if (interfaceNames.contains(name)) {
             return;
         }
         if ((classifier instanceof Class) || (classifier instanceof Interface)) {
             operationInterfaces.add(classifier);
-            interfaceNames.add(classifier.getName());
+            interfaceNames.add(name);
         }
     }
 
