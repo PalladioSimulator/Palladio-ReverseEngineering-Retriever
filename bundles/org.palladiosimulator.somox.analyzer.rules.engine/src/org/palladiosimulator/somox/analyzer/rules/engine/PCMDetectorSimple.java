@@ -17,10 +17,11 @@ import org.emftext.language.java.members.Method;
 import org.emftext.language.java.variables.Variable;
 
 /**
-* This class is used to detect and hold all relevant elements found during the processing of rules.
-* It provides methods to detect and retrieve PCM elements.
-* After all rules are parsed, this class holds the results as "simple" java objects not yet transformed to real PCM objects like PCM Basic Components.
-*/
+ * This class is used to detect and hold all relevant elements found during the processing of rules.
+ * It provides methods to detect and retrieve PCM elements. After all rules are parsed, this class
+ * holds the results as "simple" java objects not yet transformed to real PCM objects like PCM Basic
+ * Components.
+ */
 public class PCMDetectorSimple {
     private List<CompilationUnitImpl> components = new ArrayList<>();
 
@@ -29,11 +30,11 @@ public class PCMDetectorSimple {
     private Map<String, List<Variable>> requiredInterfaces = new HashMap<>();
 
     private List<Classifier> operationInterfaces = new ArrayList<>();
-    
+
     private Set<String> interfaceNames = new HashSet<>();
 
     private String getFullUnitName(CompilationUnitImpl unit) {
-        return unit.getNamespacesAsString() + "." +unit.getName();
+        return unit.getNamespacesAsString() + "." + unit.getName();
     }
 
     public void detectComponent(CompilationUnitImpl unit) {
@@ -50,19 +51,19 @@ public class PCMDetectorSimple {
         }
 
     }
-    
+
     private void detectOperationInterface(Classifier classifier) {
-    	if(interfaceNames.contains(classifier.getName())) {
-    		return;
-    	}
-    	if ((classifier instanceof Class) || (classifier instanceof Interface)) {
+        if (interfaceNames.contains(classifier.getName())) {
+            return;
+        }
+        if ((classifier instanceof Class) || (classifier instanceof Interface)) {
             operationInterfaces.add(classifier);
             interfaceNames.add(classifier.getName());
         }
     }
 
     public void detectOperationInterface(Interface in) {
-    	detectOperationInterface((Classifier) in);
+        detectOperationInterface((Classifier) in);
     }
 
     public void detectRequiredInterface(CompilationUnitImpl unit, Variable v) {
@@ -71,14 +72,18 @@ public class PCMDetectorSimple {
             final List<Variable> fields = new ArrayList<>();
             requiredInterfaces.put(unitName, fields);
         }
-        requiredInterfaces.get(unitName).add(v);
-        Classifier currentClassi = v.getTypeReference().getPureClassifierReference().getTarget();
+        requiredInterfaces.get(unitName)
+            .add(v);
+        Classifier currentClassi = v.getTypeReference()
+            .getPureClassifierReference()
+            .getTarget();
         detectOperationInterface(currentClassi);
 
     }
 
     public void detectProvidedInterface(CompilationUnitImpl unit, Method method) {
-        detectProvidedInterface(unit, unit.getClassifiers().get(0), method);
+        detectProvidedInterface(unit, unit.getClassifiers()
+            .get(0), method);
     }
 
     public void detectProvidedInterface(CompilationUnitImpl unit, Classifier opI, Method method) {
@@ -87,7 +92,8 @@ public class PCMDetectorSimple {
         if (providedRelations.get(unitName) == null) {
             providedRelations.put(unitName, new ArrayList<ProvidesRelation>());
         }
-        providedRelations.get(unitName).add(relation);
+        providedRelations.get(unitName)
+            .add(relation);
 
     }
 
@@ -112,26 +118,32 @@ public class PCMDetectorSimple {
     }
 
     protected List<Classifier> getOperationInterfaces() {
-        return operationInterfaces.stream().distinct().collect(Collectors.toList());
+        return operationInterfaces.stream()
+            .distinct()
+            .collect(Collectors.toList());
     }
-    
+
     public void showInsides() {
-    	System.out.println("\ncomps:");
-    	components.forEach(comp->{
-    		System.out.println(comp.getNamespacesAsString()+"."+comp.getName());
-    	});
-    	System.out.println("\ninters");
-    	operationInterfaces.forEach(op->System.out.println(op.getName()));
-    	System.out.println("\nprovide things:");
-    	providedRelations.entrySet().forEach(entry->{
-    		System.out.println("key: "+entry.getKey());
-    		entry.getValue().forEach(value->System.out.println(value));
-    	});
-    	System.out.println("\nrequire things:");
-    	requiredInterfaces.entrySet().forEach(entry->{
-    		System.out.println("key: "+entry.getKey());
-    		entry.getValue().forEach(value->System.out.println(value));
-    	});
+        System.out.println("\ncomps:");
+        components.forEach(comp -> {
+            System.out.println(comp.getNamespacesAsString() + "." + comp.getName());
+        });
+        System.out.println("\ninters");
+        operationInterfaces.forEach(op -> System.out.println(op.getName()));
+        System.out.println("\nprovide things:");
+        providedRelations.entrySet()
+            .forEach(entry -> {
+                System.out.println("key: " + entry.getKey());
+                entry.getValue()
+                    .forEach(value -> System.out.println(value));
+            });
+        System.out.println("\nrequire things:");
+        requiredInterfaces.entrySet()
+            .forEach(entry -> {
+                System.out.println("key: " + entry.getKey());
+                entry.getValue()
+                    .forEach(value -> System.out.println(value));
+            });
     }
 
 }
