@@ -277,7 +277,8 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
                 // added to a system
                 if (repoComp != null) {
                     system.addToSystem(create.newAssemblyContext()
-                        .withEncapsulatedComponent(repoComp));
+                        .withEncapsulatedComponent(repoComp)
+                        .withName(repoComp.getEntityName()));
                     hasChildren = true;
                 }
             }
