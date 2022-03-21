@@ -6,7 +6,7 @@ import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 public class PiggymetricsTest extends RuleEngineTest {
 
     protected PiggymetricsTest() {
-        super("piggymetrics", DefaultRule.SPRING);
+        super("external/piggymetrics-master", DefaultRule.SPRING);
     }
 
     /**

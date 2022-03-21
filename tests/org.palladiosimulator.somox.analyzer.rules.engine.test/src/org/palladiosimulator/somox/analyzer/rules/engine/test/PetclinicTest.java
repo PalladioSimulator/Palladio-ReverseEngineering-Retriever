@@ -6,7 +6,7 @@ import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 public class PetclinicTest extends RuleEngineTest {
 
     protected PetclinicTest() {
-        super("spring-petclinic-microservices", DefaultRule.SPRING);
+        super("external/spring-petclinic-microservices-master", DefaultRule.SPRING);
     }
 
     /**

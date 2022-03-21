@@ -6,8 +6,7 @@ import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 public class TeaStoreTest extends RuleEngineTest {
 
     protected TeaStoreTest() {
-        // TODO change this to "TeaStore" to activate the test
-        super("BasicProject", DefaultRule.JAX_RS);
+        super("external/TeaStore-master", DefaultRule.JAX_RS);
     }
 
     /**
@@ -16,11 +15,5 @@ public class TeaStoreTest extends RuleEngineTest {
      */
     @Disabled("TeaStore will be dealt with later, they had a big update")
     void test() {
-        /*
-        assertEquals(1, getComponents().size());
-        assertEquals(1, getDatatypes().size());
-        assertEquals(0, getFailuretypes().size());
-        assertEquals(0, getInterfaces().size());
-        */
     }
 }
