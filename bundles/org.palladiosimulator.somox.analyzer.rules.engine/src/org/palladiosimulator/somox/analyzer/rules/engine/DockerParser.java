@@ -80,10 +80,6 @@ public class DockerParser {
     */
     @SuppressWarnings("unchecked")
     private List<String> extractServiceNames(InputStream stream) {
-        if (stream != null) {
-            System.out.println(stream.toString());
-        }
-    	
         // final Yaml yaml = new Yaml();
         final Map<String, Object> object = new HashMap<>(); // (Map<String, Object>) yaml.load(stream);
 

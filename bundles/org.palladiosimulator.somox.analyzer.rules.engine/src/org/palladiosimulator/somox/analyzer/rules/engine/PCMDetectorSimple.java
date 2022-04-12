@@ -1,6 +1,7 @@
 package org.palladiosimulator.somox.analyzer.rules.engine;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -128,27 +129,53 @@ public class PCMDetectorSimple {
             .collect(Collectors.toList());
     }
 
-    public void showInsides() {
-        System.out.println("\ncomps:");
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[PCMDetectorSimple] {\n");
+
+        sb.append("\tcomponents: {\n");
         components.forEach(comp -> {
-            System.out.println(comp.getNamespacesAsString() + "." + comp.getName());
+            sb.append("\t\t");
+            sb.append(comp.getNamespacesAsString());
+            sb.append('.');
+            sb.append(comp.getName());
+            sb.append("\n");
         });
-        System.out.println("\ninters");
-        operationInterfaces.forEach(op -> System.out.println(op.getName()));
-        System.out.println("\nprovide things:");
-        providedRelations.entrySet()
-            .forEach(entry -> {
-                System.out.println("key: " + entry.getKey());
-                entry.getValue()
-                    .forEach(value -> System.out.println(value));
-            });
-        System.out.println("\nrequire things:");
+
+        sb.append("\t}\n\tinterfaces: {\n");
+        operationInterfaces.forEach(op -> {
+            sb.append("\t\t");
+            sb.append(op.getName());
+            sb.append("\n");
+        });
+
+        sb.append("\t}\n\tprovided relations: {\n");
+        sb.append(mapToString(providedRelations, 2));
+        sb.append("\t}\n\trequired interfaces: {\n");
+        sb.append(mapToString(requiredInterfaces, 2));
+        sb.append("\t}\n}");
+        return sb.toString();
+    }
+
+    private String mapToString(Map<?, ? extends Collection<?>> map, int indentation) {
+        StringBuilder sb = new StringBuilder();
         requiredInterfaces.entrySet()
             .forEach(entry -> {
-                System.out.println("key: " + entry.getKey());
+                sb.append("\t".repeat(indentation));
+                sb.append("\"");
+                sb.append(entry.getKey());
+                sb.append("\" -> {");
                 entry.getValue()
-                    .forEach(value -> System.out.println(value));
+                    .forEach(value -> {
+                        sb.append("\t".repeat(indentation + 1));
+                        sb.append(value);
+                        sb.append("\n");
+                    });
+                sb.append("\t".repeat(indentation));
+                sb.append("}\n");
             });
+        return sb.toString();
     }
 
 }
