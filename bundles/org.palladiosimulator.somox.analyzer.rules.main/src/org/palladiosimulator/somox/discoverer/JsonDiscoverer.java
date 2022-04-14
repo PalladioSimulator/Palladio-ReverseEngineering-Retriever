@@ -1,19 +1,19 @@
 package org.palladiosimulator.somox.discoverer;
 
+import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 
@@ -37,16 +37,22 @@ public class JsonDiscoverer implements Discoverer {
 
             @Override
             public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
-                final Path root = Paths.get(configuration.getInputFolder().devicePath()).toAbsolutePath().normalize();
+                final Path root = Paths.get(configuration.getInputFolder()
+                    .devicePath())
+                    .toAbsolutePath()
+                    .normalize();
                 setBlackboard(Objects.requireNonNull(blackboard));
                 final Map<String, JSONObject> jsons = new HashMap<>();
-                Discoverer.find(root, ".json", logger).forEach(p -> {
-                    try (Reader reader = new FileReader(p)) {
-                        jsons.put(p, (JSONObject) new JSONParser().parse(reader));
-                    } catch (ClassCastException | IOException | ParseException e) {
-                        logger.error(String.format("%s could not be read correctly.", p), e);
-                    }
-                });
+                Discoverer.find(root, ".json", logger)
+                    .forEach(p -> {
+                        try (BufferedReader reader = new BufferedReader(new FileReader(p))) {
+                            String jsonSource = reader.lines()
+                                .collect(Collectors.joining(System.lineSeparator()));
+                            jsons.put(p, new JSONObject(jsonSource));
+                        } catch (ClassCastException | IOException | JSONException e) {
+                            logger.error(String.format("%s could not be read correctly.", p), e);
+                        }
+                    });
             }
 
             @Override
