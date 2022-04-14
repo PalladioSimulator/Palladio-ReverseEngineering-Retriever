@@ -31,9 +31,9 @@ Require-Bundle: jamopp.parser,
  org.eclipse.emf.ecore,
  org.palladiosimulator.generator.fluent,
  org.apache.commons.csv,
- com.googlecode.json-simple,
  org.jdom2,
- org.yaml.snakeyaml
+ org.yaml.snakeyaml,
+ org.json;bundle-version="1.0.0"
 Export-Package: org.palladiosimulator.somox.analyzer.rules.cli;uses:="org.eclipse.equinox.app",
  org.palladiosimulator.somox.analyzer.rules.configuration,
  org.palladiosimulator.somox.analyzer.rules.main,
