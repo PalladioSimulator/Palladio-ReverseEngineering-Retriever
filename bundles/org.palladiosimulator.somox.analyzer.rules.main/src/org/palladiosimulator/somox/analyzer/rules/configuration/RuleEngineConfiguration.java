@@ -89,6 +89,7 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
             setSelectedRules(parseRules((Set<String>) attributeMap.get(RULE_ENGINE_SELECTED_RULES)));
         }
         analystConfig.applyAttributeMap(attributeMap);
+        discovererConfig.applyAttributeMap(attributeMap);
     }
 
     private void setSelectedRules(Set<DefaultRule> rules) {
@@ -133,6 +134,7 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         result.put(RULE_ENGINE_OUTPUT_PATH, getOutputFolder());
         result.put(RULE_ENGINE_SELECTED_RULES, serializeRules(rules));
         result.putAll(analystConfig.toMap());
+        result.putAll(discovererConfig.toMap());
 
         return result;
     }

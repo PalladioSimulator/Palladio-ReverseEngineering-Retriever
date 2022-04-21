@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -66,21 +68,21 @@ public class ServiceConfigurationView<T extends Service> {
 
         tree.addListener(SWT.Selection, new TreeEditListener(tree, modifyListener, SERVICE_CONFIGURATION_VALUE_COLUMN));
 
-        for (int i = 0; i < services.size(); i++) {
+        List<T> sortedServices = services.stream()
+            .sorted((a, b) -> a.getName()
+                .compareTo(b.getName()))
+            .collect(Collectors.toList());
+        for (T service : sortedServices) {
             TreeItem serviceItem = new TreeItem(tree, SWT.NONE);
-            serviceItem.setText(0, services.get(i)
-                .getClass()
+            serviceItem.setText(0, service.getClass()
                 .getSimpleName());
-            addCheckboxTo(serviceItem, services.get(i));
-            if (services.get(i)
-                .getConfigurationKeys() != null) {
-                for (String configKey : services.get(i)
-                    .getConfigurationKeys()) {
+            addCheckboxTo(serviceItem, service);
+            if (service.getConfigurationKeys() != null) {
+                String serviceId = service.getID();
+                configTreeItems.putIfAbsent(serviceId, new HashMap<>());
+                for (String configKey : service.getConfigurationKeys()) {
                     TreeItem propertyItem = new TreeItem(serviceItem, SWT.NONE);
                     propertyItem.setText(0, configKey);
-                    String serviceId = services.get(i)
-                        .getID();
-                    configTreeItems.putIfAbsent(serviceId, new HashMap<>());
                     configTreeItems.get(serviceId)
                         .put(configKey, propertyItem);
                 }

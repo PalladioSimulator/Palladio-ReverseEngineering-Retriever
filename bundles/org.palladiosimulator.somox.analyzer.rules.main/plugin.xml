@@ -80,4 +80,12 @@
           class="org.palladiosimulator.somox.discoverer.YamlDiscoverer">
     </discoverer>
  </extension>
+ <extension
+       id="org.palladiosimulator.somox.discoverer.jdtparser"
+       name="JDT Parser"
+       point="org.palladiosimulator.somox.discoverer">
+    <discoverer
+          class="org.palladiosimulator.somox.discoverer.JdtParserJob">
+    </discoverer>
+ </extension>
 </plugin>

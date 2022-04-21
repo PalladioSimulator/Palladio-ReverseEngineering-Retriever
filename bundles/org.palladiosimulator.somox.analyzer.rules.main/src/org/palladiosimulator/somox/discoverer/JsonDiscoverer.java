@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -25,6 +26,8 @@ import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 public class JsonDiscoverer implements Discoverer {
 
+    public static final String DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.json";
+
     @Override
     public IBlackboardInteractingJob<RuleEngineBlackboard> create(final RuleEngineConfiguration configuration,
             final RuleEngineBlackboard blackboard) {
@@ -32,7 +35,6 @@ public class JsonDiscoverer implements Discoverer {
 
             @Override
             public void cleanup(final IProgressMonitor monitor) throws CleanupFailedException {
-                // TODO Auto-generated method stub
             }
 
             @Override
@@ -57,27 +59,23 @@ public class JsonDiscoverer implements Discoverer {
 
             @Override
             public String getName() {
-                // TODO Auto-generated method stub
-                return null;
+                return "JSON Discoverer Job";
             }
         };
     }
 
     @Override
     public Set<String> getConfigurationKeys() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
     public String getID() {
-        // TODO Auto-generated method stub
-        return null;
+        return DISCOVERER_ID;
     }
 
     @Override
     public String getName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "JSON Discoverer";
     }
 }
