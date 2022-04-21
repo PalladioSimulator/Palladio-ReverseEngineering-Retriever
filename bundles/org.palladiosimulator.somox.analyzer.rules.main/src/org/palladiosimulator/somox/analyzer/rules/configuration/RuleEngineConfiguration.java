@@ -25,6 +25,7 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
     public static final String RULE_ENGINE_INPUT_PATH = "org.palladiosimulator.somox.analyzer.rules.configuration.input.path";
     public static final String RULE_ENGINE_OUTPUT_PATH = "org.palladiosimulator.somox.analyzer.rules.configuration.output.path";
     public static final String RULE_ENGINE_SELECTED_RULES = "org.palladiosimulator.somox.analyzer.rules.configuration.rules";
+    public static final String RULE_ENGINE_SELECTED_ANALYSTS = "org.palladiosimulator.somox.analyzer.rules.configuration.analysts";
     public static final String RULE_LIST_SEPARATOR = ";";
     public static final String RULE_ENGINE_ANALYST_CONFIG_PREFIX = "org.palladiosimulator.somox.analyzer.rules.configuration.analystconfig.";
 
@@ -32,6 +33,7 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
     private Set<DefaultRule> rules;
     private Map<String, Map<String, String>> analystConfigs;
     private List<Analyst> analysts;
+    private Set<Analyst> selectedAnalysts;
 
     private final Map<String, Object> attributes;
 
@@ -50,6 +52,7 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
                 .error("An exception occurred while collecting analysts");
             this.analysts = new ArrayList<>();
         }
+        this.selectedAnalysts = new HashSet<>();
         applyAttributeMap(attributes);
     }
 
@@ -70,11 +73,15 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         if (attributeMap.get(RULE_ENGINE_SELECTED_RULES) != null) {
             setSelectedRules(parseRules((Set<String>) attributeMap.get(RULE_ENGINE_SELECTED_RULES)));
         }
+        Set<String> analystIds = (Set<String>) attributeMap.get(RULE_ENGINE_SELECTED_ANALYSTS);
         for (Analyst analyst : analysts) {
             String analystId = analyst.getID();
             if (attributeMap.get(RULE_ENGINE_ANALYST_CONFIG_PREFIX + analystId) != null) {
                 analystConfigs.put(analystId,
                         (Map<String, String>) attributeMap.get(RULE_ENGINE_ANALYST_CONFIG_PREFIX + analystId));
+            }
+            if (analystIds != null && analystIds.contains(analyst.getID())) {
+                selectedAnalysts.add(analyst);
             }
         }
     }
@@ -125,6 +132,22 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         analystConfig.put(key, value);
     }
 
+    public void setAnalystSelected(Analyst analyst, boolean selected) {
+        if (selected) {
+            selectedAnalysts.add(analyst);
+        } else {
+            selectedAnalysts.remove(analyst);
+        }
+    }
+
+    public boolean getAnalystSelected(Analyst analyst) {
+        return selectedAnalysts.contains(analyst);
+    }
+
+    public Set<Analyst> getSelectedAnalysts() {
+        return Collections.unmodifiableSet(selectedAnalysts);
+    }
+
     @Override
     public Map<String, Object> toMap() {
         final Map<String, Object> result = super.toMap();
@@ -135,6 +158,7 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         for (String analystId : analystConfigs.keySet()) {
             result.put(RULE_ENGINE_ANALYST_CONFIG_PREFIX + analystId, analystConfigs.get(analystId));
         }
+        result.put(RULE_ENGINE_SELECTED_ANALYSTS, serializeAnalysts(selectedAnalysts));
 
         return result;
     }
@@ -162,5 +186,13 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
             strRules.add(rule.toString());
         }
         return strRules;
+    }
+
+    public static Set<String> serializeAnalysts(Set<Analyst> analysts) {
+        Set<String> analystIds = new HashSet<>();
+        for (Analyst analyst : analysts) {
+            analystIds.add(analyst.getID());
+        }
+        return analystIds;
     }
 }

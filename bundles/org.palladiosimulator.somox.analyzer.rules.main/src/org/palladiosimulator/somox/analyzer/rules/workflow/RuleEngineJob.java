@@ -35,8 +35,7 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
     }
 
     private void addAnalysts(RuleEngineConfiguration configuration) throws CoreException {
-        AnalystCollection analystCollection = new AnalystCollection();
-        for (Analyst analyst : analystCollection.getAnalysts()) {
+        for (Analyst analyst : configuration.getSelectedAnalysts()) {
             AbstractJob analystJob = analyst.create(configuration, myBlackboard);
             this.add(analystJob);
             logger.info("Adding analyst job \"" + analystJob.getName() + "\"");

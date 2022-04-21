@@ -1,8 +1,11 @@
 package org.palladiosimulator.somox.analyzer.rules.gui;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.TreeEditor;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -58,6 +61,8 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     private Text out;
     private Map<String, Map<String, TreeItem>> analystTreeItems;
     private List<Analyst> analysts;
+    private Set<Analyst> selectedAnalysts;
+    private Map<String, Button> analystCheckboxes;
 
     public RuleEngineIoTab() {
         // Create the default path of this Eclipse application
@@ -66,10 +71,12 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
             .normalize()
             .toString();
 
-        // Initialize the selected rules
+        // Initialize the selected rules and analysts
         rules = new HashSet<>();
-        // Initialize the analyst configuration map
+        selectedAnalysts = new HashSet<>();
+        // Initialize the analyst configuration map and set
         analystTreeItems = new HashMap<>();
+        analystCheckboxes = new HashMap<>();
         // Collect the available analysts
         try {
             AnalystCollection analystCollection = new AnalystCollection();
@@ -142,6 +149,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
             analystItem.setText(0, analysts.get(i)
                 .getClass()
                 .getSimpleName());
+            addCheckboxTo(analystItem, analysts.get(i));
             for (String configKey : analysts.get(i)
                 .getConfigurationKeys()) {
                 TreeItem propertyItem = new TreeItem(analystItem, SWT.NONE);
@@ -153,6 +161,32 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
                     .put(configKey, propertyItem);
             }
         }
+    }
+
+    private void addCheckboxTo(TreeItem item, Analyst analyst) {
+        Tree tree = item.getParent();
+        TreeEditor editor = new TreeEditor(tree);
+        Button checkbox = new Button(tree, SWT.CHECK);
+        checkbox.addSelectionListener(new SelectionListener() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                if (((Button) e.getSource()).getSelection()) {
+                    selectedAnalysts.add(analyst);
+                } else {
+                    selectedAnalysts.remove(analyst);
+                }
+                modifyListener.modifyText(null);
+            }
+
+            @Override
+            public void widgetDefaultSelected(SelectionEvent e) {
+            }
+        });
+        checkbox.pack();
+        analystCheckboxes.put(analyst.getID(), checkbox);
+        editor.minimumWidth = checkbox.getSize().x;
+        editor.horizontalAlignment = SWT.LEFT;
+        editor.setEditor(checkbox, item, ANALYST_CONFIGURATION_VALUE_COLUMN);
     }
 
     private boolean validateFolderInput(Text widget) {
@@ -206,8 +240,27 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         }
 
         for (Analyst analyst : analysts) {
+            setAnalystCheckbox(configuration, analyst, analystCheckboxes.get(analyst.getID()),
+                    RuleEngineConfiguration.RULE_ENGINE_SELECTED_ANALYSTS);
             setTreeItems(configuration, analystTreeItems.get(analyst.getID()),
                     RuleEngineConfiguration.RULE_ENGINE_ANALYST_CONFIG_PREFIX + analyst.getID());
+        }
+    }
+
+    private void setAnalystCheckbox(ILaunchConfiguration configuration, Analyst analyst, Button checkbox,
+            String attributeName) {
+        try {
+            Set<String> configAnalystIds = (Set<String>) configuration.getAttribute(attributeName, new HashSet<>());
+            if (configAnalystIds.contains(analyst.getID())) {
+                checkbox.setSelection(true);
+                selectedAnalysts.add(analyst);
+            } else {
+                checkbox.setSelection(false);
+                selectedAnalysts.remove(analyst);
+            }
+        } catch (final Exception e) {
+            LaunchConfigPlugin.errorLogger(getName(), attributeName, e.getMessage());
+            error(e.getLocalizedMessage());
         }
     }
 
@@ -267,6 +320,16 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
             setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_ANALYST_CONFIG_PREFIX + analyst.getID(),
                     analystTreeItems.get(analyst.getID()));
         }
+        setAnalystsAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_SELECTED_ANALYSTS, selectedAnalysts);
+    }
+
+    private void setAnalystsAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName,
+            Set<Analyst> analysts) {
+        try {
+            configuration.setAttribute(attributeName, RuleEngineConfiguration.serializeAnalysts(analysts));
+        } catch (final Exception e) {
+            error(e.getLocalizedMessage());
+        }
     }
 
     private void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName, Text textWidget) {
@@ -319,6 +382,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
             setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_ANALYST_CONFIG_PREFIX + analyst.getID(),
                     treeItems);
         }
+        setAnalystsAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_SELECTED_ANALYSTS, selectedAnalysts);
     }
 
     private void setText(final Text textWidget, final String attributeName) {
