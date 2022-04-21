@@ -1,11 +1,8 @@
 package org.palladiosimulator.somox.analyzer.rules.gui;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.TreeEditor;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -13,13 +10,14 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.swt.widgets.TreeItem;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
-import org.palladiosimulator.somox.analyzer.rules.workflow.Analyst;
-import org.palladiosimulator.somox.analyzer.rules.workflow.AnalystCollection;
+import org.palladiosimulator.somox.analyzer.rules.service.Analyst;
+import org.palladiosimulator.somox.analyzer.rules.service.AnalystCollection;
+import org.palladiosimulator.somox.analyzer.rules.service.EmptyCollection;
+import org.palladiosimulator.somox.analyzer.rules.service.ServiceCollection;
+import org.palladiosimulator.somox.discoverer.Discoverer;
+import org.palladiosimulator.somox.discoverer.DiscovererCollection;
 
 import de.uka.ipd.sdq.workflow.launchconfig.ImageRegistryHelper;
 import de.uka.ipd.sdq.workflow.launchconfig.LaunchConfigPlugin;
@@ -28,12 +26,7 @@ import de.uka.ipd.sdq.workflow.launchconfig.tabs.TabHelper;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -49,7 +42,6 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     public static final String NAME = "Rule Engine IO";
     public static final String PLUGIN_ID = "org.palladiosimulator.somox.analyzer.rules.runconfig.LaunchRuleEngineAnalyzer";
     private static final String FILENAME_TAB_IMAGE_PATH = "icons/RuleEngine_16x16.gif";
-    private static final int ANALYST_CONFIGURATION_VALUE_COLUMN = 1;
 
     private String defaultPath;
     private Composite container;
@@ -59,10 +51,8 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     private Set<DefaultRule> rules;
     private Set<Button> ruleButtons;
     private Text out;
-    private Map<String, Map<String, TreeItem>> analystTreeItems;
-    private List<Analyst> analysts;
-    private Set<Analyst> selectedAnalysts;
-    private Map<String, Button> analystCheckboxes;
+    private ServiceConfigurationView<Analyst> analystConfigView;
+    private ServiceConfigurationView<Discoverer> discovererConfigView;
 
     public RuleEngineIoTab() {
         // Create the default path of this Eclipse application
@@ -71,21 +61,8 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
             .normalize()
             .toString();
 
-        // Initialize the selected rules and analysts
+        // Initialize the selected rules
         rules = new HashSet<>();
-        selectedAnalysts = new HashSet<>();
-        // Initialize the analyst configuration map and set
-        analystTreeItems = new HashMap<>();
-        analystCheckboxes = new HashMap<>();
-        // Collect the available analysts
-        try {
-            AnalystCollection analystCollection = new AnalystCollection();
-            analysts = new ArrayList<Analyst>(analystCollection.getAnalysts());
-        } catch (CoreException e) {
-            Logger.getLogger(RuleEngineIoTab.class)
-                .error("Exception occurred while discovering analysts!");
-            analysts = new ArrayList<>();
-        }
 
         // Create a listener for GUI modification events
         modifyListener = new ModifyListener() {
@@ -96,6 +73,30 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
                 updateLaunchConfigurationDialog();
             }
         };
+
+        ServiceCollection<Analyst> analystCollection = null;
+        try {
+            analystCollection = new AnalystCollection();
+        } catch (CoreException e) {
+            Logger.getLogger(RuleEngineIoTab.class)
+                .error("Exception occurred while discovering analysts!");
+            analystCollection = new EmptyCollection<Analyst>();
+        }
+        analystConfigView = new ServiceConfigurationView<>(analystCollection, modifyListener, this::error, getName(),
+                RuleEngineConfiguration.RULE_ENGINE_ANALYST_CONFIG_PREFIX,
+                RuleEngineConfiguration.RULE_ENGINE_SELECTED_ANALYSTS);
+
+        ServiceCollection<Discoverer> discovererCollection = null;
+        try {
+            discovererCollection = new DiscovererCollection();
+        } catch (CoreException e) {
+            Logger.getLogger(RuleEngineIoTab.class)
+                .error("Exception occurred while discovering discoverers!");
+            discovererCollection = new EmptyCollection<Discoverer>();
+        }
+        discovererConfigView = new ServiceConfigurationView<>(discovererCollection, modifyListener, this::error,
+                getName(), RuleEngineConfiguration.RULE_ENGINE_DISCOVERER_CONFIG_PREFIX,
+                RuleEngineConfiguration.RULE_ENGINE_SELECTED_DISCOVERERS);
     }
 
     @Override
@@ -134,59 +135,9 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         TabHelper.createFolderInputSection(container, modifyListener, "File Out", out, "File Out", getShell(),
                 defaultPath);
 
-        // Create tree view for analyst configuration
-
-        Tree tree = new Tree(container, SWT.BORDER | SWT.FULL_SELECTION);
-        TreeColumn nameColumn = new TreeColumn(tree, SWT.NONE);
-        nameColumn.setWidth(200);
-        TreeColumn valueColumn = new TreeColumn(tree, SWT.NONE);
-        valueColumn.setWidth(200);
-
-        tree.addListener(SWT.Selection, new TreeEditListener(tree, modifyListener, ANALYST_CONFIGURATION_VALUE_COLUMN));
-
-        for (int i = 0; i < analysts.size(); i++) {
-            TreeItem analystItem = new TreeItem(tree, SWT.NONE);
-            analystItem.setText(0, analysts.get(i)
-                .getClass()
-                .getSimpleName());
-            addCheckboxTo(analystItem, analysts.get(i));
-            for (String configKey : analysts.get(i)
-                .getConfigurationKeys()) {
-                TreeItem propertyItem = new TreeItem(analystItem, SWT.NONE);
-                propertyItem.setText(0, configKey);
-                String analystId = analysts.get(i)
-                    .getID();
-                analystTreeItems.putIfAbsent(analystId, new HashMap<>());
-                analystTreeItems.get(analystId)
-                    .put(configKey, propertyItem);
-            }
-        }
-    }
-
-    private void addCheckboxTo(TreeItem item, Analyst analyst) {
-        Tree tree = item.getParent();
-        TreeEditor editor = new TreeEditor(tree);
-        Button checkbox = new Button(tree, SWT.CHECK);
-        checkbox.addSelectionListener(new SelectionListener() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                if (((Button) e.getSource()).getSelection()) {
-                    selectedAnalysts.add(analyst);
-                } else {
-                    selectedAnalysts.remove(analyst);
-                }
-                modifyListener.modifyText(null);
-            }
-
-            @Override
-            public void widgetDefaultSelected(SelectionEvent e) {
-            }
-        });
-        checkbox.pack();
-        analystCheckboxes.put(analyst.getID(), checkbox);
-        editor.minimumWidth = checkbox.getSize().x;
-        editor.horizontalAlignment = SWT.LEFT;
-        editor.setEditor(checkbox, item, ANALYST_CONFIGURATION_VALUE_COLUMN);
+        // Create tree view for analyst and discoverer configuration
+        analystConfigView.createControl(container);
+        discovererConfigView.createControl(container);
     }
 
     private boolean validateFolderInput(Text widget) {
@@ -239,29 +190,8 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
             setButton(configuration, ruleButton, RuleEngineConfiguration.RULE_ENGINE_SELECTED_RULES);
         }
 
-        for (Analyst analyst : analysts) {
-            setAnalystCheckbox(configuration, analyst, analystCheckboxes.get(analyst.getID()),
-                    RuleEngineConfiguration.RULE_ENGINE_SELECTED_ANALYSTS);
-            setTreeItems(configuration, analystTreeItems.get(analyst.getID()),
-                    RuleEngineConfiguration.RULE_ENGINE_ANALYST_CONFIG_PREFIX + analyst.getID());
-        }
-    }
-
-    private void setAnalystCheckbox(ILaunchConfiguration configuration, Analyst analyst, Button checkbox,
-            String attributeName) {
-        try {
-            Set<String> configAnalystIds = (Set<String>) configuration.getAttribute(attributeName, new HashSet<>());
-            if (configAnalystIds.contains(analyst.getID())) {
-                checkbox.setSelection(true);
-                selectedAnalysts.add(analyst);
-            } else {
-                checkbox.setSelection(false);
-                selectedAnalysts.remove(analyst);
-            }
-        } catch (final Exception e) {
-            LaunchConfigPlugin.errorLogger(getName(), attributeName, e.getMessage());
-            error(e.getLocalizedMessage());
-        }
+        analystConfigView.initializeFrom(configuration);
+        discovererConfigView.initializeFrom(configuration);
     }
 
     private void setButton(ILaunchConfiguration configuration, Button ruleButton, String attributeName) {
@@ -289,47 +219,13 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         }
     }
 
-    private void setTreeItems(ILaunchConfiguration configuration, Map<String, TreeItem> treeItems,
-            String attributeName) {
-        Map<String, String> strings;
-        try {
-            strings = configuration.getAttribute(attributeName, new HashMap<>());
-            for (Entry<String, TreeItem> entry : treeItems.entrySet()) {
-                String value = strings.get(entry.getKey());
-                if (value == null) {
-                    entry.getValue()
-                        .setText(ANALYST_CONFIGURATION_VALUE_COLUMN, "");
-                } else {
-                    entry.getValue()
-                        .setText(ANALYST_CONFIGURATION_VALUE_COLUMN, value);
-                }
-            }
-        } catch (final Exception e) {
-            LaunchConfigPlugin.errorLogger(getName(), attributeName, e.getMessage());
-            error(e.getLocalizedMessage());
-            return;
-        }
-    }
-
     @Override
     public void performApply(ILaunchConfigurationWorkingCopy configuration) {
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_INPUT_PATH, in);
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH, out);
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_SELECTED_RULES, rules);
-        for (Analyst analyst : analysts) {
-            setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_ANALYST_CONFIG_PREFIX + analyst.getID(),
-                    analystTreeItems.get(analyst.getID()));
-        }
-        setAnalystsAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_SELECTED_ANALYSTS, selectedAnalysts);
-    }
-
-    private void setAnalystsAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName,
-            Set<Analyst> analysts) {
-        try {
-            configuration.setAttribute(attributeName, RuleEngineConfiguration.serializeAnalysts(analysts));
-        } catch (final Exception e) {
-            error(e.getLocalizedMessage());
-        }
+        analystConfigView.performApply(configuration);
+        discovererConfigView.performApply(configuration);
     }
 
     private void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName, Text textWidget) {
@@ -354,16 +250,6 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         }
     }
 
-    private void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName,
-            Map<String, TreeItem> treeItems) {
-        Map<String, String> strings = new HashMap<>();
-        for (Entry<String, TreeItem> entry : treeItems.entrySet()) {
-            strings.put(entry.getKey(), entry.getValue()
-                .getText(ANALYST_CONFIGURATION_VALUE_COLUMN));
-        }
-        configuration.setAttribute(attributeName, strings);
-    }
-
     @Override
     public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
         setText(in, defaultPath);
@@ -376,13 +262,8 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         rules = new HashSet<>();
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH, rules);
 
-        for (Analyst analyst : analysts) {
-            Map<String, TreeItem> treeItems = analystTreeItems.get(analyst.getID());
-            clearTreeItems(treeItems);
-            setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_ANALYST_CONFIG_PREFIX + analyst.getID(),
-                    treeItems);
-        }
-        setAnalystsAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_SELECTED_ANALYSTS, selectedAnalysts);
+        analystConfigView.setDefaults(configuration);
+        discovererConfigView.setDefaults(configuration);
     }
 
     private void setText(final Text textWidget, final String attributeName) {
@@ -390,13 +271,6 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
             textWidget.setText(attributeName);
         } catch (final Exception e) {
             error(e.getMessage());
-        }
-    }
-
-    private void clearTreeItems(Map<String, TreeItem> treeItems) {
-        for (Entry<String, TreeItem> entry : treeItems.entrySet()) {
-            entry.getValue()
-                .setText("");
         }
     }
 

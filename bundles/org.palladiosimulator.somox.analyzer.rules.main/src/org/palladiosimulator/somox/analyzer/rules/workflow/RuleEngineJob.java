@@ -3,9 +3,10 @@ package org.palladiosimulator.somox.analyzer.rules.workflow;
 import org.eclipse.core.runtime.CoreException;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.service.Analyst;
 
 import de.uka.ipd.sdq.workflow.extension.AbstractExtendableJob;
-import de.uka.ipd.sdq.workflow.jobs.AbstractJob;
+import de.uka.ipd.sdq.workflow.jobs.IBlackboardInteractingJob;
 import de.uka.ipd.sdq.workflow.jobs.ParallelJob;
 
 public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
@@ -35,8 +36,9 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
     }
 
     private void addAnalysts(RuleEngineConfiguration configuration) throws CoreException {
-        for (Analyst analyst : configuration.getSelectedAnalysts()) {
-            AbstractJob analystJob = analyst.create(configuration, myBlackboard);
+        for (Analyst analyst : configuration.getAnalystConfig()
+            .getSelected()) {
+            IBlackboardInteractingJob<RuleEngineBlackboard> analystJob = analyst.create(configuration, myBlackboard);
             this.add(analystJob);
             logger.info("Adding analyst job \"" + analystJob.getName() + "\"");
         }

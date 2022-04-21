@@ -37,5 +37,6 @@ Require-Bundle: jamopp.parser,
 Export-Package: org.palladiosimulator.somox.analyzer.rules.cli;uses:="org.eclipse.equinox.app",
  org.palladiosimulator.somox.analyzer.rules.configuration,
  org.palladiosimulator.somox.analyzer.rules.main,
+ org.palladiosimulator.somox.analyzer.rules.service,
  org.palladiosimulator.somox.analyzer.rules.workflow,
  org.palladiosimulator.somox.discoverer
