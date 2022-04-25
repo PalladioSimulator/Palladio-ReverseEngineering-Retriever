@@ -1,5 +1,7 @@
 package org.palladiosimulator.somox.analyzer.rules.engine.test;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 
@@ -16,5 +18,7 @@ public class PiggymetricsTest extends RuleEngineTest {
      */
     @Test
     void test() {
+        assertTrue(containsComponent("com_piggymetrics_account_client_AuthServiceClient"));
+        assertTrue(containsComponent("com_piggymetrics_notification_service_NotificationServiceImpl"));
     }
 }
