@@ -43,7 +43,7 @@
 							<goal>wget</goal>
 						</goals>
 						<configuration>
-							<url>https://github.com/acmeair/acmeair/archive/refs/heads/master.zip</url>
+							<url>https://github.com/acmeair/acmeair/archive/refs/tags/v1.2.0.zip</url>
 							<unpack>true</unpack>
 							<skipCache>true</skipCache>
 							<outputDirectory>${project.basedir}/res/external/</outputDirectory>
@@ -56,7 +56,7 @@
 							<goal>wget</goal>
 						</goals>
 						<configuration>
-							<url>https://github.com/DescartesResearch/TeaStore/archive/refs/heads/master.zip</url>
+							<url>https://github.com/DescartesResearch/TeaStore/archive/refs/tags/v1.4.1.zip</url>
 							<unpack>true</unpack>
 							<skipCache>true</skipCache>
 							<outputDirectory>${project.basedir}/res/external/</outputDirectory>
@@ -69,7 +69,7 @@
 							<goal>wget</goal>
 						</goals>
 						<configuration>
-							<url>https://github.com/spring-petclinic/spring-petclinic-microservices/archive/refs/heads/master.zip</url>
+							<url>https://github.com/spring-petclinic/spring-petclinic-microservices/archive/refs/tags/v2.3.6.zip</url>
 							<unpack>true</unpack>
 							<skipCache>true</skipCache>
 							<outputDirectory>${project.basedir}/res/external/</outputDirectory>
@@ -82,7 +82,7 @@
 							<goal>wget</goal>
 						</goals>
 						<configuration>
-							<url>https://github.com/sqshq/piggymetrics/archive/refs/heads/master.zip</url>
+							<url>https://github.com/sqshq/piggymetrics/archive/refs/tags/spring.version.2.0.3.zip</url>
 							<unpack>true</unpack>
 							<skipCache>true</skipCache>
 							<outputDirectory>${project.basedir}/res/external/</outputDirectory>
