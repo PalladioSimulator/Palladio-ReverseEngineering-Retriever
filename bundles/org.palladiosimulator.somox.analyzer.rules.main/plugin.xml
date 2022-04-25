@@ -88,4 +88,12 @@
           class="org.palladiosimulator.somox.discoverer.JdtParserJob">
     </discoverer>
  </extension>
+ <extension
+       id="org.palladiosimulator.somox.analyzer.rules.service.performance_analyst"
+       name="Performance Analyst"
+       point="org.palladiosimulator.somox.analyzer.rules.analyst">
+    <analyst
+          class="org.palladiosimulator.somox.analyzer.rules.service.PerformanceAnalyst">
+    </analyst>
+ </extension>
 </plugin>
