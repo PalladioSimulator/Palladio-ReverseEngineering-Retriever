@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>org.palladiosimulator.somox.analyzer.rules.spring</name>
+	<name>org.palladiosimulator.somox.analyzer.rules.impl</name>
 	<comment></comment>
 	<projects>
 	</projects>

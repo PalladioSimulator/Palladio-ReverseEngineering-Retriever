@@ -1,12 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: SoMoX Rule Spring
-Bundle-SymbolicName: org.palladiosimulator.somox.analyzer.rules.spring;singleton:=true
+Bundle-Name: SoMoX Rule Implementations
+Bundle-SymbolicName: org.palladiosimulator.somox.analyzer.rules.impl;singleton:=true
 Bundle-Version: 5.1.0.qualifier
 Bundle-Vendor: palladiosimulator.org
-Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.spring
+Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.jax_rs
 Bundle-RequiredExecutionEnvironment: JavaSE-11
-Export-Package: org.palladiosimulator.somox.analyzer.rules.spring
+Export-Package: org.palladiosimulator.somox.analyzer.rules.impl.jamopp
 Require-Bundle: org.eclipse.core.resources,
  org.eclipse.xtend.lib,
  org.emftext.language.java,

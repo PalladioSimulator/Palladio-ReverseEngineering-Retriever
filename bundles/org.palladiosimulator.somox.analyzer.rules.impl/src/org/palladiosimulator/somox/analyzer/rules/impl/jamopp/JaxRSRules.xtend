@@ -1,4 +1,4 @@
-package org.palladiosimulator.somox.analyzer.rules.jax_rs
+package org.palladiosimulator.somox.analyzer.rules.impl.jamopp
 
 import org.emftext.language.java.containers.impl.CompilationUnitImpl
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule

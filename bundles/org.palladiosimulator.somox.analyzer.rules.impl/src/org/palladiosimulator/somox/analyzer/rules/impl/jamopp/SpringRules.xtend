@@ -1,4 +1,4 @@
-package org.palladiosimulator.somox.analyzer.rules.spring
+package org.palladiosimulator.somox.analyzer.rules.impl.jamopp
 
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule
 

@@ -53,7 +53,7 @@ public class JavaDiscoverer implements Discoverer {
                 final String[] sourceFilePaths = Discoverer.find(root, ".java", logger)
                     .toArray(String[]::new);
                 try {
-                    parser.setEnvironment(classpathEntries, sourceFilePaths, null, true);
+                    parser.setEnvironment(classpathEntries, new String[0], new String[0], true);
                     parser.createASTs(sourceFilePaths, new String[sourceFilePaths.length], new String[0],
                             new FileASTRequestor() {
                                 @Override
@@ -64,7 +64,7 @@ public class JavaDiscoverer implements Discoverer {
                 } catch (IllegalArgumentException | IllegalStateException e) {
                     logger.error(String.format("No Java files in %s could be transposed.", root), e);
                 }
-
+                return;
             }
 
             @Override
