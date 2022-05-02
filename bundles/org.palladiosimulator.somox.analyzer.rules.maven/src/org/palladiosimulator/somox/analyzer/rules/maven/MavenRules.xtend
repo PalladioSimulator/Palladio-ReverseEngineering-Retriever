@@ -5,7 +5,7 @@ import org.palladiosimulator.somox.analyzer.rules.engine.IRule
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard
 import java.nio.file.Path;
 import java.util.HashSet
-import org.emftext.language.java.containers.impl.CompilationUnitImpl
+import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper
 
 class MavenRules extends IRule {
 	static final String MAVEN_FILE_NAME = "pom.xml";
@@ -18,18 +18,18 @@ class MavenRules extends IRule {
 		if (path !== null && path.fileName.toString().equals(MAVEN_FILE_NAME)) {
 			
 			// Add all file system children as associated compilation units
-			var children = new HashSet<CompilationUnitImpl>();
+			var children = new HashSet<CompilationUnitWrapper>();
 			var parentPath = path.parent;
-			for (compUnit : blackboard.compilationUnits) {
+			for (unit : blackboard.compilationUnits) {
 				var isChild = false;
-				for (compUnitPath : blackboard.getCompilationUnitLocations(compUnit)) {
-					if (compUnitPath.startsWith(parentPath)) {
+				for (unitPath : blackboard.getCompilationUnitLocations(unit)) {
+					if (unitPath.startsWith(parentPath)) {
 						// The compilation unit is a child of this build file
 						isChild = true;
 					}
 				}
 				if (isChild) {
-					children.add(compUnit);
+					children.add(unit);
 				}
 			}
 			blackboard.addSystemAssociations(path, children);

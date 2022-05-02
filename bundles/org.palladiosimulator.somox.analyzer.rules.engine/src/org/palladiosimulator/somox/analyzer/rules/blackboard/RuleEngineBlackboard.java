@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.palladiosimulator.pcm.core.entity.Entity;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.system.System;
@@ -22,11 +21,11 @@ import com.google.common.collect.Sets;
 public class RuleEngineBlackboard extends SoMoXBlackboard {
 
     private Map<String, ExtractionResult> extractionResults;
-    private Set<CompilationUnitImpl> compilationUnits;
-    private Map<CompilationUnitImpl, Set<Path>> compilationUnitLocations;
-    private Map<RepositoryComponent, CompilationUnitImpl> repositoryComponentLocations;
-    private Map<Entity, CompilationUnitImpl> entityLocations;
-    private Map<Path, Set<CompilationUnitImpl>> systemAssociations;
+    private Set<CompilationUnitWrapper> compilationUnits;
+    private Map<CompilationUnitWrapper, Set<Path>> compilationUnitLocations;
+    private Map<RepositoryComponent, CompilationUnitWrapper> repositoryComponentLocations;
+    private Map<Entity, CompilationUnitWrapper> entityLocations;
+    private Map<Path, Set<CompilationUnitWrapper>> systemAssociations;
     private Map<System, Path> systemPaths;
     private PCMDetectorSimple pcmDetector;
 
@@ -48,7 +47,7 @@ public class RuleEngineBlackboard extends SoMoXBlackboard {
         return Collections.unmodifiableMap(extractionResults);
     }
 
-    public void addCompilationUnitLocation(CompilationUnitImpl compilationUnit, Path path) {
+    public void addCompilationUnitLocation(CompilationUnitWrapper compilationUnit, Path path) {
         Set<Path> paths = compilationUnitLocations.get(compilationUnit);
         if (paths == null) {
             paths = new HashSet<>();
@@ -57,7 +56,7 @@ public class RuleEngineBlackboard extends SoMoXBlackboard {
         paths.add(path.normalize());
     }
 
-    public Set<Path> getCompilationUnitLocations(CompilationUnitImpl compilationUnit) {
+    public Set<Path> getCompilationUnitLocations(CompilationUnitWrapper compilationUnit) {
         Set<Path> paths = compilationUnitLocations.get(compilationUnit);
         if (paths == null) {
             return Collections.emptySet();
@@ -66,13 +65,13 @@ public class RuleEngineBlackboard extends SoMoXBlackboard {
         }
     }
 
-    public CompilationUnitImpl putRepositoryComponentLocation(RepositoryComponent repoComp,
-            CompilationUnitImpl compilationUnit) {
+    public CompilationUnitWrapper putRepositoryComponentLocation(RepositoryComponent repoComp,
+            CompilationUnitWrapper compilationUnit) {
         entityLocations.put(repoComp, compilationUnit);
         return repositoryComponentLocations.put(repoComp, compilationUnit);
     }
 
-    public Map<RepositoryComponent, CompilationUnitImpl> getRepositoryComponentLocations() {
+    public Map<RepositoryComponent, CompilationUnitWrapper> getRepositoryComponentLocations() {
         return Collections.unmodifiableMap(repositoryComponentLocations);
     }
 
@@ -80,7 +79,7 @@ public class RuleEngineBlackboard extends SoMoXBlackboard {
         final Map<Entity, Set<Path>> entityPaths = new HashMap<>();
 
         for (Entity entity : entityLocations.keySet()) {
-            CompilationUnitImpl compilationUnit = entityLocations.get(entity);
+            CompilationUnitWrapper compilationUnit = entityLocations.get(entity);
             if (compilationUnit == null)
                 continue;
             Set<Path> path = compilationUnitLocations.get(compilationUnit);
@@ -114,14 +113,14 @@ public class RuleEngineBlackboard extends SoMoXBlackboard {
      *            the path to look for registered CompilationUnits at
      * @return the CompilationUnits or {@code null} if there was none at the {@code path}
      */
-    public Set<CompilationUnitImpl> getCompilationUnitAt(Path path) {
+    public Set<CompilationUnitWrapper> getCompilationUnitAt(Path path) {
         if (path == null) {
             // Return all registered CompilationUnits that are not associated with a path
             return Sets.difference(compilationUnits, compilationUnitLocations.keySet());
         }
 
-        Set<CompilationUnitImpl> compUnit = new HashSet<>();
-        for (Entry<CompilationUnitImpl, Set<Path>> entry : compilationUnitLocations.entrySet()) {
+        Set<CompilationUnitWrapper> compUnit = new HashSet<>();
+        for (Entry<CompilationUnitWrapper, Set<Path>> entry : compilationUnitLocations.entrySet()) {
             // Path::equals is enough because the working directory does not change
             if (entry.getValue()
                 .contains(path.normalize())) {
@@ -132,23 +131,23 @@ public class RuleEngineBlackboard extends SoMoXBlackboard {
         return compUnit;
     }
 
-    public void addCompilationUnit(CompilationUnitImpl compilationUnit) {
+    public void addCompilationUnit(CompilationUnitWrapper compilationUnit) {
         compilationUnits.add(compilationUnit);
     }
 
-    public void addCompilationUnits(Collection<CompilationUnitImpl> compilationUnits) {
+    public void addCompilationUnits(Collection<CompilationUnitWrapper> compilationUnits) {
         this.compilationUnits.addAll(compilationUnits);
     }
 
-    public Set<CompilationUnitImpl> getCompilationUnits() {
+    public Set<CompilationUnitWrapper> getCompilationUnits() {
         return Collections.unmodifiableSet(compilationUnits);
     }
 
-    public void addSystemAssociations(Path path, Set<CompilationUnitImpl> compilationUnits) {
+    public void addSystemAssociations(Path path, Set<CompilationUnitWrapper> compilationUnits) {
         systemAssociations.put(path, Collections.unmodifiableSet(compilationUnits));
     }
 
-    public Map<Path, Set<CompilationUnitImpl>> getSystemAssociations() {
+    public Map<Path, Set<CompilationUnitWrapper>> getSystemAssociations() {
         return Collections.unmodifiableMap(systemAssociations);
     }
 

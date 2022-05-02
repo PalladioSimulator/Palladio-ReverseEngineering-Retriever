@@ -24,6 +24,7 @@ import org.palladiosimulator.pcm.repository.Interface;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.repository.impl.RepositoryImpl;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
+import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
 import org.apache.log4j.Logger;
@@ -54,7 +55,7 @@ abstract class RuleEngineTest {
         final Path inPath = TEST_DIR.resolve(projectDirectory);
         final List<CompilationUnitImpl> model = ParserAdapter.generateModelForPath(inPath, OUT_DIR);
         this.rules = Set.of(rules);
-        RuleEngineAnalyzer.executeWith(inPath, OUT_DIR, model, this.rules);
+        RuleEngineAnalyzer.executeWith(inPath, OUT_DIR, CompilationUnitWrapper.wrap(model), this.rules);
 
         Path repoPath = Paths.get(OUT_DIR.toString(), "pcm.repository");
         assertTrue(repoPath.toFile()

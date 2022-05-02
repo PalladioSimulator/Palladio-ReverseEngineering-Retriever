@@ -1,5 +1,9 @@
 package org.palladiosimulator.somox.analyzer.rules.blackboard;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 
@@ -25,12 +29,38 @@ public class CompilationUnitWrapper {
         this.emftextCompUnit = null;
         this.eclipseCompUnit = eclipseCompUnit;
     }
-    
-    boolean isEclipseCompilationUnit() {
+
+    public boolean isEMFTextCompilationUnit() {
+        return emftextCompUnit != null;
+    }
+
+    public boolean isEclipseCompilationUnit() {
         return eclipseCompUnit != null;
     }
-    
-    boolean isEMFTextCompilationUnit() {
-        return emftextCompUnit != null;
+
+    public CompilationUnitImpl getEMFTextCompilationUnit() {
+        return emftextCompUnit;
+    }
+
+    public CompilationUnit getEclipseCompilationUnit() {
+        return eclipseCompUnit;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> List<CompilationUnitWrapper> wrap(List<T> compUnits) {
+        if (compUnits == null) {
+            return null;
+        } else if (compUnits.isEmpty()) {
+            return Collections.emptyList();
+        } else if (compUnits.get(0) instanceof CompilationUnitImpl) {
+            return ((List<CompilationUnitImpl>) compUnits).stream()
+                .map(CompilationUnitWrapper::new)
+                .collect(Collectors.toList());
+        } else if (compUnits.get(0) instanceof CompilationUnit) {
+            return ((List<CompilationUnit>) compUnits).stream()
+                .map(CompilationUnitWrapper::new)
+                .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 }

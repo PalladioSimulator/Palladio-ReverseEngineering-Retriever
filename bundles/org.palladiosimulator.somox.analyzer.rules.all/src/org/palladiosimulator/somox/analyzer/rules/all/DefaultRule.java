@@ -4,8 +4,8 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
-import org.palladiosimulator.somox.analyzer.rules.impl.jamopp.JaxRSRules;
-import org.palladiosimulator.somox.analyzer.rules.impl.jamopp.SpringRules;
+import org.palladiosimulator.somox.analyzer.rules.impl.emftext.JaxRSRules;
+import org.palladiosimulator.somox.analyzer.rules.impl.emftext.SpringRules;
 import org.palladiosimulator.somox.analyzer.rules.maven.MavenRules;
 
 /**

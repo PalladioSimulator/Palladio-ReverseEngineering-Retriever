@@ -32,12 +32,13 @@ import org.palladiosimulator.generator.fluent.system.factory.FluentSystemFactory
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
+import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.engine.DockerParser;
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
 import org.palladiosimulator.somox.analyzer.rules.engine.PCMDetectorSimple;
-import org.palladiosimulator.somox.analyzer.rules.engine.PCMInstanceCreator;
+import org.palladiosimulator.somox.analyzer.rules.engine.EMFTextPCMInstanceCreator;
 import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
 import org.apache.log4j.Logger;
 import org.somox.analyzer.AnalysisResult;
@@ -121,7 +122,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
 
             final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForPath(inPath, outPath);
 
-            executeWith(inPath, outPath, roots, rules, blackboard);
+            executeWith(inPath, outPath, CompilationUnitWrapper.wrap(roots), rules, blackboard);
         } catch (Exception e) {
             throw new ModelAnalyzerException(e.getMessage());
         } finally {
@@ -141,7 +142,13 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
      *            the blackboard to save to
      */
     private static void findFilesForCompilationUnits(Path root, RuleEngineBlackboard blackboard) {
-        for (CompilationUnitImpl compilationUnit : blackboard.getCompilationUnits()) {
+        for (CompilationUnitWrapper compilationUnitWrapper : blackboard.getCompilationUnits()) {
+            if (compilationUnitWrapper.isEclipseCompilationUnit()) {
+                // The file search is not necessary for eclipse compilation units,
+                // their file path is provided by the parser.
+                continue;
+            }
+            CompilationUnitImpl compilationUnit = compilationUnitWrapper.getEMFTextCompilationUnit();
             List<String> pathSegments = new LinkedList<>(compilationUnit.getContainingPackageName());
             pathSegments.add(compilationUnit.getName());
             String guessedPath = String.join(File.separator, pathSegments) + ".java";
@@ -150,7 +157,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
                 Files.walk(root)
                     .filter(Files::isRegularFile)
                     .filter(x -> x.endsWith(guessedPath))
-                    .forEach(x -> blackboard.addCompilationUnitLocation(compilationUnit, x));
+                    .forEach(x -> blackboard.addCompilationUnitLocation(compilationUnitWrapper, x));
             } catch (IOException e) {
                 LOG.warn("An IOException occurred while searching for the files containing the CompilationUnits!");
             }
@@ -169,7 +176,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
      * @param ruleDoc
      *            the object containing the rules
      */
-    public static void executeWith(Path projectPath, Path outPath, List<CompilationUnitImpl> model,
+    public static void executeWith(Path projectPath, Path outPath, List<CompilationUnitWrapper> model,
             Set<DefaultRule> rules) {
         executeWith(projectPath, outPath, model, rules, new RuleEngineBlackboard());
     }
@@ -188,7 +195,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
      * @param blackboard
      *            the rule engine blackboard
      */
-    private static void executeWith(Path projectPath, Path outPath, List<CompilationUnitImpl> model,
+    private static void executeWith(Path projectPath, Path outPath, List<CompilationUnitWrapper> model,
             Set<DefaultRule> rules, RuleEngineBlackboard blackboard) {
 
         // Set up blackboard
@@ -209,7 +216,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
 
         boolean processedLocationless = false;
         // For each unit, execute rules
-        for (final CompilationUnitImpl u : model) {
+        for (final CompilationUnitWrapper u : model) {
             Set<Path> unitPaths = blackboard.getCompilationUnitLocations(u);
             if (unitPaths.isEmpty()) {
                 if (!processedLocationless) {
@@ -254,24 +261,25 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         final Map<String, List<CompilationUnitImpl>> mapping = dockerParser.getMapping();
 
         // Creates a PCM repository with systems, components, interfaces and roles
-        pcm = new PCMInstanceCreator(blackboard).createPCM(mapping);
+        pcm = new EMFTextPCMInstanceCreator(blackboard).createPCM(mapping);
 
         // Create the build file systems
-        Map<RepositoryComponent, CompilationUnitImpl> repoCompLocations = blackboard.getRepositoryComponentLocations();
-        Map<CompilationUnitImpl, RepositoryComponent> invertedEntityLocations = new HashMap<>();
-        for (Entry<RepositoryComponent, CompilationUnitImpl> entry : repoCompLocations.entrySet()) {
+        Map<RepositoryComponent, CompilationUnitWrapper> repoCompLocations = blackboard
+            .getRepositoryComponentLocations();
+        Map<CompilationUnitWrapper, RepositoryComponent> invertedEntityLocations = new HashMap<>();
+        for (Entry<RepositoryComponent, CompilationUnitWrapper> entry : repoCompLocations.entrySet()) {
             invertedEntityLocations.put(entry.getValue(), entry.getKey());
         }
 
         FluentSystemFactory create = new FluentSystemFactory();
-        for (Entry<Path, Set<CompilationUnitImpl>> entry : blackboard.getSystemAssociations()
+        for (Entry<Path, Set<CompilationUnitWrapper>> entry : blackboard.getSystemAssociations()
             .entrySet()) {
             // TODO better name
             ISystem system = create.newSystem()
                 .withName(entry.getKey()
                     .toString());
             boolean hasChildren = false;
-            for (CompilationUnitImpl compUnit : entry.getValue()) {
+            for (CompilationUnitWrapper compUnit : entry.getValue()) {
                 RepositoryComponent repoComp = invertedEntityLocations.get(compUnit);
                 // Only compilation units that have been processed by some other rule can be
                 // added to a system

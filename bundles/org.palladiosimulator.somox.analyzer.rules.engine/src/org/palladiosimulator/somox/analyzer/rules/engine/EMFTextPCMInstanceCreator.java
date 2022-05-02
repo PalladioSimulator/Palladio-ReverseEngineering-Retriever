@@ -39,6 +39,7 @@ import org.palladiosimulator.pcm.repository.CollectionDataType;
 import org.palladiosimulator.pcm.repository.DataType;
 import org.palladiosimulator.pcm.repository.ParameterModifier;
 import org.palladiosimulator.pcm.repository.Repository;
+import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.generator.fluent.repository.api.Repo;
 import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
@@ -49,8 +50,8 @@ import org.palladiosimulator.generator.fluent.repository.structure.internals.Pri
 import org.palladiosimulator.generator.fluent.repository.structure.types.CompositeDataTypeCreator;
 
 // Class to create a pcm instance out of all results from the detector class
-public class PCMInstanceCreator {
-    private static final Logger LOG = Logger.getLogger(PCMInstanceCreator.class);
+public class EMFTextPCMInstanceCreator {
+    private static final Logger LOG = Logger.getLogger(EMFTextPCMInstanceCreator.class);
 
     private final static String REPO_NAME = "Software Architecture Repository";
     private final FluentRepositoryFactory create;
@@ -59,7 +60,7 @@ public class PCMInstanceCreator {
     private final Map<String, CompositeDataTypeCreator> existingDataTypesMap;
     private final Map<String, DataType> existingCollectionDataTypes;
 
-    public PCMInstanceCreator(RuleEngineBlackboard blackboard) {
+    public EMFTextPCMInstanceCreator(RuleEngineBlackboard blackboard) {
         existingDataTypesMap = new HashMap<>();
         existingCollectionDataTypes = new HashMap<>();
         create = new FluentRepositoryFactory();
@@ -152,7 +153,7 @@ public class PCMInstanceCreator {
                     .replaceAll("\\.", "_")), "dummy require name");
             }
             BasicComponent builtComp = pcmComp.build();
-            blackboard.putRepositoryComponentLocation(builtComp, comp);
+            blackboard.putRepositoryComponentLocation(builtComp, new CompilationUnitWrapper(comp));
             repository.addToRepository(builtComp);
         }
     }
