@@ -26,12 +26,12 @@ import org.apache.log4j.Logger;
 public class DockerParser {
     private final String FILE_NAME = "docker-compose";
     private final Path path;
-    private final PCMDetectorSimple pcmDetector;
+    private final EMFTextPCMDetector pcmDetector;
     private final Map<String, List<CompilationUnitImpl>> mapping;
 
     private static final Logger LOG = Logger.getLogger(DockerParser.class);
 
-    public DockerParser(Path path, PCMDetectorSimple pcmDetector) {
+    public DockerParser(Path path, EMFTextPCMDetector pcmDetector) {
 
     	LOG.info("starting docker process");
 

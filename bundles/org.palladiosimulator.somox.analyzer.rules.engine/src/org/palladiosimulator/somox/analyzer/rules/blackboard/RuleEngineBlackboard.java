@@ -12,7 +12,8 @@ import java.util.Set;
 import org.palladiosimulator.pcm.core.entity.Entity;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.system.System;
-import org.palladiosimulator.somox.analyzer.rules.engine.PCMDetectorSimple;
+import org.palladiosimulator.somox.analyzer.rules.engine.EMFTextPCMDetector;
+import org.palladiosimulator.somox.analyzer.rules.engine.EclipsePCMDetector;
 import org.somox.analyzer.AnalysisResult;
 import org.somox.extractor.ExtractionResult;
 
@@ -29,7 +30,8 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
     private Map<Entity, CompilationUnitWrapper> entityLocations;
     private Map<Path, Set<CompilationUnitWrapper>> systemAssociations;
     private Map<System, Path> systemPaths;
-    private PCMDetectorSimple pcmDetector;
+    private EMFTextPCMDetector emfTextPcmDetector;
+    private EclipsePCMDetector eclipsePcmDetector;
     private AnalysisResult analysisResult;
 
     public RuleEngineBlackboard() {
@@ -98,12 +100,20 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
         return Collections.unmodifiableMap(entityPaths);
     }
 
-    public void setPCMDetector(PCMDetectorSimple pcmDetector) {
-        this.pcmDetector = pcmDetector;
+    public void setEMFTextPCMDetector(EMFTextPCMDetector pcmDetector) {
+        this.emfTextPcmDetector = pcmDetector;
     }
 
-    public PCMDetectorSimple getPCMDetector() {
-        return this.pcmDetector;
+    public EMFTextPCMDetector getEMFTextPCMDetector() {
+        return this.emfTextPcmDetector;
+    }
+
+    public void setEclipsePCMDetector(EclipsePCMDetector pcmDetector) {
+        this.eclipsePcmDetector = pcmDetector;
+    }
+
+    public EclipsePCMDetector getEclipsePCMDetector() {
+        return this.eclipsePcmDetector;
     }
 
     /**
@@ -157,11 +167,11 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
     public void putSystemPath(System system, Path path) {
         systemPaths.put(system, path);
     }
-    
+
     public void setAnalysisResult(AnalysisResult analysisResult) {
         this.analysisResult = analysisResult;
     }
-    
+
     public AnalysisResult getAnalysisResult() {
         return analysisResult;
     }

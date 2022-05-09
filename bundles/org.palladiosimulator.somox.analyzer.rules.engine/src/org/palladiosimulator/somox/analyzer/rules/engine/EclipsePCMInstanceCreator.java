@@ -50,8 +50,8 @@ import org.palladiosimulator.generator.fluent.repository.structure.internals.Pri
 import org.palladiosimulator.generator.fluent.repository.structure.types.CompositeDataTypeCreator;
 
 // Class to create a pcm instance out of all results from the detector class
-public class EMFTextPCMInstanceCreator {
-    private static final Logger LOG = Logger.getLogger(EMFTextPCMInstanceCreator.class);
+public class EclipsePCMInstanceCreator {
+    private static final Logger LOG = Logger.getLogger(EclipsePCMInstanceCreator.class);
 
     private final static String REPO_NAME = "Software Architecture Repository";
     private final FluentRepositoryFactory create;
@@ -60,7 +60,7 @@ public class EMFTextPCMInstanceCreator {
     private final Map<String, CompositeDataTypeCreator> existingDataTypesMap;
     private final Map<String, DataType> existingCollectionDataTypes;
 
-    public EMFTextPCMInstanceCreator(RuleEngineBlackboard blackboard) {
+    public EclipsePCMInstanceCreator(RuleEngineBlackboard blackboard) {
         existingDataTypesMap = new HashMap<>();
         existingCollectionDataTypes = new HashMap<>();
         create = new FluentRepositoryFactory();

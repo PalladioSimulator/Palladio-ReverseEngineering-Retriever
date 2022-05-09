@@ -1,11 +1,11 @@
-package org.palladiosimulator.somox.analyzer.rules.impl.emftext
+package org.palladiosimulator.somox.analyzer.rules.impl.eclipse
 
-import org.emftext.language.java.containers.impl.CompilationUnitImpl
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule
 
-import static org.palladiosimulator.somox.analyzer.rules.engine.EMFTextRuleHelper.*
+import static org.palladiosimulator.somox.analyzer.rules.engine.EclipseRuleHelper.*
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard
 import java.nio.file.Path;
+import org.eclipse.jdt.core.dom.CompilationUnit
 
 class JaxRSRules extends IRule{
 	
@@ -19,16 +19,16 @@ class JaxRSRules extends IRule{
 		var containedSuccessful = false
 		for (unit : units) {
 			if (unit.isEMFTextCompilationUnit()) {
-				val emfUnit = unit.getEMFTextCompilationUnit()
-				containedSuccessful = processRuleForCompUnit(emfUnit) || containedSuccessful
+				val eclipseUnit = unit.getEclipseCompilationUnit
+				containedSuccessful = processRuleForCompUnit(eclipseUnit) || containedSuccessful
 			}
 		}
 		
 		return containedSuccessful
 	}
 	
-	def boolean processRuleForCompUnit(CompilationUnitImpl unit) {
-		val pcmDetector = blackboard.getEMFTextPCMDetector()
+	def boolean processRuleForCompUnit(CompilationUnit unit) {
+		val pcmDetector = blackboard.getEclipsePCMDetector()
 
 		// technology based and general recognition
 		val isConverter = isUnitAnnotatedWithName(unit, "Converter")
@@ -80,7 +80,7 @@ class JaxRSRules extends IRule{
 		
 	}
 	
-	def detectDefault(CompilationUnitImpl unit) {
+	def detectDefault(CompilationUnit unit) {
 		val pcmDetector = blackboard.getEMFTextPCMDetector()
 
 		pcmDetector.detectComponent(unit)

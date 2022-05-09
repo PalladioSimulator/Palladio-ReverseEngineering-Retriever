@@ -37,7 +37,7 @@ import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboar
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.engine.DockerParser;
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
-import org.palladiosimulator.somox.analyzer.rules.engine.PCMDetectorSimple;
+import org.palladiosimulator.somox.analyzer.rules.engine.EMFTextPCMDetector;
 import org.palladiosimulator.somox.analyzer.rules.engine.EMFTextPCMInstanceCreator;
 import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
 import org.apache.log4j.Logger;
@@ -199,7 +199,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
             Set<DefaultRule> rules, RuleEngineBlackboard blackboard) {
 
         // Set up blackboard
-        blackboard.setPCMDetector(new PCMDetectorSimple());
+        blackboard.setEMFTextPCMDetector(new EMFTextPCMDetector());
         blackboard.addCompilationUnits(model);
         findFilesForCompilationUnits(projectPath, blackboard);
 
@@ -257,7 +257,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
 
         // Parses the docker-compose file to get a mapping between microservice names and components
         // for creating composite components for each microservice
-        final DockerParser dockerParser = new DockerParser(projectPath, blackboard.getPCMDetector());
+        final DockerParser dockerParser = new DockerParser(projectPath, blackboard.getEMFTextPCMDetector());
         final Map<String, List<CompilationUnitImpl>> mapping = dockerParser.getMapping();
 
         // Creates a PCM repository with systems, components, interfaces and roles

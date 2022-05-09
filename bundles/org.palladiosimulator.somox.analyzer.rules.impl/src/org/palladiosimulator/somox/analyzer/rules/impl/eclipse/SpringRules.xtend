@@ -1,14 +1,15 @@
-package org.palladiosimulator.somox.analyzer.rules.impl.emftext
+package org.palladiosimulator.somox.analyzer.rules.impl.eclipse
 
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule
 
-import static org.palladiosimulator.somox.analyzer.rules.engine.EMFTextRuleHelper.*
-import org.emftext.language.java.containers.impl.CompilationUnitImpl
-import org.emftext.language.java.members.Method
-import org.emftext.language.java.members.Field
-import org.emftext.language.java.parameters.Parameter
+import static org.palladiosimulator.somox.analyzer.rules.engine.EclipseRuleHelper.*
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard
 import java.nio.file.Path;
+import org.eclipse.jdt.core.dom.MethodDeclaration
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration
+import java.util.List
+import org.eclipse.jdt.core.dom.FieldDeclaration
 
 class SpringRules extends IRule {
 	
@@ -21,17 +22,17 @@ class SpringRules extends IRule {
 	
 		var containedSuccessful = false
 		for (unit : units) {
-			if (unit.isEMFTextCompilationUnit) {
-				val emfUnit = unit.getEMFTextCompilationUnit()
-				containedSuccessful = processRuleForCompUnit(emfUnit) || containedSuccessful
+			if (unit.isEclipseCompilationUnit) {
+				val eclipseUnit = unit.getEclipseCompilationUnit
+				containedSuccessful = processRuleForCompUnit(eclipseUnit) || containedSuccessful
 			}
 		}
 		
 		return containedSuccessful
 	}
 	
-	def boolean processRuleForCompUnit(CompilationUnitImpl unit) {
-		val pcmDetector = blackboard.getEMFTextPCMDetector()
+	def boolean processRuleForCompUnit(CompilationUnit unit) {
+		val pcmDetector = blackboard.getEclipsePCMDetector()
 		
 		// Abort if there is no CompilationUnit at the specified path
 		if (unit === null) {
@@ -59,17 +60,24 @@ class SpringRules extends IRule {
 		if(isComponent && isementingOne) {
 			var firstIn = inFs.get(0)
 			pcmDetector.detectOperationInterface(firstIn)
-			for(Method m: getMethods(firstIn)){
+			for(MethodDeclaration m: getMethods(firstIn)){
 				pcmDetector.detectProvidedInterface(unit, firstIn, m)
 			}
 		}
 			
 		// not implementing 1 interface => Controller class with annotations on methods  
+		val annoNames = List.of("RequestMapping","GetMapping","PutMapping","PostMapping","DeleteMapping","PatchMapping")
 		if(isComponent && !isementingOne) 
-			for(Method m: getMethods(unit)){
-				val annoWithName = isMethodAnnotatedWithName(m,"RequestMapping","GetMapping","PutMapping","PostMapping","DeleteMapping","PatchMapping")
+			for(MethodDeclaration m: getMethods(unit)){
+				val annoWithName = isMethodAnnotatedWithName(m, annoNames)
 
-				if(annoWithName || (!annoWithName && m.public)) 
+				if(annoWithName) 
+					pcmDetector.detectProvidedInterface(unit, m) pcmDetector.detectOperationInterface(unit)
+			}
+			
+			for(MethodDeclaration m: getAllPublicMethods(unit)) {
+				val annoWithName = isMethodAnnotatedWithName(m, annoNames)
+				if(!annoWithName) 
 					pcmDetector.detectProvidedInterface(unit, m) pcmDetector.detectOperationInterface(unit)
 			}
 				
@@ -78,7 +86,7 @@ class SpringRules extends IRule {
 		if(isComponent){
 			
 			// field injection
-			for(Field f: getFields(unit)){
+			for(FieldDeclaration f: getFields(unit)){
 				val annotated = isFieldAnnotatedWithName(f, "Autowired")
 				if(annotated){
 					pcmDetector.detectRequiredInterface(unit, f)
@@ -96,9 +104,9 @@ class SpringRules extends IRule {
 			}
 			
 			// setter injection
-			for(Method m: getMethods(unit)){
+			for(MethodDeclaration m: getMethods(unit)){
 				if(isMethodAnnotatedWithName(m, "Autowired")){
-					for(Parameter p: m.parameters){
+					for(SingleVariableDeclaration p: m.parameters as List<SingleVariableDeclaration>){
 						// if abstract type
 						val isParaAbstract = isParameterAbstract(p)
 						if(isParaAbstract){

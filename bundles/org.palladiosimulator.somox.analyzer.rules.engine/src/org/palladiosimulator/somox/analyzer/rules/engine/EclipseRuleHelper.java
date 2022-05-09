@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -112,8 +113,7 @@ public class EclipseRuleHelper {
 
     public static List<MethodDeclaration> getMethods(CompilationUnit unit) {
         final List<MethodDeclaration> methods = new ArrayList<>();
-        // TODO: Methods of sub-classes are not returned!
-        // Is that intentional?
+        // TODO: Methods of sub-classes are not returned
 
         @SuppressWarnings("unchecked")
         List<AbstractTypeDeclaration> types = unit.types();
@@ -153,6 +153,11 @@ public class EclipseRuleHelper {
 
     public static List<MethodDeclaration> getMethods(TypeDeclaration type) {
         return List.of(type.getMethods());
+    }
+
+    public static List<IMethodBinding> getMethods(Type type) {
+        return List.of(type.resolveBinding()
+            .getDeclaredMethods());
     }
 
     public static List<FieldDeclaration> getFields(CompilationUnit unit) {
@@ -433,5 +438,4 @@ public class EclipseRuleHelper {
             .map(IAnnotationBinding::getName)
             .anyMatch(uniqueNames::contains);
     }
-
 }

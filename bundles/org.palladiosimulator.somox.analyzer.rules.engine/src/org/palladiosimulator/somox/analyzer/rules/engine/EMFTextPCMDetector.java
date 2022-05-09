@@ -24,7 +24,7 @@ import org.emftext.language.java.variables.Variable;
  * holds the results as "simple" java objects not yet transformed to real PCM objects like PCM Basic
  * Components.
  */
-public class PCMDetectorSimple {
+public class EMFTextPCMDetector {
     private List<CompilationUnitImpl> components = new ArrayList<>();
 
     private Map<String, List<ProvidesRelation>> providedRelations = new HashMap<>();
