@@ -13,5 +13,6 @@ Require-Bundle: org.eclipse.core.resources,
  org.palladiosimulator.pcm,
  org.palladiosimulator.somox.analyzer.rules.engine,
  org.palladiosimulator.somox.analyzer.rules.impl,
- org.palladiosimulator.somox.analyzer.rules.maven;bundle-version="5.1.0",
- org.somox.gast2seff;bundle-version="5.0.0"
+ org.palladiosimulator.somox.analyzer.rules.maven,
+ org.somox.gast2seff;bundle-version="5.0.0",
+ org.somox.core

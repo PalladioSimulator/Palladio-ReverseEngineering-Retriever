@@ -13,12 +13,14 @@ import org.palladiosimulator.pcm.core.entity.Entity;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.system.System;
 import org.palladiosimulator.somox.analyzer.rules.engine.PCMDetectorSimple;
+import org.somox.analyzer.AnalysisResult;
 import org.somox.extractor.ExtractionResult;
-import org.somox.gast2seff.jobs.SoMoXBlackboard;
 
 import com.google.common.collect.Sets;
 
-public class RuleEngineBlackboard extends SoMoXBlackboard {
+import de.uka.ipd.sdq.workflow.blackboard.Blackboard;
+
+public class RuleEngineBlackboard extends Blackboard<Object> {
 
     private Map<String, ExtractionResult> extractionResults;
     private Set<CompilationUnitWrapper> compilationUnits;
@@ -28,6 +30,7 @@ public class RuleEngineBlackboard extends SoMoXBlackboard {
     private Map<Path, Set<CompilationUnitWrapper>> systemAssociations;
     private Map<System, Path> systemPaths;
     private PCMDetectorSimple pcmDetector;
+    private AnalysisResult analysisResult;
 
     public RuleEngineBlackboard() {
         extractionResults = new HashMap<>();
@@ -153,5 +156,13 @@ public class RuleEngineBlackboard extends SoMoXBlackboard {
 
     public void putSystemPath(System system, Path path) {
         systemPaths.put(system, path);
+    }
+    
+    public void setAnalysisResult(AnalysisResult analysisResult) {
+        this.analysisResult = analysisResult;
+    }
+    
+    public AnalysisResult getAnalysisResult() {
+        return analysisResult;
     }
 }

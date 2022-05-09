@@ -2,7 +2,7 @@ package org.palladiosimulator.somox.analyzer.rules.impl.emftext
 
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule
 
-import static org.palladiosimulator.somox.analyzer.rules.engine.RuleHelper.*
+import static org.palladiosimulator.somox.analyzer.rules.engine.EMFTextRuleHelper.*
 import org.emftext.language.java.containers.impl.CompilationUnitImpl
 import org.emftext.language.java.members.Method
 import org.emftext.language.java.members.Field

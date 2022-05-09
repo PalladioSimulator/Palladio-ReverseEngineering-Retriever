@@ -33,9 +33,9 @@ import org.emftext.language.java.variables.Variable;
  * annotated with a specific annotation name. Also the helper contains methods for retrieving
  * aspects of a class like the interfaces it is implementing.
  */
-public class RuleHelper {
+public class EMFTextRuleHelper {
 
-    private static final Logger LOG = Logger.getLogger(RuleHelper.class);
+    private static final Logger LOG = Logger.getLogger(EMFTextRuleHelper.class);
 
     public static boolean isAbstraction(CompilationUnitImpl unit) {
         for (final ConcreteClassifier classi : unit.getClassifiers()) {
