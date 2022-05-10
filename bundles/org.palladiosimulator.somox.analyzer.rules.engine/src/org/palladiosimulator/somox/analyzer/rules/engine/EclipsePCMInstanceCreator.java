@@ -131,7 +131,7 @@ public class EclipsePCMInstanceCreator {
             BasicComponentCreator pcmComp = create.newBasicComponent()
                 .withName(getCompName(comp));
 
-            final List<ProvidesRelation> providedRelations = blackboard.getEMFTextPCMDetector()
+            final List<EMFTextProvidesRelation> providedRelations = blackboard.getEMFTextPCMDetector()
                 .getProvidedInterfaces(comp);
 
             Set<ConcreteClassifier> realInterfaces = providedRelations.stream()

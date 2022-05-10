@@ -27,7 +27,7 @@ import org.emftext.language.java.variables.Variable;
 public class EMFTextPCMDetector {
     private List<CompilationUnitImpl> components = new ArrayList<>();
 
-    private Map<String, List<ProvidesRelation>> providedRelations = new HashMap<>();
+    private Map<String, List<EMFTextProvidesRelation>> providedRelations = new HashMap<>();
 
     private Map<String, List<Variable>> requiredInterfaces = new HashMap<>();
 
@@ -94,9 +94,9 @@ public class EMFTextPCMDetector {
 
     public void detectProvidedInterface(CompilationUnitImpl unit, Classifier opI, Method method) {
         final String unitName = getFullUnitName(unit);
-        final ProvidesRelation relation = new ProvidesRelation(opI, method);
+        final EMFTextProvidesRelation relation = new EMFTextProvidesRelation(opI, method);
         if (providedRelations.get(unitName) == null) {
-            providedRelations.put(unitName, new ArrayList<ProvidesRelation>());
+            providedRelations.put(unitName, new ArrayList<>());
         }
         providedRelations.get(unitName)
             .add(relation);
@@ -107,7 +107,7 @@ public class EMFTextPCMDetector {
         return components;
     }
 
-    protected List<ProvidesRelation> getProvidedInterfaces(CompilationUnitImpl unit) {
+    protected List<EMFTextProvidesRelation> getProvidedInterfaces(CompilationUnitImpl unit) {
         final String name = getFullUnitName(unit);
         if (providedRelations.get(name) == null) {
             return new ArrayList<>();

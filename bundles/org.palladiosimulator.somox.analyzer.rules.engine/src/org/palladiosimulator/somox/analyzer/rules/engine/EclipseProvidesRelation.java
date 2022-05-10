@@ -1,28 +1,23 @@
 package org.palladiosimulator.somox.analyzer.rules.engine;
 
-import java.util.stream.Collectors;
-
-import org.emftext.language.java.classifiers.Classifier;
-import org.emftext.language.java.members.Method;
-import org.emftext.language.java.parameters.Parameter;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 // Encapsulates the operation interface and method a component is providing.
 // This class is required because a method from the java model itself does not contain a reference to the interface it comes from like variables do.
-public class ProvidesRelation {
-    private final Classifier operationInterface;
-    private final Method method;
+public class EclipseProvidesRelation {
+    private final ITypeBinding operationInterface;
+    private final IMethodBinding method;
 
-    public ProvidesRelation(Classifier operationInterface, Method method) {
+    public EclipseProvidesRelation(ITypeBinding opI, IMethodBinding method) {
         super();
-        this.operationInterface = operationInterface;
+        this.operationInterface = opI;
         this.method = method;
     }
 
     @Override
     public String toString() {
-        String parameterString = "";
-        parameterString += method.getParameters().stream().map(Parameter::getName).collect(Collectors.joining(","));
-        return (operationInterface.getName() + ": " + method.getName() + "(" + parameterString+")");
+        return (operationInterface.getQualifiedName() + ": " + method.toString());
     }
 
     @Override
@@ -41,18 +36,18 @@ public class ProvidesRelation {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final ProvidesRelation other = (ProvidesRelation) obj;
+        final EclipseProvidesRelation other = (EclipseProvidesRelation) obj;
         if (!toString().equals(other.toString())) {
             return false;
         }
         return true;
     }
 
-    public Classifier getOperationInterface() {
+    public ITypeBinding getOperationInterface() {
         return operationInterface;
     }
 
-    public Method getMethod() {
+    public IMethodBinding getMethod() {
         return method;
     }
 

@@ -4,19 +4,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.emftext.language.java.classifiers.Class;
-import org.emftext.language.java.classifiers.Classifier;
-import org.emftext.language.java.classifiers.ConcreteClassifier;
-import org.emftext.language.java.classifiers.Interface;
-import org.emftext.language.java.containers.impl.CompilationUnitImpl;
-import org.emftext.language.java.members.Method;
-import org.emftext.language.java.variables.Variable;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 /**
  * This class is used to detect and hold all relevant elements found during the processing of rules.
@@ -25,89 +25,118 @@ import org.emftext.language.java.variables.Variable;
  * Components.
  */
 public class EclipsePCMDetector {
-    private List<CompilationUnitImpl> components = new ArrayList<>();
+    private List<CompilationUnit> components = new ArrayList<>();
 
-    private Map<String, List<ProvidesRelation>> providedRelations = new HashMap<>();
+    private Map<String, List<EclipseProvidesRelation>> providedRelations = new HashMap<>();
 
-    private Map<String, List<Variable>> requiredInterfaces = new HashMap<>();
+    // TODO Is this a good solution or would a union be better?
+    private Map<String, List<List<VariableDeclaration>>> requiredInterfaces = new HashMap<>();
 
-    private List<Classifier> operationInterfaces = new ArrayList<>();
+    private Set<ITypeBinding> operationInterfaces = new HashSet<>();
 
-    private Set<String> interfaceNames = new HashSet<>();
+    private String getFullUnitName(CompilationUnit unit) {
+        // TODO this is potentially problematic, maybe restructure
+        // On the other hand, it is still fit as a unique identifier,
+        // since types cannot be declared multiple times.
 
-    private String getFullUnitName(CompilationUnitImpl unit) {
-        return unit.getNamespacesAsString() + "." + unit.getName();
+        List<String> names = getFullUnitNames(unit);
+        if (!names.isEmpty()) {
+            return names.get(0);
+        } else {
+            return null;
+        }
     }
 
-    public void detectComponent(CompilationUnitImpl unit) {
-        for (final ConcreteClassifier classi : unit.getClassifiers()) {
-            if ((classi instanceof Class) || (classi instanceof Interface)) {
+    private List<String> getFullUnitNames(CompilationUnit unit) {
+        List<String> names = new ArrayList<String>();
+        for (Object type : unit.types()) {
+            if (type instanceof AbstractTypeDeclaration) {
+                names.add(getFullTypeName((AbstractTypeDeclaration) type));
+            }
+        }
+
+        return names;
+    }
+
+    private String getFullTypeName(AbstractTypeDeclaration type) {
+        return type.getName()
+            .getFullyQualifiedName();
+    }
+
+    public void detectComponent(CompilationUnit unit) {
+        for (Object type : unit.types()) {
+            if (type instanceof TypeDeclaration) {
                 components.add(unit);
             }
         }
     }
 
-    public void detectOperationInterface(CompilationUnitImpl unit) {
-        for (final ConcreteClassifier classi : unit.getClassifiers()) {
-            detectOperationInterface(classi);
+    public void detectOperationInterface(CompilationUnit unit) {
+        for (Object type : unit.types()) {
+            if (type instanceof AbstractTypeDeclaration) {
+                detectOperationInterface((AbstractTypeDeclaration) type);
+            }
         }
 
     }
 
-    private void detectOperationInterface(Classifier classifier) {
-        List<String> names = new LinkedList<>(classifier.getContainingPackageName());
-        names.add(classifier.getName());
-        String name = String.join(".", names);
-
-        if (interfaceNames.contains(name)) {
-            return;
-        }
-        if ((classifier instanceof Class) || (classifier instanceof Interface)) {
-            operationInterfaces.add(classifier);
-            interfaceNames.add(name);
+    private void detectOperationInterface(AbstractTypeDeclaration type) {
+        if (type instanceof TypeDeclaration) {
+            operationInterfaces.add(type.resolveBinding()
+                .getTypeDeclaration());
         }
     }
 
-    public void detectOperationInterface(Interface in) {
-        detectOperationInterface((Classifier) in);
+    public void detectOperationInterface(Type type) {
+        ITypeBinding binding = type.resolveBinding()
+            .getTypeDeclaration();
+        if (binding.isClass() || binding.isInterface()) {
+            operationInterfaces.add(binding);
+        }
     }
 
-    public void detectRequiredInterface(CompilationUnitImpl unit, Variable v) {
+    public void detectRequiredInterface(CompilationUnit unit, FieldDeclaration field) {
         final String unitName = getFullUnitName(unit);
         if (requiredInterfaces.get(unitName) == null) {
-            final List<Variable> fields = new ArrayList<>();
-            requiredInterfaces.put(unitName, fields);
+            requiredInterfaces.put(unitName, new ArrayList<>());
+        }
+        @SuppressWarnings("unchecked")
+        List<VariableDeclaration> fragments = (List<VariableDeclaration>) field.fragments();
+        requiredInterfaces.get(unitName)
+            .add(fragments);
+        detectOperationInterface(field.getType());
+
+    }
+
+    public void detectRequiredInterface(CompilationUnit unit, SingleVariableDeclaration parameter) {
+        final String unitName = getFullUnitName(unit);
+        if (requiredInterfaces.get(unitName) == null) {
+            requiredInterfaces.put(unitName, new ArrayList<>());
         }
         requiredInterfaces.get(unitName)
-            .add(v);
-        Classifier currentClassi = v.getTypeReference()
-            .getPureClassifierReference()
-            .getTarget();
-        detectOperationInterface(currentClassi);
+            .add(List.of(parameter));
+        detectOperationInterface(parameter.getType());
 
     }
 
-    public void detectProvidedInterface(CompilationUnitImpl unit, Method method) {
-        detectProvidedInterface(unit, unit.getClassifiers()
-            .get(0), method);
+    public void detectProvidedInterface(CompilationUnit unit, IMethodBinding method) {
+        detectProvidedInterface(unit, method.getDeclaringClass(), method);
     }
 
-    public void detectProvidedInterface(CompilationUnitImpl unit, Classifier opI, Method method) {
+    public void detectProvidedInterface(CompilationUnit unit, ITypeBinding opI, IMethodBinding method) {
         final String unitName = getFullUnitName(unit);
-        final ProvidesRelation relation = new ProvidesRelation(opI, method);
         if (providedRelations.get(unitName) == null) {
-            providedRelations.put(unitName, new ArrayList<ProvidesRelation>());
+            providedRelations.put(unitName, new ArrayList<>());
         }
         providedRelations.get(unitName)
-            .add(relation);
-
+            .add(new EclipseProvidesRelation(opI, method));
     }
 
-    protected List<CompilationUnitImpl> getComponents() {
+    protected List<CompilationUnit> getComponents() {
         return components;
     }
 
-    protected List<ProvidesRelation> getProvidedInterfaces(CompilationUnitImpl unit) {
+    protected List<EclipseProvidesRelation> getProvidedInterfaces(CompilationUnit unit) {
         final String name = getFullUnitName(unit);
         if (providedRelations.get(name) == null) {
             return new ArrayList<>();
@@ -115,7 +144,7 @@ public class EclipsePCMDetector {
         return providedRelations.get(name);
     }
 
-    protected List<Variable> getRequiredInterfaces(CompilationUnitImpl unit) {
+    protected List<List<VariableDeclaration>> getRequiredInterfaces(CompilationUnit unit) {
         final String name = getFullUnitName(unit);
         if (requiredInterfaces.get(name) == null) {
             return new ArrayList<>();
@@ -123,10 +152,8 @@ public class EclipsePCMDetector {
         return requiredInterfaces.get(name);
     }
 
-    protected List<Classifier> getOperationInterfaces() {
-        return operationInterfaces.stream()
-            .distinct()
-            .collect(Collectors.toList());
+    protected List<ITypeBinding> getOperationInterfaces() {
+        return List.of(operationInterfaces.toArray(new ITypeBinding[0]));
     }
 
     @Override
@@ -137,16 +164,14 @@ public class EclipsePCMDetector {
         sb.append("\tcomponents: {\n");
         components.forEach(comp -> {
             sb.append("\t\t");
-            sb.append(comp.getNamespacesAsString());
-            sb.append('.');
-            sb.append(comp.getName());
+            sb.append(getFullUnitName(comp));
             sb.append("\n");
         });
 
         sb.append("\t}\n\tinterfaces: {\n");
         operationInterfaces.forEach(op -> {
             sb.append("\t\t");
-            sb.append(op.getName());
+            sb.append(op.getQualifiedName());
             sb.append("\n");
         });
 

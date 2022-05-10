@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration
 import java.util.List
 import org.eclipse.jdt.core.dom.FieldDeclaration
+import org.eclipse.jdt.core.dom.IMethodBinding
 
 class SpringRules extends IRule {
 	
@@ -50,7 +51,7 @@ class SpringRules extends IRule {
 		if((isUnitAnnotatedWithName(unit,"FeignClient","Repository") || (isUnitNamedWith(unit, "Repository")) && isAbstract)) {
 			pcmDetector.detectComponent(unit) 
 			pcmDetector.detectOperationInterface(unit)
-			getMethods(unit).forEach[m|pcmDetector.detectProvidedInterface(unit, m)]
+			getMethods(unit).forEach[m|pcmDetector.detectProvidedInterface(unit, m.resolveBinding)]
 		}
 		
 		// Operation Interface Detection
@@ -60,8 +61,8 @@ class SpringRules extends IRule {
 		if(isComponent && isementingOne) {
 			var firstIn = inFs.get(0)
 			pcmDetector.detectOperationInterface(firstIn)
-			for(MethodDeclaration m: getMethods(firstIn)){
-				pcmDetector.detectProvidedInterface(unit, firstIn, m)
+			for(IMethodBinding m: getMethods(firstIn)){
+				pcmDetector.detectProvidedInterface(unit, firstIn.resolveBinding, m)
 			}
 		}
 			
@@ -72,13 +73,13 @@ class SpringRules extends IRule {
 				val annoWithName = isMethodAnnotatedWithName(m, annoNames)
 
 				if(annoWithName) 
-					pcmDetector.detectProvidedInterface(unit, m) pcmDetector.detectOperationInterface(unit)
+					pcmDetector.detectProvidedInterface(unit, m.resolveBinding) pcmDetector.detectOperationInterface(unit)
 			}
 			
 			for(MethodDeclaration m: getAllPublicMethods(unit)) {
 				val annoWithName = isMethodAnnotatedWithName(m, annoNames)
 				if(!annoWithName) 
-					pcmDetector.detectProvidedInterface(unit, m) pcmDetector.detectOperationInterface(unit)
+					pcmDetector.detectProvidedInterface(unit, m.resolveBinding) pcmDetector.detectOperationInterface(unit)
 			}
 				
 		

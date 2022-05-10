@@ -43,7 +43,7 @@ class JaxRSRules extends IRule{
 			pcmDetector.detectComponent(unit) 
 			pcmDetector.detectOperationInterface(unit)
 			getMethods(unit).forEach[m|
-			if(isMethodAnnotatedWithName(m,"DELETE","GET","HEAD","PUT","POST","OPTIONS")) pcmDetector.detectProvidedInterface(unit,m)]
+			if(isMethodAnnotatedWithName(m,"DELETE","GET","HEAD","PUT","POST","OPTIONS")) pcmDetector.detectProvidedInterface(unit,m.resolveBinding)]
 			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
 		return true
 		} 
@@ -53,7 +53,7 @@ class JaxRSRules extends IRule{
 			pcmDetector.detectComponent(unit)
 			pcmDetector.detectOperationInterface(unit)
 			getMethods(unit).forEach[m|
-			if(isMethodModifiedExactlyWith(m,"public") || isMethodModifiedExactlyWith(m,"protected")) pcmDetector.detectProvidedInterface(unit,m)]
+			if(isMethodModifiedExactlyWith(m,"public") || isMethodModifiedExactlyWith(m,"protected")) pcmDetector.detectProvidedInterface(unit,m.resolveBinding)]
 			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
 		return true
 		}
@@ -64,7 +64,7 @@ class JaxRSRules extends IRule{
 			pcmDetector.detectComponent(unit)
 			val firstIn = getAllInterfaces(unit).get(0)
 			pcmDetector.detectOperationInterface(firstIn)
-			getMethods(firstIn).forEach[m|pcmDetector.detectProvidedInterface(unit, firstIn, m)]
+			getMethods(firstIn).forEach[m|pcmDetector.detectProvidedInterface(unit, firstIn.resolveBinding, m)]
 			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
 			return true
 		}
@@ -81,11 +81,11 @@ class JaxRSRules extends IRule{
 	}
 	
 	def detectDefault(CompilationUnit unit) {
-		val pcmDetector = blackboard.getEMFTextPCMDetector()
+		val pcmDetector = blackboard.getEclipsePCMDetector()
 
 		pcmDetector.detectComponent(unit)
 		pcmDetector.detectOperationInterface(unit)
-		getAllPublicMethods(unit).forEach[m|pcmDetector.detectProvidedInterface(unit,m)]
+		getAllPublicMethods(unit).forEach[m|pcmDetector.detectProvidedInterface(unit,m.resolveBinding)]
 		getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
 	}
 	
