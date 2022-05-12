@@ -1,9 +1,12 @@
 package org.palladiosimulator.somox.analyzer.rules.blackboard;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 
@@ -46,21 +49,50 @@ public class CompilationUnitWrapper {
         return eclipseCompUnit;
     }
 
+    public String getName() {
+        if (isEMFTextCompilationUnit()) {
+            return emftextCompUnit.getName();
+        } else {
+            // TODO is this actually only the name?
+            return ((AbstractTypeDeclaration) eclipseCompUnit.types()
+                .get(0)).getName()
+                    .getIdentifier();
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(eclipseCompUnit, emftextCompUnit);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        CompilationUnitWrapper other = (CompilationUnitWrapper) obj;
+        return Objects.equals(eclipseCompUnit, other.eclipseCompUnit)
+                && Objects.equals(emftextCompUnit, other.emftextCompUnit);
+    }
+
     @SuppressWarnings("unchecked")
-    public static <T> List<CompilationUnitWrapper> wrap(List<T> compUnits) {
+    public static <T> List<CompilationUnitWrapper> wrap(Collection<T> compUnits) {
         if (compUnits == null) {
             return null;
-        } else if (compUnits.isEmpty()) {
-            return Collections.emptyList();
-        } else if (compUnits.get(0) instanceof CompilationUnitImpl) {
-            return ((List<CompilationUnitImpl>) compUnits).stream()
+        } else if (compUnits.stream()
+            .anyMatch(CompilationUnitImpl.class::isInstance)) {
+            return ((Collection<CompilationUnitImpl>) compUnits).stream()
                 .map(CompilationUnitWrapper::new)
-                .collect(Collectors.toList());
-        } else if (compUnits.get(0) instanceof CompilationUnit) {
-            return ((List<CompilationUnit>) compUnits).stream()
+                .collect(Collectors.toCollection(ArrayList::new));
+        } else if (compUnits.stream()
+            .anyMatch(CompilationUnit.class::isInstance)) {
+            return ((Collection<CompilationUnit>) compUnits).stream()
                 .map(CompilationUnitWrapper::new)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
         }
-        return Collections.emptyList();
+        return new ArrayList<>();
     }
 }

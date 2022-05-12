@@ -22,7 +22,8 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
         // TODO integration SEFF extraction
         // this.add(new SeffCreatorJob(false, null, null));
 
-        this.add(new ModelSaverJob(configuration));
+        // TODO temporarily disabled
+        // this.add(new ModelSaverJob(configuration));
 
         this.add(createAnalystsJob(configuration));
     }

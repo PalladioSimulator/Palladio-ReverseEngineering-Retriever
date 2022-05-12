@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 
 /**
  * This class is used to detect and hold all relevant elements found during the processing of rules.
@@ -24,7 +25,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
  * holds the results as "simple" java objects not yet transformed to real PCM objects like PCM Basic
  * Components.
  */
-public class EclipsePCMDetector {
+public class EclipsePCMDetector implements IPCMDetector {
     private List<CompilationUnit> components = new ArrayList<>();
 
     private Map<String, List<EclipseProvidesRelation>> providedRelations = new HashMap<>();
@@ -130,6 +131,11 @@ public class EclipsePCMDetector {
         }
         providedRelations.get(unitName)
             .add(new EclipseProvidesRelation(opI, method));
+    }
+
+    @Override
+    public List<CompilationUnitWrapper> getWrappedComponents() {
+        return CompilationUnitWrapper.wrap(components);
     }
 
     protected List<CompilationUnit> getComponents() {

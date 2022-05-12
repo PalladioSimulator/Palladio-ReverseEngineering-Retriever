@@ -7,7 +7,7 @@ import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 public class TeaStoreTest extends RuleEngineTest {
 
     protected TeaStoreTest() {
-        super("external/TeaStore-1.4.1", DefaultRule.JAX_RS);
+        super("external/TeaStore-1.4.1", DefaultRule.JAX_RS_EMFTEXT);
     }
 
     /**

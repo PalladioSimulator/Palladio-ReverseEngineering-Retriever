@@ -76,7 +76,7 @@ public class EMFTextPCMInstanceCreator {
      *            a mapping between microservice names and java model instances
      * @return the PCM repository model
      */
-    public Repository createPCM(Map<String, List<CompilationUnitImpl>> mapping) {
+    public Repository createPCM(Map<String, List<CompilationUnitWrapper>> mapping) {
         final List<CompilationUnitImpl> components = blackboard.getEMFTextPCMDetector()
             .getComponents();
         final List<Classifier> interfaces = blackboard.getEMFTextPCMDetector()

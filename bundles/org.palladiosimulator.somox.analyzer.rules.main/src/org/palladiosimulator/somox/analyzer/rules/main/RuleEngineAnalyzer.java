@@ -7,6 +7,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -24,6 +25,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.emftext.language.java.containers.ContainersPackage;
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.palladiosimulator.generator.fluent.shared.util.ModelSaver;
@@ -39,6 +41,8 @@ import org.palladiosimulator.somox.analyzer.rules.engine.DockerParser;
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
 import org.palladiosimulator.somox.analyzer.rules.engine.EMFTextPCMDetector;
 import org.palladiosimulator.somox.analyzer.rules.engine.EMFTextPCMInstanceCreator;
+import org.palladiosimulator.somox.analyzer.rules.engine.EclipsePCMDetector;
+import org.palladiosimulator.somox.analyzer.rules.engine.EclipsePCMInstanceCreator;
 import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
 import org.apache.log4j.Logger;
 import org.somox.analyzer.AnalysisResult;
@@ -67,7 +71,8 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
 
     private RuleEngineBlackboard blackboard;
 
-    private static Repository pcm;
+    private static Repository emfTextPcm;
+    private static Repository eclipsePcm;
 
     private static SourceCodeDecoratorRepository deco;
 
@@ -92,7 +97,8 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
      * @return the PCM repository model
      */
     public static Repository getPCMRepository() {
-        return pcm;
+        // TODO choose a repository
+        return eclipsePcm;
     }
 
     /**
@@ -120,9 +126,19 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
 
             final Set<DefaultRule> rules = ruleEngineConfiguration.getSelectedRules();
 
-            final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForPath(inPath, outPath);
+            // Collect CompilationUnits of both kinds
+            final Map<String, CompilationUnit> eclipseRoots = fetchEclipseCompilationUnits();
+            final List<CompilationUnitWrapper> wrappedRoots = new ArrayList<>();
+            for (String path : eclipseRoots.keySet()) {
+                CompilationUnitWrapper wrappedUnit = new CompilationUnitWrapper(eclipseRoots.get(path));
+                wrappedRoots.add(wrappedUnit);
+                blackboard.addCompilationUnitLocation(wrappedUnit, Path.of(path));
+            }
 
-            executeWith(inPath, outPath, CompilationUnitWrapper.wrap(roots), rules, blackboard);
+            final List<CompilationUnitImpl> emfTextRoots = ParserAdapter.generateModelForPath(inPath, outPath);
+            wrappedRoots.addAll(CompilationUnitWrapper.wrap(emfTextRoots));
+
+            executeWith(inPath, outPath, wrappedRoots, rules, blackboard);
         } catch (Exception e) {
             throw new ModelAnalyzerException(e.getMessage());
         } finally {
@@ -130,6 +146,30 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         }
 
         return this.initializeAnalysisResult();
+    }
+
+    private Map<String, CompilationUnit> fetchEclipseCompilationUnits() {
+        // TODO Select a partition name
+        if (!blackboard.hasPartition("TODO")) {
+            return new HashMap<>();
+        }
+        Object compUnitPartition = blackboard.getPartition("TODO");
+        if (!(compUnitPartition instanceof Map<?, ?>)) {
+            return new HashMap<>();
+        }
+        @SuppressWarnings("unchecked") // , since it is actually checked.
+        Map<Object, Object> compUnitObjs = (Map<Object, Object>) compUnitPartition;
+        if (compUnitObjs.isEmpty()) {
+            return new HashMap<>();
+        }
+        @SuppressWarnings("unchecked") // , since it is -again- actually checked.
+        Entry<Object, Object> anEntry = (Entry<Object, Object>) compUnitObjs.entrySet();
+        if (!(anEntry.getKey() instanceof String) || !(anEntry.getValue() instanceof CompilationUnit)) {
+            return new HashMap<>();
+        }
+        return compUnitObjs.entrySet()
+            .stream()
+            .collect(Collectors.toMap(x -> (String) x.getKey(), x -> (CompilationUnit) x.getValue()));
     }
 
     /**
@@ -200,6 +240,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
 
         // Set up blackboard
         blackboard.setEMFTextPCMDetector(new EMFTextPCMDetector());
+        blackboard.setEclipsePCMDetector(new EclipsePCMDetector());
         blackboard.addCompilationUnits(model);
         findFilesForCompilationUnits(projectPath, blackboard);
 
@@ -255,13 +296,18 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         }
         LOG.info("Applied rules to the build files");
 
+        // TODO Which one should be used?
         // Parses the docker-compose file to get a mapping between microservice names and components
         // for creating composite components for each microservice
-        final DockerParser dockerParser = new DockerParser(projectPath, blackboard.getEMFTextPCMDetector());
-        final Map<String, List<CompilationUnitImpl>> mapping = dockerParser.getMapping();
+        final DockerParser emfTextDockerParser = new DockerParser(projectPath, blackboard.getEMFTextPCMDetector());
+        final DockerParser eclipseDockerParser = new DockerParser(projectPath, blackboard.getEclipsePCMDetector());
+
+        final Map<String, List<CompilationUnitWrapper>> mapping = emfTextDockerParser.getMapping();
+        mapping.putAll(eclipseDockerParser.getMapping());
 
         // Creates a PCM repository with systems, components, interfaces and roles
-        pcm = new EMFTextPCMInstanceCreator(blackboard).createPCM(mapping);
+        emfTextPcm = new EMFTextPCMInstanceCreator(blackboard).createPCM(mapping);
+        eclipsePcm = new EclipsePCMInstanceCreator(blackboard).createPCM(mapping);
 
         // Create the build file systems
         Map<RepositoryComponent, CompilationUnitWrapper> repoCompLocations = blackboard
@@ -296,8 +342,10 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
             }
         }
 
-        // Persist the repository at ./pcm.repository
-        ModelSaver.saveRepository(pcm, outPath.resolve("pcm")
+        // Persist the repository at ./****Pcm.repository
+        ModelSaver.saveRepository(eclipsePcm, outPath.resolve("emfTextPcm")
+            .toString(), false);
+        ModelSaver.saveRepository(eclipsePcm, outPath.resolve("eclipsePcm")
             .toString(), false);
     }
 

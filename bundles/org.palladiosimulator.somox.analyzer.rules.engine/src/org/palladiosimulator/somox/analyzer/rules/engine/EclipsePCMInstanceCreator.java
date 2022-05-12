@@ -49,6 +49,7 @@ import org.palladiosimulator.generator.fluent.repository.structure.interfaces.Op
 import org.palladiosimulator.generator.fluent.repository.structure.internals.Primitive;
 import org.palladiosimulator.generator.fluent.repository.structure.types.CompositeDataTypeCreator;
 
+// TODO Re-implement for Eclipse JDT model
 // Class to create a pcm instance out of all results from the detector class
 public class EclipsePCMInstanceCreator {
     private static final Logger LOG = Logger.getLogger(EclipsePCMInstanceCreator.class);
@@ -76,7 +77,7 @@ public class EclipsePCMInstanceCreator {
      *            a mapping between microservice names and java model instances
      * @return the PCM repository model
      */
-    public Repository createPCM(Map<String, List<CompilationUnitImpl>> mapping) {
+    public Repository createPCM(Map<String, List<CompilationUnitWrapper>> mapping) {
         final List<CompilationUnitImpl> components = blackboard.getEMFTextPCMDetector()
             .getComponents();
         final List<Classifier> interfaces = blackboard.getEMFTextPCMDetector()

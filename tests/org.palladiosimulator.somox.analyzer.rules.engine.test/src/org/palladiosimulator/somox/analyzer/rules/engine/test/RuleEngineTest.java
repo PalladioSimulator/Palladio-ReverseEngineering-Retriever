@@ -57,7 +57,7 @@ abstract class RuleEngineTest {
         this.rules = Set.of(rules);
         RuleEngineAnalyzer.executeWith(inPath, OUT_DIR, CompilationUnitWrapper.wrap(model), this.rules);
 
-        Path repoPath = Paths.get(OUT_DIR.toString(), "pcm.repository");
+        Path repoPath = Paths.get(OUT_DIR.toString(), "emfTextPcm.repository");
         assertTrue(repoPath.toFile()
             .exists());
 

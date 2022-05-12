@@ -8,7 +8,7 @@ import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 public class JaxRsTest extends RuleEngineTest {
 
     protected JaxRsTest() {
-        super("JaxRsProject", DefaultRule.JAX_RS);
+        super("JaxRsProject", DefaultRule.JAX_RS_EMFTEXT);
     }
 
     /**

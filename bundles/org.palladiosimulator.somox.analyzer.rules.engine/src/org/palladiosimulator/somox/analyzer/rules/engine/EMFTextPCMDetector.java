@@ -17,6 +17,7 @@ import org.emftext.language.java.classifiers.Interface;
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.emftext.language.java.members.Method;
 import org.emftext.language.java.variables.Variable;
+import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 
 /**
  * This class is used to detect and hold all relevant elements found during the processing of rules.
@@ -24,7 +25,7 @@ import org.emftext.language.java.variables.Variable;
  * holds the results as "simple" java objects not yet transformed to real PCM objects like PCM Basic
  * Components.
  */
-public class EMFTextPCMDetector {
+public class EMFTextPCMDetector implements IPCMDetector {
     private List<CompilationUnitImpl> components = new ArrayList<>();
 
     private Map<String, List<EMFTextProvidesRelation>> providedRelations = new HashMap<>();
@@ -101,6 +102,11 @@ public class EMFTextPCMDetector {
         providedRelations.get(unitName)
             .add(relation);
 
+    }
+
+    @Override
+    public List<CompilationUnitWrapper> getWrappedComponents() {
+        return CompilationUnitWrapper.wrap(components);
     }
 
     protected List<CompilationUnitImpl> getComponents() {

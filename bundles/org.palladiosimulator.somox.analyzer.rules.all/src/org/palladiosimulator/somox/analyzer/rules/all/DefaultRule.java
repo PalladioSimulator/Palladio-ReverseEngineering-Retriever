@@ -20,7 +20,9 @@ public enum DefaultRule {
 
 	SPRING(SpringRules.class),
 	JAX_RS(JaxRSRules.class),
-	MAVEN(MavenRules.class);
+	MAVEN(MavenRules.class),
+	SPRING_EMFTEXT(org.palladiosimulator.somox.analyzer.rules.impl.emftext.SpringRules.class),
+	JAX_RS_EMFTEXT(org.palladiosimulator.somox.analyzer.rules.impl.emftext.JaxRSRules.class);
 
 	private final Class<? extends IRule> ruleClass;
 

@@ -28,7 +28,7 @@ import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
 public class BasicTest extends RuleEngineTest {
 
     private static final String PROJECT_NAME = "BasicProject";
-    private static final DefaultRule[] RULES = { DefaultRule.JAX_RS };
+    private static final DefaultRule[] RULES = { DefaultRule.JAX_RS_EMFTEXT };
 
     protected BasicTest() {
         super(PROJECT_NAME, RULES);
@@ -40,7 +40,7 @@ public class BasicTest extends RuleEngineTest {
      */
     @Test
     void test() {
-        assertTrue(OUT_DIR.resolve("pcm.repository")
+        assertTrue(OUT_DIR.resolve("emfTextPcm.repository")
             .toFile()
             .exists());
     }
@@ -117,7 +117,7 @@ public class BasicTest extends RuleEngineTest {
         final Path inPath = TEST_DIR.resolve(PROJECT_NAME);
         final List<CompilationUnitImpl> model = ParserAdapter.generateModelForPath(inPath, OUT_DIR);
         RuleEngineAnalyzer.executeWith(inPath, OUT_DIR, CompilationUnitWrapper.wrap(model), getRules());
-        Path repoPath = OUT_DIR.resolve("pcm.repository");
+        Path repoPath = OUT_DIR.resolve("emfTextPcm.repository");
         RepositoryImpl repo = loadRepository(URI.createFileURI(repoPath.toString()));
         conflictingMethods = getConflictingMethods(repo.getInterfaces__Repository());
 
