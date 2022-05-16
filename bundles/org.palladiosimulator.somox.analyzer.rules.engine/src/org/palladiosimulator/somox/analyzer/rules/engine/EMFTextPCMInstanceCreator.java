@@ -187,14 +187,14 @@ public class EMFTextPCMInstanceCreator {
         } else if (primT instanceof Double) {
             return Primitive.DOUBLE;
         } else if (primT instanceof Float) {
-            // TODO replace with Primitive.FLOAT as soon as that exists
+            // TODO replace with Primitive.FLOAT as soon as that works
             return Primitive.DOUBLE;
         } else if (primT instanceof Int) {
             return Primitive.INTEGER;
         } else if (primT instanceof Long) {
             return Primitive.LONG;
         } else if (primT instanceof Short) {
-            // TODO replace with Primitive.SHORT as soon as that exists
+            // TODO replace with Primitive.SHORT as soon as that works
             return Primitive.INTEGER;
         }
 
