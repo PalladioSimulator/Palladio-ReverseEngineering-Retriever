@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.apache.commons.csv.CSVRecord;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.emf.common.CommonPlugin;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 
@@ -41,10 +42,8 @@ public class CsvDiscoverer implements Discoverer {
 
             @Override
             public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
-                final Path root = Paths.get(configuration.getInputFolder()
-                    .devicePath())
-                    .toAbsolutePath()
-                    .normalize();
+                final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
+                    .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
                 final Map<String, List<CSVRecord>> csvs = new HashMap<>();
                 Discoverer.find(root, ".csv", logger)

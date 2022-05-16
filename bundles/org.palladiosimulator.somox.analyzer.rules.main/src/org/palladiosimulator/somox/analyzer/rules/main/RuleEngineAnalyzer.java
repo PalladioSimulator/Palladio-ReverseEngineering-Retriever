@@ -44,6 +44,7 @@ import org.palladiosimulator.somox.analyzer.rules.engine.EMFTextPCMInstanceCreat
 import org.palladiosimulator.somox.analyzer.rules.engine.EclipsePCMDetector;
 import org.palladiosimulator.somox.analyzer.rules.engine.EclipsePCMInstanceCreator;
 import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
+import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
 import org.apache.log4j.Logger;
 import org.somox.analyzer.AnalysisResult;
 import org.somox.analyzer.ModelAnalyzer;
@@ -150,10 +151,10 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
 
     private Map<String, CompilationUnit> fetchEclipseCompilationUnits() {
         // TODO Select a partition name
-        if (!blackboard.hasPartition("TODO")) {
+        if (!blackboard.hasPartition(JavaDiscoverer.DISCOVERER_ID)) {
             return new HashMap<>();
         }
-        Object compUnitPartition = blackboard.getPartition("TODO");
+        Object compUnitPartition = blackboard.getPartition(JavaDiscoverer.DISCOVERER_ID);
         if (!(compUnitPartition instanceof Map<?, ?>)) {
             return new HashMap<>();
         }
@@ -162,8 +163,10 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         if (compUnitObjs.isEmpty()) {
             return new HashMap<>();
         }
-        @SuppressWarnings("unchecked") // , since it is -again- actually checked.
-        Entry<Object, Object> anEntry = (Entry<Object, Object>) compUnitObjs.entrySet();
+        Entry<Object, Object> anEntry = null;
+        for (Entry<Object, Object> entry : compUnitObjs.entrySet()) {
+            anEntry = entry;
+        }
         if (!(anEntry.getKey() instanceof String) || !(anEntry.getValue() instanceof CompilationUnit)) {
             return new HashMap<>();
         }
@@ -343,7 +346,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         }
 
         // Persist the repository at ./****Pcm.repository
-        ModelSaver.saveRepository(eclipsePcm, outPath.resolve("emfTextPcm")
+        ModelSaver.saveRepository(emfTextPcm, outPath.resolve("emfTextPcm")
             .toString(), false);
         ModelSaver.saveRepository(eclipsePcm, outPath.resolve("eclipsePcm")
             .toString(), false);

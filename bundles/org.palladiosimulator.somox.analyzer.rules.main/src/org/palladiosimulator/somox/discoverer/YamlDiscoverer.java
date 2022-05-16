@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.emf.common.CommonPlugin;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 import org.yaml.snakeyaml.Yaml;
@@ -38,10 +39,8 @@ public class YamlDiscoverer implements Discoverer {
 
             @Override
             public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
-                final Path root = Paths.get(configuration.getInputFolder()
-                    .devicePath())
-                    .toAbsolutePath()
-                    .normalize();
+                final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
+                    .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
                 final Map<String, Map<String, Object>> yamls = new HashMap<>();
                 Stream.concat(Discoverer.find(root, ".yml", logger), Discoverer.find(root, ".yaml", logger))

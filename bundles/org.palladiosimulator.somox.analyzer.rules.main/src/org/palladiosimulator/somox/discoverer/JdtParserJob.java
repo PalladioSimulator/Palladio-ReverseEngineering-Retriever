@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -54,10 +55,8 @@ public class JdtParserJob implements Discoverer {
 
             @Override
             public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
-                final Path root = Paths.get(configuration.getInputFolder()
-                    .devicePath())
-                    .toAbsolutePath()
-                    .normalize();
+                final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
+                    .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
                 logger.info("Begin " + toString());
                 monitor.beginTask(toString(), IProgressMonitor.UNKNOWN);

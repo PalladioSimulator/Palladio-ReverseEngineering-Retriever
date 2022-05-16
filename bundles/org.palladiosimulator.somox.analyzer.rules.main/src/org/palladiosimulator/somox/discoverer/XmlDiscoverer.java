@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.emf.common.CommonPlugin;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
@@ -39,10 +40,8 @@ public class XmlDiscoverer implements Discoverer {
 
             @Override
             public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
-                final Path root = Paths.get(configuration.getInputFolder()
-                    .devicePath())
-                    .toAbsolutePath()
-                    .normalize();
+                final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
+                    .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
                 final Map<String, Document> xmls = new HashMap<>();
                 Discoverer.find(root, ".xml", logger)

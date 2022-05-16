@@ -18,7 +18,7 @@ class JaxRSRules extends IRule{
 		
 		var containedSuccessful = false
 		for (unit : units) {
-			if (unit.isEMFTextCompilationUnit()) {
+			if (unit.isEclipseCompilationUnit()) {
 				val eclipseUnit = unit.getEclipseCompilationUnit
 				containedSuccessful = processRuleForCompUnit(eclipseUnit) || containedSuccessful
 			}

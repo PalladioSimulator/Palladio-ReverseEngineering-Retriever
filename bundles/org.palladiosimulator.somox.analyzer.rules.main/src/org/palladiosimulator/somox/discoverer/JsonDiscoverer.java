@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.emf.common.CommonPlugin;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
@@ -39,10 +40,8 @@ public class JsonDiscoverer implements Discoverer {
 
             @Override
             public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
-                final Path root = Paths.get(configuration.getInputFolder()
-                    .devicePath())
-                    .toAbsolutePath()
-                    .normalize();
+                final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
+                    .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
                 final Map<String, JSONObject> jsons = new HashMap<>();
                 Discoverer.find(root, ".json", logger)

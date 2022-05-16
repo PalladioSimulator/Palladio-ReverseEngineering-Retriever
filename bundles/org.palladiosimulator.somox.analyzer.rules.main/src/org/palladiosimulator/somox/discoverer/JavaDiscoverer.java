@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -37,10 +38,8 @@ public class JavaDiscoverer implements Discoverer {
 
             @Override
             public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
-                final Path root = Paths.get(configuration.getInputFolder()
-                    .devicePath())
-                    .toAbsolutePath()
-                    .normalize();
+                final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
+                    .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
                 final Map<String, CompilationUnit> compilationUnits = new HashMap<>();
                 final ASTParser parser = ASTParser.newParser(AST.getJLSLatest());
@@ -64,7 +63,7 @@ public class JavaDiscoverer implements Discoverer {
                 } catch (IllegalArgumentException | IllegalStateException e) {
                     logger.error(String.format("No Java files in %s could be transposed.", root), e);
                 }
-                return;
+                getBlackboard().addPartition(DISCOVERER_ID, compilationUnits);
             }
 
             @Override

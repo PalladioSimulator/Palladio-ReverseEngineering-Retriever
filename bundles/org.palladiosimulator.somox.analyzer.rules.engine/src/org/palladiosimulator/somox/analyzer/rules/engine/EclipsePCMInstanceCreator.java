@@ -21,6 +21,7 @@ import org.palladiosimulator.pcm.repository.ParameterModifier;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
+import org.palladiosimulator.generator.fluent.exceptions.FluentApiException;
 import org.palladiosimulator.generator.fluent.repository.api.Repo;
 import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
 import org.palladiosimulator.generator.fluent.repository.structure.components.BasicComponentCreator;
@@ -77,8 +78,7 @@ public class EclipsePCMInstanceCreator {
             LOG.info("Current PCM Interface: " + inter.getQualifiedName());
 
             OperationInterfaceCreator pcmInterface = create.newOperationInterface()
-                .withName(inter.getQualifiedName()
-                    .replaceAll("\\.", "_"));
+                .withName(wrapName(inter));
 
             for (final IMethodBinding m : inter.getDeclaredMethods()) {
                 OperationSignatureCreator signature = create.newOperationSignature()
@@ -106,8 +106,7 @@ public class EclipsePCMInstanceCreator {
             AbstractTypeDeclaration firstTypeDecl = (AbstractTypeDeclaration) comp.types()
                 .get(0);
             BasicComponentCreator pcmComp = create.newBasicComponent()
-                .withName(firstTypeDecl.getName()
-                    .getFullyQualifiedName());
+                .withName(wrapName(firstTypeDecl.resolveBinding()));
 
             final List<EclipseProvidesRelation> providedRelations = blackboard.getEclipsePCMDetector()
                 .getProvidedInterfaces(comp);
@@ -116,8 +115,7 @@ public class EclipsePCMInstanceCreator {
                 .map(relation -> relation.getOperationInterface())
                 .collect(Collectors.toSet());
             for (ITypeBinding realInterface : realInterfaces) {
-                pcmComp.provides(create.fetchOfOperationInterface(realInterface.getQualifiedName()
-                    .replaceAll("\\.", "_")), "dummy name");
+                pcmComp.provides(create.fetchOfOperationInterface(wrapName(realInterface)), "dummy name");
             }
 
             final List<List<VariableDeclaration>> requiredIs = blackboard.getEclipsePCMDetector()
@@ -129,8 +127,7 @@ public class EclipsePCMInstanceCreator {
                 .collect(Collectors.toSet());
 
             for (ITypeBinding requInter : requireInterfaces) {
-                pcmComp.requires(create.fetchOfOperationInterface(requInter.getQualifiedName()
-                    .replaceAll("\\.", "_")), "dummy require name");
+                pcmComp.requires(create.fetchOfOperationInterface(wrapName(requInter)), "dummy require name");
             }
             BasicComponent builtComp = pcmComp.build();
             blackboard.putRepositoryComponentLocation(builtComp, new CompilationUnitWrapper(comp));
@@ -208,7 +205,7 @@ public class EclipsePCMInstanceCreator {
 
     private DataType handleCollectionType(ITypeBinding ref, int dimensions) {
         // Base for the name of the collection data type
-        String typeName = ref.getQualifiedName();
+        String typeName = wrapName(ref);
 
         CollectionDataType collectionType = null;
         String collectionTypeName = null;
@@ -217,8 +214,8 @@ public class EclipsePCMInstanceCreator {
             if (ref.isPrimitive()) {
                 typeName = convertPrimitive(ref).name();
             }
+            collectionTypeName = typeName;
 
-            collectionTypeName = typeName + "[]";
             if (existingCollectionDataTypes.containsKey(collectionTypeName)) {
                 return existingCollectionDataTypes.get(collectionTypeName);
             }
@@ -228,9 +225,9 @@ public class EclipsePCMInstanceCreator {
         // TODO: I do not think this works properly for deeper collection types (e.g.
         // List<String>[]), especially the naming.
         else if (isCollectionType(ref)) {
-            typeName = ref.getQualifiedName();
+            typeName = wrapName(ref);
             for (ITypeBinding typeArg : ref.getTypeArguments()) {
-                String argumentTypeName = typeArg.getQualifiedName();
+                String argumentTypeName = wrapName(typeArg);
                 collectionTypeName = typeName + "<" + argumentTypeName + ">";
 
                 LOG.info("Current Argument type name: " + argumentTypeName);
@@ -312,10 +309,11 @@ public class EclipsePCMInstanceCreator {
     }
 
     private DataType handleCompositeType(ITypeBinding ref) {
-        String classifierName = ref.getQualifiedName();
+        String classifierName = wrapName(ref);
 
         if (!existingDataTypesMap.containsKey(classifierName)) {
-            existingDataTypesMap.put(classifierName, createTypesRecursively(ref));
+            // TODO why is this commented out?
+//            existingDataTypesMap.put(classifierName, createTypesRecursively(ref));
             existingDataTypesMap.put(classifierName, create.newCompositeDataType()
                 .withName(classifierName));
             repository.addToRepository(existingDataTypesMap.get(classifierName));
@@ -326,12 +324,12 @@ public class EclipsePCMInstanceCreator {
 
     // TODO creation of CompositeDataTypes
     private CompositeDataTypeCreator createTypesRecursively(ITypeBinding type) {
-        if (existingDataTypesMap.containsKey(type.getQualifiedName())) {
-            return existingDataTypesMap.get(type.getQualifiedName());
+        if (existingDataTypesMap.containsKey(wrapName(type))) {
+            return existingDataTypesMap.get(wrapName(type));
         }
 
         CompositeDataTypeCreator currentDataType = create.newCompositeDataType()
-            .withName(type.getQualifiedName());
+            .withName(wrapName(type));
         for (IVariableBinding f : type.getDeclaredFields()) {
 
             if (f.getType()
@@ -357,4 +355,14 @@ public class EclipsePCMInstanceCreator {
         return currentDataType;
     }
 
+    private static String wrapName(ITypeBinding name) {
+        String fullName = name.getQualifiedName()
+            .replace(".", "_");
+        // Erase type parameters in identifiers
+        // TODO is this the right solution?
+        if (fullName.contains("<")) {
+            return fullName.substring(0, fullName.indexOf('<'));
+        }
+        return fullName;
+    }
 }
