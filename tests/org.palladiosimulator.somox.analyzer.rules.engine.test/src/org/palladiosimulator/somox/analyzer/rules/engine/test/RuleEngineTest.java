@@ -116,6 +116,12 @@ abstract class RuleEngineTest {
                 .equals(name));
     }
 
+    public boolean containsOperationInterface(String name) {
+        return getInterfaces().stream()
+            .anyMatch(x -> x.getEntityName()
+                .equals(name));
+    }
+
     public static RepositoryImpl loadRepository(URI repoXMI) {
         final List<EObject> contents = new ResourceSetImpl().getResource(repoXMI, true)
             .getContents();
