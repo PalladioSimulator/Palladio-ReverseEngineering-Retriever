@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -26,6 +27,7 @@ import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrap
  * Components.
  */
 public class EclipsePCMDetector implements IPCMDetector {
+    private static final Logger LOG = Logger.getLogger(EclipsePCMDetector.class);
     private List<CompilationUnit> components = new ArrayList<>();
 
     private Map<String, List<EclipseProvidesRelation>> providedRelations = new HashMap<>();
@@ -83,16 +85,28 @@ public class EclipsePCMDetector implements IPCMDetector {
 
     private void detectOperationInterface(AbstractTypeDeclaration type) {
         if (type instanceof TypeDeclaration) {
-            operationInterfaces.add(type.resolveBinding()
-                .getTypeDeclaration());
+            ITypeBinding binding = type.resolveBinding();
+            if (binding == null) {
+                LOG.warn("Unresolved interface binding detected in " + getFullTypeName(type) + "!");
+                return;
+            }
+            operationInterfaces.add(binding.getTypeDeclaration());
         }
     }
 
     public void detectOperationInterface(Type type) {
-        ITypeBinding binding = type.resolveBinding()
-            .getTypeDeclaration();
-        if (binding.isClass() || binding.isInterface()) {
-            operationInterfaces.add(binding);
+        ITypeBinding binding = type.resolveBinding();
+        if (binding == null) {
+            LOG.warn("Unresolved interface binding detected!");
+            return;
+        }
+        ITypeBinding typeBinding = binding.getTypeDeclaration();
+        if (typeBinding == null) {
+            LOG.warn("Unresolved interface binding detected!");
+            return;
+        }
+        if (typeBinding.isClass() || typeBinding.isInterface()) {
+            operationInterfaces.add(typeBinding);
         }
     }
 
@@ -121,10 +135,22 @@ public class EclipsePCMDetector implements IPCMDetector {
     }
 
     public void detectProvidedInterface(CompilationUnit unit, IMethodBinding method) {
+        if (method == null) {
+            LOG.warn("Unresolved method binding detected in " + getFullUnitName(unit) + "!");
+            return;
+        }
         detectProvidedInterface(unit, method.getDeclaringClass(), method);
     }
 
     public void detectProvidedInterface(CompilationUnit unit, ITypeBinding opI, IMethodBinding method) {
+        if (opI == null) {
+            LOG.warn("Unresolved type binding detected in " + getFullUnitName(unit) + "!");
+            return;
+        }
+        if (method == null) {
+            LOG.warn("Unresolved method binding detected in " + getFullUnitName(unit) + "!");
+            return;
+        }
         final String unitName = getFullUnitName(unit);
         if (providedRelations.get(unitName) == null) {
             providedRelations.put(unitName, new ArrayList<>());
