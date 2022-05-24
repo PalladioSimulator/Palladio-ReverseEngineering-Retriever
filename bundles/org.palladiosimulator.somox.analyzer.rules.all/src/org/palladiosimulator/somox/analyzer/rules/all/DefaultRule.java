@@ -3,7 +3,9 @@ package org.palladiosimulator.somox.analyzer.rules.all;
 import java.lang.reflect.InvocationTargetException;
 
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
+import org.palladiosimulator.somox.analyzer.rules.docker.DockerRules;
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
+import org.palladiosimulator.somox.analyzer.rules.gradle.GradleRules;
 import org.palladiosimulator.somox.analyzer.rules.impl.eclipse.JaxRSRules;
 import org.palladiosimulator.somox.analyzer.rules.impl.eclipse.SpringRules;
 import org.palladiosimulator.somox.analyzer.rules.maven.MavenRules;
@@ -21,6 +23,8 @@ public enum DefaultRule {
 	SPRING(SpringRules.class),
 	JAX_RS(JaxRSRules.class),
 	MAVEN(MavenRules.class),
+	GRADLE(GradleRules.class),
+	DOCKER(DockerRules.class),
 	SPRING_EMFTEXT(org.palladiosimulator.somox.analyzer.rules.impl.emftext.SpringRules.class),
 	JAX_RS_EMFTEXT(org.palladiosimulator.somox.analyzer.rules.impl.emftext.JaxRSRules.class);
 
