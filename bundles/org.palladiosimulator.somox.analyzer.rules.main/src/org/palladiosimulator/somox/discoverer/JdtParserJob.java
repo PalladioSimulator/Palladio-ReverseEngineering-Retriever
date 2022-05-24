@@ -6,10 +6,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -33,6 +35,8 @@ import jamopp.resource.JavaResource2Factory;
 
 public class JdtParserJob implements Discoverer {
 
+    public static final String DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.jdtparser";
+
     public static Resource getResource(final URI uri) throws IllegalArgumentException {
         if ((uri == null) || !uri.isFile() || !"jdt".equals(uri.fileExtension())) {
             throw new IllegalArgumentException("No valid JDT model");
@@ -47,12 +51,12 @@ public class JdtParserJob implements Discoverer {
 
             @Override
             public void cleanup(final IProgressMonitor monitor) throws CleanupFailedException {
-                // TODO Auto-generated method stub
             }
 
             @Override
             public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
-                final Path root = Paths.get(configuration.getInputFolder().devicePath()).toAbsolutePath().normalize();
+                final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
+                    .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
                 logger.info("Begin " + toString());
                 monitor.beginTask(toString(), IProgressMonitor.UNKNOWN);
@@ -75,40 +79,55 @@ public class JdtParserJob implements Discoverer {
 
             @Override
             public String getName() {
-                // TODO Auto-generated method stub
-                return null;
+                return "JDT Parser Job";
             }
 
             private ResourceSet parseDirectory(final Path root) {
                 ContainersFactory.eINSTANCE.createEmptyModel();
-                Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("java", new JavaResource2Factory());
-                Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("xmi", new XMIResourceFactoryImpl());
-                Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("xml", new XMLResourceFactoryImpl());
-                JavaClasspath.get().clear();
+                Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap()
+                    .put("java", new JavaResource2Factory());
+                Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap()
+                    .put("xmi", new XMIResourceFactoryImpl());
+                Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap()
+                    .put("xml", new XMLResourceFactoryImpl());
+                JavaClasspath.get()
+                    .clear();
                 final JaMoPPJDTParser parser = new JaMoPPJDTParser();
                 final ResourceSet resources = parser.parseDirectory(root);
                 EcoreUtil.resolveAll(resources);
                 return resources;
             }
 
-            private URI saveResource(final ResourceSet resourceSet, final String uuid, final Path root) throws IOException {
-                INSTANCE.getExtensionToFactoryMap().put("jdt", new XMIResourceFactoryImpl());
-                final Path path = Paths.get(root.getParent().toString(), uuid + "." + "jdt");
+            private URI saveResource(final ResourceSet resourceSet, final String uuid, final Path root)
+                    throws IOException {
+                INSTANCE.getExtensionToFactoryMap()
+                    .put("jdt", new XMIResourceFactoryImpl());
+                final Path path = Paths.get(root.getParent()
+                    .toString(), uuid + "." + "jdt");
                 final URI jdtFileURI = URI.createFileURI(path.toString());
                 final Resource jdtResource = resourceSet.createResource(jdtFileURI);
 
                 for (final Resource javaResource : new ArrayList<>(resourceSet.getResources())) {
-                    if (javaResource.getContents().isEmpty() || !"file".equals(javaResource.getURI().scheme())) {
+                    if (javaResource.getContents()
+                        .isEmpty()
+                            || !"file".equals(javaResource.getURI()
+                                .scheme())) {
                         continue;
                     }
                     if (javaResource instanceof CompilationUnit) {
                         final CompilationUnit unit = (CompilationUnit) javaResource;
-                        if (((unit.getClassifiers().size() <= 0) || (unit.getClassifiers().get(0).getName() == null)
-                                || unit.getNamespacesAsString().isEmpty())) {
+                        if (((unit.getClassifiers()
+                            .size() <= 0)
+                                || (unit.getClassifiers()
+                                    .get(0)
+                                    .getName() == null)
+                                || unit.getNamespacesAsString()
+                                    .isEmpty())) {
                             continue;
                         }
                     }
-                    jdtResource.getContents().addAll(javaResource.getContents());
+                    jdtResource.getContents()
+                        .addAll(javaResource.getContents());
                 }
 
                 jdtResource.save(resourceSet.getLoadOptions());
@@ -119,19 +138,16 @@ public class JdtParserJob implements Discoverer {
 
     @Override
     public Set<String> getConfigurationKeys() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
     public String getID() {
-        // TODO Auto-generated method stub
-        return null;
+        return DISCOVERER_ID;
     }
 
     @Override
     public String getName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "JDT Parser";
     }
 }

@@ -8,14 +8,15 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.Platform;
+import org.palladiosimulator.somox.analyzer.rules.service.ServiceCollection;
 
-public class DiscovererCollection {
+public class DiscovererCollection implements ServiceCollection<Discoverer> {
     public static final String EXTENSION_POINT = "org.palladiosimulator.somox.discoverer";
     private final Set<Discoverer> discoverer = new HashSet<>();
 
     public DiscovererCollection() throws CoreException, InvalidRegistryObjectException {
         for (final IConfigurationElement extension : Platform.getExtensionRegistry()
-                .getConfigurationElementsFor(EXTENSION_POINT)) {
+            .getConfigurationElementsFor(EXTENSION_POINT)) {
             final Object o = extension.createExecutableExtension("class");
             if (o instanceof Discoverer) {
                 discoverer.add((Discoverer) o);
@@ -23,7 +24,8 @@ public class DiscovererCollection {
         }
     }
 
-    public Set<Discoverer> getDiscoverer() {
+    @Override
+    public Set<Discoverer> getServices() {
         return Collections.unmodifiableSet(discoverer);
     }
 }

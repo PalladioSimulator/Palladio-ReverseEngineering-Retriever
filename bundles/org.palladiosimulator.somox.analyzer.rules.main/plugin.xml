@@ -2,6 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension-point id="org.palladiosimulator.somox.analyzer.rules.analyst" name="RuleEngine Analyst" schema="schema/org.palladiosimulator.somox.analyzer.rules.analyst.exsd"/>
+   <extension-point id="org.palladiosimulator.somox.discoverer" name="RuleEngine Discoverer" schema="schema/org.palladiosimulator.somox.discoverer.exsd"/>
 	<extension point="org.eclipse.debug.core.launchConfigurationTypes">
 	    <launchConfigurationType
            delegate="org.palladiosimulator.somox.analyzer.rules.gui.RuleEngineConfigurationDelegate"
@@ -38,5 +39,61 @@
 	     class="org.palladiosimulator.somox.analyzer.rules.cli.RuleEngineApplication">
 	    </run>
     </application>
+ </extension>
+ <extension
+       id="org.palladiosimulator.somox.discoverer.csv"
+       name="CSV Discoverer"
+       point="org.palladiosimulator.somox.discoverer">
+    <discoverer
+          class="org.palladiosimulator.somox.discoverer.CsvDiscoverer">
+    </discoverer>
+ </extension>
+ <extension
+       id="org.palladiosimulator.somox.discoverer.java"
+       name="Java Discoverer"
+       point="org.palladiosimulator.somox.discoverer">
+    <discoverer
+          class="org.palladiosimulator.somox.discoverer.JavaDiscoverer">
+    </discoverer>
+ </extension>
+ <extension
+       id="org.palladiosimulator.somox.discoverer.json"
+       name="JSON Discoverer"
+       point="org.palladiosimulator.somox.discoverer">
+    <discoverer
+          class="org.palladiosimulator.somox.discoverer.JsonDiscoverer">
+    </discoverer>
+ </extension>
+ <extension
+       id="org.palladiosimulator.somox.discoverer.xml"
+       name="XML Discoverer"
+       point="org.palladiosimulator.somox.discoverer">
+    <discoverer
+          class="org.palladiosimulator.somox.discoverer.XmlDiscoverer">
+    </discoverer>
+ </extension>
+ <extension
+       id="org.palladiosimulator.somox.discoverer.yaml"
+       name="YAML Discoverer"
+       point="org.palladiosimulator.somox.discoverer">
+    <discoverer
+          class="org.palladiosimulator.somox.discoverer.YamlDiscoverer">
+    </discoverer>
+ </extension>
+ <extension
+       id="org.palladiosimulator.somox.discoverer.jdtparser"
+       name="JDT Parser"
+       point="org.palladiosimulator.somox.discoverer">
+    <discoverer
+          class="org.palladiosimulator.somox.discoverer.JdtParserJob">
+    </discoverer>
+ </extension>
+ <extension
+       id="org.palladiosimulator.somox.analyzer.rules.service.performance_analyst"
+       name="Performance Analyst"
+       point="org.palladiosimulator.somox.analyzer.rules.analyst">
+    <analyst
+          class="org.palladiosimulator.somox.analyzer.rules.service.PerformanceAnalyst">
+    </analyst>
  </extension>
 </plugin>

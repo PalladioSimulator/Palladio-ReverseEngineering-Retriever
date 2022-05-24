@@ -1,10 +1,7 @@
 package org.palladiosimulator.somox.analyzer.rules.configuration;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -13,25 +10,34 @@ import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.common.util.URI;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
-import org.palladiosimulator.somox.analyzer.rules.workflow.Analyst;
-import org.palladiosimulator.somox.analyzer.rules.workflow.AnalystCollection;
+import org.palladiosimulator.somox.analyzer.rules.service.Analyst;
+import org.palladiosimulator.somox.analyzer.rules.service.AnalystCollection;
+import org.palladiosimulator.somox.analyzer.rules.service.EmptyCollection;
+import org.palladiosimulator.somox.analyzer.rules.service.ServiceCollection;
+import org.palladiosimulator.somox.analyzer.rules.service.ServiceConfiguration;
+import org.palladiosimulator.somox.discoverer.Discoverer;
+import org.palladiosimulator.somox.discoverer.DiscovererCollection;
 import org.somox.configuration.AbstractMoxConfiguration;
 import org.somox.configuration.FileLocationConfiguration;
 
 import de.uka.ipd.sdq.workflow.extension.ExtendableJobConfiguration;
 
 public class RuleEngineConfiguration extends AbstractMoxConfiguration implements ExtendableJobConfiguration {
+    private static final Logger LOG = Logger.getLogger(RuleEngineConfiguration.class);
 
     public static final String RULE_ENGINE_INPUT_PATH = "org.palladiosimulator.somox.analyzer.rules.configuration.input.path";
     public static final String RULE_ENGINE_OUTPUT_PATH = "org.palladiosimulator.somox.analyzer.rules.configuration.output.path";
     public static final String RULE_ENGINE_SELECTED_RULES = "org.palladiosimulator.somox.analyzer.rules.configuration.rules";
-    public static final String RULE_LIST_SEPARATOR = ";";
+    public static final String RULE_ENGINE_SELECTED_ANALYSTS = "org.palladiosimulator.somox.analyzer.rules.configuration.analysts";
+    public static final String RULE_ENGINE_SELECTED_DISCOVERERS = "org.palladiosimulator.somox.analyzer.rules.configuration.discoverers";
     public static final String RULE_ENGINE_ANALYST_CONFIG_PREFIX = "org.palladiosimulator.somox.analyzer.rules.configuration.analystconfig.";
+    public static final String RULE_ENGINE_DISCOVERER_CONFIG_PREFIX = "org.palladiosimulator.somox.analyzer.rules.configuration.discovererconfig.";
+    public static final String RULE_LIST_SEPARATOR = ";";
 
-    private FileLocationConfiguration fileLocations;
-    private Set<DefaultRule> rules;
-    private Map<String, Map<String, String>> analystConfigs;
-    private List<Analyst> analysts;
+    private final FileLocationConfiguration fileLocations;
+    private final Set<DefaultRule> rules;
+    private final ServiceConfiguration<Analyst> analystConfig;
+    private final ServiceConfiguration<Discoverer> discovererConfig;
 
     private final Map<String, Object> attributes;
 
@@ -40,16 +46,28 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
     }
 
     public RuleEngineConfiguration(Map<String, Object> attributes) {
+        this.rules = new HashSet<>();
         this.attributes = Objects.requireNonNull(attributes);
         this.fileLocations = new FileLocationConfiguration();
-        this.analystConfigs = new HashMap<>();
+        ServiceCollection<Analyst> analystCollection = null;
         try {
-            this.analysts = new ArrayList<>(new AnalystCollection().getAnalysts());
+            analystCollection = new AnalystCollection();
         } catch (CoreException e) {
-            Logger.getLogger(RuleEngineConfiguration.class)
-                .error("An exception occurred while collecting analysts");
-            this.analysts = new ArrayList<>();
+            LOG.error("Exception occurred while discovering analysts!");
+            analystCollection = new EmptyCollection<Analyst>();
         }
+        this.analystConfig = new ServiceConfiguration<>(analystCollection, RULE_ENGINE_SELECTED_ANALYSTS,
+                RULE_ENGINE_ANALYST_CONFIG_PREFIX);
+
+        ServiceCollection<Discoverer> discovererCollection = null;
+        try {
+            discovererCollection = new DiscovererCollection();
+        } catch (CoreException e) {
+            LOG.error("Exception occurred while discovering discoverers!");
+            discovererCollection = new EmptyCollection<Discoverer>();
+        }
+        this.discovererConfig = new ServiceConfiguration<>(discovererCollection, RULE_ENGINE_SELECTED_DISCOVERERS,
+                RULE_ENGINE_DISCOVERER_CONFIG_PREFIX);
         applyAttributeMap(attributes);
     }
 
@@ -70,17 +88,13 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         if (attributeMap.get(RULE_ENGINE_SELECTED_RULES) != null) {
             setSelectedRules(parseRules((Set<String>) attributeMap.get(RULE_ENGINE_SELECTED_RULES)));
         }
-        for (Analyst analyst : analysts) {
-            String analystId = analyst.getID();
-            if (attributeMap.get(RULE_ENGINE_ANALYST_CONFIG_PREFIX + analystId) != null) {
-                analystConfigs.put(analystId,
-                        (Map<String, String>) attributeMap.get(RULE_ENGINE_ANALYST_CONFIG_PREFIX + analystId));
-            }
-        }
+        analystConfig.applyAttributeMap(attributeMap);
+        discovererConfig.applyAttributeMap(attributeMap);
     }
 
     private void setSelectedRules(Set<DefaultRule> rules) {
-        this.rules = rules;
+        this.rules.clear();
+        this.rules.addAll(rules);
     }
 
     @Override
@@ -96,16 +110,12 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         return URI.createURI(fileLocations.getOutputFolder());
     }
 
-    public String getAnalystConfig(String analystId, String key) {
-        Map<String, String> analystConfig = analystConfigs.get(analystId);
-        if (analystConfig == null) {
-            return null;
-        }
-        return analystConfig.get(key);
+    public ServiceConfiguration<Analyst> getAnalystConfig() {
+        return analystConfig;
     }
 
-    public Map<String, String> getWholeAnalystConfig(String analystId) {
-        return Collections.unmodifiableMap(analystConfigs.get(analystId));
+    public ServiceConfiguration<Discoverer> getDiscovererConfig() {
+        return discovererConfig;
     }
 
     public void setInputFolder(URI inputFolder) {
@@ -116,15 +126,6 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         fileLocations.setOutputFolder(outputFolder.toString());
     }
 
-    public void setAnalystConfig(String analystId, String key, String value) {
-        Map<String, String> analystConfig = analystConfigs.get(analystId);
-        if (analystConfig == null) {
-            analystConfig = new HashMap<String, String>();
-            analystConfigs.put(analystId, analystConfig);
-        }
-        analystConfig.put(key, value);
-    }
-
     @Override
     public Map<String, Object> toMap() {
         final Map<String, Object> result = super.toMap();
@@ -132,9 +133,8 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         result.put(RULE_ENGINE_INPUT_PATH, getInputFolder());
         result.put(RULE_ENGINE_OUTPUT_PATH, getOutputFolder());
         result.put(RULE_ENGINE_SELECTED_RULES, serializeRules(rules));
-        for (String analystId : analystConfigs.keySet()) {
-            result.put(RULE_ENGINE_ANALYST_CONFIG_PREFIX + analystId, analystConfigs.get(analystId));
-        }
+        result.putAll(analystConfig.toMap());
+        result.putAll(discovererConfig.toMap());
 
         return result;
     }

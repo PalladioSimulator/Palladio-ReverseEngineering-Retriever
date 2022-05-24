@@ -16,8 +16,6 @@
       <import plugin="org.eclipse.xtend.lib"/>
       <import plugin="org.emftext.language.java"/>
       <import plugin="org.palladiosimulator.pcm"/>
-      <import plugin="org.palladiosimulator.somox.analyzer.rules.jax_rs"/>
-      <import plugin="org.palladiosimulator.somox.analyzer.rules.spring"/>
       <import plugin="jamopp.parser"/>
       <import plugin="jamopp.parser.jdt"/>
       <import plugin="jamopp.resource"/>
@@ -51,7 +49,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.palladiosimulator.somox.analyzer.rules.jax_rs"
+         id="org.palladiosimulator.somox.analyzer.rules.impl"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -59,13 +57,6 @@
 
    <plugin
          id="org.palladiosimulator.somox.analyzer.rules.main"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.palladiosimulator.somox.analyzer.rules.spring"
          download-size="0"
          install-size="0"
          version="0.0.0"

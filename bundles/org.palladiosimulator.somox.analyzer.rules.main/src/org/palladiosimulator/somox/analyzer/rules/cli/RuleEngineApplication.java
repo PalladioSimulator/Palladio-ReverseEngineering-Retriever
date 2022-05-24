@@ -11,6 +11,7 @@ import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
+import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
 
@@ -59,7 +60,7 @@ public class RuleEngineApplication implements IApplication {
 
         final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForPath(in, out);
 
-        RuleEngineAnalyzer.executeWith(in, out, roots, rules);
+        RuleEngineAnalyzer.executeWith(in, out, CompilationUnitWrapper.wrap(roots), rules);
 
         return 0;
     }

@@ -1,12 +1,14 @@
 package org.palladiosimulator.somox.analyzer.rules.engine.test;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 
 public class ACMETest extends RuleEngineTest {
 
     protected ACMETest() {
-        super("external/acmeair-master", DefaultRule.JAX_RS);
+        super("external/acmeair-1.2.0", DefaultRule.JAX_RS_EMFTEXT);
     }
 
     /**
@@ -16,5 +18,7 @@ public class ACMETest extends RuleEngineTest {
      */
     @Test
     void test() {
+        assertTrue(containsComponent("com_acmeair_entities_Flight"));
+        assertTrue(containsComponent("com_acmeair_wxs_service_FlightServiceImpl"));
     }
 }

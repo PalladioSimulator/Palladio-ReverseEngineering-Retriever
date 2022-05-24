@@ -24,6 +24,7 @@ import org.palladiosimulator.pcm.repository.Interface;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.repository.impl.RepositoryImpl;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
+import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
 import org.apache.log4j.Logger;
@@ -31,36 +32,37 @@ import org.apache.log4j.Logger;
 abstract class RuleEngineTest {
     // Seperate instances for every child test
     private final Logger log = Logger.getLogger(this.getClass());
-    
+
     public static final Path TEST_DIR = Paths.get("res/");
     public static final Path OUT_DIR = TEST_DIR.resolve("out");
 
     private Set<DefaultRule> rules;
     private RepositoryImpl repo;
-    
+
     private List<RepositoryComponent> components;
     private List<DataType> datatypes;
     private List<FailureType> failuretypes;
     private List<Interface> interfaces;
 
-
     /**
-     * Tests the basic functionality of the RuleEngineAnalyzer.
-     * Requires it to execute without an exception and produce an output file.
+     * Tests the basic functionality of the RuleEngineAnalyzer. Requires it to execute without an
+     * exception and produce an output file.
      * 
-     * @param projectDirectory the name of the project directory that will be analyzed
+     * @param projectDirectory
+     *            the name of the project directory that will be analyzed
      */
     protected RuleEngineTest(String projectDirectory, DefaultRule... rules) {
         final Path inPath = TEST_DIR.resolve(projectDirectory);
         final List<CompilationUnitImpl> model = ParserAdapter.generateModelForPath(inPath, OUT_DIR);
         this.rules = Set.of(rules);
-        RuleEngineAnalyzer.executeWith(inPath, OUT_DIR, model, this.rules);
+        RuleEngineAnalyzer.executeWith(inPath, OUT_DIR, CompilationUnitWrapper.wrap(model), this.rules);
 
-        Path repoPath = Paths.get(OUT_DIR.toString(), "pcm.repository");
-        assertTrue(repoPath.toFile().exists());
-        
+        Path repoPath = Paths.get(OUT_DIR.toString(), "emfTextPcm.repository");
+        assertTrue(repoPath.toFile()
+            .exists());
+
         repo = loadRepository(URI.createFileURI(repoPath.toString()));
-        
+
         components = repo.getComponents__Repository();
         datatypes = repo.getDataTypes__Repository();
         failuretypes = repo.getFailureTypes__Repository();
@@ -71,17 +73,18 @@ abstract class RuleEngineTest {
         log.error("failuretypes: " + failuretypes.size());
         log.error("interfaces: " + interfaces.size());
     }
-    
+
     abstract void test();
-	
-	@AfterEach
-	void cleanUp() {
-        File target = new File(OUT_DIR.toFile(), this.getClass().getSimpleName() + ".repository");
+
+    @AfterEach
+    void cleanUp() {
+        File target = new File(OUT_DIR.toFile(), this.getClass()
+            .getSimpleName() + ".repository");
         target.delete();
         if (!new File(OUT_DIR.toFile(), "pcm.repository").renameTo(target)) {
             log.error("Could not save created repository to \"" + target.getAbsolutePath() + "\"!");
         }
-	}
+    }
 
     public RepositoryImpl getRepo() {
         return repo;
@@ -106,22 +109,35 @@ abstract class RuleEngineTest {
     public List<Interface> getInterfaces() {
         return Collections.unmodifiableList(interfaces);
     }
-    
+
+    public boolean containsComponent(String name) {
+        return getComponents().stream()
+            .anyMatch(x -> x.getEntityName()
+                .equals(name));
+    }
+
+    public boolean containsOperationInterface(String name) {
+        return getInterfaces().stream()
+            .anyMatch(x -> x.getEntityName()
+                .equals(name));
+    }
+
     public static RepositoryImpl loadRepository(URI repoXMI) {
-        final List<EObject> contents = new ResourceSetImpl().getResource(repoXMI, true).getContents();
-        
+        final List<EObject> contents = new ResourceSetImpl().getResource(repoXMI, true)
+            .getContents();
+
         assertEquals(1, contents.size());
         assertTrue(contents.get(0) instanceof RepositoryImpl);
-        
+
         // TODO activate this again when all tests are green
-        //validate(contents.get(0));
-        
+        // validate(contents.get(0));
+
         return (RepositoryImpl) contents.get(0);
     }
-    
-    public static void validate(EObject eObject) 
-    {
+
+    public static void validate(EObject eObject) {
         EcoreUtil.resolveAll(eObject);
-        assertEquals(Diagnostic.OK, Diagnostician.INSTANCE.validate(eObject).getSeverity());
+        assertEquals(Diagnostic.OK, Diagnostician.INSTANCE.validate(eObject)
+            .getSeverity());
     }
 }
