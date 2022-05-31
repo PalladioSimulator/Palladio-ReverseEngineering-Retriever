@@ -140,7 +140,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
                 for (String path : eclipseRoots.keySet()) {
                     CompilationUnitWrapper wrappedUnit = new CompilationUnitWrapper(eclipseRoots.get(path));
                     wrappedRoots.add(wrappedUnit);
-                    blackboard.addCompilationUnitLocation(wrappedUnit, Path.of(path));
+                    blackboard.putCompilationUnitLocation(wrappedUnit, Path.of(path));
                 }
             }
 
@@ -205,7 +205,7 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
                 Files.walk(root)
                     .filter(Files::isRegularFile)
                     .filter(x -> x.endsWith(guessedPath))
-                    .forEach(x -> blackboard.addCompilationUnitLocation(compilationUnitWrapper, x));
+                    .forEach(x -> blackboard.putCompilationUnitLocation(compilationUnitWrapper, x));
             } catch (IOException e) {
                 LOG.warn("An IOException occurred while searching for the files containing the CompilationUnits!");
             }
@@ -293,31 +293,29 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         boolean processedLocationless = false;
         // For each unit, execute rules
         for (final CompilationUnitWrapper u : model) {
-            Set<Path> unitPaths = blackboard.getCompilationUnitLocations(u);
-            if (unitPaths.isEmpty()) {
-                if (!processedLocationless) {
-                    // Execute rules for all CompilationUnits without associated files
-                    for (final DefaultRule rule : rules) {
-                        rule.getRule(blackboard)
-                            .processRules(null);
-                    }
-                    processedLocationless = true;
+            Path unitPath = blackboard.getCompilationUnitLocation(u);
+            if (unitPath == null) {
+                if (processedLocationless) {
+                    continue;
                 }
-                continue;
+                // Execute rules for all CompilationUnits without associated files
+                for (final DefaultRule rule : rules) {
+                    rule.getRule(blackboard)
+                        .processRules(null);
+                }
+                processedLocationless = true;
             }
 
-            // TODO it could happen that a build file is a compilation unit as well.
-            // In that case, the build file rule could not assume that all
+            // TODO It could *hypothetically* happen that a build file is a compilation unit as
+            // well. In that case, the build file rule could not assume that all
             // compilation units have been found.
 
             // It is assumed that files with compilation units cannot be build files
-            buildPaths.removeAll(unitPaths);
+            buildPaths.remove(unitPath);
 
             for (final DefaultRule rule : rules) {
-                for (final Path path : unitPaths) {
-                    rule.getRule(blackboard)
-                        .processRules(path);
-                }
+                rule.getRule(blackboard)
+                    .processRules(unitPath);
             }
         }
         LOG.info("Applied rules to the compilation units");

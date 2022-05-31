@@ -22,7 +22,7 @@ class GradleRules extends IRule {
 			var parentPath = path.parent;
 			for (unit : blackboard.compilationUnits) {
 				var isChild = false;
-				for (unitPath : blackboard.getCompilationUnitLocations(unit)) {
+				for (unitPath : blackboard.getCompilationUnitLocation(unit)) {
 					if (unitPath.startsWith(parentPath)) {
 						// The compilation unit is a child of this build file
 						isChild = true;

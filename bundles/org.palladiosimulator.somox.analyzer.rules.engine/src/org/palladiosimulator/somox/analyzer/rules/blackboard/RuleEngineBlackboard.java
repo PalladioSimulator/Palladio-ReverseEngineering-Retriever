@@ -25,7 +25,7 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
 
     private Map<String, ExtractionResult> extractionResults;
     private Set<CompilationUnitWrapper> compilationUnits;
-    private Map<CompilationUnitWrapper, Set<Path>> compilationUnitLocations;
+    private Map<CompilationUnitWrapper, Path> compilationUnitLocations;
     private Map<RepositoryComponent, CompilationUnitWrapper> repositoryComponentLocations;
     private Map<Entity, CompilationUnitWrapper> entityLocations;
     private Map<Path, Set<CompilationUnitWrapper>> systemAssociations;
@@ -52,22 +52,12 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
         return Collections.unmodifiableMap(extractionResults);
     }
 
-    public void addCompilationUnitLocation(CompilationUnitWrapper compilationUnit, Path path) {
-        Set<Path> paths = compilationUnitLocations.get(compilationUnit);
-        if (paths == null) {
-            paths = new HashSet<>();
-            compilationUnitLocations.put(compilationUnit, paths);
-        }
-        paths.add(path.normalize());
+    public Path putCompilationUnitLocation(CompilationUnitWrapper compilationUnit, Path path) {
+        return compilationUnitLocations.put(compilationUnit, path);
     }
 
-    public Set<Path> getCompilationUnitLocations(CompilationUnitWrapper compilationUnit) {
-        Set<Path> paths = compilationUnitLocations.get(compilationUnit);
-        if (paths == null) {
-            return Collections.emptySet();
-        } else {
-            return Collections.unmodifiableSet(paths);
-        }
+    public Path getCompilationUnitLocation(CompilationUnitWrapper compilationUnit) {
+        return compilationUnitLocations.get(compilationUnit);
     }
 
     public CompilationUnitWrapper putRepositoryComponentLocation(RepositoryComponent repoComp,
@@ -80,21 +70,21 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
         return Collections.unmodifiableMap(repositoryComponentLocations);
     }
 
-    public Map<Entity, Set<Path>> getEntityPaths() {
-        final Map<Entity, Set<Path>> entityPaths = new HashMap<>();
+    public Map<Entity, Path> getEntityPaths() {
+        final Map<Entity, Path> entityPaths = new HashMap<>();
 
         for (Entity entity : entityLocations.keySet()) {
             CompilationUnitWrapper compilationUnit = entityLocations.get(entity);
             if (compilationUnit == null)
                 continue;
-            Set<Path> path = compilationUnitLocations.get(compilationUnit);
+            Path path = compilationUnitLocations.get(compilationUnit);
             if (path == null)
                 continue;
             entityPaths.put(entity, path);
         }
 
         for (Entry<System, Path> entry : systemPaths.entrySet()) {
-            entityPaths.put(entry.getKey(), Set.of(entry.getValue()));
+            entityPaths.put(entry.getKey(), entry.getValue());
         }
 
         return Collections.unmodifiableMap(entityPaths);
@@ -133,10 +123,10 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
         }
 
         Set<CompilationUnitWrapper> compUnit = new HashSet<>();
-        for (Entry<CompilationUnitWrapper, Set<Path>> entry : compilationUnitLocations.entrySet()) {
+        for (Entry<CompilationUnitWrapper, Path> entry : compilationUnitLocations.entrySet()) {
             // Path::equals is enough because the working directory does not change
             if (entry.getValue()
-                .contains(path.normalize())) {
+                .equals(path.normalize())) {
                 compUnit.add(entry.getKey());
             }
         }
