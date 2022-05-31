@@ -40,7 +40,7 @@ public class BasicTest extends RuleEngineTest {
      */
     @Test
     void test() {
-        assertTrue(OUT_DIR.resolve("emfTextPcm.repository")
+        assertTrue(OUT_DIR.resolve("pcm.repository")
             .toFile()
             .exists());
     }
@@ -117,7 +117,7 @@ public class BasicTest extends RuleEngineTest {
         final Path inPath = TEST_DIR.resolve(PROJECT_NAME);
         final List<CompilationUnitImpl> model = ParserAdapter.generateModelForPath(inPath, OUT_DIR);
         RuleEngineAnalyzer.executeWith(inPath, OUT_DIR, CompilationUnitWrapper.wrap(model), getRules());
-        Path repoPath = OUT_DIR.resolve("emfTextPcm.repository");
+        Path repoPath = OUT_DIR.resolve("pcm.repository");
         RepositoryImpl repo = loadRepository(URI.createFileURI(repoPath.toString()));
         conflictingMethods = getConflictingMethods(repo.getInterfaces__Repository());
 
