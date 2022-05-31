@@ -34,6 +34,9 @@ class SpringRules extends IRule {
 	
 	def boolean processRuleForCompUnit(CompilationUnit unit) {
 		val pcmDetector = blackboard.getEclipsePCMDetector()
+		if (pcmDetector === null) {
+			return false
+		}
 		
 		// Abort if there is no CompilationUnit at the specified path
 		if (unit === null) {

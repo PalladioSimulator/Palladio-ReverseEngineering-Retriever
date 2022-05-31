@@ -29,6 +29,9 @@ class JaxRSRules extends IRule{
 	
 	def boolean processRuleForCompUnit(CompilationUnitImpl unit) {
 		val pcmDetector = blackboard.getEMFTextPCMDetector()
+		if (pcmDetector === null) {
+		return false
+		}
 
 		// technology based and general recognition
 		val isConverter = isUnitAnnotatedWithName(unit, "Converter")

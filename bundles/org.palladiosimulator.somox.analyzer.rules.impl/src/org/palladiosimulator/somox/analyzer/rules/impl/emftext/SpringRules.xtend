@@ -32,6 +32,9 @@ class SpringRules extends IRule {
 	
 	def boolean processRuleForCompUnit(CompilationUnitImpl unit) {
 		val pcmDetector = blackboard.getEMFTextPCMDetector()
+		if (pcmDetector === null) {
+			return false
+		}
 		
 		// Abort if there is no CompilationUnit at the specified path
 		if (unit === null) {

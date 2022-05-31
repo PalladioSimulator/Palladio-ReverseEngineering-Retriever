@@ -29,6 +29,9 @@ class JaxRSRules extends IRule{
 	
 	def boolean processRuleForCompUnit(CompilationUnit unit) {
 		val pcmDetector = blackboard.getEclipsePCMDetector()
+		if (pcmDetector === null) {
+		return false
+		}
 
 		// technology based and general recognition
 		val isConverter = isUnitAnnotatedWithName(unit, "Converter")

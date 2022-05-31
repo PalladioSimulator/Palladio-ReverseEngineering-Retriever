@@ -125,21 +125,26 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
             final URI out = CommonPlugin.asLocalURI(ruleEngineConfiguration.getOutputFolder());
             final Path outPath = Paths.get(out.devicePath());
 
+            final boolean useEMFTextParser = ruleEngineConfiguration.getUseEMFTextParser();
+
             final Set<DefaultRule> rules = ruleEngineConfiguration.getSelectedRules();
 
-            // Collect CompilationUnits of both kinds
-            final Map<String, CompilationUnit> eclipseRoots = fetchEclipseCompilationUnits();
+            // Collect CompilationUnits, depending on user selection
             final List<CompilationUnitWrapper> wrappedRoots = new ArrayList<>();
-            for (String path : eclipseRoots.keySet()) {
-                CompilationUnitWrapper wrappedUnit = new CompilationUnitWrapper(eclipseRoots.get(path));
-                wrappedRoots.add(wrappedUnit);
-                blackboard.addCompilationUnitLocation(wrappedUnit, Path.of(path));
+
+            if (useEMFTextParser) {
+                final List<CompilationUnitImpl> emfTextRoots = ParserAdapter.generateModelForPath(inPath, outPath);
+                wrappedRoots.addAll(CompilationUnitWrapper.wrap(emfTextRoots));
+            } else {
+                final Map<String, CompilationUnit> eclipseRoots = fetchEclipseCompilationUnits();
+                for (String path : eclipseRoots.keySet()) {
+                    CompilationUnitWrapper wrappedUnit = new CompilationUnitWrapper(eclipseRoots.get(path));
+                    wrappedRoots.add(wrappedUnit);
+                    blackboard.addCompilationUnitLocation(wrappedUnit, Path.of(path));
+                }
             }
 
-            final List<CompilationUnitImpl> emfTextRoots = ParserAdapter.generateModelForPath(inPath, outPath);
-            wrappedRoots.addAll(CompilationUnitWrapper.wrap(emfTextRoots));
-
-            executeWith(inPath, outPath, wrappedRoots, rules, blackboard);
+            executeWith(inPath, outPath, wrappedRoots, rules, blackboard, useEMFTextParser);
         } catch (Exception e) {
             throw new ModelAnalyzerException(e.getMessage());
         } finally {
@@ -208,7 +213,8 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
     }
 
     /**
-     * Extracts PCM elements out of an existing JaMoPP model using an IRule file.
+     * Extracts PCM elements out of an existing JaMoPP model using an IRule file. Expects input from
+     * an EMFText Parser.
      *
      * @param projectPath
      *            the project directory
@@ -221,7 +227,26 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
      */
     public static void executeWith(Path projectPath, Path outPath, List<CompilationUnitWrapper> model,
             Set<DefaultRule> rules) {
-        executeWith(projectPath, outPath, model, rules, new RuleEngineBlackboard());
+        executeWith(projectPath, outPath, model, rules, true);
+    }
+
+    /**
+     * Extracts PCM elements out of an existing JaMoPP model using an IRule file.
+     *
+     * @param projectPath
+     *            the project directory
+     * @param outPath
+     *            the output directory
+     * @param model
+     *            the JaMoPP model
+     * @param ruleDoc
+     *            the object containing the rules
+     * @param expectEMFTextParser
+     *            whether to expect the EMFTextParser or the recommended Eclipse JDT Parser
+     */
+    public static void executeWith(Path projectPath, Path outPath, List<CompilationUnitWrapper> model,
+            Set<DefaultRule> rules, boolean expectEMFTextParser) {
+        executeWith(projectPath, outPath, model, rules, new RuleEngineBlackboard(), expectEMFTextParser);
     }
 
     /**
@@ -237,15 +262,22 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
      *            the object containing the rules
      * @param blackboard
      *            the rule engine blackboard
+     * @param expectEMFTextParser
+     *            whether to expect the EMFTextParser or the recommended Eclipse JDT Parser
      */
     private static void executeWith(Path projectPath, Path outPath, List<CompilationUnitWrapper> model,
-            Set<DefaultRule> rules, RuleEngineBlackboard blackboard) {
+            Set<DefaultRule> rules, RuleEngineBlackboard blackboard, boolean expectEMFTextParser) {
 
         // Set up blackboard
-        blackboard.setEMFTextPCMDetector(new EMFTextPCMDetector());
-        blackboard.setEclipsePCMDetector(new EclipsePCMDetector());
+        if (expectEMFTextParser) {
+            blackboard.setEMFTextPCMDetector(new EMFTextPCMDetector());
+        } else {
+            blackboard.setEclipsePCMDetector(new EclipsePCMDetector());
+        }
         blackboard.addCompilationUnits(model);
-        findFilesForCompilationUnits(projectPath, blackboard);
+        if (expectEMFTextParser) {
+            findFilesForCompilationUnits(projectPath, blackboard);
+        }
 
         // Look for build files in projectPath
         Set<Path> buildPaths;
@@ -299,18 +331,21 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         }
         LOG.info("Applied rules to the build files");
 
-        // TODO Which one should be used?
-        // Parses the docker-compose file to get a mapping between microservice names and components
-        // for creating composite components for each microservice
-        final DockerParser emfTextDockerParser = new DockerParser(projectPath, blackboard.getEMFTextPCMDetector());
-        final DockerParser eclipseDockerParser = new DockerParser(projectPath, blackboard.getEclipsePCMDetector());
-
-        final Map<String, List<CompilationUnitWrapper>> mapping = emfTextDockerParser.getMapping();
-        mapping.putAll(eclipseDockerParser.getMapping());
-
         // Creates a PCM repository with systems, components, interfaces and roles
-        emfTextPcm = new EMFTextPCMInstanceCreator(blackboard).createPCM(mapping);
-        eclipsePcm = new EclipsePCMInstanceCreator(blackboard).createPCM(mapping);
+        if (expectEMFTextParser) {
+            // Parses the docker-compose file to get a mapping between microservice names and
+            // components for creating composite components for each microservice
+            final DockerParser emfTextDockerParser = new DockerParser(projectPath, blackboard.getEMFTextPCMDetector());
+            final Map<String, List<CompilationUnitWrapper>> mapping = emfTextDockerParser.getMapping();
+
+            emfTextPcm = new EMFTextPCMInstanceCreator(blackboard).createPCM(mapping);
+        } else {
+            // See just above
+            final DockerParser eclipseDockerParser = new DockerParser(projectPath, blackboard.getEclipsePCMDetector());
+            final Map<String, List<CompilationUnitWrapper>> mapping = eclipseDockerParser.getMapping();
+
+            eclipsePcm = new EclipsePCMInstanceCreator(blackboard).createPCM(mapping);
+        }
 
         // Create the build file systems
         Map<RepositoryComponent, CompilationUnitWrapper> repoCompLocations = blackboard
@@ -345,11 +380,14 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
             }
         }
 
-        // Persist the repository at ./****Pcm.repository
-        ModelSaver.saveRepository(emfTextPcm, outPath.resolve("emfTextPcm")
-            .toString(), false);
-        ModelSaver.saveRepository(eclipsePcm, outPath.resolve("eclipsePcm")
-            .toString(), false);
+        // Persist the repository at ./pcm.repository
+        if (expectEMFTextParser) {
+            ModelSaver.saveRepository(emfTextPcm, outPath.resolve("pcm")
+                .toString(), false);
+        } else {
+            ModelSaver.saveRepository(eclipsePcm, outPath.resolve("pcm")
+                .toString(), false);
+        }
     }
 
     /**
