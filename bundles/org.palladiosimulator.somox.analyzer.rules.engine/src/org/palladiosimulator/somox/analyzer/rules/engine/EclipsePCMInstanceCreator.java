@@ -21,7 +21,6 @@ import org.palladiosimulator.pcm.repository.ParameterModifier;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.generator.fluent.exceptions.FluentApiException;
 import org.palladiosimulator.generator.fluent.repository.api.Repo;
 import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
 import org.palladiosimulator.generator.fluent.repository.structure.components.BasicComponentCreator;
@@ -247,6 +246,7 @@ public class EclipsePCMInstanceCreator {
         return collectionType;
     }
 
+    @SuppressWarnings("static-access")
     private CollectionDataType createCollectionWithTypeArg(String collectionTypeName, ITypeBinding typeArg,
             int typeArgDimensions) {
         // Type argument is primitive
@@ -323,6 +323,7 @@ public class EclipsePCMInstanceCreator {
     }
 
     // TODO creation of CompositeDataTypes
+    @SuppressWarnings("unused")
     private CompositeDataTypeCreator createTypesRecursively(ITypeBinding type) {
         if (existingDataTypesMap.containsKey(wrapName(type))) {
             return existingDataTypesMap.get(wrapName(type));
