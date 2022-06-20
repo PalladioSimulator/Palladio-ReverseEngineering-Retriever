@@ -1,14 +1,16 @@
 package org.palladiosimulator.somox.analyzer.rules.engine.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.ecore.EObject;
@@ -21,12 +23,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.palladiosimulator.pcm.reliability.FailureType;
 import org.palladiosimulator.pcm.repository.DataType;
 import org.palladiosimulator.pcm.repository.Interface;
+import org.palladiosimulator.pcm.repository.OperationInterface;
+import org.palladiosimulator.pcm.repository.OperationSignature;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.repository.impl.RepositoryImpl;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
+
+import com.google.common.collect.Sets;
+
 import org.apache.log4j.Logger;
 
 abstract class RuleEngineTest {
@@ -68,10 +75,10 @@ abstract class RuleEngineTest {
         failuretypes = repo.getFailureTypes__Repository();
         interfaces = repo.getInterfaces__Repository();
 
-        log.error("components: " + components.size());
-        log.error("datatypes: " + datatypes.size());
-        log.error("failuretypes: " + failuretypes.size());
-        log.error("interfaces: " + interfaces.size());
+        log.info("components: " + components.size());
+        log.info("datatypes: " + datatypes.size());
+        log.info("failuretypes: " + failuretypes.size());
+        log.info("interfaces: " + interfaces.size());
     }
 
     abstract void test();
@@ -118,8 +125,42 @@ abstract class RuleEngineTest {
 
     public boolean containsOperationInterface(String name) {
         return getInterfaces().stream()
+            .filter(OperationInterface.class::isInstance)
             .anyMatch(x -> x.getEntityName()
                 .equals(name));
+    }
+
+    public boolean containsOperationSignature(String interfaceName, String signatureName) {
+        return !getOperationSignature(interfaceName, signatureName).isEmpty();
+    }
+
+    public int getSignatureMaxParameterCount(String interfaceName, String signatureName) {
+        Set<OperationSignature> sigs = getOperationSignature(interfaceName, signatureName);
+        return sigs.stream()
+            .map(OperationSignature::getParameters__OperationSignature)
+            .map(List::size)
+            .reduce(0, Math::max);
+    }
+
+    public void assertMaxParameterCount(int expectedMaxParameterCount, String interfaceName, String signatureName) {
+        assertTrue(containsOperationInterface(interfaceName));
+        assertTrue(containsOperationSignature(interfaceName, signatureName));
+        assertEquals(expectedMaxParameterCount, getSignatureMaxParameterCount(interfaceName, signatureName));
+    }
+
+    private Set<OperationSignature> getOperationSignature(String interfaceName, String signatureName) {
+        Set<OperationSignature> sigs = getInterfaces().stream()
+            .filter(OperationInterface.class::isInstance)
+            .map(OperationInterface.class::cast)
+            .filter(x -> x.getEntityName()
+                .equals(interfaceName))
+            .map(x -> x.getSignatures__OperationInterface()
+                .stream()
+                .filter(y -> y.getEntityName()
+                    .equals(signatureName))
+                .collect(Collectors.toSet()))
+            .collect(Collectors.reducing(new HashSet<OperationSignature>(), Sets::union));
+        return sigs;
     }
 
     public static RepositoryImpl loadRepository(URI repoXMI) {

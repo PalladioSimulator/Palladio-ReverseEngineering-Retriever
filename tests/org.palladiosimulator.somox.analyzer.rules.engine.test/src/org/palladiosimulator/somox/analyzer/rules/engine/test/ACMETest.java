@@ -20,5 +20,6 @@ public class ACMETest extends RuleEngineTest {
     void test() {
         assertTrue(containsComponent("com_acmeair_entities_Flight"));
         assertTrue(containsComponent("com_acmeair_wxs_service_FlightServiceImpl"));
+        assertMaxParameterCount(2, "com_acmeair_service_BookingService", "bookFlight");
     }
 }

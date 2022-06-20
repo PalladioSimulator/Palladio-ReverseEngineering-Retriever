@@ -18,8 +18,6 @@ public class JaxRsTest extends RuleEngineTest {
      */
     @Test
     void test() {
-        assertTrue(getComponents().stream()
-            .anyMatch(x -> x.getEntityName()
-                .equals("jax_rs_AConverter")));
+        assertTrue(containsComponent("jax_rs_AConverter"));
     }
 }
