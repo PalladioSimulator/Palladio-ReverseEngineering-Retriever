@@ -1,2 +1,6 @@
-# These owners will be the default owners for everything in this repertoire. Unless a later match takes precedence, they will be requested for review when someone opens a pull request.
-* @YvesKirschner
+# These owners will be the default owners for everything in this repertoire.
+# Unless a later match takes precedence, they will be requested for review when someone opens a pull request.
+*                         @YvesKirschner
+
+# These owners are the default owners for all build and deployment workflows.
+.github/workflows/*      @Nicolas-Boltz
