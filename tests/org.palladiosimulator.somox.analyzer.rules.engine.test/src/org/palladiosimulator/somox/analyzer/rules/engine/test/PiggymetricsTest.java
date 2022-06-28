@@ -20,6 +20,6 @@ public class PiggymetricsTest extends RuleEngineTest {
     void test() {
         assertTrue(containsComponent("com_piggymetrics_account_client_AuthServiceClient"));
         assertTrue(containsComponent("com_piggymetrics_notification_service_NotificationServiceImpl"));
-        assertMaxParameterCount(1, "com_piggymetrics_auth_config_OAuth2AuthorizationConfig", "configure");
+        assertMaxParameterCount(2, "com_piggymetrics_notification_service_RecipientService", "markNotified");
     }
 }

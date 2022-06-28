@@ -19,7 +19,7 @@ public class PetclinicTest extends RuleEngineTest {
     @Test
     void test() {
         assertTrue(containsComponent("org_springframework_samples_petclinic_api_application_VisitsServiceClient"));
-        assertMaxParameterCount(1, "org_springframework_samples_petclinic_vets_model_Specialty", "setId");
-        assertMaxParameterCount(0, "org_springframework_samples_petclinic_vets_model_Specialty", "getId");
+        assertMaxParameterCount(1, "org_springframework_samples_petclinic_customers_model_PetRepository", "findPetTypeById");
+        assertMaxParameterCount(0, "org_springframework_samples_petclinic_customers_model_PetRepository", "findPetTypes");
     }
 }
