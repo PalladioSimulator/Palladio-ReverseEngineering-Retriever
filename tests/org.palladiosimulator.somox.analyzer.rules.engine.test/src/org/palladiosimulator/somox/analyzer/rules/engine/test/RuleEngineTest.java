@@ -4,22 +4,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.palladiosimulator.pcm.reliability.FailureType;
 import org.palladiosimulator.pcm.repository.DataType;
 import org.palladiosimulator.pcm.repository.Interface;
@@ -28,9 +27,10 @@ import org.palladiosimulator.pcm.repository.OperationSignature;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.repository.impl.RepositoryImpl;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
-import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
-import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
+import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
+import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
+import org.somox.analyzer.ModelAnalyzerException;
 
 import com.google.common.collect.Sets;
 
@@ -40,9 +40,11 @@ abstract class RuleEngineTest {
     // Seperate instances for every child test
     private final Logger log = Logger.getLogger(this.getClass());
 
-    public static final Path TEST_DIR = Paths.get("res/");
-    public static final Path OUT_DIR = TEST_DIR.resolve("out");
+    public static final URI TEST_DIR = CommonPlugin
+        .asLocalURI(URI.createFileURI(URI.decode(new File("res").getAbsolutePath())));
+    public static final URI OUT_DIR = TEST_DIR.appendSegment("out");
 
+    private RuleEngineConfiguration config = new RuleEngineConfiguration();
     private Set<DefaultRule> rules;
     private RepositoryImpl repo;
 
@@ -59,16 +61,26 @@ abstract class RuleEngineTest {
      *            the name of the project directory that will be analyzed
      */
     protected RuleEngineTest(String projectDirectory, DefaultRule... rules) {
-        final Path inPath = TEST_DIR.resolve(projectDirectory);
-        final List<CompilationUnitImpl> model = ParserAdapter.generateModelForPath(inPath, OUT_DIR);
+        RuleEngineBlackboard blackboard = new RuleEngineBlackboard();
+        RuleEngineAnalyzer analyzer = new RuleEngineAnalyzer(blackboard);
+
         this.rules = Set.of(rules);
-        RuleEngineAnalyzer.executeWith(inPath, OUT_DIR, CompilationUnitWrapper.wrap(model), this.rules);
 
-        Path repoPath = Paths.get(OUT_DIR.toString(), "pcm.repository");
-        assertTrue(repoPath.toFile()
-            .exists());
+        config.setInputFolder(TEST_DIR.appendSegments(projectDirectory.split("/")));
+        config.setOutputFolder(OUT_DIR);
+        config.setUseEMFTextParser(true);
+        config.setSelectedRules(this.rules);
+        try {
+            analyzer.analyze(config, null, null);
+        } catch (ModelAnalyzerException e) {
+            Assertions.fail(e);
+        }
 
-        repo = loadRepository(URI.createFileURI(repoPath.toString()));
+        String repoPath = OUT_DIR.appendSegment("pcm.repository")
+            .devicePath();
+        assertTrue(new File(repoPath).exists());
+
+        repo = loadRepository(URI.createFileURI(repoPath));
 
         components = repo.getComponents__Repository();
         datatypes = repo.getDataTypes__Repository();
@@ -85,12 +97,16 @@ abstract class RuleEngineTest {
 
     @AfterEach
     void cleanUp() {
-        File target = new File(OUT_DIR.toFile(), this.getClass()
+        File target = new File(OUT_DIR.devicePath(), this.getClass()
             .getSimpleName() + ".repository");
         target.delete();
-        if (!new File(OUT_DIR.toFile(), "pcm.repository").renameTo(target)) {
+        if (!new File(OUT_DIR.devicePath(), "pcm.repository").renameTo(target)) {
             log.error("Could not save created repository to \"" + target.getAbsolutePath() + "\"!");
         }
+    }
+
+    public RuleEngineConfiguration getConfig() {
+        return config;
     }
 
     public RepositoryImpl getRepo() {

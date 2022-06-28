@@ -5,11 +5,9 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.nio.file.Path;
+import java.io.File;
 import java.util.List;
 
-import org.eclipse.emf.common.util.URI;
-import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.pcm.repository.CollectionDataType;
@@ -21,9 +19,9 @@ import org.palladiosimulator.pcm.repository.PrimitiveDataType;
 import org.palladiosimulator.pcm.repository.PrimitiveTypeEnum;
 import org.palladiosimulator.pcm.repository.impl.RepositoryImpl;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
-import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
-import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
+import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
+import org.somox.analyzer.ModelAnalyzerException;
 
 public class BasicTest extends RuleEngineTest {
 
@@ -40,9 +38,8 @@ public class BasicTest extends RuleEngineTest {
      */
     @Test
     void test() {
-        assertTrue(OUT_DIR.resolve("pcm.repository")
-            .toFile()
-            .exists());
+        assertTrue(new File(OUT_DIR.appendSegment("pcm.repository")
+            .devicePath()).exists());
     }
 
     @Disabled("This bug is inherited from Palladio, this can only be fixed after it is fixed there.")
@@ -99,9 +96,12 @@ public class BasicTest extends RuleEngineTest {
      * The RuleEngine produced inconsistent results if executed multiple times. Arguments and
      * methods appear multiple times. This probably has something to do with (discouraged) static
      * states somewhere in the stack.
+     * 
+     * @throws ModelAnalyzerException
+     *             forwarded from RuleEngineAnalyzer. Should cause the test to fail.
      */
     @Test
-    void testRepeatability() {
+    void testRepeatability() throws ModelAnalyzerException {
         OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
         int firstIntArgCount = 0;
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
@@ -114,11 +114,12 @@ public class BasicTest extends RuleEngineTest {
         }
 
         // Run the RuleEngine again on the same project
-        final Path inPath = TEST_DIR.resolve(PROJECT_NAME);
-        final List<CompilationUnitImpl> model = ParserAdapter.generateModelForPath(inPath, OUT_DIR);
-        RuleEngineAnalyzer.executeWith(inPath, OUT_DIR, CompilationUnitWrapper.wrap(model), getRules());
-        Path repoPath = OUT_DIR.resolve("pcm.repository");
-        RepositoryImpl repo = loadRepository(URI.createFileURI(repoPath.toString()));
+        RuleEngineBlackboard blackboard = new RuleEngineBlackboard();
+        RuleEngineAnalyzer analyzer = new RuleEngineAnalyzer(blackboard);
+
+        analyzer.analyze(getConfig(), null, null);
+
+        RepositoryImpl repo = loadRepository(OUT_DIR.appendSegment("pcm.repository"));
         conflictingMethods = getConflictingMethods(repo.getInterfaces__Repository());
 
         int secondIntArgCount = 0;

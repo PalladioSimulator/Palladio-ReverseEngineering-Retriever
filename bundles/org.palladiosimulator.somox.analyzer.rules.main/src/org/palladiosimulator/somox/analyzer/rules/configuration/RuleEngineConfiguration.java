@@ -97,7 +97,7 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         discovererConfig.applyAttributeMap(attributeMap);
     }
 
-    private void setSelectedRules(Set<DefaultRule> rules) {
+    public void setSelectedRules(Set<DefaultRule> rules) {
         this.rules.clear();
         this.rules.addAll(rules);
     }
