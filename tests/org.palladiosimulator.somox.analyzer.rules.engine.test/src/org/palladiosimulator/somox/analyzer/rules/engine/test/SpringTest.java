@@ -1,6 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.engine.test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -9,7 +8,7 @@ import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 public class SpringTest extends RuleEngineTest {
 
     protected SpringTest() {
-        super("SpringProject", DefaultRule.SPRING_EMFTEXT);
+        super("SpringProject", DefaultRule.SPRING, DefaultRule.SPRING_EMFTEXT);
     }
 
     /**
@@ -19,11 +18,6 @@ public class SpringTest extends RuleEngineTest {
      */
     @Test
     void test() {
-        assertEquals(1, getComponents().size());
-        assertEquals(0, getDatatypes().size());
-        assertEquals(0, getFailuretypes().size());
-        assertEquals(0, getInterfaces().size());
-
         assertTrue(containsComponent("spring_AComponent"));
     }
 }

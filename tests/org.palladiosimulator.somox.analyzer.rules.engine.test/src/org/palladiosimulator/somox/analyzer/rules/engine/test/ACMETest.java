@@ -8,7 +8,7 @@ import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 public class ACMETest extends RuleEngineTest {
 
     protected ACMETest() {
-        super("external/acmeair-1.2.0", DefaultRule.JAX_RS_EMFTEXT);
+        super("external/acmeair-1.2.0", DefaultRule.JAX_RS, DefaultRule.JAX_RS_EMFTEXT);
     }
 
     /**

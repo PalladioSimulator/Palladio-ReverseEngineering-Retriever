@@ -8,7 +8,7 @@ import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 public class PetclinicTest extends RuleEngineTest {
 
     protected PetclinicTest() {
-        super("external/spring-petclinic-microservices-2.3.6", DefaultRule.SPRING_EMFTEXT);
+        super("external/spring-petclinic-microservices-2.3.6", DefaultRule.SPRING, DefaultRule.SPRING_EMFTEXT);
     }
 
     /**
@@ -19,7 +19,9 @@ public class PetclinicTest extends RuleEngineTest {
     @Test
     void test() {
         assertTrue(containsComponent("org_springframework_samples_petclinic_api_application_VisitsServiceClient"));
-        assertMaxParameterCount(1, "org_springframework_samples_petclinic_customers_model_PetRepository", "findPetTypeById");
-        assertMaxParameterCount(0, "org_springframework_samples_petclinic_customers_model_PetRepository", "findPetTypes");
+        assertMaxParameterCount(1, "org_springframework_samples_petclinic_customers_model_PetRepository",
+                "findPetTypeById");
+        assertMaxParameterCount(0, "org_springframework_samples_petclinic_customers_model_PetRepository",
+                "findPetTypes");
     }
 }

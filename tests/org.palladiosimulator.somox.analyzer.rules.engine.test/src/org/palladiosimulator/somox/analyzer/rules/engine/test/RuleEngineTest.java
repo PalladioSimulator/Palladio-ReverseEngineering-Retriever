@@ -30,9 +30,13 @@ import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
+import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
 import org.somox.analyzer.ModelAnalyzerException;
 
 import com.google.common.collect.Sets;
+
+import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
+import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 import org.apache.log4j.Logger;
 
@@ -63,16 +67,20 @@ abstract class RuleEngineTest {
     protected RuleEngineTest(String projectDirectory, DefaultRule... rules) {
         RuleEngineBlackboard blackboard = new RuleEngineBlackboard();
         RuleEngineAnalyzer analyzer = new RuleEngineAnalyzer(blackboard);
+        JavaDiscoverer discoverer = new JavaDiscoverer();
 
         this.rules = Set.of(rules);
 
         config.setInputFolder(TEST_DIR.appendSegments(projectDirectory.split("/")));
         config.setOutputFolder(OUT_DIR);
-        config.setUseEMFTextParser(true);
+        config.setUseEMFTextParser(false);
         config.setSelectedRules(this.rules);
+
         try {
+            discoverer.create(config, blackboard)
+                .execute(null);
             analyzer.analyze(config, null, null);
-        } catch (ModelAnalyzerException e) {
+        } catch (ModelAnalyzerException | JobFailedException | UserCanceledException e) {
             Assertions.fail(e);
         }
 

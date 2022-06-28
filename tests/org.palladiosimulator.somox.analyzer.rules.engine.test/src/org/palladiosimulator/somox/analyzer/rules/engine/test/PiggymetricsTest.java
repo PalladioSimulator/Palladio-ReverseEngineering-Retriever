@@ -8,7 +8,7 @@ import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 public class PiggymetricsTest extends RuleEngineTest {
 
     protected PiggymetricsTest() {
-        super("external/piggymetrics-spring.version.2.0.3", DefaultRule.SPRING_EMFTEXT);
+        super("external/piggymetrics-spring.version.2.0.3", DefaultRule.SPRING, DefaultRule.SPRING_EMFTEXT);
     }
 
     /**

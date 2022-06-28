@@ -21,12 +21,16 @@ import org.palladiosimulator.pcm.repository.impl.RepositoryImpl;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
+import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
 import org.somox.analyzer.ModelAnalyzerException;
+
+import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
+import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 public class BasicTest extends RuleEngineTest {
 
     private static final String PROJECT_NAME = "BasicProject";
-    private static final DefaultRule[] RULES = { DefaultRule.JAX_RS_EMFTEXT };
+    private static final DefaultRule[] RULES = { DefaultRule.JAX_RS, DefaultRule.JAX_RS_EMFTEXT };
 
     protected BasicTest() {
         super(PROJECT_NAME, RULES);
@@ -99,9 +103,13 @@ public class BasicTest extends RuleEngineTest {
      * 
      * @throws ModelAnalyzerException
      *             forwarded from RuleEngineAnalyzer. Should cause the test to fail.
+     * @throws UserCanceledException
+     *             should not happen since no user is in the loop.
+     * @throws JobFailedException
+     *             forwarded from JavaDiscoverer. Should cause the test to fail.
      */
     @Test
-    void testRepeatability() throws ModelAnalyzerException {
+    void testRepeatability() throws ModelAnalyzerException, JobFailedException, UserCanceledException {
         OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
         int firstIntArgCount = 0;
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
@@ -116,6 +124,9 @@ public class BasicTest extends RuleEngineTest {
         // Run the RuleEngine again on the same project
         RuleEngineBlackboard blackboard = new RuleEngineBlackboard();
         RuleEngineAnalyzer analyzer = new RuleEngineAnalyzer(blackboard);
+        JavaDiscoverer discoverer = new JavaDiscoverer();
+        discoverer.create(getConfig(), blackboard)
+            .execute(null);
 
         analyzer.analyze(getConfig(), null, null);
 
