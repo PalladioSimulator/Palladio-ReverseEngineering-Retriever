@@ -21,6 +21,7 @@ import org.palladiosimulator.pcm.repository.ParameterModifier;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
+import org.palladiosimulator.generator.fluent.exceptions.FluentApiException;
 import org.palladiosimulator.generator.fluent.repository.api.Repo;
 import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
 import org.palladiosimulator.generator.fluent.repository.structure.components.BasicComponentCreator;
@@ -114,7 +115,16 @@ public class EclipsePCMInstanceCreator {
                 .map(relation -> relation.getOperationInterface())
                 .collect(Collectors.toSet());
             for (ITypeBinding realInterface : realInterfaces) {
-                pcmComp.provides(create.fetchOfOperationInterface(wrapName(realInterface)), "dummy name");
+                try {
+                    pcmComp.provides(create.fetchOfOperationInterface(wrapName(realInterface)), "dummy name");
+                } catch (FluentApiException e) {
+                    // Add the interface on-demand if it was not in the model previously.
+                    // This is necessary for interfaces that were not in the class path of the java
+                    // parser.
+                    create.newOperationInterface()
+                        .withName(wrapName(realInterface));
+                    pcmComp.provides(create.fetchOfOperationInterface(wrapName(realInterface)), "dummy name");
+                }
             }
 
             final List<List<VariableDeclaration>> requiredIs = blackboard.getEclipsePCMDetector()
@@ -126,7 +136,16 @@ public class EclipsePCMInstanceCreator {
                 .collect(Collectors.toSet());
 
             for (ITypeBinding requInter : requireInterfaces) {
-                pcmComp.requires(create.fetchOfOperationInterface(wrapName(requInter)), "dummy require name");
+                try {
+                    pcmComp.requires(create.fetchOfOperationInterface(wrapName(requInter)), "dummy require name");
+                } catch (FluentApiException e) {
+                    // Add the interface on-demand if it was not in the model previously.
+                    // This is necessary for interfaces that were not in the class path of the java
+                    // parser.
+                    create.newOperationInterface()
+                        .withName(wrapName(requInter));
+                    pcmComp.requires(create.fetchOfOperationInterface(wrapName(requInter)), "dummy require name");
+                }
             }
             BasicComponent builtComp = pcmComp.build();
             blackboard.putRepositoryComponentLocation(builtComp, new CompilationUnitWrapper(comp));
