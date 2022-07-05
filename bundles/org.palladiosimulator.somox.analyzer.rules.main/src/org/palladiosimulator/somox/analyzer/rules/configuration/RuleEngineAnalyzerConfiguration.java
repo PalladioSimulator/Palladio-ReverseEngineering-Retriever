@@ -10,7 +10,7 @@ import de.uka.ipd.sdq.workflow.launchconfig.AbstractWorkflowBasedRunConfiguratio
  */
 public class RuleEngineAnalyzerConfiguration extends AbstractWorkflowBasedRunConfiguration {
 
-    RuleEngineConfiguration ruleEngineConfiguration;
+    private RuleEngineConfiguration ruleEngineConfiguration;
 
     @Override
     public void setDefaults() {

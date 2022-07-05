@@ -52,7 +52,7 @@ import org.palladiosimulator.generator.fluent.repository.structure.types.Composi
 public class EMFTextPCMInstanceCreator {
     private static final Logger LOG = Logger.getLogger(EMFTextPCMInstanceCreator.class);
 
-    private final static String REPO_NAME = "Software Architecture Repository";
+    private static final String REPO_NAME = "Software Architecture Repository";
     private final FluentRepositoryFactory create;
     private final Repo repository;
     private final RuleEngineBlackboard blackboard;
@@ -269,10 +269,9 @@ public class EMFTextPCMInstanceCreator {
 
             collectionType = createCollectionWithTypeArg(collectionTypeName, ref,
                     dimensions.subList(1, dimensions.size()));
-        }
-        // TODO: I do not think this works properly for deeper collection types (e.g.
-        // List<String>[]), especially the naming.
-        else if (ref.getPureClassifierReference() != null && isCollectionType(ref.getPureClassifierReference()
+        } else if (ref.getPureClassifierReference() != null && isCollectionType(ref.getPureClassifierReference()
+            // TODO: I do not think this works properly for deeper collection types (e.g.
+            // List<String>[]), especially the naming.
             .getTarget())) {
             typeName = ref.getPureClassifierReference()
                 .getTarget()

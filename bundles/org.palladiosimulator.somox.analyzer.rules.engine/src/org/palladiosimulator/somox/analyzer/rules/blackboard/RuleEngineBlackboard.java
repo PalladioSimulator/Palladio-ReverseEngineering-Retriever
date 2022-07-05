@@ -62,11 +62,13 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
 
         for (Entity entity : entityLocations.keySet()) {
             CompilationUnitWrapper compilationUnit = entityLocations.get(entity);
-            if (compilationUnit == null)
+            if (compilationUnit == null) {
                 continue;
+            }
             Path path = compilationUnitLocations.get(compilationUnit);
-            if (path == null)
+            if (path == null) {
                 continue;
+            }
             entityPaths.put(entity, path);
         }
 

@@ -35,7 +35,7 @@ import org.palladiosimulator.generator.fluent.repository.structure.types.Composi
 public class EclipsePCMInstanceCreator {
     private static final Logger LOG = Logger.getLogger(EclipsePCMInstanceCreator.class);
 
-    private final static String REPO_NAME = "Software Architecture Repository";
+    private static final String REPO_NAME = "Software Architecture Repository";
     private final FluentRepositoryFactory create;
     private final Repo repository;
     private final RuleEngineBlackboard blackboard;
@@ -173,9 +173,9 @@ public class EclipsePCMInstanceCreator {
         case "short":
             // TODO replace with Primitive.SHORT as soon as that works
             return Primitive.INTEGER;
+        default:
+            return null;
         }
-
-        return null;
     }
 
     private OperationSignatureCreator handleSignatureDataType(OperationSignatureCreator signature, String varName,
@@ -239,10 +239,9 @@ public class EclipsePCMInstanceCreator {
             }
 
             collectionType = createCollectionWithTypeArg(collectionTypeName, ref, dimensions - 1);
-        }
-        // TODO: I do not think this works properly for deeper collection types (e.g.
-        // List<String>[]), especially the naming.
-        else if (isCollectionType(ref) && ref.getTypeArguments().length > 0) {
+        } else if (isCollectionType(ref) && ref.getTypeArguments().length > 0) {
+            // TODO: I do not think this works properly for deeper collection types (e.g.
+            // List<String>[]), especially the naming.
             typeName = wrapName(ref);
             ITypeBinding typeArg = ref.getTypeArguments()[0];
             String argumentTypeName = wrapName(typeArg);
