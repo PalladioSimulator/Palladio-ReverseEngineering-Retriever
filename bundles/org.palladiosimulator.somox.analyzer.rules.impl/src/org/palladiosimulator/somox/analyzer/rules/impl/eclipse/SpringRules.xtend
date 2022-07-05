@@ -75,14 +75,18 @@ class SpringRules extends IRule {
 			for(MethodDeclaration m: getMethods(unit)){
 				val annoWithName = isMethodAnnotatedWithName(m, annoNames)
 
-				if(annoWithName) 
-					pcmDetector.detectProvidedInterface(unit, m.resolveBinding) pcmDetector.detectOperationInterface(unit)
+				if(annoWithName) {
+					pcmDetector.detectProvidedInterface(unit, m.resolveBinding)
+					pcmDetector.detectOperationInterface(unit)
+				}
 			}
 			
 			for(MethodDeclaration m: getAllPublicMethods(unit)) {
 				val annoWithName = isMethodAnnotatedWithName(m, annoNames)
-				if(!annoWithName) 
-					pcmDetector.detectProvidedInterface(unit, m.resolveBinding) pcmDetector.detectOperationInterface(unit)
+				if(!annoWithName) {
+					pcmDetector.detectProvidedInterface(unit, m.resolveBinding)
+					pcmDetector.detectOperationInterface(unit)
+				}
 			}
 				
 		
