@@ -24,14 +24,15 @@ import de.uka.ipd.sdq.workflow.extension.ExtendableJobConfiguration;
 public class RuleEngineConfiguration extends AbstractComposedJobConfiguration implements ExtendableJobConfiguration {
     private static final Logger LOG = Logger.getLogger(RuleEngineConfiguration.class);
 
-    public static final String RULE_ENGINE_INPUT_PATH = "org.palladiosimulator.somox.analyzer.rules.configuration.input.path";
-    public static final String RULE_ENGINE_OUTPUT_PATH = "org.palladiosimulator.somox.analyzer.rules.configuration.output.path";
-    public static final String RULE_ENGINE_SELECTED_RULES = "org.palladiosimulator.somox.analyzer.rules.configuration.rules";
-    public static final String RULE_ENGINE_SELECTED_ANALYSTS = "org.palladiosimulator.somox.analyzer.rules.configuration.analysts";
-    public static final String RULE_ENGINE_SELECTED_DISCOVERERS = "org.palladiosimulator.somox.analyzer.rules.configuration.discoverers";
-    public static final String RULE_ENGINE_ANALYST_CONFIG_PREFIX = "org.palladiosimulator.somox.analyzer.rules.configuration.analystconfig.";
-    public static final String RULE_ENGINE_DISCOVERER_CONFIG_PREFIX = "org.palladiosimulator.somox.analyzer.rules.configuration.discovererconfig.";
-    public static final String RULE_ENGINE_USE_EMFTEXT_PARSER = "org.palladiosimulator.somox.analyzer.rules.configuration.use_emftext_parser";
+    private static final String CONFIG_PREFIX = "org.palladiosimulator.somox.analyzer.rules.configuration.";
+    public static final String RULE_ENGINE_INPUT_PATH = "input.path";
+    public static final String RULE_ENGINE_OUTPUT_PATH = CONFIG_PREFIX + "output.path";
+    public static final String RULE_ENGINE_SELECTED_RULES = CONFIG_PREFIX + "rules";
+    public static final String RULE_ENGINE_SELECTED_ANALYSTS = CONFIG_PREFIX + "analysts";
+    public static final String RULE_ENGINE_SELECTED_DISCOVERERS = CONFIG_PREFIX + "discoverers";
+    public static final String RULE_ENGINE_ANALYST_CONFIG_PREFIX = CONFIG_PREFIX + "analystconfig.";
+    public static final String RULE_ENGINE_DISCOVERER_CONFIG_PREFIX = CONFIG_PREFIX + "discovererconfig.";
+    public static final String RULE_ENGINE_USE_EMFTEXT_PARSER = CONFIG_PREFIX + "use_emftext_parser";
     public static final String RULE_LIST_SEPARATOR = ";";
 
     private /* not final */ URI inputFolder;

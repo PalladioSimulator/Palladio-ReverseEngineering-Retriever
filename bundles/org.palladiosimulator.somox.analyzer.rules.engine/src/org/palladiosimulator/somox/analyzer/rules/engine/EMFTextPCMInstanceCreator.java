@@ -93,8 +93,7 @@ public class EMFTextPCMInstanceCreator {
     private void createPCMInterfaces(List<Classifier> interfaces) {
         interfaces.forEach(inter -> {
             final ConcreteClassifier concreteInter = (ConcreteClassifier) inter;
-            final String interfaceName = concreteInter.getQualifiedName()
-                .replaceAll("\\.", "_");
+            final String interfaceName = wrapName(concreteInter);
 
             LOG.info("Current PCM Interface: " + interfaceName);
 
@@ -135,8 +134,7 @@ public class EMFTextPCMInstanceCreator {
                 .map(relation -> (ConcreteClassifier) relation.getOperationInterface())
                 .collect(Collectors.toSet());
             for (ConcreteClassifier realInterface : realInterfaces) {
-                pcmComp.provides(create.fetchOfOperationInterface(realInterface.getQualifiedName()
-                    .replaceAll("\\.", "_")), "dummy name");
+                pcmComp.provides(create.fetchOfOperationInterface(wrapName(realInterface)), "dummy name");
             }
 
             final List<Variable> requiredIs = blackboard.getEMFTextPCMDetector()
@@ -146,13 +144,17 @@ public class EMFTextPCMInstanceCreator {
                 .collect(Collectors.toSet());
 
             for (ConcreteClassifier requInter : requireInterfaces) {
-                pcmComp.requires(create.fetchOfOperationInterface(requInter.getQualifiedName()
-                    .replaceAll("\\.", "_")), "dummy require name");
+                pcmComp.requires(create.fetchOfOperationInterface(wrapName(requInter)), "dummy require name");
             }
             BasicComponent builtComp = pcmComp.build();
             blackboard.putRepositoryComponentLocation(builtComp, new CompilationUnitWrapper(comp));
             repository.addToRepository(builtComp);
         }
+    }
+
+    private static String wrapName(ConcreteClassifier name) {
+        return name.getQualifiedName()
+            .replace("\\.", "_");
     }
 
     private static String getCompName(CompilationUnitImpl comp) {
@@ -388,5 +390,4 @@ public class EMFTextPCMInstanceCreator {
 
         return create.fetchOfCompositeDataType(classifierName);
     }
-
 }

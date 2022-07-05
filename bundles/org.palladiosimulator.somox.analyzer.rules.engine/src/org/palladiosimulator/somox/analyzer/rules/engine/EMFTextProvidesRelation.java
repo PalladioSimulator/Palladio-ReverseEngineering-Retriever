@@ -7,7 +7,8 @@ import org.emftext.language.java.members.Method;
 import org.emftext.language.java.parameters.Parameter;
 
 // Encapsulates the operation interface and method a component is providing.
-// This class is required because a method from the java model itself does not contain a reference to the interface it comes from like variables do.
+// This class is required because a method from the java model itself does not contain a reference to the interface
+// it comes from like variables do.
 public class EMFTextProvidesRelation {
     private final Classifier operationInterface;
     private final Method method;

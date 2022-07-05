@@ -79,18 +79,19 @@ public class CompilationUnitWrapper {
                 && Objects.equals(emftextCompUnit, other.emftextCompUnit);
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> List<CompilationUnitWrapper> wrap(Collection<T> compUnits) {
         if (compUnits == null) {
             return null;
         } else if (compUnits.stream()
             .anyMatch(CompilationUnitImpl.class::isInstance)) {
-            return ((Collection<CompilationUnitImpl>) compUnits).stream()
+            return compUnits.stream()
+                .map(CompilationUnitImpl.class::cast)
                 .map(CompilationUnitWrapper::new)
                 .collect(Collectors.toCollection(ArrayList::new));
         } else if (compUnits.stream()
             .anyMatch(CompilationUnit.class::isInstance)) {
-            return ((Collection<CompilationUnit>) compUnits).stream()
+            return compUnits.stream()
+                .map(CompilationUnit.class::cast)
                 .map(CompilationUnitWrapper::new)
                 .collect(Collectors.toCollection(ArrayList::new));
         }
