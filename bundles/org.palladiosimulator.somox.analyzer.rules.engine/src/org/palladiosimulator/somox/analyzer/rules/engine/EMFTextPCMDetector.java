@@ -42,7 +42,7 @@ public class EMFTextPCMDetector implements IPCMDetector {
 
     public void detectComponent(CompilationUnitImpl unit) {
         for (final ConcreteClassifier classi : unit.getClassifiers()) {
-            if ((classi instanceof Class) || (classi instanceof Interface)) {
+            if (classi instanceof Class || classi instanceof Interface) {
                 components.add(unit);
             }
         }
@@ -63,7 +63,7 @@ public class EMFTextPCMDetector implements IPCMDetector {
         if (interfaceNames.contains(name)) {
             return;
         }
-        if ((classifier instanceof Class) || (classifier instanceof Interface)) {
+        if (classifier instanceof Class || classifier instanceof Interface) {
             operationInterfaces.add(classifier);
             interfaceNames.add(name);
         }
@@ -166,7 +166,7 @@ public class EMFTextPCMDetector implements IPCMDetector {
 
     private String mapToString(Map<?, ? extends Collection<?>> map, int indentation) {
         StringBuilder sb = new StringBuilder();
-        requiredInterfaces.entrySet()
+        map.entrySet()
             .forEach(entry -> {
                 sb.append("\t".repeat(indentation));
                 sb.append("\"");

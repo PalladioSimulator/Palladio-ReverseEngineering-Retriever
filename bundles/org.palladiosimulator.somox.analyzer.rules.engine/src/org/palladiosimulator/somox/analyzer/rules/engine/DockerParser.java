@@ -85,6 +85,8 @@ public class DockerParser {
      */
     @SuppressWarnings("unchecked")
     private List<String> extractServiceNames(InputStream stream) {
+        // TODO why is this deactivated? Circumvents "unused" warning:
+        stream = (InputStream) stream;
         // final Yaml yaml = new Yaml();
         final Map<String, Object> object = new HashMap<>(); // (Map<String, Object>)
                                                             // yaml.load(stream);

@@ -318,7 +318,7 @@ public class EclipseRuleHelper {
 
         for (AbstractTypeDeclaration abstType : types) {
             if (abstType instanceof TypeDeclaration) {
-                TypeDeclaration type = ((TypeDeclaration) abstType);
+                TypeDeclaration type = (TypeDeclaration) abstType;
 
                 @SuppressWarnings("unchecked")
                 List<Type> interfaceTypes = (List<Type>) type.superInterfaceTypes();

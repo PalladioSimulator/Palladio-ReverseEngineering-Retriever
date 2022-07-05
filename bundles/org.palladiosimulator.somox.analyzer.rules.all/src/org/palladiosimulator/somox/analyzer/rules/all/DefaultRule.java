@@ -32,7 +32,7 @@ public enum DefaultRule {
 
     private final Class<? extends IRule> ruleClass;
 
-    private DefaultRule(Class<? extends IRule> ruleClass) {
+    DefaultRule(Class<? extends IRule> ruleClass) {
         this.ruleClass = ruleClass;
     }
 

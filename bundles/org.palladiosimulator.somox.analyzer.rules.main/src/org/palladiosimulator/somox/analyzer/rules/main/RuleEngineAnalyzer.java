@@ -67,7 +67,7 @@ public class RuleEngineAnalyzer {
     public RuleEngineAnalyzer(RuleEngineBlackboard blackboard) {
         this.blackboard = blackboard;
     }
-
+    
     /**
      * Returns the current PCM repository model of the engine
      *

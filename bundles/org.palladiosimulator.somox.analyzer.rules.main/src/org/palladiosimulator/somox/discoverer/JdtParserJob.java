@@ -38,7 +38,7 @@ public class JdtParserJob implements Discoverer {
     public static final String DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.jdtparser";
 
     public static Resource getResource(final URI uri) throws IllegalArgumentException {
-        if ((uri == null) || !uri.isFile() || !"jdt".equals(uri.fileExtension())) {
+        if (uri == null || !uri.isFile() || !"jdt".equals(uri.fileExtension())) {
             throw new IllegalArgumentException("No valid JDT model");
         }
         return new ResourceSetImpl().getResource(uri, true);
@@ -116,13 +116,13 @@ public class JdtParserJob implements Discoverer {
                     }
                     if (javaResource instanceof CompilationUnit) {
                         final CompilationUnit unit = (CompilationUnit) javaResource;
-                        if (((unit.getClassifiers()
-                            .size() <= 0)
-                                || (unit.getClassifiers()
+                        if (unit.getClassifiers()
+                            .size() <= 0
+                                || unit.getClassifiers()
                                     .get(0)
-                                    .getName() == null)
+                                    .getName() == null
                                 || unit.getNamespacesAsString()
-                                    .isEmpty())) {
+                                    .isEmpty()) {
                             continue;
                         }
                     }

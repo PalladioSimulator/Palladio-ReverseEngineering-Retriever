@@ -35,6 +35,8 @@ javacore.*
 local.properties
 # src-gen/
 tmp/
+.eclipse-pmd
+.checkstyle
 
 # Maven
 .mvn/timing.properties

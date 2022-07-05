@@ -63,7 +63,7 @@ public class EMFTextRuleHelper {
             .getClassifierID() == EcorePackage.EANNOTATION) {
             final AnnotationInstance anno = (AnnotationInstance) mod;
 
-            if ((anno == null) || (anno.getAnnotation() == null)) {
+            if (anno == null || anno.getAnnotation() == null) {
                 LOG.warn("annotation was null, returning false");
                 return false;
             }
@@ -80,8 +80,9 @@ public class EMFTextRuleHelper {
     public static boolean isClassifierAnnotatedWithName(Classifier classifier, String name) {
         if (classifier instanceof ConcreteClassifier) {
             final ConcreteClassifier classi = (ConcreteClassifier) classifier;
-            for (final AnnotationInstanceOrModifier mod : classi.getAnnotationsAndModifiers()) {
-                return isObjectAnnotatedWithName(mod, name);
+            List<AnnotationInstanceOrModifier> annosAndMods = classi.getAnnotationsAndModifiers();
+            if (!annosAndMods.isEmpty()) {
+                isObjectAnnotatedWithName(annosAndMods.get(0), name);
             }
         }
         return false;
@@ -215,13 +216,8 @@ public class EMFTextRuleHelper {
     }
 
     public static boolean isUnitNamedWith(CompilationUnitImpl unit, String name) {
-        if ((unit != null) && (unit.getName() != null)) {
-            if (unit.getName()
-                .contains(name)) {
-                return true;
-            }
-        }
-        return false;
+        return unit != null && unit.getName() != null && unit.getName()
+            .contains(name);
     }
 
     public static boolean isUnitAnEnum(CompilationUnitImpl unit) {

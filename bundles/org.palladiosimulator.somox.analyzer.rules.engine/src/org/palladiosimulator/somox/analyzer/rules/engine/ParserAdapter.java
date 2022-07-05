@@ -118,12 +118,12 @@ public class ParserAdapter {
      * did not have a name for example
      */
     private static boolean isUnitRelevant(CompilationUnit root) {
-        return ((root.getClassifiers()
-            .size() > 0)
-                && (root.getClassifiers()
+        return root.getClassifiers()
+            .size() > 0
+                && root.getClassifiers()
                     .get(0)
-                    .getName() != null)
+                    .getName() != null
                 && !root.getNamespacesAsString()
-                    .isEmpty());
+                    .isEmpty();
     }
 }

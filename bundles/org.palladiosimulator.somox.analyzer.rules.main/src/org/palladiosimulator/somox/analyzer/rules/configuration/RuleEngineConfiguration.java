@@ -74,7 +74,7 @@ public class RuleEngineConfiguration extends AbstractComposedJobConfiguration im
 
     @SuppressWarnings("unchecked")
     public void applyAttributeMap(final Map<String, Object> attributeMap) {
-        if ((attributeMap == null)) {
+        if (attributeMap == null) {
             return;
         }
 

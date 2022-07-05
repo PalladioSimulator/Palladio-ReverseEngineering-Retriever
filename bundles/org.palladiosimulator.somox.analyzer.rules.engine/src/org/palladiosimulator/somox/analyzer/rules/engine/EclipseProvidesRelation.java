@@ -17,14 +17,14 @@ public class EclipseProvidesRelation {
 
     @Override
     public String toString() {
-        return (operationInterface.getQualifiedName() + ": " + method.toString());
+        return operationInterface.getQualifiedName() + ": " + method.toString();
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result) + (toString().hashCode());
+        result = prime * result + toString().hashCode();
         return result;
     }
 

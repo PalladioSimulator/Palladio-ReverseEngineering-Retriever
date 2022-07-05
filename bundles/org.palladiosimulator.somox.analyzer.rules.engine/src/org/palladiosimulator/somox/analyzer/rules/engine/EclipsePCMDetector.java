@@ -217,7 +217,7 @@ public class EclipsePCMDetector implements IPCMDetector {
 
     private String mapToString(Map<?, ? extends Collection<?>> map, int indentation) {
         StringBuilder sb = new StringBuilder();
-        requiredInterfaces.entrySet()
+        map.entrySet()
             .forEach(entry -> {
                 sb.append("\t".repeat(indentation));
                 sb.append("\"");

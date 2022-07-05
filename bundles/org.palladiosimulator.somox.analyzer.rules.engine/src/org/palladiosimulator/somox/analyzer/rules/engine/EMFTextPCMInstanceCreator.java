@@ -156,14 +156,14 @@ public class EMFTextPCMInstanceCreator {
     }
 
     private static String getCompName(CompilationUnitImpl comp) {
-        return (comp.getNamespacesAsString()
-            .replaceAll("\\.", "_") + "_" + comp.getName());
+        return comp.getNamespacesAsString()
+            .replaceAll("\\.", "_") + "_" + comp.getName();
     }
 
     private static ConcreteClassifier getConcreteFromVar(TypedElement var) {
-        return ((ConcreteClassifier) var.getTypeReference()
+        return (ConcreteClassifier) var.getTypeReference()
             .getPureClassifierReference()
-            .getTarget());
+            .getTarget();
     }
 
     private static Primitive convertPrimitive(PrimitiveType primT) {

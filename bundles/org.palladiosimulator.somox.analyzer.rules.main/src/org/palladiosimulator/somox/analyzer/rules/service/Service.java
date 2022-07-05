@@ -16,9 +16,9 @@ public interface Service {
     IBlackboardInteractingJob<RuleEngineBlackboard> create(RuleEngineConfiguration configuration,
             RuleEngineBlackboard blackboard);
 
-    public Set<String> getConfigurationKeys();
+    Set<String> getConfigurationKeys();
 
-    public String getName();
+    String getName();
 
-    public String getID();
+    String getID();
 }

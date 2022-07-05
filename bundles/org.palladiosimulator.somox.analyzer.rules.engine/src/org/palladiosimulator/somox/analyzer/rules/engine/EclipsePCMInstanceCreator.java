@@ -242,21 +242,19 @@ public class EclipsePCMInstanceCreator {
         }
         // TODO: I do not think this works properly for deeper collection types (e.g.
         // List<String>[]), especially the naming.
-        else if (isCollectionType(ref)) {
+        else if (isCollectionType(ref) && ref.getTypeArguments().length > 0) {
             typeName = wrapName(ref);
-            for (ITypeBinding typeArg : ref.getTypeArguments()) {
-                String argumentTypeName = wrapName(typeArg);
-                collectionTypeName = typeName + "<" + argumentTypeName + ">";
+            ITypeBinding typeArg = ref.getTypeArguments()[0];
+            String argumentTypeName = wrapName(typeArg);
+            collectionTypeName = typeName + "<" + argumentTypeName + ">";
 
-                LOG.info("Current Argument type name: " + argumentTypeName);
+            LOG.info("Current Argument type name: " + argumentTypeName);
 
-                if (existingCollectionDataTypes.containsKey(collectionTypeName)) {
-                    return existingCollectionDataTypes.get(collectionTypeName);
-                }
-
-                collectionType = createCollectionWithTypeArg(collectionTypeName, typeArg, typeArg.getDimensions());
-                break;
+            if (existingCollectionDataTypes.containsKey(collectionTypeName)) {
+                return existingCollectionDataTypes.get(collectionTypeName);
             }
+
+            collectionType = createCollectionWithTypeArg(collectionTypeName, typeArg, typeArg.getDimensions());
         }
         if (collectionType != null) {
             existingCollectionDataTypes.put(collectionTypeName, collectionType);
