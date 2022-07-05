@@ -30,8 +30,8 @@ import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
+import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineException;
 import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
-import org.somox.analyzer.ModelAnalyzerException;
 
 import com.google.common.collect.Sets;
 
@@ -79,8 +79,8 @@ abstract class RuleEngineTest {
         try {
             discoverer.create(config, blackboard)
                 .execute(null);
-            analyzer.analyze(config, null, null);
-        } catch (ModelAnalyzerException | JobFailedException | UserCanceledException e) {
+            analyzer.analyze(config, null);
+        } catch (RuleEngineException | JobFailedException | UserCanceledException e) {
             Assertions.fail(e);
         }
 

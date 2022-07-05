@@ -46,15 +46,6 @@ import org.palladiosimulator.somox.analyzer.rules.engine.EclipsePCMInstanceCreat
 import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
 import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
 import org.apache.log4j.Logger;
-import org.somox.analyzer.AnalysisResult;
-import org.somox.analyzer.ModelAnalyzer;
-import static org.somox.analyzer.ModelAnalyzer.Status.FINISHED;
-import static org.somox.analyzer.ModelAnalyzer.Status.READY;
-import static org.somox.analyzer.ModelAnalyzer.Status.RUNNING;
-
-import org.somox.analyzer.ModelAnalyzerException;
-import org.somox.extractor.ExtractionResult;
-import org.somox.sourcecodedecorator.SourceCodeDecoratorRepository;
 
 /**
  * The rule engine identifies PCM elements like components and interfaces inside source code via
@@ -65,31 +56,16 @@ import org.somox.sourcecodedecorator.SourceCodeDecoratorRepository;
  * To use the engine, invoke executeWith(projectPath, outPath, model, rules). To simplify the use,
  * the engine provides the public methods loadRules() and loadModel().
  */
-public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration> {
+public class RuleEngineAnalyzer {
     private static final Logger LOG = Logger.getLogger(RuleEngineAnalyzer.class);
-
-    private Status status;
 
     private RuleEngineBlackboard blackboard;
 
     private static Repository emfTextPcm;
     private static Repository eclipsePcm;
 
-    private static SourceCodeDecoratorRepository deco;
-
     public RuleEngineAnalyzer(RuleEngineBlackboard blackboard) {
         this.blackboard = blackboard;
-        init();
-    }
-
-    @Override
-    public void init() {
-        this.status = READY;
-    }
-
-    @Override
-    public Status getStatus() {
-        return this.status;
     }
 
     /**
@@ -102,21 +78,8 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
         return eclipsePcm;
     }
 
-    /**
-     * Returns the current SourceCodeDecoratorRepository model of the engine
-     *
-     * @return the SourceCodeDecoratorRepository model
-     */
-    public static SourceCodeDecoratorRepository getDecoratorRepository() {
-        return deco;
-    }
-
-    @Override
-    public AnalysisResult analyze(RuleEngineConfiguration ruleEngineConfiguration,
-            HashMap<String, ExtractionResult> extractionResultMap, IProgressMonitor progressMonitor)
-            throws ModelAnalyzerException {
-
-        this.status = RUNNING;
+    public void analyze(RuleEngineConfiguration ruleEngineConfiguration, IProgressMonitor progressMonitor)
+            throws RuleEngineException {
 
         try {
             final URI in = CommonPlugin.asLocalURI(ruleEngineConfiguration.getInputFolder());
@@ -146,12 +109,8 @@ public class RuleEngineAnalyzer implements ModelAnalyzer<RuleEngineConfiguration
 
             executeWith(inPath, outPath, wrappedRoots, rules, blackboard, useEMFTextParser);
         } catch (Exception e) {
-            throw new ModelAnalyzerException(e.getMessage());
-        } finally {
-            this.status = FINISHED;
+            throw new RuleEngineException(e.getMessage());
         }
-
-        return this.initializeAnalysisResult();
     }
 
     private Map<String, CompilationUnit> fetchEclipseCompilationUnits() {

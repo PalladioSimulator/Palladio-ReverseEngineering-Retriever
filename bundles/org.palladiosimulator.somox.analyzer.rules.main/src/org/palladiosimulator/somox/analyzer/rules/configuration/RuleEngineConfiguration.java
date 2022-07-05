@@ -17,12 +17,11 @@ import org.palladiosimulator.somox.analyzer.rules.service.ServiceCollection;
 import org.palladiosimulator.somox.analyzer.rules.service.ServiceConfiguration;
 import org.palladiosimulator.somox.discoverer.Discoverer;
 import org.palladiosimulator.somox.discoverer.DiscovererCollection;
-import org.somox.configuration.AbstractMoxConfiguration;
-import org.somox.configuration.FileLocationConfiguration;
 
+import de.uka.ipd.sdq.workflow.configuration.AbstractComposedJobConfiguration;
 import de.uka.ipd.sdq.workflow.extension.ExtendableJobConfiguration;
 
-public class RuleEngineConfiguration extends AbstractMoxConfiguration implements ExtendableJobConfiguration {
+public class RuleEngineConfiguration extends AbstractComposedJobConfiguration implements ExtendableJobConfiguration {
     private static final Logger LOG = Logger.getLogger(RuleEngineConfiguration.class);
 
     public static final String RULE_ENGINE_INPUT_PATH = "org.palladiosimulator.somox.analyzer.rules.configuration.input.path";
@@ -35,8 +34,9 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
     public static final String RULE_ENGINE_USE_EMFTEXT_PARSER = "org.palladiosimulator.somox.analyzer.rules.configuration.use_emftext_parser";
     public static final String RULE_LIST_SEPARATOR = ";";
 
-    private final FileLocationConfiguration fileLocations;
-    private /*not final*/ boolean useEMFTextParser;
+    private /* not final */ URI inputFolder;
+    private /* not final */ URI outputFolder;
+    private /* not final */ boolean useEMFTextParser;
     private final Set<DefaultRule> rules;
     private final ServiceConfiguration<Analyst> analystConfig;
     private final ServiceConfiguration<Discoverer> discovererConfig;
@@ -50,7 +50,6 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
     public RuleEngineConfiguration(Map<String, Object> attributes) {
         this.rules = new HashSet<>();
         this.attributes = Objects.requireNonNull(attributes);
-        this.fileLocations = new FileLocationConfiguration();
         ServiceCollection<Analyst> analystCollection = null;
         try {
             analystCollection = new AnalystCollection();
@@ -74,12 +73,10 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
     }
 
     @SuppressWarnings("unchecked")
-    @Override
     public void applyAttributeMap(final Map<String, Object> attributeMap) {
         if ((attributeMap == null)) {
             return;
         }
-        super.applyAttributeMap(attributeMap);
 
         if (attributeMap.get(RULE_ENGINE_INPUT_PATH) != null) {
             setInputFolder(URI.createURI((String) attributeMap.get(RULE_ENGINE_INPUT_PATH)));
@@ -93,6 +90,7 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         if (attributeMap.get(RULE_ENGINE_SELECTED_RULES) != null) {
             setSelectedRules(parseRules((Set<String>) attributeMap.get(RULE_ENGINE_SELECTED_RULES)));
         }
+
         analystConfig.applyAttributeMap(attributeMap);
         discovererConfig.applyAttributeMap(attributeMap);
     }
@@ -108,11 +106,11 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
     }
 
     public URI getInputFolder() {
-        return URI.createURI(fileLocations.getAnalyserInputFile());
+        return inputFolder;
     }
 
     public URI getOutputFolder() {
-        return URI.createURI(fileLocations.getOutputFolder());
+        return outputFolder;
     }
 
     public boolean getUseEMFTextParser() {
@@ -128,20 +126,19 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
     }
 
     public void setInputFolder(URI inputFolder) {
-        fileLocations.setAnalyserInputFile(inputFolder.toString());
+        this.inputFolder = inputFolder;
     }
 
     public void setOutputFolder(URI outputFolder) {
-        fileLocations.setOutputFolder(outputFolder.toString());
+        this.outputFolder = outputFolder;
     }
-    
+
     public void setUseEMFTextParser(boolean value) {
         useEMFTextParser = value;
     }
 
-    @Override
     public Map<String, Object> toMap() {
-        final Map<String, Object> result = super.toMap();
+        final Map<String, Object> result = new HashMap<String, Object>();
 
         result.put(RULE_ENGINE_INPUT_PATH, getInputFolder());
         result.put(RULE_ENGINE_OUTPUT_PATH, getOutputFolder());
@@ -151,11 +148,6 @@ public class RuleEngineConfiguration extends AbstractMoxConfiguration implements
         result.putAll(discovererConfig.toMap());
 
         return result;
-    }
-
-    @Override
-    public FileLocationConfiguration getFileLocations() {
-        return fileLocations;
     }
 
     public Set<DefaultRule> getSelectedRules() {

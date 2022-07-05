@@ -15,8 +15,6 @@ Require-Bundle: jamopp.parser,
  org.eclipse.jdt.core,
  org.emftext.language.java,
  org.palladiosimulator.pcm,
- org.somox.sourcecodedecorator,
  org.apache.log4j,
  org.palladiosimulator.generator.fluent,
- org.somox.gast2seff,
- org.somox.core
+ de.uka.ipd.sdq.workflow

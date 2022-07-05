@@ -21,8 +21,8 @@ import org.palladiosimulator.pcm.repository.impl.RepositoryImpl;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
+import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineException;
 import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
-import org.somox.analyzer.ModelAnalyzerException;
 
 import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
 import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
@@ -109,7 +109,7 @@ public class BasicTest extends RuleEngineTest {
      *             forwarded from JavaDiscoverer. Should cause the test to fail.
      */
     @Test
-    void testRepeatability() throws ModelAnalyzerException, JobFailedException, UserCanceledException {
+    void testRepeatability() throws RuleEngineException, JobFailedException, UserCanceledException {
         OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
         int firstIntArgCount = 0;
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
@@ -128,7 +128,7 @@ public class BasicTest extends RuleEngineTest {
         discoverer.create(getConfig(), blackboard)
             .execute(null);
 
-        analyzer.analyze(getConfig(), null, null);
+        analyzer.analyze(getConfig(), null);
 
         RepositoryImpl repo = loadRepository(OUT_DIR.appendSegment("pcm.repository"));
         conflictingMethods = getConflictingMethods(repo.getInterfaces__Repository());

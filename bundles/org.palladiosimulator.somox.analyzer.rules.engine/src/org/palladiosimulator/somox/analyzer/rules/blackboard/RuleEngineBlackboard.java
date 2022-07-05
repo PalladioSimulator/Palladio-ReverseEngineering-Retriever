@@ -14,8 +14,6 @@ import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.system.System;
 import org.palladiosimulator.somox.analyzer.rules.engine.EMFTextPCMDetector;
 import org.palladiosimulator.somox.analyzer.rules.engine.EclipsePCMDetector;
-import org.somox.analyzer.AnalysisResult;
-import org.somox.extractor.ExtractionResult;
 
 import com.google.common.collect.Sets;
 
@@ -23,7 +21,6 @@ import de.uka.ipd.sdq.workflow.blackboard.Blackboard;
 
 public class RuleEngineBlackboard extends Blackboard<Object> {
 
-    private Map<String, ExtractionResult> extractionResults;
     private Set<CompilationUnitWrapper> compilationUnits;
     private Map<CompilationUnitWrapper, Path> compilationUnitLocations;
     private Map<RepositoryComponent, CompilationUnitWrapper> repositoryComponentLocations;
@@ -32,24 +29,14 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
     private Map<System, Path> systemPaths;
     private EMFTextPCMDetector emfTextPcmDetector;
     private EclipsePCMDetector eclipsePcmDetector;
-    private AnalysisResult analysisResult;
 
     public RuleEngineBlackboard() {
-        extractionResults = new HashMap<>();
         compilationUnits = new HashSet<>();
         compilationUnitLocations = new HashMap<>();
         repositoryComponentLocations = new HashMap<>();
         entityLocations = new HashMap<>();
         systemAssociations = new HashMap<>();
         systemPaths = new HashMap<>();
-    }
-
-    public ExtractionResult putExtractionResult(String identifier, ExtractionResult extractionResult) {
-        return extractionResults.put(identifier, extractionResult);
-    }
-
-    public Map<String, ExtractionResult> getExtractionResults() {
-        return Collections.unmodifiableMap(extractionResults);
     }
 
     public Path putCompilationUnitLocation(CompilationUnitWrapper compilationUnit, Path path) {
@@ -156,13 +143,5 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
 
     public void putSystemPath(System system, Path path) {
         systemPaths.put(system, path);
-    }
-
-    public void setAnalysisResult(AnalysisResult analysisResult) {
-        this.analysisResult = analysisResult;
-    }
-
-    public AnalysisResult getAnalysisResult() {
-        return analysisResult;
     }
 }

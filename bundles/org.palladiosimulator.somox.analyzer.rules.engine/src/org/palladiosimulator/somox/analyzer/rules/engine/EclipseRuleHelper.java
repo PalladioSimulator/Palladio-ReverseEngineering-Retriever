@@ -407,6 +407,7 @@ public class EclipseRuleHelper {
     @SuppressWarnings("unchecked")
     public static List<MethodDeclaration> getAllPublicMethods(CompilationUnit unit) {
         return getMethods(unit).stream()
+            .filter(MethodDeclaration::isConstructor)
             .filter(x -> ((List<IExtendedModifier>) x.modifiers()).stream()
                 .filter(IExtendedModifier::isModifier)
                 .map(Modifier.class::cast)

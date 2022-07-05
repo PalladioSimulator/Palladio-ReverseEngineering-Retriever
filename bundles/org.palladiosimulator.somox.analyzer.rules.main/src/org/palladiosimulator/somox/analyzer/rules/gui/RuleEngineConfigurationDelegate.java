@@ -16,7 +16,7 @@ public class RuleEngineConfigurationDelegate
 
     @Override
     protected IJob createWorkflowJob(RuleEngineAnalyzerConfiguration config, ILaunch launch) throws CoreException {
-        return new RuleEngineJob(config.getMoxConfiguration());
+        return new RuleEngineJob(config.getRuleEngineConfiguration());
     }
 
     @Override
@@ -24,7 +24,7 @@ public class RuleEngineConfigurationDelegate
             throws CoreException {
 
         final RuleEngineAnalyzerConfiguration analyzerConfiguration = new RuleEngineAnalyzerConfiguration();
-        analyzerConfiguration.setMoxConfiguration(new RuleEngineConfiguration(configuration.getAttributes()));
+        analyzerConfiguration.setRuleEngineConfiguration(new RuleEngineConfiguration(configuration.getAttributes()));
 
         return analyzerConfiguration;
     }

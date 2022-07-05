@@ -19,11 +19,7 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
 
         this.add(new RuleEngineBlackboardInteractingJob(configuration, getBlackboard()));
 
-        // TODO integration SEFF extraction
-        // this.add(new SeffCreatorJob(false, null, null));
-
-        // TODO temporarily disabled
-        // this.add(new ModelSaverJob(configuration));
+        // TODO Integrate SEFF extraction once it is done being developed.
 
         this.add(createAnalystsJob(configuration));
     }
@@ -32,7 +28,8 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
         ParallelJob parentJob = new ParallelJob();
         for (Discoverer discoverer : configuration.getDiscovererConfig()
             .getSelected()) {
-            IBlackboardInteractingJob<RuleEngineBlackboard> discovererJob = discoverer.create(configuration, myBlackboard);
+            IBlackboardInteractingJob<RuleEngineBlackboard> discovererJob = discoverer.create(configuration,
+                    myBlackboard);
             parentJob.add(discovererJob);
             logger.info("Adding discoverer job \"" + discovererJob.getName() + "\"");
         }
