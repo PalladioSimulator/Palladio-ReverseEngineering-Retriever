@@ -2,7 +2,7 @@ package org.palladiosimulator.somox.analyzer.rules.main;
 
 /**
  * A general exception for the rule engine.
- *  
+ *
  * @author Florian Bossert
  */
 public class RuleEngineException extends Exception {

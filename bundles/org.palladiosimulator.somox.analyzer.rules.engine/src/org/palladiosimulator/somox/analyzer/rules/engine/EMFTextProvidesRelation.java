@@ -21,8 +21,11 @@ public class EMFTextProvidesRelation {
     @Override
     public String toString() {
         String parameterString = "";
-        parameterString += method.getParameters().stream().map(Parameter::getName).collect(Collectors.joining(","));
-        return (operationInterface.getName() + ": " + method.getName() + "(" + parameterString+")");
+        parameterString += method.getParameters()
+            .stream()
+            .map(Parameter::getName)
+            .collect(Collectors.joining(","));
+        return (operationInterface.getName() + ": " + method.getName() + "(" + parameterString + ")");
     }
 
     @Override

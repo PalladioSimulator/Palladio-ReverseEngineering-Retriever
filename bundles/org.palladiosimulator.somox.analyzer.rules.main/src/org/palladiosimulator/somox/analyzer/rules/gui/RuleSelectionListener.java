@@ -15,7 +15,8 @@ public class RuleSelectionListener extends SelectionAdapter {
     private final Set<DefaultRule> rules;
     private final DefaultRule rule;
 
-    public RuleSelectionListener(Button selectionButton, ModifyListener modifyListener, Set<DefaultRule> rules, DefaultRule rule) {
+    public RuleSelectionListener(Button selectionButton, ModifyListener modifyListener, Set<DefaultRule> rules,
+            DefaultRule rule) {
         this.selectionButton = selectionButton;
         this.modifyListener = modifyListener;
         this.rules = rules;

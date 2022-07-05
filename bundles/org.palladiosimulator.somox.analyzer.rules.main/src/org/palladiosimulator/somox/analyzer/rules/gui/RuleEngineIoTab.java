@@ -133,6 +133,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
                 useEMFTextParser = parserSelection.getSelectionIndex() == 1;
                 modifyListener.modifyText(null);
             }
+
             @Override
             public void widgetDefaultSelected(SelectionEvent e) {
                 widgetSelected(e);

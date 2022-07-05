@@ -11,7 +11,7 @@ import de.uka.ipd.sdq.workflow.launchconfig.AbstractWorkflowBasedRunConfiguratio
 public class RuleEngineAnalyzerConfiguration extends AbstractWorkflowBasedRunConfiguration {
 
     RuleEngineConfiguration ruleEngineConfiguration;
-    
+
     @Override
     public void setDefaults() {
         ruleEngineConfiguration = new RuleEngineConfiguration();
@@ -24,7 +24,6 @@ public class RuleEngineAnalyzerConfiguration extends AbstractWorkflowBasedRunCon
     public void setRuleEngineConfiguration(RuleEngineConfiguration ruleEngineConfiguration) {
         this.ruleEngineConfiguration = ruleEngineConfiguration;
     }
-
 
     @Override
     public String getErrorMessage() {
