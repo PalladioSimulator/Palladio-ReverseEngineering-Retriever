@@ -21,15 +21,11 @@
       <import plugin="jamopp.resource"/>
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.palladiosimulator.generator.fluent"/>
-      <import plugin="org.somox.sourcecodedecorator"/>
       <import plugin="org.apache.log4j"/>
-      <import plugin="org.somox.core"/>
       <import plugin="de.uka.ipd.sdq.workflow"/>
-      <import plugin="org.somox.ui"/>
       <import plugin="de.uka.ipd.sdq.workflow.launchconfig"/>
       <import plugin="org.eclipse.debug.ui"/>
       <import plugin="org.eclipse.equinox.app"/>
-      <import plugin="org.somox.gast2seff"/>
       <import plugin="org.eclipse.swt"/>
       <import plugin="org.palladiosimulator.commons"/>
    </requires>
