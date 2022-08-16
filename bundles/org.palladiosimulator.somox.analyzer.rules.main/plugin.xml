@@ -81,11 +81,11 @@
     </discoverer>
  </extension>
  <extension
-       id="org.palladiosimulator.somox.discoverer.jdtparser"
-       name="JDT Parser"
+       id="org.palladiosimulator.somox.discoverer.emftext"
+       name="EMFText Discoverer"
        point="org.palladiosimulator.somox.discoverer">
     <discoverer
-          class="org.palladiosimulator.somox.discoverer.JdtParserJob">
+          class="org.palladiosimulator.somox.discoverer.EmfTextDiscoverer">
     </discoverer>
  </extension>
  <extension

@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.CommonPlugin;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -47,11 +48,17 @@ public class JavaDiscoverer implements Discoverer {
                 parser.setResolveBindings(true);
                 parser.setBindingsRecovery(true);
                 parser.setStatementsRecovery(true);
+                final String latestJavaVersion = JavaCore.latestSupportedJavaVersion();
+                parser.setCompilerOptions(
+                        Map.of(JavaCore.COMPILER_SOURCE, latestJavaVersion, JavaCore.COMPILER_COMPLIANCE,
+                                latestJavaVersion, JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, latestJavaVersion));
                 final String[] classpathEntries = Discoverer.find(root, ".jar", logger)
                     .toArray(String[]::new);
                 final String[] sourceFilePaths = Discoverer.find(root, ".java", logger)
                     .toArray(String[]::new);
                 try {
+                    // TODO: use this? It is currently broken though.
+//                    parser.setEnvironment(classpathEntries, sourceFilePaths, null, true);
                     parser.setEnvironment(classpathEntries, new String[0], new String[0], true);
                     parser.createASTs(sourceFilePaths, new String[sourceFilePaths.length], new String[0],
                             new FileASTRequestor() {
@@ -87,5 +94,4 @@ public class JavaDiscoverer implements Discoverer {
     public String getName() {
         return "Java Discoverer";
     }
-
 }
