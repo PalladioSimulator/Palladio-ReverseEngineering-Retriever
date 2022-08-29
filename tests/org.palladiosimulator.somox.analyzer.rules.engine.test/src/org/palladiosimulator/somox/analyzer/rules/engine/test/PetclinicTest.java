@@ -2,7 +2,8 @@ package org.palladiosimulator.somox.analyzer.rules.engine.test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 
 public class PetclinicTest extends RuleEngineTest {
@@ -16,12 +17,13 @@ public class PetclinicTest extends RuleEngineTest {
      * Requires it to execute without an exception and produce an output file with the correct
      * contents.
      */
-    @Test
-    void test() {
-        assertTrue(containsComponent("org_springframework_samples_petclinic_api_application_VisitsServiceClient"));
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void test(boolean emfText) {
+        assertTrue(containsComponent("org_springframework_samples_petclinic_api_application_VisitsServiceClient", emfText));
         assertMaxParameterCount(1, "org_springframework_samples_petclinic_customers_model_PetRepository",
-                "findPetTypeById");
+                "findPetTypeById", emfText);
         assertMaxParameterCount(0, "org_springframework_samples_petclinic_customers_model_PetRepository",
-                "findPetTypes");
+                "findPetTypes", emfText);
     }
 }

@@ -2,7 +2,8 @@ package org.palladiosimulator.somox.analyzer.rules.engine.test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 
 public class PiggymetricsTest extends RuleEngineTest {
@@ -16,10 +17,11 @@ public class PiggymetricsTest extends RuleEngineTest {
      * Requires it to execute without an exception and produce an output file with the correct
      * contents.
      */
-    @Test
-    void test() {
-        assertTrue(containsComponent("com_piggymetrics_account_client_AuthServiceClient"));
-        assertTrue(containsComponent("com_piggymetrics_notification_service_NotificationServiceImpl"));
-        assertMaxParameterCount(2, "com_piggymetrics_notification_service_RecipientService", "markNotified");
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void test(boolean emfText) {
+        assertTrue(containsComponent("com_piggymetrics_account_client_AuthServiceClient", emfText));
+        assertTrue(containsComponent("com_piggymetrics_notification_service_NotificationServiceImpl", emfText));
+        assertMaxParameterCount(2, "com_piggymetrics_notification_service_RecipientService", "markNotified", emfText);
     }
 }

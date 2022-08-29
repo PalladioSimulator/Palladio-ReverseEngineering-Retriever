@@ -2,7 +2,8 @@ package org.palladiosimulator.somox.analyzer.rules.engine.test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 
 public class ACMETest extends RuleEngineTest {
@@ -16,10 +17,11 @@ public class ACMETest extends RuleEngineTest {
      * Requires it to execute without an exception and produce an output file with the correct
      * contents.
      */
-    @Test
-    void test() {
-        assertTrue(containsComponent("com_acmeair_entities_Flight"));
-        assertTrue(containsComponent("com_acmeair_wxs_service_FlightServiceImpl"));
-        assertMaxParameterCount(2, "com_acmeair_service_BookingService", "bookFlight");
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void test(boolean emfText) {
+        assertTrue(containsComponent("com_acmeair_entities_Flight", emfText));
+        assertTrue(containsComponent("com_acmeair_wxs_service_FlightServiceImpl", emfText));
+        assertMaxParameterCount(2, "com_acmeair_service_BookingService", "bookFlight", emfText);
     }
 }

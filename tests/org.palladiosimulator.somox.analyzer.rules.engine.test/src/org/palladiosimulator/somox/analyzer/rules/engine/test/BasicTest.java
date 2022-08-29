@@ -9,7 +9,8 @@ import java.io.File;
 import java.util.List;
 
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.palladiosimulator.pcm.repository.CollectionDataType;
 import org.palladiosimulator.pcm.repository.Interface;
 import org.palladiosimulator.pcm.repository.OperationInterface;
@@ -22,6 +23,8 @@ import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineException;
+import org.palladiosimulator.somox.discoverer.Discoverer;
+import org.palladiosimulator.somox.discoverer.EmfTextDiscoverer;
 import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
 
 import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
@@ -40,16 +43,18 @@ public class BasicTest extends RuleEngineTest {
      * Tests the basic functionality of the RuleEngineAnalyzer. Requires it to execute without an
      * exception and produce an output file.
      */
-    @Test
-    void test() {
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void test(boolean emfText) {
         assertTrue(new File(OUT_DIR.appendSegment("pcm.repository")
             .devicePath()).exists());
     }
 
     @Disabled("This bug is inherited from Palladio, this can only be fixed after it is fixed there.")
-    @Test
-    void testShort() {
-        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void testShort(boolean emfText) {
+        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces(emfText));
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (Parameter param : sig.getParameters__OperationSignature()) {
                 if (param.getParameterName()
@@ -62,9 +67,10 @@ public class BasicTest extends RuleEngineTest {
         }
     }
 
-    @Test
-    void testArray() {
-        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void testArray(boolean emfText) {
+        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces(emfText));
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (Parameter param : sig.getParameters__OperationSignature()) {
                 if (param.getParameterName()
@@ -79,9 +85,10 @@ public class BasicTest extends RuleEngineTest {
         }
     }
 
-    @Test
-    void testVararg() {
-        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void testVararg(boolean emfText) {
+        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces(emfText));
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (Parameter param : sig.getParameters__OperationSignature()) {
                 if (param.getParameterName()
@@ -108,9 +115,10 @@ public class BasicTest extends RuleEngineTest {
      * @throws JobFailedException
      *             forwarded from JavaDiscoverer. Should cause the test to fail.
      */
-    @Test
-    void testRepeatability() throws RuleEngineException, JobFailedException, UserCanceledException {
-        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void testRepeatability(boolean emfText) throws RuleEngineException, JobFailedException, UserCanceledException {
+        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces(emfText));
         int firstIntArgCount = 0;
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (Parameter param : sig.getParameters__OperationSignature()) {
@@ -124,13 +132,14 @@ public class BasicTest extends RuleEngineTest {
         // Run the RuleEngine again on the same project
         RuleEngineBlackboard blackboard = new RuleEngineBlackboard();
         RuleEngineAnalyzer analyzer = new RuleEngineAnalyzer(blackboard);
-        JavaDiscoverer discoverer = new JavaDiscoverer();
-        discoverer.create(getConfig(), blackboard)
+        Discoverer discoverer = emfText ? new EmfTextDiscoverer() : new JavaDiscoverer();
+        discoverer.create(getConfig(emfText), blackboard)
             .execute(null);
 
-        analyzer.analyze(getConfig(), null);
+        analyzer.analyze(getConfig(emfText), null);
 
-        RepositoryImpl repo = loadRepository(OUT_DIR.appendSegment("pcm.repository"));
+        String discovererSegment = emfText ? "emfText" : "jdt";
+        RepositoryImpl repo = loadRepository(OUT_DIR.appendSegment(discovererSegment).appendSegment("pcm.repository"));
         conflictingMethods = getConflictingMethods(repo.getInterfaces__Repository());
 
         int secondIntArgCount = 0;

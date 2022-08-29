@@ -2,7 +2,8 @@ package org.palladiosimulator.somox.analyzer.rules.engine.test;
 
 import static org.junit.Assert.assertTrue;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 
 public class JaxRsTest extends RuleEngineTest {
@@ -16,8 +17,9 @@ public class JaxRsTest extends RuleEngineTest {
      * Requires it to execute without an exception and produce an output file with the correct
      * contents.
      */
-    @Test
-    void test() {
-        assertTrue(containsComponent("jax_rs_AConverter"));
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void test(boolean emfText) {
+        assertTrue(containsComponent("jax_rs_AConverter", emfText));
     }
 }

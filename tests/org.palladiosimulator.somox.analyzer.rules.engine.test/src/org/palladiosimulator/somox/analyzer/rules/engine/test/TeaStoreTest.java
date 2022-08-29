@@ -2,7 +2,8 @@ package org.palladiosimulator.somox.analyzer.rules.engine.test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 
 public class TeaStoreTest extends RuleEngineTest {
@@ -16,10 +17,11 @@ public class TeaStoreTest extends RuleEngineTest {
      * Requires it to execute without an exception and produce an output file with the correct
      * contents.
      */
-    @Test
-    void test() {
-        assertTrue(containsComponent("tools_descartes_teastore_auth_security_BCryptProvider"));
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void test(boolean emfText) {
+        assertTrue(containsComponent("tools_descartes_teastore_auth_security_BCryptProvider", emfText));
         assertTrue(
-                containsOperationInterface("tools_descartes_teastore_kieker_probes_records_IPayloadCharacterization"));
+                containsOperationInterface("tools_descartes_teastore_kieker_probes_records_IPayloadCharacterization", emfText));
     }
 }
