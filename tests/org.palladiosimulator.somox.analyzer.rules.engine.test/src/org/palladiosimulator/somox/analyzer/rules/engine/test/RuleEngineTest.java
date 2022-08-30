@@ -77,7 +77,7 @@ abstract class RuleEngineTest {
     protected RuleEngineTest(String projectDirectory, DefaultRule... rules) {
         RuleEngineBlackboard jdtBlackboard = new RuleEngineBlackboard();
         RuleEngineAnalyzer jdtAnalyzer = new RuleEngineAnalyzer(jdtBlackboard);
-        JavaDiscoverer jdtDiscoverer = new JavaDiscoverer();
+        Discoverer jdtDiscoverer = new JavaDiscoverer();
 
         RuleEngineBlackboard emfTextBlackboard = new RuleEngineBlackboard();
         RuleEngineAnalyzer emfTextAnalyzer = new RuleEngineAnalyzer(emfTextBlackboard);
@@ -128,15 +128,19 @@ abstract class RuleEngineTest {
         	emfTextRepo = loadRepository(URI.createFileURI(emfTextRepoPath));
         }
 
-        jdtComponents = jdtRepo.getComponents__Repository();
-        jdtDatatypes = jdtRepo.getDataTypes__Repository();
-        jdtFailuretypes = jdtRepo.getFailureTypes__Repository();
-        jdtInterfaces = jdtRepo.getInterfaces__Repository();
+        if (isJDTCreated) {
+	        jdtComponents = jdtRepo.getComponents__Repository();
+	        jdtDatatypes = jdtRepo.getDataTypes__Repository();
+	        jdtFailuretypes = jdtRepo.getFailureTypes__Repository();
+	        jdtInterfaces = jdtRepo.getInterfaces__Repository();
+        }
 
-        emfTextComponents = emfTextRepo.getComponents__Repository();
-        emfTextDatatypes = emfTextRepo.getDataTypes__Repository();
-        emfTextFailuretypes = emfTextRepo.getFailureTypes__Repository();
-        emfTextInterfaces = emfTextRepo.getInterfaces__Repository();
+        if (isEMFTextCreated) {
+	        emfTextComponents = emfTextRepo.getComponents__Repository();
+	        emfTextDatatypes = emfTextRepo.getDataTypes__Repository();
+	        emfTextFailuretypes = emfTextRepo.getFailureTypes__Repository();
+	        emfTextInterfaces = emfTextRepo.getInterfaces__Repository();
+        }
     }
 
     abstract void test(boolean emfText);
@@ -152,6 +156,7 @@ abstract class RuleEngineTest {
     }
 
     public RuleEngineConfiguration getConfig(boolean emfText) {
+    	assertCreated(emfText);
     	if (emfText) {
     		return emfTextConfig;
     	} else {
@@ -160,6 +165,7 @@ abstract class RuleEngineTest {
     }
 
     public RepositoryImpl getRepo(boolean emfText) {
+    	assertCreated(emfText);
     	if (emfText) {
     		return emfTextRepo;
     	} else {
@@ -172,6 +178,7 @@ abstract class RuleEngineTest {
     }
 
     public List<RepositoryComponent> getComponents(boolean emfText) {
+    	assertCreated(emfText);
     	if (emfText) {
     		return Collections.unmodifiableList(emfTextComponents);
     	} else {
@@ -180,6 +187,7 @@ abstract class RuleEngineTest {
     }
 
     public List<DataType> getDatatypes(boolean emfText) {
+    	assertCreated(emfText);
     	if (emfText) {
     		return Collections.unmodifiableList(emfTextDatatypes);
     	} else {
@@ -188,6 +196,7 @@ abstract class RuleEngineTest {
     }
 
     public List<FailureType> getFailuretypes(boolean emfText) {
+    	assertCreated(emfText);
     	if (emfText) {
     		return Collections.unmodifiableList(emfTextFailuretypes);
     	} else {
@@ -196,6 +205,7 @@ abstract class RuleEngineTest {
     }
 
     public List<Interface> getInterfaces(boolean emfText) {
+    	assertCreated(emfText);
     	if (emfText) {
     		return Collections.unmodifiableList(emfTextInterfaces);
     	} else {
@@ -247,6 +257,14 @@ abstract class RuleEngineTest {
                 .collect(Collectors.toSet()))
             .collect(Collectors.reducing(new HashSet<OperationSignature>(), Sets::union));
         return sigs;
+    }
+    
+    private void assertCreated(boolean emfText) {
+    	if (emfText) {
+    		assertTrue(isEMFTextCreated, "Failed to create model using EMFTextDiscoverer!");
+    	} else {
+    		assertTrue(isJDTCreated, "Failed to create model using JavaDiscoverer!");
+    	}
     }
 
     public static RepositoryImpl loadRepository(URI repoXMI) {
