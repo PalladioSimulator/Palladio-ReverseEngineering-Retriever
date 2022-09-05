@@ -1,5 +1,5 @@
-# This workflow will build a Java project with Maven
-name: Continuous Integration
+# This workflow compiles to a directly distributable format and uploads the artifacts.
+name: Continuous Product Integration
 
 on:
   push:
@@ -11,26 +11,27 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK 11
-      uses: actions/setup-java@v2
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+    - name: Set Up JDK 11
+      uses: actions/setup-java@v3
       with:
+        distribution: 'temurin'
         java-version: '11'
-        distribution: 'adopt'
     - name: Build with Maven Tycho
       run: mvn -B -U clean package
-    - name: Upload linux artifact
-      uses: actions/upload-artifact@v2
+    - name: Upload Linux Artifact
+      uses: actions/upload-artifact@v3
       with:
         name: org.palladiosimulator.somox.analyzer.rules.product-linux.gtk.x86_64.zip
         path: products/org.palladiosimulator.somox.analyzer.rules.product/target/products/org.palladiosimulator.somox.analyzer.rules.product-linux.gtk.x86_64.zip
-    - name: Upload macosx artifact
-      uses: actions/upload-artifact@v2
+    - name: Upload macOS Artifact
+      uses: actions/upload-artifact@v3
       with:
         name: org.palladiosimulator.somox.analyzer.rules.product-macosx.cocoa.x86_64.zip
         path: products/org.palladiosimulator.somox.analyzer.rules.product/target/products/org.palladiosimulator.somox.analyzer.rules.product-macosx.cocoa.x86_64.zip
-    - name: Upload win32 artifact
-      uses: actions/upload-artifact@v2
+    - name: Upload Windows Artifact
+      uses: actions/upload-artifact@v3
       with:
         name: org.palladiosimulator.somox.analyzer.rules.product-win32.win32.x86_64.zip
         path: products/org.palladiosimulator.somox.analyzer.rules.product/target/products/org.palladiosimulator.somox.analyzer.rules.product-win32.win32.x86_64.zip
