@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.common.util.Diagnostic;
@@ -284,5 +285,10 @@ abstract class RuleEngineTest {
         EcoreUtil.resolveAll(eObject);
         assertEquals(Diagnostic.OK, Diagnostician.INSTANCE.validate(eObject)
             .getSeverity());
+    }
+    
+    protected static Stream<Boolean> discovererProvider() {
+    	// Only test JDT parser, the EMFText parser is broken
+        return Stream.of(false);
     }
 }

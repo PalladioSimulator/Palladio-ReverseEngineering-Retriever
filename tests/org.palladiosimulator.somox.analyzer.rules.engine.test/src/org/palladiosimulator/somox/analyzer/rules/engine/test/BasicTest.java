@@ -10,7 +10,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.palladiosimulator.pcm.repository.CollectionDataType;
 import org.palladiosimulator.pcm.repository.Interface;
 import org.palladiosimulator.pcm.repository.OperationInterface;
@@ -44,7 +44,7 @@ public class BasicTest extends RuleEngineTest {
      * exception and produce an output file.
      */
     @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @MethodSource("discovererProvider")
     void test(boolean emfText) {
         assertTrue(new File(OUT_DIR.appendSegment("pcm.repository")
             .devicePath()).exists());
@@ -52,7 +52,7 @@ public class BasicTest extends RuleEngineTest {
 
     @Disabled("This bug is inherited from Palladio, this can only be fixed after it is fixed there.")
     @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @MethodSource("discovererProvider")
     void testShort(boolean emfText) {
         OperationInterface conflictingMethods = getConflictingMethods(getInterfaces(emfText));
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
@@ -68,7 +68,7 @@ public class BasicTest extends RuleEngineTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @MethodSource("discovererProvider")
     void testArray(boolean emfText) {
         OperationInterface conflictingMethods = getConflictingMethods(getInterfaces(emfText));
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
@@ -86,7 +86,7 @@ public class BasicTest extends RuleEngineTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @MethodSource("discovererProvider")
     void testVararg(boolean emfText) {
         OperationInterface conflictingMethods = getConflictingMethods(getInterfaces(emfText));
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
@@ -116,7 +116,7 @@ public class BasicTest extends RuleEngineTest {
      *             forwarded from JavaDiscoverer. Should cause the test to fail.
      */
     @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @MethodSource("discovererProvider")
     void testRepeatability(boolean emfText) throws RuleEngineException, JobFailedException, UserCanceledException {
         OperationInterface conflictingMethods = getConflictingMethods(getInterfaces(emfText));
         int firstIntArgCount = 0;

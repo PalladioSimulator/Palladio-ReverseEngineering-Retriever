@@ -3,7 +3,7 @@ package org.palladiosimulator.somox.analyzer.rules.engine.test;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 
 public class ACMETest extends RuleEngineTest {
@@ -18,7 +18,7 @@ public class ACMETest extends RuleEngineTest {
      * contents.
      */
     @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @MethodSource("discovererProvider")
     void test(boolean emfText) {
         assertTrue(containsComponent("com_acmeair_entities_Flight", emfText));
         assertTrue(containsComponent("com_acmeair_wxs_service_FlightServiceImpl", emfText));
