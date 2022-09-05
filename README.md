@@ -1,9 +1,9 @@
 # Rule Engine for Reverse Engineering
 > Eclipse plugin for model-driven reverse engineering
 
-[![Build Status](https://build.palladio-simulator.com/job/PalladioSimulator/job/Palladio-ReverseEngineering-SoMoX-RuleEngine/job/master/badge/icon?style=plastic)](https://build.palladio-simulator.com/job/PalladioSimulator/job/Palladio-ReverseEngineering-SoMoX-RuleEngine/job/master/) [![Maven Verify](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/actions/workflows/verify.yml/badge.svg?branch=master&event=push)](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/actions/workflows/verify.yml) [![Continuous Integration](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/actions/workflows/build.yml/badge.svg?branch=master&event=release)](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/actions/workflows/build.yml)
+[![CI/CD](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/actions/workflows/build.yml/badge.svg)](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/actions/workflows/build.yml) [![CIP](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/actions/workflows/verify.yml/badge.svg)](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/actions/workflows/verify.yml)
 
-Reverse engineering of software component models from [heterogeneous artifacts](#extractors) of the software development process. For this purpose, [technology-specific rules](#rules) are used within the rule engine to automatically extract static components of a system. For this purpose, the heterogeneous artifacts of a software project are first transformed into a model representation. Based on the model, the rule engine applies mappings specified in rule artifacts to each model instance to identify components for the final software architecture model.
+Reverse engineering of software component models from [heterogeneous artifacts](#discoverers) of the software development process. For this purpose, [technology-specific rules](#rules) are used within the rule engine to automatically extract static components of a system. For this purpose, the heterogeneous artifacts of a software project are first transformed into a model representation. Based on the model, the rule engine applies mappings specified in rule artifacts to each model instance to identify components for the final software architecture model.
 
 This component extraction supports base components, composite structures, interfaces, ports, and connectors. The candidate components are then used to generate the elements of the target software architecture model, which can then be used for quality prediction purposes in the [Palladio](https://www.palladio-simulator.com/) context. The extracted models are suitable for improving the understanding of existing software and enabling further quality analyses. Software performance, reliability, and maintenance analyses are already available as part of a complementary tool chain.
 
@@ -17,13 +17,18 @@ Source code based on EMF metamodels is generated during the build process and is
 
 The rules for the model-to-model transformations are implemented in [Xtend](https://www.eclipse.org/xtend/), which can be compiled into Java-compatible source code.
 
-### Extractors
-* [JDT-Based Java Extractor](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Java)
-* [Docker File Extractor](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Docker)
+### Discoverers
+* [CSV Discoverer](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/blob/master/bundles/org.palladiosimulator.somox.analyzer.rules.main/src/org/palladiosimulator/somox/discoverer/CsvDiscoverer.java)
+* [Java Discoverer](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/blob/master/bundles/org.palladiosimulator.somox.analyzer.rules.main/src/org/palladiosimulator/somox/discoverer/JavaDiscoverer.java)
+* [JSON Discoverer](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/blob/master/bundles/org.palladiosimulator.somox.analyzer.rules.main/src/org/palladiosimulator/somox/discoverer/JsonDiscoverer.java)
+* [XML Discoverer](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/blob/master/bundles/org.palladiosimulator.somox.analyzer.rules.main/src/org/palladiosimulator/somox/discoverer/XmlDiscoverer.java)
+* [YAML Discoverer](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/blob/master/bundles/org.palladiosimulator.somox.analyzer.rules.main/src/org/palladiosimulator/somox/discoverer/YamlDiscoverer.java)
 
 ### Rules
 * [Spring Boot and Framework](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/tree/master/bundles/org.palladiosimulator.somox.analyzer.rules.spring)
 * [Jakarta RESTful Web Services](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/tree/master/bundles/org.palladiosimulator.somox.analyzer.rules.jax_rs)
+* [Maven Project Object Model](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/tree/master/bundles/org.palladiosimulator.somox.analyzer.rules.maven)
+
 
 ### Analyzer
 * [Docker Vulnerability](https://github.com/FluidTrust/Palladio-ReverseEngineering-Docker-Vulnerability)
@@ -38,8 +43,7 @@ The rules for the model-to-model transformations are implemented in [Xtend](http
 ### Installation
 #### For Development
 * Install the [Fluent Api Model Generator](https://github.com/PalladioSimulator/Palladio-Addons-FluentApiModelGenerator) from the [update site](https://updatesite.palladio-simulator.com/palladio-addons-fluentapimodelgenerator/nightly/)
-* Install the [JDT-Based Java Extractor](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Java) from the [update site](https://updatesite.palladio-simulator.com/palladio-reverseengineering-java/nightly/)
-* Install the [SoMoX Core Feature](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX) from the [update site](https://updatesite.palladio-simulator.com/palladio-reverseengineering-somox/nightly/)
+* Install the [JDT-Based Java Extractor](https://github.com/MDSD-Tools/JaMoPP) from the [update site](https://updatesite.mdsd.tools/jamopp/nightly/)
 * Install the [Xtend IDE](https://www.eclipse.org/xtend/download.html) from the [update site](https://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/)
 * Keep the current installation and, if necessary, change the items to be installed so that they are compatible
 * Check out [this repository](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine.git) and [import the existing projects](https://help.eclipse.org/latest/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm) into Eclipse
@@ -50,8 +54,7 @@ The rules for the model-to-model transformations are implemented in [Xtend](http
 #### For Direct Use
 * [Adding these update sites](https://help.eclipse.org/latest/topic/org.eclipse.platform.doc.user/tasks/tasks-127.htm), without any further installation:
   * The [update site](https://updatesite.palladio-simulator.com/palladio-addons-fluentapimodelgenerator/nightly/) for the [Fluent Api Model Generator](https://github.com/PalladioSimulator/Palladio-Addons-FluentApiModelGenerator)
-  * The [update site](https://updatesite.palladio-simulator.com/palladio-reverseengineering-java/nightly/) for the [JDT-Based Java Extractor](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Java)
-  * The [update site](https://updatesite.palladio-simulator.com/palladio-reverseengineering-somox/nightly/) for the [SoMoX Core Feature](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX)
+  * The [update site](https://updatesite.mdsd.tools/jamopp/nightly/) for the [JDT-Based Java Extractor](https://github.com/MDSD-Tools/JaMoPP)
 * Install this Rule Engine from the [update site](https://updatesite.palladio-simulator.com/palladio-reverseengineering-somox-ruleengine/nightly/)
   * This will automatically install all the required dependencies
 
@@ -77,10 +80,9 @@ Alternatively, you can read the GitHub documentation on how to [create a pull re
 * Palladio homepage: https://www.palladio-simulator.com/home/
 * Comprehensive documentation: https://sdqweb.ipd.kit.edu/wiki/Palladio_Component_Model
 * Issue tracker: https://palladio-simulator.atlassian.net/jira/
-* Build server: https://build.palladio-simulator.com/job/PalladioSimulator/job/Palladio-ReverseEngineering-SoMoX-RuleEngine/
 * Update site: https://updatesite.palladio-simulator.com/palladio-reverseengineering-somox-ruleengine/nightly/
 * Javadoc: https://updatesite.palladio-simulator.com/palladio-reverseengineering-somox-ruleengine/nightly/javadoc/
+* Deprecated build server: https://build.palladio-simulator.com/job/PalladioSimulator/job/Palladio-ReverseEngineering-SoMoX-RuleEngine/
 
 ## Licensing
 The code in this project is licensed under the [EPL-2.0 License](LICENSE).
- 
