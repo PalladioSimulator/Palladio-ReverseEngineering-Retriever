@@ -20,7 +20,6 @@ public class PetclinicTest extends RuleEngineTest {
     @ParameterizedTest
     @MethodSource("discovererProvider")
     void test(boolean emfText) {
-    	if (emfText) return;
         assertTrue(containsComponent("org_springframework_samples_petclinic_api_application_VisitsServiceClient", emfText));
         assertMaxParameterCount(1, "org_springframework_samples_petclinic_customers_model_PetRepository",
                 "findPetTypeById", emfText);
