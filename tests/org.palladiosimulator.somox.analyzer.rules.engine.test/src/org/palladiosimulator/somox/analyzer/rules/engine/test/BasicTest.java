@@ -46,7 +46,7 @@ public class BasicTest extends RuleEngineTest {
     @ParameterizedTest
     @MethodSource("discovererProvider")
     void test(boolean emfText) {
-        assertTrue(new File(OUT_DIR.appendSegment("pcm.repository")
+        assertTrue(new File(getOutputDirectory(emfText).appendSegment("pcm.repository")
             .devicePath()).exists());
     }
 
@@ -139,7 +139,8 @@ public class BasicTest extends RuleEngineTest {
         analyzer.analyze(getConfig(emfText), null);
 
         String discovererSegment = emfText ? "emfText" : "jdt";
-        RepositoryImpl repo = loadRepository(OUT_DIR.appendSegment(discovererSegment).appendSegment("pcm.repository"));
+        RepositoryImpl repo = loadRepository(OUT_DIR.appendSegment(discovererSegment)
+            .appendSegment("pcm.repository"));
         conflictingMethods = getConflictingMethods(repo.getInterfaces__Repository());
 
         int secondIntArgCount = 0;
