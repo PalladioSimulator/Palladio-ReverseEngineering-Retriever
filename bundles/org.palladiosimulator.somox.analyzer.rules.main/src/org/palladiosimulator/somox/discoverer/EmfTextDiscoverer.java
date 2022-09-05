@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -74,14 +75,14 @@ public class EmfTextDiscoverer implements Discoverer {
                     .clear();
 
                 final var api = new JaMoPPJDTParser();
-                final var sourcepathEntries = api.getSourcepathEntries(Paths.get(configuration.getInputFolder()
-                    .devicePath())
-                    .toAbsolutePath()
-                    .normalize());
+                java.nio.file.Path p = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
+                        .devicePath());
+                final var sourcepathEntries = api.getSourcepathEntries(p);
                 final var encodings = new String[sourcepathEntries.length];
                 Arrays.fill(encodings, JaMoPPJDTParser.DEFAULT_ENCODING);
                 final var units = JaMoPPJDTParser.getCompilationUnits(
-                        JaMoPPJDTParser.getJavaParser(configuration.getDiscovererConfig().getConfig(getID(), JAVA_VERSION)),
+                        JaMoPPJDTParser.getJavaParser(configuration.getDiscovererConfig()
+                            .getConfig(getID(), JAVA_VERSION)),
                         JaMoPPJDTParser.getClasspathEntries(Paths.get(configuration.getInputFolder()
                             .devicePath())
                             .toAbsolutePath()
@@ -116,7 +117,8 @@ public class EmfTextDiscoverer implements Discoverer {
 
             private int getTimeout() {
                 try {
-                    return Integer.parseInt(configuration.getDiscovererConfig().getConfig(getID(), JAVA_TIMEOUT));
+                    return Integer.parseInt(configuration.getDiscovererConfig()
+                        .getConfig(getID(), JAVA_TIMEOUT));
                 } catch (final NumberFormatException e) {
                     logger.warn("The time limit could not be applied.", e);
                     return 10;
