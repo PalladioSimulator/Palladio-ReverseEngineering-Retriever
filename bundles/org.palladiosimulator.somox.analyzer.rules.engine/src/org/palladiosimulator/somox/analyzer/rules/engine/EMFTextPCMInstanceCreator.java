@@ -308,7 +308,6 @@ public class EMFTextPCMInstanceCreator {
         return collectionType;
     }
 
-    @SuppressWarnings("static-access")
     private CollectionDataType createCollectionWithTypeArg(String collectionTypeName, TypeReference typeArg,
             List<ArrayDimension> typeArgDimensions) {
         // Type argument is primitive

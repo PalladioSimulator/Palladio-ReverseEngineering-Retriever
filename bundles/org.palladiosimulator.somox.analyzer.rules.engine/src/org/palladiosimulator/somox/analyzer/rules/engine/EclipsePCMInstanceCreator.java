@@ -259,7 +259,6 @@ public class EclipsePCMInstanceCreator {
         return collectionType;
     }
 
-    @SuppressWarnings("static-access")
     private CollectionDataType createCollectionWithTypeArg(String collectionTypeName, ITypeBinding typeArg,
             int typeArgDimensions) {
         // Type argument is primitive

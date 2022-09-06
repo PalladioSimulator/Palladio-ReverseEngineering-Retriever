@@ -43,7 +43,7 @@ import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 abstract class RuleEngineTest {
     // Seperate instances for every child test
-    private static final Logger LOG = Logger.getLogger(this.getClass());
+    private final Logger logger = Logger.getLogger(this.getClass());
 
     public static final URI TEST_DIR = CommonPlugin
         .asLocalURI(URI.createFileURI(URI.decode(new File("res").getAbsolutePath())));
@@ -150,10 +150,10 @@ abstract class RuleEngineTest {
         File target = new File(OUT_DIR.devicePath(), this.getClass()
             .getSimpleName() + ".repository");
         if (!target.delete()) {
-            LOG.error("Could not save delete repository \"" + target.getAbsolutePath() + "\"!");
+            logger.error("Could not save delete repository \"" + target.getAbsolutePath() + "\"!");
         }
         if (!new File(OUT_DIR.devicePath(), "pcm.repository").renameTo(target)) {
-            LOG.error("Could not save created repository to \"" + target.getAbsolutePath() + "\"!");
+            logger.error("Could not save created repository to \"" + target.getAbsolutePath() + "\"!");
         }
     }
 
