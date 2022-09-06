@@ -24,6 +24,10 @@
 			<repository location="https://updatesite.palladio-simulator.com/palladio-addons-fluentapimodelgenerator/nightly/" />
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="false" refresh="true" type="InstallableUnit">
+			<unit id="com.github.jsqlparser" version="4.4.0" />
+			<repository location="https://updatesite.palladio-simulator.com/palladio-thirdparty-library/nightly/" />
+		</location>
+		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="false" refresh="true" type="InstallableUnit">
 			<unit id="org.emftext.language.java.feature.feature.group" version="5.1.0.202209051332" />
 			<repository location="https://updatesite.mdsd.tools/jamopp/nightly/" />
 		</location>

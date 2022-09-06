@@ -29,7 +29,8 @@ Require-Bundle: jamopp.parser,
  org.jdom2,
  org.yaml.snakeyaml,
  org.json,
- org.apache.commons.cli
+ org.apache.commons.cli,
+ com.github.jsqlparser
 Export-Package: org.palladiosimulator.somox.analyzer.rules.cli;uses:="org.eclipse.equinox.app",
  org.palladiosimulator.somox.analyzer.rules.configuration,
  org.palladiosimulator.somox.analyzer.rules.main,
