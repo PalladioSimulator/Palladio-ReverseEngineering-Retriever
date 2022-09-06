@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -13,7 +14,6 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.emftext.language.java.JavaClasspath;
 import org.emftext.language.java.containers.CompilationUnit;
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
-import org.apache.log4j.Logger;
 
 import jamopp.parser.api.JaMoPPParserAPI;
 import jamopp.parser.jdt.JaMoPPJDTParser;
@@ -90,9 +90,9 @@ public class ParserAdapter {
                 continue;
             }
 
-            if (!javaResource.getURI()
-                .scheme()
-                .equals("file")) {
+            if (!"file"
+                .equals(javaResource.getURI()
+                    .scheme())) {
                 continue;
             }
 
@@ -118,11 +118,10 @@ public class ParserAdapter {
      * did not have a name for example
      */
     private static boolean isUnitRelevant(CompilationUnit root) {
-        return root.getClassifiers()
-            .size() > 0
-                && root.getClassifiers()
+        return (!root.getClassifiers().isEmpty())
+                && (root.getClassifiers()
                     .get(0)
-                    .getName() != null
+                    .getName() != null)
                 && !root.getNamespacesAsString()
                     .isEmpty();
     }

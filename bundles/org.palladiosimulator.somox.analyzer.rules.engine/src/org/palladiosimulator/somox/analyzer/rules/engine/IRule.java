@@ -12,7 +12,7 @@ public abstract class IRule {
 
     protected RuleEngineBlackboard blackboard;
 
-    public IRule(RuleEngineBlackboard blackboard) {
+    protected IRule(RuleEngineBlackboard blackboard) {
         this.blackboard = blackboard;
     }
 

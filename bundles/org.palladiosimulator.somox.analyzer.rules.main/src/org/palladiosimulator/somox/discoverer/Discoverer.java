@@ -17,8 +17,8 @@ public interface Discoverer extends Service {
         final String normalizedSuffix = Objects.requireNonNull(suffix)
             .toLowerCase()
             .strip();
-        try {
-            return Files.walk(normalizedRoot)
+        try (final Stream<Path> walk = Files.walk(normalizedRoot)) {
+            return walk
                 .filter(path -> Files.isRegularFile(path) && path.getFileName()
                     .toString()
                     .toLowerCase()

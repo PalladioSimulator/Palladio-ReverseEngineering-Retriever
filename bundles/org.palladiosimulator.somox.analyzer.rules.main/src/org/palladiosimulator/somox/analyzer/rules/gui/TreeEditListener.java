@@ -34,7 +34,7 @@ public class TreeEditListener implements Listener {
     @Override
     public void handleEvent(Event event) {
         final TreeItem item = (TreeItem) event.item;
-        if (item != null && item == lastItem[0] && item.getParentItem() != null) {
+        if ((item != null) && (item == lastItem[0]) && (item.getParentItem() != null)) {
             boolean showBorder = true;
             final Composite composite = new Composite(tree, SWT.NONE);
             if (showBorder) {
@@ -44,7 +44,7 @@ public class TreeEditListener implements Listener {
             final int inset = showBorder ? 1 : 0;
             composite.addListener(SWT.Resize, e1 -> {
                 Rectangle rect1 = composite.getClientArea();
-                text.setBounds(rect1.x + inset, rect1.y + inset, rect1.width - inset * 2, rect1.height - inset * 2);
+                text.setBounds(rect1.x + inset, rect1.y + inset, rect1.width - (inset * 2), rect1.height - (inset * 2));
             });
             Listener textListener = e2 -> {
                 switch (e2.type) {
@@ -56,7 +56,7 @@ public class TreeEditListener implements Listener {
                 case SWT.Verify:
                     String newText = text.getText();
                     String leftText = newText.substring(0, e2.start);
-                    String rightText = newText.substring(e2.end, newText.length());
+                    String rightText = newText.substring(e2.end);
                     GC gc = new GC(text);
                     Point size = gc.textExtent(leftText + e2.text + rightText);
                     gc.dispose();
@@ -64,10 +64,10 @@ public class TreeEditListener implements Listener {
                     editor.horizontalAlignment = SWT.LEFT;
                     editor.setColumn(column);
                     Rectangle itemRect = item.getBounds(column), rect2 = tree.getClientArea();
-                    editor.minimumWidth = Math.max(size.x, itemRect.width) + inset * 2;
+                    editor.minimumWidth = Math.max(size.x, itemRect.width) + (inset * 2);
                     int left = itemRect.x, right = rect2.x + rect2.width;
                     editor.minimumWidth = Math.min(editor.minimumWidth, right - left);
-                    editor.minimumHeight = size.y + inset * 2;
+                    editor.minimumHeight = size.y + (inset * 2);
                     editor.layout();
                     break;
                 case SWT.Traverse:

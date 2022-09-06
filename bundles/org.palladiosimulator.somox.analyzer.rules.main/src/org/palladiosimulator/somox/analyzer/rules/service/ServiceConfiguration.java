@@ -11,9 +11,9 @@ import java.util.Set;
 public class ServiceConfiguration<T extends Service> {
     private final String selectedServicesKey;
     private final String serviceConfigKeyPrefix;
-    private Map<String, Map<String, String>> serviceConfigs;
-    private List<T> services;
-    private Set<T> selectedServices;
+    private final Map<String, Map<String, String>> serviceConfigs;
+    private final List<T> services;
+    private final Set<T> selectedServices;
 
     public ServiceConfiguration(ServiceCollection<T> serviceCollection, String selectedServicesKey,
             String serviceConfigKeyPrefix) {
@@ -33,7 +33,7 @@ public class ServiceConfiguration<T extends Service> {
                 serviceConfigs.put(serviceId,
                         (Map<String, String>) attributeMap.get(serviceConfigKeyPrefix + serviceId));
             }
-            if (serviceIds != null && serviceIds.contains(service.getID())) {
+            if ((serviceIds != null) && serviceIds.contains(service.getID())) {
                 selectedServices.add(service);
             }
         }
@@ -55,7 +55,7 @@ public class ServiceConfiguration<T extends Service> {
     public void setConfig(String serviceId, String key, String value) {
         Map<String, String> config = serviceConfigs.get(serviceId);
         if (config == null) {
-            config = new HashMap<String, String>();
+            config = new HashMap<>();
             serviceConfigs.put(serviceId, config);
         }
         config.put(key, value);
@@ -69,7 +69,7 @@ public class ServiceConfiguration<T extends Service> {
         }
     }
 
-    public boolean getSelected(T service) {
+    public boolean isSelected(T service) {
         return selectedServices.contains(service);
     }
 
@@ -86,7 +86,7 @@ public class ServiceConfiguration<T extends Service> {
         return result;
     }
 
-    public static Set<String> serializeServices(Set<? extends Service> services) {
+    public static Set<String> serializeServices(Iterable<? extends Service> services) {
         Set<String> serviceIds = new HashSet<>();
         for (Service service : services) {
             serviceIds.add(service.getID());

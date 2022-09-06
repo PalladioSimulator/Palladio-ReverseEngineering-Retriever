@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,7 +16,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.common.util.URI;
@@ -38,14 +40,13 @@ import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrap
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.engine.DockerParser;
-import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
 import org.palladiosimulator.somox.analyzer.rules.engine.EMFTextPCMDetector;
 import org.palladiosimulator.somox.analyzer.rules.engine.EMFTextPCMInstanceCreator;
 import org.palladiosimulator.somox.analyzer.rules.engine.EclipsePCMDetector;
 import org.palladiosimulator.somox.analyzer.rules.engine.EclipsePCMInstanceCreator;
+import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
 import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
 import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
-import org.apache.log4j.Logger;
 
 /**
  * The rule engine identifies PCM elements like components and interfaces inside source code via
@@ -59,7 +60,7 @@ import org.apache.log4j.Logger;
 public class RuleEngineAnalyzer {
     private static final Logger LOG = Logger.getLogger(RuleEngineAnalyzer.class);
 
-    private RuleEngineBlackboard blackboard;
+    private final RuleEngineBlackboard blackboard;
 
     private static Repository emfTextPcm;
     private static Repository eclipsePcm;
@@ -67,7 +68,7 @@ public class RuleEngineAnalyzer {
     public RuleEngineAnalyzer(RuleEngineBlackboard blackboard) {
         this.blackboard = blackboard;
     }
-    
+
     /**
      * Returns the current PCM repository model of the engine
      *
@@ -88,7 +89,7 @@ public class RuleEngineAnalyzer {
             final URI out = CommonPlugin.asLocalURI(ruleEngineConfiguration.getOutputFolder());
             final Path outPath = Paths.get(out.devicePath());
 
-            final boolean useEMFTextParser = ruleEngineConfiguration.getUseEMFTextParser();
+            final boolean useEMFTextParser = ruleEngineConfiguration.useEmfTextParser();
 
             final Set<DefaultRule> rules = ruleEngineConfiguration.getSelectedRules();
 
@@ -142,7 +143,7 @@ public class RuleEngineAnalyzer {
     /**
      * Tries to find the files for the CompilationUnits in the {@code root} directory. Both takes
      * the CompilationUnits from and saves the associations to the given {@code blackboard}.
-     * 
+     *
      * @param roots
      *            the directory to search in
      * @param blackboard
@@ -160,8 +161,8 @@ public class RuleEngineAnalyzer {
             pathSegments.add(compilationUnit.getName());
             String guessedPath = String.join(File.separator, pathSegments) + ".java";
 
-            try {
-                Files.walk(root)
+            try (final Stream<Path> walk = Files.walk(root)) {
+                walk
                     .filter(Files::isRegularFile)
                     .filter(x -> x.endsWith(guessedPath))
                     .forEach(x -> blackboard.putCompilationUnitLocation(compilationUnitWrapper, x));
@@ -240,12 +241,11 @@ public class RuleEngineAnalyzer {
 
         // Look for build files in projectPath
         Set<Path> buildPaths;
-        try {
-            buildPaths = Files.walk(projectPath)
-                .filter(Files::isRegularFile)
+        try (final Stream<Path> walk = Files.walk(projectPath)) {
+            buildPaths = walk.filter(Files::isRegularFile)
                 .collect(Collectors.toSet());
         } catch (final IOException e) {
-            buildPaths = new HashSet<Path>();
+            buildPaths = new HashSet<>();
             e.printStackTrace();
         }
 
@@ -368,8 +368,7 @@ public class RuleEngineAnalyzer {
             final Object instance = c.getDeclaredConstructor()
                 .newInstance();
             if (instance instanceof IRule) {
-                final IRule rules = (IRule) instance;
-                return rules;
+                return (IRule) instance;
             }
         } catch (final Exception e) {
             e.printStackTrace();
@@ -400,7 +399,7 @@ public class RuleEngineAnalyzer {
 
         final List<EObject> contents = res.getContents();
         return contents.stream()
-            .map(content -> (CompilationUnitImpl) content)
+            .map(CompilationUnitImpl.class::cast)
             .filter(compi -> compi.getName() != null)
             .collect(Collectors.toList());
     }

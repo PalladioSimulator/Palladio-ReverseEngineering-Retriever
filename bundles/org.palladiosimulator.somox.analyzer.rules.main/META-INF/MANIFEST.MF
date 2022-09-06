@@ -28,7 +28,7 @@ Require-Bundle: jamopp.parser,
  org.apache.commons.csv,
  org.jdom2,
  org.yaml.snakeyaml,
- org.json;bundle-version="1.0.0"
+ org.json
 Export-Package: org.palladiosimulator.somox.analyzer.rules.cli;uses:="org.eclipse.equinox.app",
  org.palladiosimulator.somox.analyzer.rules.configuration,
  org.palladiosimulator.somox.analyzer.rules.main,

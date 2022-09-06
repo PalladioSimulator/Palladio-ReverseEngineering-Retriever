@@ -11,13 +11,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.log4j.Logger;
 import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.common.util.Diagnostic;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.palladiosimulator.pcm.reliability.FailureType;
 import org.palladiosimulator.pcm.repository.DataType;
@@ -40,21 +41,19 @@ import com.google.common.collect.Sets;
 import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
 import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
-import org.apache.log4j.Logger;
-
 abstract class RuleEngineTest {
     // Seperate instances for every child test
-    private final Logger log = Logger.getLogger(this.getClass());
+    private static final Logger LOG = Logger.getLogger(this.getClass());
 
     public static final URI TEST_DIR = CommonPlugin
         .asLocalURI(URI.createFileURI(URI.decode(new File("res").getAbsolutePath())));
     public static final URI OUT_DIR = TEST_DIR.appendSegment("out");
 
-    private RuleEngineConfiguration jdtConfig = new RuleEngineConfiguration();
-    private RuleEngineConfiguration emfTextConfig = new RuleEngineConfiguration();
+    private final RuleEngineConfiguration jdtConfig = new RuleEngineConfiguration();
+    private final RuleEngineConfiguration emfTextConfig = new RuleEngineConfiguration();
     private boolean isJDTCreated;
     private boolean isEMFTextCreated;
-    private Set<DefaultRule> rules;
+    private final Set<DefaultRule> rules;
     private RepositoryImpl jdtRepo;
     private RepositoryImpl emfTextRepo;
 
@@ -71,7 +70,7 @@ abstract class RuleEngineTest {
     /**
      * Tests the basic functionality of the RuleEngineAnalyzer. Requires it to execute without an
      * exception and produce an output file.
-     * 
+     *
      * @param projectDirectory
      *            the name of the project directory that will be analyzed
      */
@@ -150,9 +149,11 @@ abstract class RuleEngineTest {
     void cleanUp() {
         File target = new File(OUT_DIR.devicePath(), this.getClass()
             .getSimpleName() + ".repository");
-        target.delete();
+        if (!target.delete()) {
+            LOG.error("Could not save delete repository \"" + target.getAbsolutePath() + "\"!");
+        }
         if (!new File(OUT_DIR.devicePath(), "pcm.repository").renameTo(target)) {
-            log.error("Could not save created repository to \"" + target.getAbsolutePath() + "\"!");
+            LOG.error("Could not save created repository to \"" + target.getAbsolutePath() + "\"!");
         }
     }
 
@@ -160,18 +161,16 @@ abstract class RuleEngineTest {
         assertCreated(emfText);
         if (emfText) {
             return emfTextConfig;
-        } else {
-            return jdtConfig;
         }
+        return jdtConfig;
     }
 
     public RepositoryImpl getRepo(boolean emfText) {
         assertCreated(emfText);
         if (emfText) {
             return emfTextRepo;
-        } else {
-            return jdtRepo;
         }
+        return jdtRepo;
     }
 
     public Set<DefaultRule> getRules() {
@@ -182,36 +181,32 @@ abstract class RuleEngineTest {
         assertCreated(emfText);
         if (emfText) {
             return Collections.unmodifiableList(emfTextComponents);
-        } else {
-            return Collections.unmodifiableList(jdtComponents);
         }
+        return Collections.unmodifiableList(jdtComponents);
     }
 
     public List<DataType> getDatatypes(boolean emfText) {
         assertCreated(emfText);
         if (emfText) {
             return Collections.unmodifiableList(emfTextDatatypes);
-        } else {
-            return Collections.unmodifiableList(jdtDatatypes);
         }
+        return Collections.unmodifiableList(jdtDatatypes);
     }
 
     public List<FailureType> getFailuretypes(boolean emfText) {
         assertCreated(emfText);
         if (emfText) {
             return Collections.unmodifiableList(emfTextFailuretypes);
-        } else {
-            return Collections.unmodifiableList(jdtFailuretypes);
         }
+        return Collections.unmodifiableList(jdtFailuretypes);
     }
 
     public List<Interface> getInterfaces(boolean emfText) {
         assertCreated(emfText);
         if (emfText) {
             return Collections.unmodifiableList(emfTextInterfaces);
-        } else {
-            return Collections.unmodifiableList(jdtInterfaces);
         }
+        return Collections.unmodifiableList(jdtInterfaces);
     }
 
     public boolean containsComponent(String name, boolean emfText) {
@@ -247,7 +242,7 @@ abstract class RuleEngineTest {
     }
 
     private Set<OperationSignature> getOperationSignature(String interfaceName, String signatureName, boolean emfText) {
-        Set<OperationSignature> sigs = getInterfaces(emfText).stream()
+        return getInterfaces(emfText).stream()
             .filter(OperationInterface.class::isInstance)
             .map(OperationInterface.class::cast)
             .filter(x -> x.getEntityName()
@@ -257,8 +252,7 @@ abstract class RuleEngineTest {
                 .filter(y -> y.getEntityName()
                     .equals(signatureName))
                 .collect(Collectors.toSet()))
-            .collect(Collectors.reducing(new HashSet<OperationSignature>(), Sets::union));
-        return sigs;
+            .reduce(new HashSet<>(), Sets::union);
     }
 
     private void assertCreated(boolean emfText) {
@@ -296,8 +290,7 @@ abstract class RuleEngineTest {
     protected static URI getOutputDirectory(boolean emfText) {
         if (emfText) {
             return OUT_DIR.appendSegment("emfText");
-        } else {
-            return OUT_DIR.appendSegment("jdt");
         }
+        return OUT_DIR.appendSegment("jdt");
     }
 }

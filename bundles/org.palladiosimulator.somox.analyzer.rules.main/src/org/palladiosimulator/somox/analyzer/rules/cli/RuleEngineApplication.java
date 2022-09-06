@@ -1,11 +1,11 @@
 package org.palladiosimulator.somox.analyzer.rules.cli;
 
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
 
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
@@ -48,7 +48,7 @@ public class RuleEngineApplication implements IApplication {
         }
 
         // Extract and check rules
-        final Set<DefaultRule> rules = new HashSet<DefaultRule>();
+        final Set<DefaultRule> rules = new HashSet<>();
         for (int i = 2; i < args.length; i++) {
             try {
                 rules.add(DefaultRule.valueOf(args[i]));

@@ -20,8 +20,8 @@ public class RuleEngineBlackboardInteractingJob extends AbstractBlackboardIntera
     private final RuleEngineConfiguration configuration;
 
     public RuleEngineBlackboardInteractingJob(RuleEngineConfiguration configuration, RuleEngineBlackboard blackboard) {
+        super.setBlackboard(blackboard);
         this.configuration = Objects.requireNonNull(configuration);
-        setBlackboard(blackboard);
     }
 
     @Override

@@ -17,6 +17,7 @@ public class ACMETest extends RuleEngineTest {
      * Requires it to execute without an exception and produce an output file with the correct
      * contents.
      */
+    @Override
     @ParameterizedTest
     @MethodSource("discovererProvider")
     void test(boolean emfText) {

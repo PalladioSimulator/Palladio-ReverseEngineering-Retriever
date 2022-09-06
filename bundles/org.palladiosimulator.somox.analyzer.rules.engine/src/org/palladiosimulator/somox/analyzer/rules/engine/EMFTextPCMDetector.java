@@ -26,23 +26,23 @@ import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrap
  * Components.
  */
 public class EMFTextPCMDetector implements IPCMDetector {
-    private List<CompilationUnitImpl> components = new ArrayList<>();
+    private final List<CompilationUnitImpl> components = new ArrayList<>();
 
-    private Map<String, List<EMFTextProvidesRelation>> providedRelations = new HashMap<>();
+    private final Map<String, List<EMFTextProvidesRelation>> providedRelations = new HashMap<>();
 
-    private Map<String, List<Variable>> requiredInterfaces = new HashMap<>();
+    private final Map<String, List<Variable>> requiredInterfaces = new HashMap<>();
 
-    private List<Classifier> operationInterfaces = new ArrayList<>();
+    private final List<Classifier> operationInterfaces = new ArrayList<>();
 
-    private Set<String> interfaceNames = new HashSet<>();
+    private final Set<String> interfaceNames = new HashSet<>();
 
-    private String getFullUnitName(CompilationUnitImpl unit) {
+    private static String getFullUnitName(CompilationUnitImpl unit) {
         return unit.getNamespacesAsString() + "." + unit.getName();
     }
 
     public void detectComponent(CompilationUnitImpl unit) {
         for (final ConcreteClassifier classi : unit.getClassifiers()) {
-            if (classi instanceof Class || classi instanceof Interface) {
+            if ((classi instanceof Class) || (classi instanceof Interface)) {
                 components.add(unit);
             }
         }
@@ -63,7 +63,7 @@ public class EMFTextPCMDetector implements IPCMDetector {
         if (interfaceNames.contains(name)) {
             return;
         }
-        if (classifier instanceof Class || classifier instanceof Interface) {
+        if ((classifier instanceof Class) || (classifier instanceof Interface)) {
             operationInterfaces.add(classifier);
             interfaceNames.add(name);
         }
@@ -162,7 +162,7 @@ public class EMFTextPCMDetector implements IPCMDetector {
         return sb.toString();
     }
 
-    private String mapToString(Map<?, ? extends Collection<?>> map, int indentation) {
+    private static String mapToString(Map<?, ? extends Collection<?>> map, int indentation) {
         StringBuilder sb = new StringBuilder();
         String indentString = "\t".repeat(indentation);
         map.entrySet()

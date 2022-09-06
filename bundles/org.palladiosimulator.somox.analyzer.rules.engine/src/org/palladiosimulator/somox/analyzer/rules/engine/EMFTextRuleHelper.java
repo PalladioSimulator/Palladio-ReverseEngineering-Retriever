@@ -14,6 +14,7 @@ import org.emftext.language.java.classifiers.ClassifiersPackage;
 import org.emftext.language.java.classifiers.ConcreteClassifier;
 import org.emftext.language.java.classifiers.Enumeration;
 import org.emftext.language.java.classifiers.Interface;
+import org.emftext.language.java.containers.CompilationUnit;
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.emftext.language.java.members.Constructor;
 import org.emftext.language.java.members.Field;
@@ -22,9 +23,9 @@ import org.emftext.language.java.members.Method;
 import org.emftext.language.java.modifiers.AnnotableAndModifiable;
 import org.emftext.language.java.modifiers.AnnotationInstanceOrModifier;
 import org.emftext.language.java.modifiers.Modifier;
-import org.emftext.language.java.parameters.Parameter;
 import org.emftext.language.java.types.Type;
 import org.emftext.language.java.types.TypeReference;
+import org.emftext.language.java.types.TypedElement;
 import org.emftext.language.java.variables.Variable;
 
 /**
@@ -37,7 +38,7 @@ public class EMFTextRuleHelper {
 
     private static final Logger LOG = Logger.getLogger(EMFTextRuleHelper.class);
 
-    public static boolean isAbstraction(CompilationUnitImpl unit) {
+    public static boolean isAbstraction(CompilationUnit unit) {
         for (final ConcreteClassifier classi : unit.getClassifiers()) {
             if (classi.eClass()
                 .getClassifierID() == ClassifiersPackage.INTERFACE) {
@@ -47,7 +48,7 @@ public class EMFTextRuleHelper {
         return false;
     }
 
-    public static boolean isUnitAnnotatedWithName(CompilationUnitImpl unit, String... names) {
+    public static boolean isUnitAnnotatedWithName(CompilationUnit unit, String... names) {
         for (final String name : names) {
             for (final ConcreteClassifier classi : unit.getClassifiers()) {
                 if (isClassifierAnnotatedWithName(classi, name)) {
@@ -63,7 +64,7 @@ public class EMFTextRuleHelper {
             .getClassifierID() == EcorePackage.EANNOTATION) {
             final AnnotationInstance anno = (AnnotationInstance) mod;
 
-            if (anno == null || anno.getAnnotation() == null) {
+            if ((anno.getAnnotation() == null)) {
                 LOG.warn("annotation was null, returning false");
                 return false;
             }
@@ -82,7 +83,7 @@ public class EMFTextRuleHelper {
             final ConcreteClassifier classi = (ConcreteClassifier) classifier;
             List<AnnotationInstanceOrModifier> annosAndMods = classi.getAnnotationsAndModifiers();
             if (!annosAndMods.isEmpty()) {
-                isObjectAnnotatedWithName(annosAndMods.get(0), name);
+                return isObjectAnnotatedWithName(annosAndMods.get(0), name);
             }
         }
         return false;
@@ -117,15 +118,15 @@ public class EMFTextRuleHelper {
         return methods;
     }
 
-    public static List<Field> getFields(CompilationUnitImpl unit) {
+    public static List<Field> getFields(CompilationUnit unit) {
         final List<Field> fields = new ArrayList<>();
 
         for (final ConcreteClassifier classi : unit.getClassifiers()) {
             for (final Member member : classi.getMembers()) {
 
-                if (member.eClass()
-                    .getName()
-                    .equals("Field")) {
+                if ("Field"
+                    .equals(member.eClass()
+                        .getName())) {
                     final Field field = (Field) member;
                     fields.add(field);
                 }
@@ -135,7 +136,7 @@ public class EMFTextRuleHelper {
         return fields;
     }
 
-    public static boolean isMethodAnnotatedWithName(Method member, String... names) {
+    public static boolean isMethodAnnotatedWithName(AnnotableAndModifiable member, String... names) {
         for (final String name : names) {
             for (final AnnotationInstance a : member.getAnnotationInstances()) {
                 if (a.getAnnotation()
@@ -148,7 +149,7 @@ public class EMFTextRuleHelper {
         return false;
     }
 
-    public static boolean isFieldAbstract(Field field) {
+    public static boolean isFieldAbstract(Variable field) {
         if (field.getTypeReference() == null) {
             LOG.warn("field: " + field.getName() + ", has type reference null"
                     + "=> returning false for isFieldAbstract");
@@ -157,21 +158,15 @@ public class EMFTextRuleHelper {
         final Type ref = field.getTypeReference()
             .getTarget();
 
-        if (ref instanceof Interface) {
-            return true;
-        }
-        return false;
+        return ref instanceof Interface;
     }
 
-    public static boolean isParameterAbstract(Parameter p) {
-        if (p.getTypeReference()
-            .getTarget() instanceof Interface) {
-            return true;
-        }
-        return false;
+    public static boolean isParameterAbstract(TypedElement para) {
+        return para.getTypeReference()
+                .getTarget() instanceof Interface;
     }
 
-    public static boolean isParameterAClassAnnotatedWith(Parameter para, String... names) {
+    public static boolean isParameterAClassAnnotatedWith(TypedElement para, String... names) {
         for (final String name : names) {
             final Classifier classi = para.getTypeReference()
                 .getPureClassifierReference()
@@ -200,13 +195,11 @@ public class EMFTextRuleHelper {
                 }
             }
         }
-        if (detectionCounter == numberOfModsToDetect) {
-            return true;
-        }
-        return false;
+
+        return detectionCounter == numberOfModsToDetect;
     }
 
-    public static boolean isParameterAnnotatedWith(Parameter p, String name) {
+    public static boolean isParameterAnnotatedWith(AnnotableAndModifiable p, String name) {
         for (final AnnotationInstanceOrModifier a : p.getAnnotationsAndModifiers()) {
             if (isObjectAnnotatedWithName(a, name)) {
                 return true;
@@ -216,20 +209,17 @@ public class EMFTextRuleHelper {
     }
 
     public static boolean isUnitNamedWith(CompilationUnitImpl unit, String name) {
-        return unit != null && unit.getName() != null && unit.getName()
+        return (unit != null) && (unit.getName() != null) && unit.getName()
             .contains(name);
     }
 
-    public static boolean isUnitAnEnum(CompilationUnitImpl unit) {
+    public static boolean isUnitAnEnum(CompilationUnit unit) {
         final Classifier classi = unit.getClassifiers()
             .get(0);
-        if (classi instanceof Enumeration) {
-            return true;
-        }
-        return false;
+        return classi instanceof Enumeration;
     }
 
-    public static List<Interface> getAllInterfaces(CompilationUnitImpl unit) {
+    public static List<Interface> getAllInterfaces(CompilationUnit unit) {
         final List<Interface> interfaces = new ArrayList<>();
         // TODO Is this still necessary?
         if (unit.getName()
@@ -254,7 +244,7 @@ public class EMFTextRuleHelper {
                 final Class cl = (Class) classifier;
                 final EList<TypeReference> references = cl.getImplements();
 
-                if (references.size() > 0) {
+                if (!references.isEmpty()) {
                     for (final TypeReference ref : references) {
                         final Classifier innerClassi = ref.getPureClassifierReference()
                             .getTarget();
@@ -268,7 +258,7 @@ public class EMFTextRuleHelper {
         return interfaces;
     }
 
-    public static boolean isFieldAnnotatedWithName(Field field, String name) {
+    public static boolean isFieldAnnotatedWithName(AnnotableAndModifiable field, String name) {
         for (final AnnotationInstance anno : field.getAnnotationInstances()) {
             if (anno.getAnnotation()
                 .getName()
@@ -279,13 +269,13 @@ public class EMFTextRuleHelper {
         return false;
     }
 
-    public static boolean isClassImplementing(CompilationUnitImpl unit) {
+    public static boolean isClassImplementing(CompilationUnit unit) {
 
         for (final ConcreteClassifier classifier : unit.getClassifiers()) {
             if (classifier instanceof Class) {
                 final Class cl = (Class) classifier;
                 final EList<TypeReference> references = cl.getImplements();
-                if (references.size() > 0) {
+                if (!references.isEmpty()) {
                     return true;
                 }
             }
@@ -293,7 +283,7 @@ public class EMFTextRuleHelper {
         return false;
     }
 
-    public static boolean isClassExtending(CompilationUnitImpl unit) {
+    public static boolean isClassExtending(CompilationUnit unit) {
         for (final ConcreteClassifier classifier : unit.getClassifiers()) {
             if (classifier instanceof Class) {
                 final Class cl = (Class) classifier;
@@ -321,7 +311,7 @@ public class EMFTextRuleHelper {
         return null;
     }
 
-    public static boolean isClassModifiedExactlyWith(CompilationUnitImpl unit, String... names) {
+    public static boolean isClassModifiedExactlyWith(CompilationUnit unit, String... names) {
         for (final ConcreteClassifier classi : unit.getClassifiers()) {
             if (classi instanceof Class) {
                 return isObjectModifiedExactlyWith(classi, names);
@@ -340,7 +330,7 @@ public class EMFTextRuleHelper {
             .collect(Collectors.toList());
     }
 
-    public static List<Constructor> getConstructors(CompilationUnitImpl unit) {
+    public static List<Constructor> getConstructors(CompilationUnit unit) {
         final List<Constructor> constructors = new ArrayList<>();
         for (final ConcreteClassifier classi : unit.getClassifiers()) {
             for (final Member member : classi.getMembers()) {
@@ -367,8 +357,8 @@ public class EMFTextRuleHelper {
     }
 
     public static boolean isClassOfFieldAnnotatedWithName(Variable v, String... names) {
-        if (v == null || v.getTypeReference() == null || v.getTypeReference()
-            .getPureClassifierReference() == null) {
+        if ((v == null) || (v.getTypeReference() == null) || (v.getTypeReference()
+            .getPureClassifierReference() == null)) {
             return false;
         }
         Classifier currentClassifier = v.getTypeReference()
