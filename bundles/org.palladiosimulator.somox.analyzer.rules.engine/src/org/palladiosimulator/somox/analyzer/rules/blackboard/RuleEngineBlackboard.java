@@ -14,8 +14,6 @@ import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.system.System;
 import org.palladiosimulator.somox.analyzer.rules.engine.EMFTextPCMDetector;
 import org.palladiosimulator.somox.analyzer.rules.engine.EclipsePCMDetector;
-import org.somox.analyzer.AnalysisResult;
-import org.somox.extractor.ExtractionResult;
 
 import com.google.common.collect.Sets;
 
@@ -23,19 +21,16 @@ import de.uka.ipd.sdq.workflow.blackboard.Blackboard;
 
 public class RuleEngineBlackboard extends Blackboard<Object> {
 
-    private Map<String, ExtractionResult> extractionResults;
     private Set<CompilationUnitWrapper> compilationUnits;
-    private Map<CompilationUnitWrapper, Set<Path>> compilationUnitLocations;
+    private Map<CompilationUnitWrapper, Path> compilationUnitLocations;
     private Map<RepositoryComponent, CompilationUnitWrapper> repositoryComponentLocations;
     private Map<Entity, CompilationUnitWrapper> entityLocations;
     private Map<Path, Set<CompilationUnitWrapper>> systemAssociations;
     private Map<System, Path> systemPaths;
     private EMFTextPCMDetector emfTextPcmDetector;
     private EclipsePCMDetector eclipsePcmDetector;
-    private AnalysisResult analysisResult;
 
     public RuleEngineBlackboard() {
-        extractionResults = new HashMap<>();
         compilationUnits = new HashSet<>();
         compilationUnitLocations = new HashMap<>();
         repositoryComponentLocations = new HashMap<>();
@@ -44,30 +39,12 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
         systemPaths = new HashMap<>();
     }
 
-    public ExtractionResult putExtractionResult(String identifier, ExtractionResult extractionResult) {
-        return extractionResults.put(identifier, extractionResult);
+    public Path putCompilationUnitLocation(CompilationUnitWrapper compilationUnit, Path path) {
+        return compilationUnitLocations.put(compilationUnit, path);
     }
 
-    public Map<String, ExtractionResult> getExtractionResults() {
-        return Collections.unmodifiableMap(extractionResults);
-    }
-
-    public void addCompilationUnitLocation(CompilationUnitWrapper compilationUnit, Path path) {
-        Set<Path> paths = compilationUnitLocations.get(compilationUnit);
-        if (paths == null) {
-            paths = new HashSet<>();
-            compilationUnitLocations.put(compilationUnit, paths);
-        }
-        paths.add(path.normalize());
-    }
-
-    public Set<Path> getCompilationUnitLocations(CompilationUnitWrapper compilationUnit) {
-        Set<Path> paths = compilationUnitLocations.get(compilationUnit);
-        if (paths == null) {
-            return Collections.emptySet();
-        } else {
-            return Collections.unmodifiableSet(paths);
-        }
+    public Path getCompilationUnitLocation(CompilationUnitWrapper compilationUnit) {
+        return compilationUnitLocations.get(compilationUnit);
     }
 
     public CompilationUnitWrapper putRepositoryComponentLocation(RepositoryComponent repoComp,
@@ -80,21 +57,23 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
         return Collections.unmodifiableMap(repositoryComponentLocations);
     }
 
-    public Map<Entity, Set<Path>> getEntityPaths() {
-        final Map<Entity, Set<Path>> entityPaths = new HashMap<>();
+    public Map<Entity, Path> getEntityPaths() {
+        final Map<Entity, Path> entityPaths = new HashMap<>();
 
         for (Entity entity : entityLocations.keySet()) {
             CompilationUnitWrapper compilationUnit = entityLocations.get(entity);
-            if (compilationUnit == null)
+            if (compilationUnit == null) {
                 continue;
-            Set<Path> path = compilationUnitLocations.get(compilationUnit);
-            if (path == null)
+            }
+            Path path = compilationUnitLocations.get(compilationUnit);
+            if (path == null) {
                 continue;
+            }
             entityPaths.put(entity, path);
         }
 
         for (Entry<System, Path> entry : systemPaths.entrySet()) {
-            entityPaths.put(entry.getKey(), Set.of(entry.getValue()));
+            entityPaths.put(entry.getKey(), entry.getValue());
         }
 
         return Collections.unmodifiableMap(entityPaths);
@@ -133,10 +112,10 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
         }
 
         Set<CompilationUnitWrapper> compUnit = new HashSet<>();
-        for (Entry<CompilationUnitWrapper, Set<Path>> entry : compilationUnitLocations.entrySet()) {
+        for (Entry<CompilationUnitWrapper, Path> entry : compilationUnitLocations.entrySet()) {
             // Path::equals is enough because the working directory does not change
             if (entry.getValue()
-                .contains(path.normalize())) {
+                .equals(path.normalize())) {
                 compUnit.add(entry.getKey());
             }
         }
@@ -166,13 +145,5 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
 
     public void putSystemPath(System system, Path path) {
         systemPaths.put(system, path);
-    }
-
-    public void setAnalysisResult(AnalysisResult analysisResult) {
-        this.analysisResult = analysisResult;
-    }
-
-    public AnalysisResult getAnalysisResult() {
-        return analysisResult;
     }
 }

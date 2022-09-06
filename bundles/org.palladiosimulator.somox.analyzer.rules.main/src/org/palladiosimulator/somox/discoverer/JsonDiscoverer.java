@@ -54,6 +54,7 @@ public class JsonDiscoverer implements Discoverer {
                             logger.error(String.format("%s could not be read correctly.", p), e);
                         }
                     });
+                getBlackboard().addPartition(DISCOVERER_ID, jsons);
             }
 
             @Override

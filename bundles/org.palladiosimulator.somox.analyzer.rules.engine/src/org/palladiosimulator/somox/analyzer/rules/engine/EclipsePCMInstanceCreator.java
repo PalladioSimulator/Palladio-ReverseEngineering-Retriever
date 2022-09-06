@@ -35,7 +35,7 @@ import org.palladiosimulator.generator.fluent.repository.structure.types.Composi
 public class EclipsePCMInstanceCreator {
     private static final Logger LOG = Logger.getLogger(EclipsePCMInstanceCreator.class);
 
-    private final static String REPO_NAME = "Software Architecture Repository";
+    private static final String REPO_NAME = "Software Architecture Repository";
     private final FluentRepositoryFactory create;
     private final Repo repository;
     private final RuleEngineBlackboard blackboard;
@@ -115,7 +115,16 @@ public class EclipsePCMInstanceCreator {
                 .map(relation -> relation.getOperationInterface())
                 .collect(Collectors.toSet());
             for (ITypeBinding realInterface : realInterfaces) {
-                pcmComp.provides(create.fetchOfOperationInterface(wrapName(realInterface)), "dummy name");
+                try {
+                    pcmComp.provides(create.fetchOfOperationInterface(wrapName(realInterface)), "dummy name");
+                } catch (FluentApiException e) {
+                    // Add the interface on-demand if it was not in the model previously.
+                    // This is necessary for interfaces that were not in the class path of the java
+                    // parser.
+                    create.newOperationInterface()
+                        .withName(wrapName(realInterface));
+                    pcmComp.provides(create.fetchOfOperationInterface(wrapName(realInterface)), "dummy name");
+                }
             }
 
             final List<List<VariableDeclaration>> requiredIs = blackboard.getEclipsePCMDetector()
@@ -127,7 +136,16 @@ public class EclipsePCMInstanceCreator {
                 .collect(Collectors.toSet());
 
             for (ITypeBinding requInter : requireInterfaces) {
-                pcmComp.requires(create.fetchOfOperationInterface(wrapName(requInter)), "dummy require name");
+                try {
+                    pcmComp.requires(create.fetchOfOperationInterface(wrapName(requInter)), "dummy require name");
+                } catch (FluentApiException e) {
+                    // Add the interface on-demand if it was not in the model previously.
+                    // This is necessary for interfaces that were not in the class path of the java
+                    // parser.
+                    create.newOperationInterface()
+                        .withName(wrapName(requInter));
+                    pcmComp.requires(create.fetchOfOperationInterface(wrapName(requInter)), "dummy require name");
+                }
             }
             BasicComponent builtComp = pcmComp.build();
             blackboard.putRepositoryComponentLocation(builtComp, new CompilationUnitWrapper(comp));
@@ -155,9 +173,9 @@ public class EclipsePCMInstanceCreator {
         case "short":
             // TODO replace with Primitive.SHORT as soon as that works
             return Primitive.INTEGER;
+        default:
+            return null;
         }
-
-        return null;
     }
 
     private OperationSignatureCreator handleSignatureDataType(OperationSignatureCreator signature, String varName,
@@ -221,24 +239,21 @@ public class EclipsePCMInstanceCreator {
             }
 
             collectionType = createCollectionWithTypeArg(collectionTypeName, ref, dimensions - 1);
-        }
-        // TODO: I do not think this works properly for deeper collection types (e.g.
-        // List<String>[]), especially the naming.
-        else if (isCollectionType(ref)) {
+        } else if (isCollectionType(ref) && ref.getTypeArguments().length > 0) {
+            // TODO: I do not think this works properly for deeper collection types (e.g.
+            // List<String>[]), especially the naming.
             typeName = wrapName(ref);
-            for (ITypeBinding typeArg : ref.getTypeArguments()) {
-                String argumentTypeName = wrapName(typeArg);
-                collectionTypeName = typeName + "<" + argumentTypeName + ">";
+            ITypeBinding typeArg = ref.getTypeArguments()[0];
+            String argumentTypeName = wrapName(typeArg);
+            collectionTypeName = typeName + "<" + argumentTypeName + ">";
 
-                LOG.info("Current Argument type name: " + argumentTypeName);
+            LOG.info("Current Argument type name: " + argumentTypeName);
 
-                if (existingCollectionDataTypes.containsKey(collectionTypeName)) {
-                    return existingCollectionDataTypes.get(collectionTypeName);
-                }
-
-                collectionType = createCollectionWithTypeArg(collectionTypeName, typeArg, typeArg.getDimensions());
-                break;
+            if (existingCollectionDataTypes.containsKey(collectionTypeName)) {
+                return existingCollectionDataTypes.get(collectionTypeName);
             }
+
+            collectionType = createCollectionWithTypeArg(collectionTypeName, typeArg, typeArg.getDimensions());
         }
         if (collectionType != null) {
             existingCollectionDataTypes.put(collectionTypeName, collectionType);
@@ -247,6 +262,7 @@ public class EclipsePCMInstanceCreator {
         return collectionType;
     }
 
+    @SuppressWarnings("static-access")
     private CollectionDataType createCollectionWithTypeArg(String collectionTypeName, ITypeBinding typeArg,
             int typeArgDimensions) {
         // Type argument is primitive
@@ -323,6 +339,7 @@ public class EclipsePCMInstanceCreator {
     }
 
     // TODO creation of CompositeDataTypes
+    @SuppressWarnings("unused")
     private CompositeDataTypeCreator createTypesRecursively(ITypeBinding type) {
         if (existingDataTypesMap.containsKey(wrapName(type))) {
             return existingDataTypesMap.get(wrapName(type));

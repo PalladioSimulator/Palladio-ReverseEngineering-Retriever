@@ -1,6 +1,6 @@
 package org.palladiosimulator.somox.analyzer.rules.configuration;
 
-import org.somox.ui.runconfig.ModelAnalyzerConfiguration;
+import de.uka.ipd.sdq.workflow.launchconfig.AbstractWorkflowBasedRunConfiguration;
 
 /**
  * An adapter for RuleEngineConfiguration, not more than a formality for use as a type parameter
@@ -8,10 +8,25 @@ import org.somox.ui.runconfig.ModelAnalyzerConfiguration;
  *
  * @see de.uka.ipd.sdq.workflow.launchconfig.AbstractWorkflowBasedLaunchConfigurationDelegate
  */
-public class RuleEngineAnalyzerConfiguration extends ModelAnalyzerConfiguration<RuleEngineConfiguration> {
+public class RuleEngineAnalyzerConfiguration extends AbstractWorkflowBasedRunConfiguration {
+
+    private RuleEngineConfiguration ruleEngineConfiguration;
 
     @Override
     public void setDefaults() {
-        moxConfiguration = new RuleEngineConfiguration();
+        ruleEngineConfiguration = new RuleEngineConfiguration();
+    }
+
+    public RuleEngineConfiguration getRuleEngineConfiguration() {
+        return ruleEngineConfiguration;
+    }
+
+    public void setRuleEngineConfiguration(RuleEngineConfiguration ruleEngineConfiguration) {
+        this.ruleEngineConfiguration = ruleEngineConfiguration;
+    }
+
+    @Override
+    public String getErrorMessage() {
+        return null;
     }
 }

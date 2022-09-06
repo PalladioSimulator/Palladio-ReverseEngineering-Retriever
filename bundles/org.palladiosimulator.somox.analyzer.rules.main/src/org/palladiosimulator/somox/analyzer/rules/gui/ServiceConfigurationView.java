@@ -198,9 +198,11 @@ public class ServiceConfigurationView<T extends Service> {
     }
 
     private void clearTreeItems(Map<String, TreeItem> treeItems) {
-        for (Entry<String, TreeItem> entry : treeItems.entrySet()) {
-            entry.getValue()
-                .setText("");
-        }
+    	if (treeItems != null) {
+    		for (Entry<String, TreeItem> entry : treeItems.entrySet()) {
+            	entry.getValue()
+            		.setText("");
+        	}
+    	}
     }
 }

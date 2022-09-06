@@ -5,13 +5,12 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.nio.file.Path;
+import java.io.File;
 import java.util.List;
 
-import org.eclipse.emf.common.util.URI;
-import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.palladiosimulator.pcm.repository.CollectionDataType;
 import org.palladiosimulator.pcm.repository.Interface;
 import org.palladiosimulator.pcm.repository.OperationInterface;
@@ -21,14 +20,20 @@ import org.palladiosimulator.pcm.repository.PrimitiveDataType;
 import org.palladiosimulator.pcm.repository.PrimitiveTypeEnum;
 import org.palladiosimulator.pcm.repository.impl.RepositoryImpl;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
-import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
-import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
+import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
+import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineException;
+import org.palladiosimulator.somox.discoverer.Discoverer;
+import org.palladiosimulator.somox.discoverer.EmfTextDiscoverer;
+import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
+
+import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
+import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 public class BasicTest extends RuleEngineTest {
 
     private static final String PROJECT_NAME = "BasicProject";
-    private static final DefaultRule[] RULES = { DefaultRule.JAX_RS_EMFTEXT };
+    private static final DefaultRule[] RULES = { DefaultRule.JAX_RS, DefaultRule.JAX_RS_EMFTEXT };
 
     protected BasicTest() {
         super(PROJECT_NAME, RULES);
@@ -38,17 +43,18 @@ public class BasicTest extends RuleEngineTest {
      * Tests the basic functionality of the RuleEngineAnalyzer. Requires it to execute without an
      * exception and produce an output file.
      */
-    @Test
-    void test() {
-        assertTrue(OUT_DIR.resolve("emfTextPcm.repository")
-            .toFile()
-            .exists());
+    @ParameterizedTest
+    @MethodSource("discovererProvider")
+    void test(boolean emfText) {
+        assertTrue(new File(getOutputDirectory(emfText).appendSegment("pcm.repository")
+            .devicePath()).exists());
     }
 
     @Disabled("This bug is inherited from Palladio, this can only be fixed after it is fixed there.")
-    @Test
-    void testShort() {
-        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
+    @ParameterizedTest
+    @MethodSource("discovererProvider")
+    void testShort(boolean emfText) {
+        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces(emfText));
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (Parameter param : sig.getParameters__OperationSignature()) {
                 if (param.getParameterName()
@@ -61,9 +67,10 @@ public class BasicTest extends RuleEngineTest {
         }
     }
 
-    @Test
-    void testArray() {
-        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
+    @ParameterizedTest
+    @MethodSource("discovererProvider")
+    void testArray(boolean emfText) {
+        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces(emfText));
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (Parameter param : sig.getParameters__OperationSignature()) {
                 if (param.getParameterName()
@@ -78,9 +85,10 @@ public class BasicTest extends RuleEngineTest {
         }
     }
 
-    @Test
-    void testVararg() {
-        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
+    @ParameterizedTest
+    @MethodSource("discovererProvider")
+    void testVararg(boolean emfText) {
+        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces(emfText));
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (Parameter param : sig.getParameters__OperationSignature()) {
                 if (param.getParameterName()
@@ -99,10 +107,18 @@ public class BasicTest extends RuleEngineTest {
      * The RuleEngine produced inconsistent results if executed multiple times. Arguments and
      * methods appear multiple times. This probably has something to do with (discouraged) static
      * states somewhere in the stack.
+     * 
+     * @throws ModelAnalyzerException
+     *             forwarded from RuleEngineAnalyzer. Should cause the test to fail.
+     * @throws UserCanceledException
+     *             should not happen since no user is in the loop.
+     * @throws JobFailedException
+     *             forwarded from JavaDiscoverer. Should cause the test to fail.
      */
-    @Test
-    void testRepeatability() {
-        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
+    @ParameterizedTest
+    @MethodSource("discovererProvider")
+    void testRepeatability(boolean emfText) throws RuleEngineException, JobFailedException, UserCanceledException {
+        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces(emfText));
         int firstIntArgCount = 0;
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (Parameter param : sig.getParameters__OperationSignature()) {
@@ -114,11 +130,17 @@ public class BasicTest extends RuleEngineTest {
         }
 
         // Run the RuleEngine again on the same project
-        final Path inPath = TEST_DIR.resolve(PROJECT_NAME);
-        final List<CompilationUnitImpl> model = ParserAdapter.generateModelForPath(inPath, OUT_DIR);
-        RuleEngineAnalyzer.executeWith(inPath, OUT_DIR, CompilationUnitWrapper.wrap(model), getRules());
-        Path repoPath = OUT_DIR.resolve("emfTextPcm.repository");
-        RepositoryImpl repo = loadRepository(URI.createFileURI(repoPath.toString()));
+        RuleEngineBlackboard blackboard = new RuleEngineBlackboard();
+        RuleEngineAnalyzer analyzer = new RuleEngineAnalyzer(blackboard);
+        Discoverer discoverer = emfText ? new EmfTextDiscoverer() : new JavaDiscoverer();
+        discoverer.create(getConfig(emfText), blackboard)
+            .execute(null);
+
+        analyzer.analyze(getConfig(emfText), null);
+
+        String discovererSegment = emfText ? "emfText" : "jdt";
+        RepositoryImpl repo = loadRepository(OUT_DIR.appendSegment(discovererSegment)
+            .appendSegment("pcm.repository"));
         conflictingMethods = getConflictingMethods(repo.getInterfaces__Repository());
 
         int secondIntArgCount = 0;

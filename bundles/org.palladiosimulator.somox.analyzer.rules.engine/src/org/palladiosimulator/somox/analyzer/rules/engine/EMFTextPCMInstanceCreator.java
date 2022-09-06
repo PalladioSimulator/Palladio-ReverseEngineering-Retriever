@@ -16,7 +16,6 @@ import org.emftext.language.java.classifiers.Interface;
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.emftext.language.java.generics.QualifiedTypeArgument;
 import org.emftext.language.java.generics.TypeArgument;
-import org.emftext.language.java.members.Field;
 import org.emftext.language.java.members.Method;
 import org.emftext.language.java.parameters.Parameter;
 import org.emftext.language.java.parameters.impl.OrdinaryParameterImpl;
@@ -53,7 +52,7 @@ import org.palladiosimulator.generator.fluent.repository.structure.types.Composi
 public class EMFTextPCMInstanceCreator {
     private static final Logger LOG = Logger.getLogger(EMFTextPCMInstanceCreator.class);
 
-    private final static String REPO_NAME = "Software Architecture Repository";
+    private static final String REPO_NAME = "Software Architecture Repository";
     private final FluentRepositoryFactory create;
     private final Repo repository;
     private final RuleEngineBlackboard blackboard;
@@ -94,8 +93,7 @@ public class EMFTextPCMInstanceCreator {
     private void createPCMInterfaces(List<Classifier> interfaces) {
         interfaces.forEach(inter -> {
             final ConcreteClassifier concreteInter = (ConcreteClassifier) inter;
-            final String interfaceName = concreteInter.getQualifiedName()
-                .replaceAll("\\.", "_");
+            final String interfaceName = wrapName(concreteInter);
 
             LOG.info("Current PCM Interface: " + interfaceName);
 
@@ -108,8 +106,6 @@ public class EMFTextPCMInstanceCreator {
 
                 // parameter type
                 for (final Parameter p : m.getParameters()) {
-
-                    final TypeReference ref = p.getTypeReference();
                     signature = handleSignatureDataType(signature, p.getClass(), p.getName(), p.getTypeReference(),
                             p.getArrayDimensionsBefore(), false);
                 }
@@ -138,8 +134,7 @@ public class EMFTextPCMInstanceCreator {
                 .map(relation -> (ConcreteClassifier) relation.getOperationInterface())
                 .collect(Collectors.toSet());
             for (ConcreteClassifier realInterface : realInterfaces) {
-                pcmComp.provides(create.fetchOfOperationInterface(realInterface.getQualifiedName()
-                    .replaceAll("\\.", "_")), "dummy name");
+                pcmComp.provides(create.fetchOfOperationInterface(wrapName(realInterface)), "dummy name");
             }
 
             final List<Variable> requiredIs = blackboard.getEMFTextPCMDetector()
@@ -149,8 +144,7 @@ public class EMFTextPCMInstanceCreator {
                 .collect(Collectors.toSet());
 
             for (ConcreteClassifier requInter : requireInterfaces) {
-                pcmComp.requires(create.fetchOfOperationInterface(requInter.getQualifiedName()
-                    .replaceAll("\\.", "_")), "dummy require name");
+                pcmComp.requires(create.fetchOfOperationInterface(wrapName(requInter)), "dummy require name");
             }
             BasicComponent builtComp = pcmComp.build();
             blackboard.putRepositoryComponentLocation(builtComp, new CompilationUnitWrapper(comp));
@@ -158,23 +152,20 @@ public class EMFTextPCMInstanceCreator {
         }
     }
 
-    private static String getProvidesName(String compName, String opName) {
-        return (compName + " provides " + opName);
-    }
-
-    private static String getRequiresName(String compName, String opName) {
-        return (compName + " requires " + opName);
+    private static String wrapName(ConcreteClassifier name) {
+        return name.getQualifiedName()
+            .replace("\\.", "_");
     }
 
     private static String getCompName(CompilationUnitImpl comp) {
-        return (comp.getNamespacesAsString()
-            .replaceAll("\\.", "_") + "_" + comp.getName());
+        return comp.getNamespacesAsString()
+            .replaceAll("\\.", "_") + "_" + comp.getName();
     }
 
     private static ConcreteClassifier getConcreteFromVar(TypedElement var) {
-        return ((ConcreteClassifier) var.getTypeReference()
+        return (ConcreteClassifier) var.getTypeReference()
             .getPureClassifierReference()
-            .getTarget());
+            .getTarget();
     }
 
     private static Primitive convertPrimitive(PrimitiveType primT) {
@@ -280,10 +271,9 @@ public class EMFTextPCMInstanceCreator {
 
             collectionType = createCollectionWithTypeArg(collectionTypeName, ref,
                     dimensions.subList(1, dimensions.size()));
-        }
-        // TODO: I do not think this works properly for deeper collection types (e.g.
-        // List<String>[]), especially the naming.
-        else if (ref.getPureClassifierReference() != null && isCollectionType(ref.getPureClassifierReference()
+        } else if (ref.getPureClassifierReference() != null && isCollectionType(ref.getPureClassifierReference()
+            // TODO: I do not think this works properly for deeper collection types (e.g.
+            // List<String>[]), especially the naming.
             .getTarget())) {
             typeName = ref.getPureClassifierReference()
                 .getTarget()
@@ -317,6 +307,7 @@ public class EMFTextPCMInstanceCreator {
         return collectionType;
     }
 
+    @SuppressWarnings("static-access")
     private CollectionDataType createCollectionWithTypeArg(String collectionTypeName, TypeReference typeArg,
             List<ArrayDimension> typeArgDimensions) {
         // Type argument is primitive
@@ -392,7 +383,6 @@ public class EMFTextPCMInstanceCreator {
         String classifierName = classifier.getName();
 
         if (!existingDataTypesMap.containsKey(classifierName)) {
-            // existingDataTypesMap.put(type.getName(), createTypesRecursively(type));
             existingDataTypesMap.put(classifierName, create.newCompositeDataType()
                 .withName(classifierName));
             repository.addToRepository(existingDataTypesMap.get(classifierName));
@@ -400,39 +390,4 @@ public class EMFTextPCMInstanceCreator {
 
         return create.fetchOfCompositeDataType(classifierName);
     }
-
-    // TODO creation of CompositeDataTypes
-    private CompositeDataTypeCreator createTypesRecursively(ConcreteClassifier type) {
-        if (existingDataTypesMap.containsKey(type.getName())) {
-            return existingDataTypesMap.get(type.getName());
-        }
-
-        CompositeDataTypeCreator currentDataType = create.newCompositeDataType()
-            .withName(type.getName());
-        for (Field f : type.getFields()) {
-
-            if (f.getTypeReference() instanceof PrimitiveType) {
-                currentDataType = currentDataType.withInnerDeclaration(f.getName(),
-                        convertPrimitive((PrimitiveType) f.getTypeReference()));
-            } else if (f.getTypeReference()
-                .getTarget()
-                .toString()
-                .equals("String")) {
-                currentDataType = currentDataType.withInnerDeclaration(f.getName(), Primitive.STRING);
-            } else if (f.getTypeReference()
-                .getTarget()
-                .toString()
-                .equals("List")) {
-                currentDataType = currentDataType.withInnerDeclaration(f.getName(),
-                        create.newCollectionDataType(f.getName(), Primitive.BYTE));
-            } else {
-                currentDataType = currentDataType.withInnerDeclaration(f.getName(),
-                        createTypesRecursively(getConcreteFromVar(f)).build());
-            }
-        }
-
-        repository.addToRepository(currentDataType);
-        return currentDataType;
-    }
-
 }

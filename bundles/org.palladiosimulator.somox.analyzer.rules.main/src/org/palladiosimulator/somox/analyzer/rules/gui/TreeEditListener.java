@@ -37,8 +37,9 @@ public class TreeEditListener implements Listener {
         if (item != null && item == lastItem[0] && item.getParentItem() != null) {
             boolean showBorder = true;
             final Composite composite = new Composite(tree, SWT.NONE);
-            if (showBorder)
+            if (showBorder) {
                 composite.setBackground(new Color(0, 0, 0));
+            }
             final Text text = new Text(composite, SWT.NONE);
             final int inset = showBorder ? 1 : 0;
             composite.addListener(SWT.Resize, e1 -> {
@@ -78,7 +79,11 @@ public class TreeEditListener implements Listener {
                     case SWT.TRAVERSE_ESCAPE:
                         composite.dispose();
                         e2.doit = false;
+                    default:
+                        break;
                     }
+                    break;
+                default:
                     break;
                 }
             };

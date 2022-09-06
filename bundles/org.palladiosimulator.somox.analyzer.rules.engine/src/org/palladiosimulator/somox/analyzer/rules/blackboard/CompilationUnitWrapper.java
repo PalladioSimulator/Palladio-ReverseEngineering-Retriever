@@ -67,29 +67,31 @@ public class CompilationUnitWrapper {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        } else if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        } else if (getClass() != obj.getClass()) {
             return false;
+        }
         CompilationUnitWrapper other = (CompilationUnitWrapper) obj;
         return Objects.equals(eclipseCompUnit, other.eclipseCompUnit)
                 && Objects.equals(emftextCompUnit, other.emftextCompUnit);
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> List<CompilationUnitWrapper> wrap(Collection<T> compUnits) {
         if (compUnits == null) {
             return null;
         } else if (compUnits.stream()
             .anyMatch(CompilationUnitImpl.class::isInstance)) {
-            return ((Collection<CompilationUnitImpl>) compUnits).stream()
+            return compUnits.stream()
+                .map(CompilationUnitImpl.class::cast)
                 .map(CompilationUnitWrapper::new)
                 .collect(Collectors.toCollection(ArrayList::new));
         } else if (compUnits.stream()
             .anyMatch(CompilationUnit.class::isInstance)) {
-            return ((Collection<CompilationUnit>) compUnits).stream()
+            return compUnits.stream()
+                .map(CompilationUnit.class::cast)
                 .map(CompilationUnitWrapper::new)
                 .collect(Collectors.toCollection(ArrayList::new));
         }

@@ -34,6 +34,9 @@ class SpringRules extends IRule {
 	
 	def boolean processRuleForCompUnit(CompilationUnit unit) {
 		val pcmDetector = blackboard.getEclipsePCMDetector()
+		if (pcmDetector === null) {
+			return false
+		}
 		
 		// Abort if there is no CompilationUnit at the specified path
 		if (unit === null) {
@@ -72,14 +75,18 @@ class SpringRules extends IRule {
 			for(MethodDeclaration m: getMethods(unit)){
 				val annoWithName = isMethodAnnotatedWithName(m, annoNames)
 
-				if(annoWithName) 
-					pcmDetector.detectProvidedInterface(unit, m.resolveBinding) pcmDetector.detectOperationInterface(unit)
+				if(annoWithName) {
+					pcmDetector.detectProvidedInterface(unit, m.resolveBinding)
+					pcmDetector.detectOperationInterface(unit)
+				}
 			}
 			
 			for(MethodDeclaration m: getAllPublicMethods(unit)) {
 				val annoWithName = isMethodAnnotatedWithName(m, annoNames)
-				if(!annoWithName) 
-					pcmDetector.detectProvidedInterface(unit, m.resolveBinding) pcmDetector.detectOperationInterface(unit)
+				if(!annoWithName) {
+					pcmDetector.detectProvidedInterface(unit, m.resolveBinding)
+					pcmDetector.detectOperationInterface(unit)
+				}
 			}
 				
 		

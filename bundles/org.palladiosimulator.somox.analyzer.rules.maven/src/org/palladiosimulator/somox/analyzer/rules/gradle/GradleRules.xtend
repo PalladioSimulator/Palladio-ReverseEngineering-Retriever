@@ -1,4 +1,4 @@
-package org.palladiosimulator.somox.analyzer.rules.maven
+package org.palladiosimulator.somox.analyzer.rules.gradle
 
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule
 
@@ -7,15 +7,15 @@ import java.nio.file.Path;
 import java.util.HashSet
 import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper
 
-class MavenRules extends IRule {
-	static final String MAVEN_FILE_NAME = "pom.xml";
+class GradleRules extends IRule {
+	static final String GRADLE_FILE_NAME = "build.gradle";
 
 	new(RuleEngineBlackboard blackboard) {
 		super(blackboard)
 	}
 
 	override boolean processRules(Path path) {
-		if (path !== null && path.fileName.toString().equals(MAVEN_FILE_NAME)) {
+		if (path !== null && path.fileName.toString().equals(GRADLE_FILE_NAME)) {
 
 			// Add all file system children as associated compilation units
 			var children = new HashSet<CompilationUnitWrapper>();

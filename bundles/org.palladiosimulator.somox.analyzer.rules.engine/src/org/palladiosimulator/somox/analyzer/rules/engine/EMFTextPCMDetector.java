@@ -42,7 +42,7 @@ public class EMFTextPCMDetector implements IPCMDetector {
 
     public void detectComponent(CompilationUnitImpl unit) {
         for (final ConcreteClassifier classi : unit.getClassifiers()) {
-            if ((classi instanceof Class) || (classi instanceof Interface)) {
+            if (classi instanceof Class || classi instanceof Interface) {
                 components.add(unit);
             }
         }
@@ -63,7 +63,7 @@ public class EMFTextPCMDetector implements IPCMDetector {
         if (interfaceNames.contains(name)) {
             return;
         }
-        if ((classifier instanceof Class) || (classifier instanceof Interface)) {
+        if (classifier instanceof Class || classifier instanceof Interface) {
             operationInterfaces.add(classifier);
             interfaceNames.add(name);
         }
@@ -137,48 +137,47 @@ public class EMFTextPCMDetector implements IPCMDetector {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[PCMDetectorSimple] {\n");
-
-        sb.append("\tcomponents: {\n");
+        StringBuilder sb = new StringBuilder(140);
+        sb.append("[PCMDetectorSimple] {\n\tcomponents: {\n");
         components.forEach(comp -> {
             sb.append("\t\t");
             sb.append(comp.getNamespacesAsString());
             sb.append('.');
             sb.append(comp.getName());
-            sb.append("\n");
+            sb.append('\n');
         });
 
         sb.append("\t}\n\tinterfaces: {\n");
         operationInterfaces.forEach(op -> {
             sb.append("\t\t");
             sb.append(op.getName());
-            sb.append("\n");
+            sb.append('\n');
         });
 
-        sb.append("\t}\n\tprovided relations: {\n");
-        sb.append(mapToString(providedRelations, 2));
-        sb.append("\t}\n\trequired interfaces: {\n");
-        sb.append(mapToString(requiredInterfaces, 2));
-        sb.append("\t}\n}");
+        sb.append("\t}\n\tprovided relations: {\n")
+            .append(mapToString(providedRelations, 2))
+            .append("\t}\n\trequired interfaces: {\n")
+            .append(mapToString(requiredInterfaces, 2))
+            .append("\t}\n}");
         return sb.toString();
     }
 
     private String mapToString(Map<?, ? extends Collection<?>> map, int indentation) {
         StringBuilder sb = new StringBuilder();
-        requiredInterfaces.entrySet()
+        String indentString = "\t".repeat(indentation);
+        map.entrySet()
             .forEach(entry -> {
-                sb.append("\t".repeat(indentation));
-                sb.append("\"");
+                sb.append(indentString);
+                sb.append('\"');
                 sb.append(entry.getKey());
                 sb.append("\" -> {");
                 entry.getValue()
                     .forEach(value -> {
                         sb.append("\t".repeat(indentation + 1));
                         sb.append(value);
-                        sb.append("\n");
+                        sb.append('\n');
                     });
-                sb.append("\t".repeat(indentation));
+                sb.append(indentString);
                 sb.append("}\n");
             });
         return sb.toString();

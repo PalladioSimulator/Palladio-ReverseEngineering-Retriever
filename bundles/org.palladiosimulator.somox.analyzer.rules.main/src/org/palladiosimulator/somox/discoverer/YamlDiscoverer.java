@@ -51,6 +51,7 @@ public class YamlDiscoverer implements Discoverer {
                             logger.error(String.format("%s could not be read correctly.", p), e);
                         }
                     });
+                getBlackboard().addPartition(DISCOVERER_ID, yamls);
             }
 
             @Override

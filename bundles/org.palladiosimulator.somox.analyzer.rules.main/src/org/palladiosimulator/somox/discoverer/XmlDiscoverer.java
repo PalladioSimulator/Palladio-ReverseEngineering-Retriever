@@ -59,6 +59,7 @@ public class XmlDiscoverer implements Discoverer {
                     .filter(p -> p.toLowerCase()
                         .endsWith("pom.xml"))
                     .forEach(k -> poms.put(k, xmls.get(k)));
+                getBlackboard().addPartition(DISCOVERER_ID, poms);
             }
 
             @Override

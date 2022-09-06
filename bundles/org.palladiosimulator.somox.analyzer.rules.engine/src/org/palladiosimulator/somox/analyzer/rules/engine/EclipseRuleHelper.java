@@ -41,8 +41,7 @@ public class EclipseRuleHelper {
     private static final Logger LOG = Logger.getLogger(EclipseRuleHelper.class);
 
     public static boolean isAbstraction(CompilationUnit unit) {
-        @SuppressWarnings("unchecked")
-        List<AbstractTypeDeclaration> types = unit.types();
+        List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
 
         for (final AbstractTypeDeclaration abstType : types) {
             if (abstType instanceof TypeDeclaration && ((TypeDeclaration) abstType).isInterface()) {
@@ -53,8 +52,7 @@ public class EclipseRuleHelper {
     }
 
     public static boolean isUnitAnnotatedWithName(CompilationUnit unit, String... names) {
-        @SuppressWarnings("unchecked")
-        List<AbstractTypeDeclaration> types = unit.types();
+        List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
 
         for (final String name : names) {
             for (final AbstractTypeDeclaration abstType : types) {
@@ -66,34 +64,28 @@ public class EclipseRuleHelper {
         return false;
     }
 
-    @SuppressWarnings("unchecked")
     public static boolean isObjectAnnotatedWithName(BodyDeclaration body, String name) {
-        return containsAnnotationWithName((List<IExtendedModifier>) body.modifiers(), name);
+        return containsAnnotationWithName(cast(body.modifiers(), IExtendedModifier.class), name);
     }
 
-    @SuppressWarnings("unchecked")
     public static boolean isObjectAnnotatedWithName(SingleVariableDeclaration parameter, String name) {
-        return containsAnnotationWithName((List<IExtendedModifier>) parameter.modifiers(), name);
+        return containsAnnotationWithName(cast(parameter.modifiers(), IExtendedModifier.class), name);
     }
 
-    @SuppressWarnings("unchecked")
     public static boolean isObjectAnnotatedWithName(TypeParameter parameter, String name) {
-        return containsAnnotationWithName((List<IExtendedModifier>) parameter.modifiers(), name);
+        return containsAnnotationWithName(cast(parameter.modifiers(), IExtendedModifier.class), name);
     }
 
-    @SuppressWarnings("unchecked")
     public static boolean isObjectAnnotatedWithName(VariableDeclarationExpression expression, String name) {
-        return containsAnnotationWithName((List<IExtendedModifier>) expression.modifiers(), name);
+        return containsAnnotationWithName(cast(expression.modifiers(), IExtendedModifier.class), name);
     }
 
-    @SuppressWarnings("unchecked")
     public static boolean isObjectAnnotatedWithName(VariableDeclarationStatement statement, String name) {
-        return containsAnnotationWithName((List<IExtendedModifier>) statement.modifiers(), name);
+        return containsAnnotationWithName(cast(statement.modifiers(), IExtendedModifier.class), name);
     }
 
-    @SuppressWarnings("unchecked")
     public static boolean isClassifierAnnotatedWithName(AbstractTypeDeclaration abstTypeDecl, String name) {
-        return containsAnnotationWithName((List<IExtendedModifier>) abstTypeDecl.modifiers(), name);
+        return containsAnnotationWithName(cast(abstTypeDecl.modifiers(), IExtendedModifier.class), name);
     }
 
     private static boolean containsAnnotationWithName(List<IExtendedModifier> modifiers, String name) {
@@ -115,8 +107,7 @@ public class EclipseRuleHelper {
         final List<MethodDeclaration> methods = new ArrayList<>();
         // TODO: Methods of sub-classes are not returned
 
-        @SuppressWarnings("unchecked")
-        List<AbstractTypeDeclaration> types = unit.types();
+        List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
 
         for (final AbstractTypeDeclaration abstType : types) {
             if (abstType instanceof TypeDeclaration) {
@@ -125,8 +116,7 @@ public class EclipseRuleHelper {
             } else if (abstType instanceof EnumDeclaration) {
                 EnumDeclaration enumDecl = (EnumDeclaration) abstType;
 
-                @SuppressWarnings("unchecked")
-                List<BodyDeclaration> bodies = (List<BodyDeclaration>) enumDecl.bodyDeclarations();
+                List<BodyDeclaration> bodies = cast(enumDecl.bodyDeclarations(), BodyDeclaration.class);
 
                 for (BodyDeclaration body : bodies) {
                     if (body instanceof MethodDeclaration) {
@@ -137,8 +127,7 @@ public class EclipseRuleHelper {
             } else if (abstType instanceof AnnotationTypeDeclaration) {
                 AnnotationTypeDeclaration anno = (AnnotationTypeDeclaration) abstType;
 
-                @SuppressWarnings("unchecked")
-                List<BodyDeclaration> bodies = (List<BodyDeclaration>) anno.bodyDeclarations();
+                List<BodyDeclaration> bodies = cast(anno.bodyDeclarations(), BodyDeclaration.class);
 
                 for (BodyDeclaration body : bodies) {
                     if (body instanceof MethodDeclaration) {
@@ -163,8 +152,7 @@ public class EclipseRuleHelper {
     public static List<FieldDeclaration> getFields(CompilationUnit unit) {
         final List<FieldDeclaration> fields = new ArrayList<>();
 
-        @SuppressWarnings("unchecked")
-        List<AbstractTypeDeclaration> types = unit.types();
+        List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
 
         for (final AbstractTypeDeclaration abstType : types) {
             if (abstType instanceof TypeDeclaration) {
@@ -174,8 +162,7 @@ public class EclipseRuleHelper {
             } else if (abstType instanceof EnumDeclaration) {
                 EnumDeclaration enumDecl = (EnumDeclaration) abstType;
 
-                @SuppressWarnings("unchecked")
-                List<BodyDeclaration> bodies = (List<BodyDeclaration>) enumDecl.bodyDeclarations();
+                List<BodyDeclaration> bodies = cast(enumDecl.bodyDeclarations(), BodyDeclaration.class);
 
                 for (BodyDeclaration body : bodies) {
                     if (body instanceof FieldDeclaration) {
@@ -186,8 +173,7 @@ public class EclipseRuleHelper {
             } else if (abstType instanceof AnnotationTypeDeclaration) {
                 AnnotationTypeDeclaration anno = (AnnotationTypeDeclaration) abstType;
 
-                @SuppressWarnings("unchecked")
-                List<BodyDeclaration> bodies = (List<BodyDeclaration>) anno.bodyDeclarations();
+                List<BodyDeclaration> bodies = cast(anno.bodyDeclarations(), BodyDeclaration.class);
 
                 for (BodyDeclaration body : bodies) {
                     if (body instanceof MethodDeclaration) {
@@ -256,9 +242,8 @@ public class EclipseRuleHelper {
         return false;
     }
 
-    @SuppressWarnings("unchecked")
     public static boolean isFieldModifiedExactlyWith(FieldDeclaration field, String... names) {
-        return areModifiersExactly((List<IExtendedModifier>) field.modifiers(), names);
+        return areModifiersExactly(cast(field.modifiers(), IExtendedModifier.class), names);
     }
 
     private static boolean areModifiersExactly(List<IExtendedModifier> modifiers, String... names) {
@@ -284,8 +269,7 @@ public class EclipseRuleHelper {
     }
 
     public static boolean isUnitNamedWith(CompilationUnit unit, String name) {
-        @SuppressWarnings("unchecked")
-        List<AbstractTypeDeclaration> types = (List<AbstractTypeDeclaration>) unit.types();
+        List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
 
         for (AbstractTypeDeclaration type : types) {
             if (type.getName()
@@ -299,8 +283,7 @@ public class EclipseRuleHelper {
     }
 
     public static boolean isUnitAnEnum(CompilationUnit unit) {
-        @SuppressWarnings("unchecked")
-        List<AbstractTypeDeclaration> types = (List<AbstractTypeDeclaration>) unit.types();
+        List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
 
         for (AbstractTypeDeclaration type : types) {
             if (type instanceof EnumDeclaration) {
@@ -313,15 +296,13 @@ public class EclipseRuleHelper {
     public static List<Type> getAllInterfaces(CompilationUnit unit) {
         List<Type> interfaces = new ArrayList<>();
 
-        @SuppressWarnings("unchecked")
-        List<AbstractTypeDeclaration> types = (List<AbstractTypeDeclaration>) unit.types();
+        List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
 
         for (AbstractTypeDeclaration abstType : types) {
             if (abstType instanceof TypeDeclaration) {
-                TypeDeclaration type = ((TypeDeclaration) abstType);
+                TypeDeclaration type = (TypeDeclaration) abstType;
 
-                @SuppressWarnings("unchecked")
-                List<Type> interfaceTypes = (List<Type>) type.superInterfaceTypes();
+                List<Type> interfaceTypes = cast(type.superInterfaceTypes(), Type.class);
                 interfaces.addAll(interfaceTypes);
             }
         }
@@ -329,14 +310,12 @@ public class EclipseRuleHelper {
         return interfaces;
     }
 
-    @SuppressWarnings("unchecked")
     public static boolean isFieldAnnotatedWithName(FieldDeclaration field, String name) {
-        return containsAnnotationWithName((List<IExtendedModifier>) field.modifiers(), name);
+        return containsAnnotationWithName(cast(field.modifiers(), IExtendedModifier.class), name);
     }
 
     public static boolean isClassImplementing(CompilationUnit unit) {
-        @SuppressWarnings("unchecked")
-        List<AbstractTypeDeclaration> types = (List<AbstractTypeDeclaration>) unit.types();
+        List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
 
         for (AbstractTypeDeclaration abstType : types) {
             if (abstType instanceof TypeDeclaration) {
@@ -351,8 +330,7 @@ public class EclipseRuleHelper {
     }
 
     public static boolean isClassExtending(CompilationUnit unit) {
-        @SuppressWarnings("unchecked")
-        List<AbstractTypeDeclaration> types = (List<AbstractTypeDeclaration>) unit.types();
+        List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
 
         for (AbstractTypeDeclaration abstType : types) {
             if (abstType instanceof TypeDeclaration) {
@@ -366,8 +344,7 @@ public class EclipseRuleHelper {
     }
 
     public static Type getExtends(CompilationUnit unit) {
-        @SuppressWarnings("unchecked")
-        List<AbstractTypeDeclaration> types = (List<AbstractTypeDeclaration>) unit.types();
+        List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
 
         for (AbstractTypeDeclaration abstType : types) {
             if (abstType instanceof TypeDeclaration) {
@@ -384,30 +361,28 @@ public class EclipseRuleHelper {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     public static boolean isClassModifiedExactlyWith(CompilationUnit unit, String... names) {
-        List<AbstractTypeDeclaration> types = (List<AbstractTypeDeclaration>) unit.types();
+        List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
 
         for (AbstractTypeDeclaration abstType : types) {
             if (abstType instanceof TypeDeclaration) {
                 TypeDeclaration type = (TypeDeclaration) abstType;
                 if (!type.isInterface()) {
-                    return areModifiersExactly((List<IExtendedModifier>) type.modifiers(), names);
+                    return areModifiersExactly(cast(type.modifiers(), IExtendedModifier.class), names);
                 }
             }
         }
         return false;
     }
 
-    @SuppressWarnings("unchecked")
     public static boolean isMethodModifiedExactlyWith(MethodDeclaration method, String... names) {
-        return areModifiersExactly((List<IExtendedModifier>) method.modifiers(), names);
+        return areModifiersExactly(cast(method.modifiers(), IExtendedModifier.class), names);
     }
 
-    @SuppressWarnings("unchecked")
     public static List<MethodDeclaration> getAllPublicMethods(CompilationUnit unit) {
         return getMethods(unit).stream()
-            .filter(x -> ((List<IExtendedModifier>) x.modifiers()).stream()
+            .filter(MethodDeclaration::isConstructor)
+            .filter(x -> cast(x.modifiers(), IExtendedModifier.class).stream()
                 .filter(IExtendedModifier::isModifier)
                 .map(Modifier.class::cast)
                 .anyMatch(Modifier::isPublic))
@@ -437,5 +412,16 @@ public class EclipseRuleHelper {
             .stream()
             .map(IAnnotationBinding::getName)
             .anyMatch(uniqueNames::contains);
+    }
+
+    // Concentrate the warnings to this single method. It is necessary due to the
+    // Eclipse JDT DOM API.
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static <T> List<T> cast(List list, Class<T> clazz) {
+        if (!list.isEmpty() && !clazz.isInstance(list.get(0))) {
+            throw new ClassCastException("Illegal cast in EclipseRuleHelper!" + "\n" + list.get(0)
+                .getClass() + " -> " + clazz);
+        }
+        return (List<T>) list;
     }
 }

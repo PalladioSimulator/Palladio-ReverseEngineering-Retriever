@@ -3,10 +3,13 @@ package org.palladiosimulator.somox.analyzer.rules.gui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
@@ -48,6 +51,8 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     private ModifyListener modifyListener;
 
     private Text in;
+    private boolean useEMFTextParser;
+    private Combo parserSelection;
     private Set<DefaultRule> rules;
     private Set<Button> ruleButtons;
     private Text out;
@@ -118,6 +123,23 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
                 defaultPath);
 
         // Create rule selection area
+        parserSelection = new Combo(container, SWT.READ_ONLY);
+        parserSelection.add("Eclipse JDT Parser (recommended)");
+        parserSelection.add("EMFText Parser");
+        parserSelection.select(0);
+        parserSelection.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                useEMFTextParser = parserSelection.getSelectionIndex() == 1;
+                modifyListener.modifyText(null);
+            }
+
+            @Override
+            public void widgetDefaultSelected(SelectionEvent e) {
+                widgetSelected(e);
+            }
+        });
+
         Group ruleSelection = new Group(container, SWT.NONE);
         ruleSelection.setText("Rules");
         ruleSelection.setLayout(new RowLayout());
@@ -186,12 +208,26 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         setText(configuration, in, RuleEngineConfiguration.RULE_ENGINE_INPUT_PATH);
         setText(configuration, out, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH);
 
+        setParserSelection(configuration);
+
         for (Button ruleButton : ruleButtons) {
             setButton(configuration, ruleButton, RuleEngineConfiguration.RULE_ENGINE_SELECTED_RULES);
         }
 
         analystConfigView.initializeFrom(configuration);
         discovererConfigView.initializeFrom(configuration);
+    }
+
+    private void setParserSelection(ILaunchConfiguration configuration) {
+        try {
+            useEMFTextParser = (boolean) configuration
+                .getAttribute(RuleEngineConfiguration.RULE_ENGINE_USE_EMFTEXT_PARSER, false);
+            parserSelection.select(useEMFTextParser ? 1 : 0);
+        } catch (CoreException e) {
+            LaunchConfigPlugin.errorLogger(getName(), RuleEngineConfiguration.RULE_ENGINE_USE_EMFTEXT_PARSER,
+                    e.getMessage());
+            error(e.getLocalizedMessage());
+        }
     }
 
     private void setButton(ILaunchConfiguration configuration, Button ruleButton, String attributeName) {
@@ -223,6 +259,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     public void performApply(ILaunchConfigurationWorkingCopy configuration) {
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_INPUT_PATH, in);
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH, out);
+        setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_USE_EMFTEXT_PARSER, useEMFTextParser);
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_SELECTED_RULES, rules);
         analystConfigView.performApply(configuration);
         discovererConfigView.performApply(configuration);
@@ -236,6 +273,14 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
             } else {
                 configuration.setAttribute(attributeName, getURI(textWidget).toString());
             }
+        } catch (final Exception e) {
+            error(e.getLocalizedMessage());
+        }
+    }
+
+    private void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName, boolean value) {
+        try {
+            configuration.setAttribute(attributeName, value);
         } catch (final Exception e) {
             error(e.getLocalizedMessage());
         }
@@ -258,9 +303,11 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         setText(out, defaultPath);
         setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH, out);
 
+        setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_USE_EMFTEXT_PARSER, false);
+
         // By default, no rule is selected
         rules = new HashSet<>();
-        setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH, rules);
+        setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_SELECTED_RULES, rules);
 
         analystConfigView.setDefaults(configuration);
         discovererConfigView.setDefaults(configuration);

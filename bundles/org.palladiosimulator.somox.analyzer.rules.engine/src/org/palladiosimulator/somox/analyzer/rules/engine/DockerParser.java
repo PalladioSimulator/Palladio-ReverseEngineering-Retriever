@@ -24,7 +24,8 @@ import org.apache.log4j.Logger;
  * in: https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Docker
  */
 public class DockerParser {
-    private final String FILE_NAME = "docker-compose";
+    private static final String FILE_NAME = "docker-compose";
+
     private final Path path;
     private final IPCMDetector pcmDetector;
     private final Map<String, List<CompilationUnitWrapper>> mapping;
@@ -63,9 +64,9 @@ public class DockerParser {
             LOG.info("No docker compose file detected.");
             return null;
         }
-        final Path path = paths.get(0);
+        final Path firstPath = paths.get(0);
 
-        final File initialFile = path.toFile();
+        final File initialFile = firstPath.toFile();
         InputStream targetStream = null;
         try {
             targetStream = new FileInputStream(initialFile);
@@ -85,6 +86,8 @@ public class DockerParser {
      */
     @SuppressWarnings("unchecked")
     private List<String> extractServiceNames(InputStream stream) {
+        // TODO why is this deactivated? Circumvents "unused" warning:
+        stream = (InputStream) stream;
         // final Yaml yaml = new Yaml();
         final Map<String, Object> object = new HashMap<>(); // (Map<String, Object>)
                                                             // yaml.load(stream);
