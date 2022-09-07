@@ -1,11 +1,12 @@
-name: Quality Control
+# This workflow enables continuous quality assurance
+name: Continual Improvement Process
 
 on:
-  push:
-  pull_request:
+  push: # push on any branch
+  pull_request: # pull request on any branch
   schedule:
-    - cron: '4 2 * * 0'
-  workflow_dispatch:
+    - cron: '4 2 * * 0' # once a week, Sundays at 02:04 UTC.
+  workflow_dispatch: # manual trigger
 
 permissions:
   actions: read
@@ -41,6 +42,7 @@ jobs:
       uses: github/codeql-action/init@v2
       with:
         languages: java
+        config-file: ./.github/codeql.yml
     - name: Autobuild Repository
       uses: github/codeql-action/autobuild@v2
     - name: Perform Analyze
