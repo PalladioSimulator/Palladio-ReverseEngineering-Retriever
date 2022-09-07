@@ -4,11 +4,12 @@ name: Continuous Product Integration
 on:
   push:
     tags:
-      - 'v*' # Push events to matching v*, i.e. v1.0, v21.07.08
+      - "v*.*.*" # Push events with tags, such as v1.0.0 or v22.07.05
   workflow_dispatch: # manual trigger
 
 jobs:
   build:
+    name: Package Products
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repository
