@@ -17,10 +17,13 @@ public class PetclinicTest extends RuleEngineTest {
      * Requires it to execute without an exception and produce an output file with the correct
      * contents.
      */
+    @Override
     @ParameterizedTest
     @MethodSource("discovererProvider")
     void test(boolean emfText) {
-    	if (emfText) return;
+    	if (emfText) {
+            return;
+        }
         assertTrue(containsComponent("org_springframework_samples_petclinic_api_application_VisitsServiceClient", emfText));
         assertMaxParameterCount(1, "org_springframework_samples_petclinic_customers_model_PetRepository",
                 "findPetTypeById", emfText);

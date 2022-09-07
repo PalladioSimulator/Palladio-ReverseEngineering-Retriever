@@ -11,8 +11,7 @@ public class EclipseProvidesRelation {
     private final IMethodBinding method;
 
     public EclipseProvidesRelation(ITypeBinding opI, IMethodBinding method) {
-        super();
-        this.operationInterface = opI;
+        operationInterface = opI;
         this.method = method;
     }
 
@@ -25,23 +24,15 @@ public class EclipseProvidesRelation {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + toString().hashCode();
-        return result;
+        return (prime * result) + toString().hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if ((obj == null) || (getClass() != obj.getClass())) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final EclipseProvidesRelation other = (EclipseProvidesRelation) obj;
-        if (!toString().equals(other.toString())) {
-            return false;
-        }
-        return true;
+        return toString().equals(obj.toString());
     }
 
     public ITypeBinding getOperationInterface() {

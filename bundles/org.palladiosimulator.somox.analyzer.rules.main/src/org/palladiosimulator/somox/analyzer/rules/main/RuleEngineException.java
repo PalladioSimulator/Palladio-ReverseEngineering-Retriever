@@ -6,7 +6,8 @@ package org.palladiosimulator.somox.analyzer.rules.main;
  * @author Florian Bossert
  */
 public class RuleEngineException extends Exception {
-    private static final long serialVersionUID = 669017784165629387L;
+
+    private static final long serialVersionUID = 8438995877350048404L;
 
     public RuleEngineException(String message) {
         super(message);

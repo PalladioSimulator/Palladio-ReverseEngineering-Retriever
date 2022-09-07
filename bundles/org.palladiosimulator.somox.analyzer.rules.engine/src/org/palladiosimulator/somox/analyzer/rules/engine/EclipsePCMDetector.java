@@ -28,14 +28,14 @@ import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrap
  */
 public class EclipsePCMDetector implements IPCMDetector {
     private static final Logger LOG = Logger.getLogger(EclipsePCMDetector.class);
-    private List<CompilationUnit> components = new ArrayList<>();
+    private final List<CompilationUnit> components = new ArrayList<>();
 
-    private Map<String, List<EclipseProvidesRelation>> providedRelations = new HashMap<>();
+    private final Map<String, List<EclipseProvidesRelation>> providedRelations = new HashMap<>();
 
     // TODO Is this a good solution or would a union be better?
-    private Map<String, List<List<VariableDeclaration>>> requiredInterfaces = new HashMap<>();
+    private final Map<String, List<List<VariableDeclaration>>> requiredInterfaces = new HashMap<>();
 
-    private Set<ITypeBinding> operationInterfaces = new HashSet<>();
+    private final Set<ITypeBinding> operationInterfaces = new HashSet<>();
 
     private String getFullUnitName(CompilationUnit unit) {
         // TODO this is potentially problematic, maybe restructure
@@ -45,13 +45,12 @@ public class EclipsePCMDetector implements IPCMDetector {
         List<String> names = getFullUnitNames(unit);
         if (!names.isEmpty()) {
             return names.get(0);
-        } else {
-            return null;
         }
+        return null;
     }
 
-    private List<String> getFullUnitNames(CompilationUnit unit) {
-        List<String> names = new ArrayList<String>();
+    private static List<String> getFullUnitNames(CompilationUnit unit) {
+        List<String> names = new ArrayList<>();
         for (Object type : unit.types()) {
             if (type instanceof AbstractTypeDeclaration) {
                 names.add(getFullTypeName((AbstractTypeDeclaration) type));
@@ -61,7 +60,7 @@ public class EclipsePCMDetector implements IPCMDetector {
         return names;
     }
 
-    private String getFullTypeName(AbstractTypeDeclaration type) {
+    private static String getFullTypeName(AbstractTypeDeclaration type) {
         return type.getName()
             .getFullyQualifiedName();
     }
@@ -116,7 +115,7 @@ public class EclipsePCMDetector implements IPCMDetector {
             requiredInterfaces.put(unitName, new ArrayList<>());
         }
         @SuppressWarnings("unchecked")
-        List<VariableDeclaration> fragments = (List<VariableDeclaration>) field.fragments();
+        List<VariableDeclaration> fragments = field.fragments();
         requiredInterfaces.get(unitName)
             .add(fragments);
         detectOperationInterface(field.getType());
@@ -213,7 +212,7 @@ public class EclipsePCMDetector implements IPCMDetector {
         return sb.toString();
     }
 
-    private String mapToString(Map<?, ? extends Collection<?>> map, int indentation) {
+    private static String mapToString(Map<?, ? extends Collection<?>> map, int indentation) {
         StringBuilder sb = new StringBuilder();
         String indentString = "\t".repeat(indentation);
         map.entrySet()

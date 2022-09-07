@@ -14,7 +14,6 @@ public class EMFTextProvidesRelation {
     private final Method method;
 
     public EMFTextProvidesRelation(Classifier operationInterface, Method method) {
-        super();
         this.operationInterface = operationInterface;
         this.method = method;
     }
@@ -33,23 +32,15 @@ public class EMFTextProvidesRelation {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + toString().hashCode();
-        return result;
+        return (prime * result) + toString().hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if ((obj == null) || (getClass() != obj.getClass())) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final EMFTextProvidesRelation other = (EMFTextProvidesRelation) obj;
-        if (!toString().equals(other.toString())) {
-            return false;
-        }
-        return true;
+        return toString().equals(obj.toString());
     }
 
     public Classifier getOperationInterface() {

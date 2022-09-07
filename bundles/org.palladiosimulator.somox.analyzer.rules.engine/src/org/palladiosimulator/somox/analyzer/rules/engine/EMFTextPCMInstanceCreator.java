@@ -8,9 +8,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
-import org.emftext.language.java.classifiers.Classifier;
 import org.emftext.language.java.arrays.ArrayDimension;
 import org.emftext.language.java.classifiers.Class;
+import org.emftext.language.java.classifiers.Classifier;
 import org.emftext.language.java.classifiers.ConcreteClassifier;
 import org.emftext.language.java.classifiers.Interface;
 import org.emftext.language.java.containers.impl.CompilationUnitImpl;
@@ -33,13 +33,6 @@ import org.emftext.language.java.types.TypeReference;
 import org.emftext.language.java.types.TypedElement;
 import org.emftext.language.java.types.Void;
 import org.emftext.language.java.variables.Variable;
-import org.palladiosimulator.pcm.repository.BasicComponent;
-import org.palladiosimulator.pcm.repository.CollectionDataType;
-import org.palladiosimulator.pcm.repository.DataType;
-import org.palladiosimulator.pcm.repository.ParameterModifier;
-import org.palladiosimulator.pcm.repository.Repository;
-import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
-import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.generator.fluent.repository.api.Repo;
 import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
 import org.palladiosimulator.generator.fluent.repository.structure.components.BasicComponentCreator;
@@ -47,6 +40,13 @@ import org.palladiosimulator.generator.fluent.repository.structure.interfaces.Op
 import org.palladiosimulator.generator.fluent.repository.structure.interfaces.OperationSignatureCreator;
 import org.palladiosimulator.generator.fluent.repository.structure.internals.Primitive;
 import org.palladiosimulator.generator.fluent.repository.structure.types.CompositeDataTypeCreator;
+import org.palladiosimulator.pcm.repository.BasicComponent;
+import org.palladiosimulator.pcm.repository.CollectionDataType;
+import org.palladiosimulator.pcm.repository.DataType;
+import org.palladiosimulator.pcm.repository.ParameterModifier;
+import org.palladiosimulator.pcm.repository.Repository;
+import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
+import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 
 // Class to create a pcm instance out of all results from the detector class
 public class EMFTextPCMInstanceCreator {
@@ -85,9 +85,7 @@ public class EMFTextPCMInstanceCreator {
 
         createPCMComponents(components);
 
-        Repository repo = repository.createRepositoryNow();
-
-        return repo;
+        return repository.createRepositoryNow();
     }
 
     private void createPCMInterfaces(List<Classifier> interfaces) {
@@ -140,7 +138,7 @@ public class EMFTextPCMInstanceCreator {
             final List<Variable> requiredIs = blackboard.getEMFTextPCMDetector()
                 .getRequiredInterfaces(comp);
             Set<ConcreteClassifier> requireInterfaces = requiredIs.stream()
-                .map(variable -> getConcreteFromVar(variable))
+                .map(EMFTextPCMInstanceCreator::getConcreteFromVar)
                 .collect(Collectors.toSet());
 
             for (ConcreteClassifier requInter : requireInterfaces) {
@@ -159,11 +157,11 @@ public class EMFTextPCMInstanceCreator {
 
     private static String getCompName(CompilationUnitImpl comp) {
         return comp.getNamespacesAsString()
-            .replaceAll("\\.", "_") + "_" + comp.getName();
+            .replace('.', '_') + "_" + comp.getName();
     }
 
-    private static ConcreteClassifier getConcreteFromVar(TypedElement var) {
-        return (ConcreteClassifier) var.getTypeReference()
+    private static ConcreteClassifier getConcreteFromVar(TypedElement variable) {
+        return (ConcreteClassifier) variable.getTypeReference()
             .getPureClassifierReference()
             .getTarget();
     }
@@ -171,20 +169,23 @@ public class EMFTextPCMInstanceCreator {
     private static Primitive convertPrimitive(PrimitiveType primT) {
         if (primT instanceof Boolean) {
             return Primitive.BOOLEAN;
-        } else if (primT instanceof Byte) {
+        }
+        if (primT instanceof Byte) {
             return Primitive.BYTE;
-        } else if (primT instanceof Char) {
+        }
+        if (primT instanceof Char) {
             return Primitive.CHAR;
-        } else if (primT instanceof Double) {
+        }
+        if ((primT instanceof Double) || (primT instanceof Float)) {
             return Primitive.DOUBLE;
-        } else if (primT instanceof Float) {
-            // TODO replace with Primitive.FLOAT as soon as that works
-            return Primitive.DOUBLE;
-        } else if (primT instanceof Int) {
+        }
+        if (primT instanceof Int) {
             return Primitive.INTEGER;
-        } else if (primT instanceof Long) {
+        }
+        if (primT instanceof Long) {
             return Primitive.LONG;
-        } else if (primT instanceof Short) {
+        }
+        if (primT instanceof Short) {
             // TODO replace with Primitive.SHORT as soon as that works
             return Primitive.INTEGER;
         }
@@ -193,11 +194,11 @@ public class EMFTextPCMInstanceCreator {
     }
 
     private OperationSignatureCreator handleSignatureDataType(OperationSignatureCreator signature,
-            java.lang.Class<? extends Parameter> varClass, String varName, TypeReference var,
+            java.lang.Class<? extends Parameter> varClass, String varName, TypeReference variable,
             List<ArrayDimension> varDimensions, boolean asReturnType) {
 
         // Parameter is a collection (extends Collection, is an array or a vararg)
-        DataType collectionType = handleCollectionType(varClass, var, varDimensions);
+        DataType collectionType = handleCollectionType(varClass, variable, varDimensions);
         if (collectionType != null) {
             if (asReturnType) {
                 return signature.withReturnType(collectionType);
@@ -206,7 +207,7 @@ public class EMFTextPCMInstanceCreator {
         }
 
         // Check if type is a primitive type
-        Primitive prim = handlePrimitive(var);
+        Primitive prim = handlePrimitive(variable);
         if (prim != null) {
             if (asReturnType) {
                 return signature.withReturnType(prim);
@@ -215,7 +216,7 @@ public class EMFTextPCMInstanceCreator {
         }
 
         // Check if type is void (not part of pcm primitives)
-        if (var instanceof Void && asReturnType) {
+        if ((variable instanceof Void) && asReturnType) {
             if (!create.containsDataType("Void")) {
                 repository.addToRepository(create.newCompositeDataType()
                     .withName("Void"));
@@ -224,7 +225,7 @@ public class EMFTextPCMInstanceCreator {
         }
 
         // Parameter is Composite Type
-        DataType compositeType = handleCompositeType(var);
+        DataType compositeType = handleCompositeType(variable);
         if (compositeType != null) {
             if (asReturnType) {
                 return signature.withReturnType(compositeType);
@@ -259,7 +260,7 @@ public class EMFTextPCMInstanceCreator {
             }
 
             collectionType = createCollectionWithTypeArg(collectionTypeName, ref, dimensions);
-        } else if (dimensions != null && !dimensions.isEmpty()) {
+        } else if ((dimensions != null) && !dimensions.isEmpty()) {
             if (ref instanceof PrimitiveType) {
                 typeName = convertPrimitive((PrimitiveType) ref).name();
             }
@@ -271,7 +272,7 @@ public class EMFTextPCMInstanceCreator {
 
             collectionType = createCollectionWithTypeArg(collectionTypeName, ref,
                     dimensions.subList(1, dimensions.size()));
-        } else if (ref.getPureClassifierReference() != null && isCollectionType(ref.getPureClassifierReference()
+        } else if ((ref.getPureClassifierReference() != null) && isCollectionType(ref.getPureClassifierReference()
             // TODO: I do not think this works properly for deeper collection types (e.g.
             // List<String>[]), especially the naming.
             .getTarget())) {
@@ -307,7 +308,6 @@ public class EMFTextPCMInstanceCreator {
         return collectionType;
     }
 
-    @SuppressWarnings("static-access")
     private CollectionDataType createCollectionWithTypeArg(String collectionTypeName, TypeReference typeArg,
             List<ArrayDimension> typeArgDimensions) {
         // Type argument is primitive
@@ -320,13 +320,13 @@ public class EMFTextPCMInstanceCreator {
         // A type argument cannot be a vararg, therefore it is "ordinary"
         DataType collectionArg = handleCollectionType(OrdinaryParameterImpl.class, typeArg, typeArgDimensions);
         if (collectionArg != null) {
-            return create.newCollectionDataType(collectionTypeName, collectionArg);
+            return FluentRepositoryFactory.newCollectionDataType(collectionTypeName, collectionArg);
         }
 
         // Type argument is a composite data type
         DataType compositeArg = handleCompositeType(typeArg);
         if (compositeArg != null) {
-            return create.newCollectionDataType(collectionTypeName, compositeArg);
+            return FluentRepositoryFactory.newCollectionDataType(collectionTypeName, compositeArg);
         }
 
         return null;
@@ -343,12 +343,11 @@ public class EMFTextPCMInstanceCreator {
         } else if (varClassifier instanceof Interface) {
 
             Interface varInterf = (Interface) varClassifier;
-            if (varInterf.getName()
-                .equals("Collection")) {
+            if ("Collection"
+                .equals(varInterf.getName())) {
                 return true;
-            } else {
-                refs = varInterf.getExtends();
             }
+            refs = varInterf.getExtends();
         }
 
         for (TypeReference ref : refs) {
@@ -356,7 +355,7 @@ public class EMFTextPCMInstanceCreator {
                 .getTarget()
                 .getName();
 
-            if (interfaceName.equals("Collection")) {
+            if ("Collection".equals(interfaceName)) {
                 return true;
             }
         }
@@ -364,12 +363,12 @@ public class EMFTextPCMInstanceCreator {
         return false;
     }
 
-    private static Primitive handlePrimitive(TypeReference var) {
-        if (var instanceof PrimitiveType) {
-            return convertPrimitive((PrimitiveType) var);
+    private static Primitive handlePrimitive(TypeReference variable) {
+        if (variable instanceof PrimitiveType) {
+            return convertPrimitive((PrimitiveType) variable);
         }
         // Parameter is String, which counts for PCM as Primitive
-        if (var.getTarget()
+        if (variable.getTarget()
             .toString()
             .contains("(name: String)")) {
             return Primitive.STRING;

@@ -1,13 +1,13 @@
 package org.palladiosimulator.somox.analyzer.rules.gui;
 
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Button;
-import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
-
+import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
+import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 
 public class RuleSelectionListener extends SelectionAdapter {
     private final Button selectionButton;
@@ -19,7 +19,7 @@ public class RuleSelectionListener extends SelectionAdapter {
             DefaultRule rule) {
         this.selectionButton = selectionButton;
         this.modifyListener = modifyListener;
-        this.rules = rules;
+        this.rules = new HashSet<>(rules);
         this.rule = rule;
     }
 

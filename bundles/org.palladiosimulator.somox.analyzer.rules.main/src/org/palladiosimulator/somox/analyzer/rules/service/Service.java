@@ -9,7 +9,7 @@ import de.uka.ipd.sdq.workflow.jobs.IBlackboardInteractingJob;
 
 /**
  * The defining interface for any plug-in style service for the rule engine.
- * 
+ *
  * @author Florian Bossert
  */
 public interface Service {

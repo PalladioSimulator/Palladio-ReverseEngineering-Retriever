@@ -49,16 +49,16 @@ public class RuleEngineConfiguration extends AbstractComposedJobConfiguration im
     }
 
     public RuleEngineConfiguration(Map<String, Object> attributes) {
-        this.rules = new HashSet<>();
+        rules = new HashSet<>();
         this.attributes = Objects.requireNonNull(attributes);
         ServiceCollection<Analyst> analystCollection = null;
         try {
             analystCollection = new AnalystCollection();
         } catch (CoreException e) {
             LOG.error("Exception occurred while discovering analysts!");
-            analystCollection = new EmptyCollection<Analyst>();
+            analystCollection = new EmptyCollection<>();
         }
-        this.analystConfig = new ServiceConfiguration<>(analystCollection, RULE_ENGINE_SELECTED_ANALYSTS,
+        analystConfig = new ServiceConfiguration<>(analystCollection, RULE_ENGINE_SELECTED_ANALYSTS,
                 RULE_ENGINE_ANALYST_CONFIG_PREFIX);
 
         ServiceCollection<Discoverer> discovererCollection = null;
@@ -66,9 +66,9 @@ public class RuleEngineConfiguration extends AbstractComposedJobConfiguration im
             discovererCollection = new DiscovererCollection();
         } catch (CoreException e) {
             LOG.error("Exception occurred while discovering discoverers!");
-            discovererCollection = new EmptyCollection<Discoverer>();
+            discovererCollection = new EmptyCollection<>();
         }
-        this.discovererConfig = new ServiceConfiguration<>(discovererCollection, RULE_ENGINE_SELECTED_DISCOVERERS,
+        discovererConfig = new ServiceConfiguration<>(discovererCollection, RULE_ENGINE_SELECTED_DISCOVERERS,
                 RULE_ENGINE_DISCOVERER_CONFIG_PREFIX);
         applyAttributeMap(attributes);
     }
@@ -114,7 +114,7 @@ public class RuleEngineConfiguration extends AbstractComposedJobConfiguration im
         return outputFolder;
     }
 
-    public boolean getUseEMFTextParser() {
+    public boolean useEmfTextParser() {
         return useEMFTextParser;
     }
 
@@ -139,11 +139,11 @@ public class RuleEngineConfiguration extends AbstractComposedJobConfiguration im
     }
 
     public Map<String, Object> toMap() {
-        final Map<String, Object> result = new HashMap<String, Object>();
+        final Map<String, Object> result = new HashMap<>();
 
         result.put(RULE_ENGINE_INPUT_PATH, getInputFolder());
         result.put(RULE_ENGINE_OUTPUT_PATH, getOutputFolder());
-        result.put(RULE_ENGINE_USE_EMFTEXT_PARSER, getUseEMFTextParser());
+        result.put(RULE_ENGINE_USE_EMFTEXT_PARSER, useEmfTextParser());
         result.put(RULE_ENGINE_SELECTED_RULES, serializeRules(rules));
         result.putAll(analystConfig.toMap());
         result.putAll(discovererConfig.toMap());
@@ -155,7 +155,7 @@ public class RuleEngineConfiguration extends AbstractComposedJobConfiguration im
         return rules;
     }
 
-    public static Set<DefaultRule> parseRules(Set<String> strRules) {
+    public static Set<DefaultRule> parseRules(Iterable<String> strRules) {
         Set<DefaultRule> rules = new HashSet<>();
         for (String rule : strRules) {
             rules.add(DefaultRule.valueOf(rule));
@@ -163,7 +163,7 @@ public class RuleEngineConfiguration extends AbstractComposedJobConfiguration im
         return rules;
     }
 
-    public static Set<String> serializeRules(Set<DefaultRule> rules) {
+    public static Set<String> serializeRules(Iterable<DefaultRule> rules) {
         Set<String> strRules = new HashSet<>();
         for (DefaultRule rule : rules) {
             strRules.add(rule.toString());
