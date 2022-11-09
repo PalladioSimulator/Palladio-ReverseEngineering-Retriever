@@ -46,7 +46,7 @@ class JaxRSRules extends IRule{
 			pcmDetector.detectComponent(unit) 
 			pcmDetector.detectOperationInterface(unit)
 			getMethods(unit).forEach[m|
-			if(isMethodAnnotatedWithName(m,"DELETE","GET","HEAD","PUT","POST","OPTIONS")) pcmDetector.detectProvidedInterface(unit,m.resolveBinding)]
+			if(isMethodAnnotatedWithName(m,"DELETE","GET","HEAD","PUT","POST","OPTIONS")) pcmDetector.detectProvidedOperation(unit,m.resolveBinding)]
 			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
 		return true
 		} 
@@ -56,7 +56,7 @@ class JaxRSRules extends IRule{
 			pcmDetector.detectComponent(unit)
 			pcmDetector.detectOperationInterface(unit)
 			getMethods(unit).forEach[m|
-			if(isMethodModifiedExactlyWith(m,"public") || isMethodModifiedExactlyWith(m,"protected")) pcmDetector.detectProvidedInterface(unit,m.resolveBinding)]
+			if(isMethodModifiedExactlyWith(m,"public") || isMethodModifiedExactlyWith(m,"protected")) pcmDetector.detectProvidedOperation(unit,m.resolveBinding)]
 			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
 		return true
 		}
@@ -67,7 +67,7 @@ class JaxRSRules extends IRule{
 			pcmDetector.detectComponent(unit)
 			val firstIn = getAllInterfaces(unit).get(0)
 			pcmDetector.detectOperationInterface(firstIn)
-			getMethods(firstIn).forEach[m|pcmDetector.detectProvidedInterface(unit, firstIn.resolveBinding, m)]
+			getMethods(firstIn).forEach[m|pcmDetector.detectProvidedOperation(unit, firstIn.resolveBinding, m)]
 			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
 			return true
 		}
@@ -88,7 +88,7 @@ class JaxRSRules extends IRule{
 
 		pcmDetector.detectComponent(unit)
 		pcmDetector.detectOperationInterface(unit)
-		getAllPublicMethods(unit).forEach[m|pcmDetector.detectProvidedInterface(unit,m.resolveBinding)]
+		getAllPublicMethods(unit).forEach[m|pcmDetector.detectProvidedOperation(unit,m.resolveBinding)]
 		getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
 	}
 	

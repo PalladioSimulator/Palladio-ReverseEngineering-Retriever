@@ -45,8 +45,14 @@ class SpringRules extends IRule {
 		
 		val isAbstract = isAbstraction(unit)
 		
+		var isExceptionHandler = true;
+		// All methods must do exception handling, otherwise the component may have another use
+		for (method : getMethods(unit)){
+			isExceptionHandler = isExceptionHandler && isMethodAnnotatedWithName(method, "ExceptionHandler")
+		}
+		
 		// Component detection
-		val isComponent = !isAbstract && isUnitAnnotatedWithName(unit, "Component","Service","Controller","RestController","RequestMapping","ControllerAdvice")
+		val isComponent = !isAbstract && !isExceptionHandler && isUnitAnnotatedWithName(unit, "Service","Controller","RestController","RequestMapping","ControllerAdvice")
 		
 		if(isComponent) pcmDetector.detectComponent(unit)
 		
@@ -54,29 +60,29 @@ class SpringRules extends IRule {
 		if((isUnitAnnotatedWithName(unit,"FeignClient","Repository") || (isUnitNamedWith(unit, "Repository")) && isAbstract)) {
 			pcmDetector.detectComponent(unit) 
 			pcmDetector.detectOperationInterface(unit)
-			getMethods(unit).forEach[m|pcmDetector.detectProvidedInterface(unit, m.resolveBinding)]
+			getMethods(unit).forEach[m|pcmDetector.detectProvidedOperation(unit, m.resolveBinding)]
 		}
 		
 		// Operation Interface Detection
 		// if implementing 1 interface
 		var inFs = getAllInterfaces(unit)
-		val isementingOne = inFs.size==1
-		if(isComponent && isementingOne) {
+		val isImplementingOne = inFs.size==1
+		if(isComponent && isImplementingOne) {
 			var firstIn = inFs.get(0)
 			pcmDetector.detectOperationInterface(firstIn)
 			for(IMethodBinding m: getMethods(firstIn)){
-				pcmDetector.detectProvidedInterface(unit, firstIn.resolveBinding, m)
+				pcmDetector.detectProvidedOperation(unit, firstIn.resolveBinding, m)
 			}
 		}
 			
 		// not implementing 1 interface => Controller class with annotations on methods  
 		val annoNames = List.of("RequestMapping","GetMapping","PutMapping","PostMapping","DeleteMapping","PatchMapping")
-		if(isComponent && !isementingOne) 
+		if(isComponent && !isImplementingOne) 
 			for(MethodDeclaration m: getMethods(unit)){
 				val annoWithName = isMethodAnnotatedWithName(m, annoNames)
 
 				if(annoWithName) {
-					pcmDetector.detectProvidedInterface(unit, m.resolveBinding)
+					pcmDetector.detectProvidedOperation(unit, m.resolveBinding)
 					pcmDetector.detectOperationInterface(unit)
 				}
 			}
@@ -84,7 +90,7 @@ class SpringRules extends IRule {
 			for(MethodDeclaration m: getAllPublicMethods(unit)) {
 				val annoWithName = isMethodAnnotatedWithName(m, annoNames)
 				if(!annoWithName) {
-					pcmDetector.detectProvidedInterface(unit, m.resolveBinding)
+					pcmDetector.detectProvidedOperation(unit, m.resolveBinding)
 					pcmDetector.detectOperationInterface(unit)
 				}
 			}

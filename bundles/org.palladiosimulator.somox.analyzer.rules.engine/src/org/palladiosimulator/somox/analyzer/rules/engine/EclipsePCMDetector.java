@@ -2,11 +2,13 @@ package org.palladiosimulator.somox.analyzer.rules.engine;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -30,12 +32,13 @@ public class EclipsePCMDetector implements IPCMDetector {
     private static final Logger LOG = Logger.getLogger(EclipsePCMDetector.class);
     private List<CompilationUnit> components = new ArrayList<>();
 
-    private Map<String, List<EclipseProvidesRelation>> providedRelations = new HashMap<>();
+    private Map<CompilationUnit, Set<String>> providedInterfaces = new HashMap<>();
 
-    // TODO Is this a good solution or would a union be better?
-    private Map<String, List<List<VariableDeclaration>>> requiredInterfaces = new HashMap<>();
+    private Map<CompilationUnit, Set<String>> requiredInterfaces = new HashMap<>();
 
-    private Set<ITypeBinding> operationInterfaces = new HashSet<>();
+    private Map<String, List<IMethodBinding>> operationInterfaces = new HashMap<>();
+
+    private Map<String, CompositeBuilder> composites = new HashMap<>();
 
     private String getFullUnitName(CompilationUnit unit) {
         // TODO this is potentially problematic, maybe restructure
@@ -83,14 +86,36 @@ public class EclipsePCMDetector implements IPCMDetector {
 
     }
 
-    private void detectOperationInterface(AbstractTypeDeclaration type) {
-        if (type instanceof TypeDeclaration) {
-            ITypeBinding binding = type.resolveBinding();
-            if (binding == null) {
-                LOG.warn("Unresolved interface binding detected in " + getFullTypeName(type) + "!");
-                return;
+    public void detectOperationInterface(CompilationUnit unit, String overrideName) {
+        for (Object type : unit.types()) {
+            if (type instanceof AbstractTypeDeclaration) {
+                detectOperationInterface((AbstractTypeDeclaration) type, overrideName);
             }
-            operationInterfaces.add(binding.getTypeDeclaration());
+        }
+    }
+
+    private void detectOperationInterface(AbstractTypeDeclaration type) {
+        detectOperationInterface(type, NameConverter.toPCMIdentifier(type.resolveBinding()));
+    }
+
+    private void detectOperationInterface(AbstractTypeDeclaration type, String overrideName) {
+        if (type instanceof TypeDeclaration) {
+            detectOperationInterface(type.resolveBinding(), overrideName);
+        }
+    }
+
+    private void detectOperationInterface(ITypeBinding binding) {
+        detectOperationInterface(binding, NameConverter.toPCMIdentifier(binding));
+    }
+
+    private void detectOperationInterface(ITypeBinding binding, String overrideName) {
+        if (binding == null) {
+            LOG.warn("Unresolved interface binding detected in " + overrideName + "!");
+            return;
+        }
+        if (binding.isClass() || binding.isInterface()) {
+            operationInterfaces.put(overrideName, List.of(binding.getTypeDeclaration()
+                .getDeclaredMethods()));
         }
     }
 
@@ -100,63 +125,132 @@ public class EclipsePCMDetector implements IPCMDetector {
             LOG.warn("Unresolved interface binding detected!");
             return;
         }
-        ITypeBinding typeBinding = binding.getTypeDeclaration();
-        if (typeBinding == null) {
-            LOG.warn("Unresolved interface binding detected!");
-            return;
+        detectOperationInterface(binding.getTypeDeclaration());
+    }
+
+    public void detectRequiredInterface(CompilationUnit unit, String interfaceName) {
+        if (requiredInterfaces.get(unit) == null) {
+            requiredInterfaces.put(unit, new HashSet<>());
         }
-        if (typeBinding.isClass() || typeBinding.isInterface()) {
-            operationInterfaces.add(typeBinding);
-        }
+        requiredInterfaces.get(unit)
+            .add(interfaceName);
+        detectOperationInterface(unit, interfaceName);
     }
 
     public void detectRequiredInterface(CompilationUnit unit, FieldDeclaration field) {
-        final String unitName = getFullUnitName(unit);
-        if (requiredInterfaces.get(unitName) == null) {
-            requiredInterfaces.put(unitName, new ArrayList<>());
+        detectRequiredInterface(unit, field, null);
+    }
+
+    private void detectRequiredInterface(CompilationUnit unit, FieldDeclaration field, String compositeName) {
+        if (requiredInterfaces.get(unit) == null) {
+            requiredInterfaces.put(unit, new HashSet<>());
         }
         @SuppressWarnings("unchecked")
-        List<VariableDeclaration> fragments = (List<VariableDeclaration>) field.fragments();
-        requiredInterfaces.get(unitName)
-            .add(fragments);
+        List<String> ifaceNames = ((List<VariableDeclaration>) field.fragments()).stream()
+            .map(x -> x.resolveBinding()
+                .getType())
+            .map(NameConverter::toPCMIdentifier)
+            .collect(Collectors.toList());
+        requiredInterfaces.get(unit)
+            .addAll(ifaceNames);
         detectOperationInterface(field.getType());
-
+        if (compositeName != null) {
+            CompositeBuilder composite = getComposite(compositeName);
+            for (String ifaceName : ifaceNames) {
+                composite.addRequiredInterface(ifaceName);
+            }
+        }
     }
 
     public void detectRequiredInterface(CompilationUnit unit, SingleVariableDeclaration parameter) {
-        final String unitName = getFullUnitName(unit);
-        if (requiredInterfaces.get(unitName) == null) {
-            requiredInterfaces.put(unitName, new ArrayList<>());
-        }
-        requiredInterfaces.get(unitName)
-            .add(List.of(parameter));
-        detectOperationInterface(parameter.getType());
-
+        detectRequiredInterface(unit, parameter, null);
     }
 
-    public void detectProvidedInterface(CompilationUnit unit, IMethodBinding method) {
+    private void detectRequiredInterface(CompilationUnit unit, SingleVariableDeclaration parameter,
+            String compositeName) {
+        if (requiredInterfaces.get(unit) == null) {
+            requiredInterfaces.put(unit, new HashSet<>());
+        }
+        String ifaceName = NameConverter.toPCMIdentifier(parameter.resolveBinding()
+            .getType());
+        requiredInterfaces.get(unit)
+            .add(ifaceName);
+        detectOperationInterface(parameter.getType());
+        if (compositeName != null) {
+            getComposite(compositeName).addRequiredInterface(ifaceName);
+        }
+    }
+
+    public void detectProvidedOperation(CompilationUnit unit, IMethodBinding method) {
         if (method == null) {
             LOG.warn("Unresolved method binding detected in " + getFullUnitName(unit) + "!");
             return;
         }
-        detectProvidedInterface(unit, method.getDeclaringClass(), method);
+        detectProvidedOperation(unit, method.getDeclaringClass(), method);
     }
 
-    public void detectProvidedInterface(CompilationUnit unit, ITypeBinding opI, IMethodBinding method) {
-        if (opI == null) {
+    public void detectProvidedOperation(CompilationUnit unit, ITypeBinding declaringIface, IMethodBinding method) {
+        if (declaringIface == null) {
             LOG.warn("Unresolved type binding detected in " + getFullUnitName(unit) + "!");
             return;
         }
+        detectProvidedOperation(unit, NameConverter.toPCMIdentifier(declaringIface), method);
+    }
+
+    public void detectProvidedOperation(CompilationUnit unit, String declaringIface, IMethodBinding method) {
         if (method == null) {
             LOG.warn("Unresolved method binding detected in " + getFullUnitName(unit) + "!");
             return;
         }
-        final String unitName = getFullUnitName(unit);
-        if (providedRelations.get(unitName) == null) {
-            providedRelations.put(unitName, new ArrayList<>());
+        if (providedInterfaces.get(unit) == null) {
+            providedInterfaces.put(unit, new HashSet<>());
         }
-        providedRelations.get(unitName)
-            .add(new EclipseProvidesRelation(opI, method));
+        providedInterfaces.get(unit)
+            .add(declaringIface);
+    }
+
+    public void detectPartOfComposite(CompilationUnit unit, String compositeName) {
+        getComposite(compositeName).addPart(unit);
+    }
+
+    public void detectCompositeRequiredInterface(String compositeName, CompilationUnit unit, String interfaceName) {
+        getComposite(compositeName).addRequiredInterface(interfaceName);
+        detectRequiredInterface(unit, interfaceName);
+    }
+
+    public void detectCompositeRequiredInterface(String compositeName, CompilationUnit unit, FieldDeclaration field) {
+        detectRequiredInterface(unit, field, compositeName);
+    }
+
+    public void detectCompositeRequiredInterface(String compositeName, CompilationUnit unit,
+            SingleVariableDeclaration parameter) {
+        detectRequiredInterface(unit, parameter, compositeName);
+    }
+
+    public void detectCompositeProvidedOperation(String compositeName, CompilationUnit unit, IMethodBinding method) {
+        String declaringIface = NameConverter.toPCMIdentifier(method.getDeclaringClass());
+        getComposite(compositeName).addProvidedOperation(declaringIface, method);
+        detectProvidedOperation(unit, declaringIface, method);
+    }
+
+    public void detectCompositeProvidedOperation(String compositeName, CompilationUnit unit,
+            ITypeBinding declaringIface, IMethodBinding method) {
+        String declaringIfaceName = NameConverter.toPCMIdentifier(declaringIface);
+        getComposite(compositeName).addProvidedOperation(declaringIfaceName, method);
+        detectProvidedOperation(unit, declaringIfaceName, method);
+    }
+
+    public void detectCompositeProvidedOperation(String compositeName, CompilationUnit unit, String declaringIface,
+            IMethodBinding method) {
+        getComposite(compositeName).addProvidedOperation(declaringIface, method);
+        detectProvidedOperation(unit, declaringIface, method);
+    }
+
+    private CompositeBuilder getComposite(String name) {
+        if (!composites.containsKey(name)) {
+            composites.put(name, new CompositeBuilder());
+        }
+        return composites.get(name);
     }
 
     @Override
@@ -168,45 +262,49 @@ public class EclipsePCMDetector implements IPCMDetector {
         return components;
     }
 
-    protected List<EclipseProvidesRelation> getProvidedInterfaces(CompilationUnit unit) {
-        final String name = getFullUnitName(unit);
-        if (providedRelations.get(name) == null) {
-            return new ArrayList<>();
+    protected Set<String> getProvidedInterfaces(CompilationUnit unit) {
+        final Set<String> set = providedInterfaces.get(unit);
+        if (set == null) {
+            return new HashSet<>();
         }
-        return providedRelations.get(name);
+        return Collections.unmodifiableSet(set);
     }
 
-    protected List<List<VariableDeclaration>> getRequiredInterfaces(CompilationUnit unit) {
-        final String name = getFullUnitName(unit);
-        if (requiredInterfaces.get(name) == null) {
-            return new ArrayList<>();
+    protected Set<String> getRequiredInterfaces(CompilationUnit unit) {
+        final Set<String> set = requiredInterfaces.get(unit);
+        if (set == null) {
+            return new HashSet<>();
         }
-        return requiredInterfaces.get(name);
+        return Collections.unmodifiableSet(set);
     }
 
-    protected List<ITypeBinding> getOperationInterfaces() {
-        return List.of(operationInterfaces.toArray(new ITypeBinding[0]));
+    protected Map<String, List<IMethodBinding>> getOperationInterfaces() {
+        return Collections.unmodifiableMap(operationInterfaces);
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(140);
+        StringBuilder sb = new StringBuilder(149);
         sb.append("[PCMDetectorSimple] {\n\tcomponents: {\n");
         components.forEach(comp -> {
-            sb.append("\t\t");
-            sb.append(getFullUnitName(comp));
-            sb.append('\n');
+            sb.append("\t\t")
+                .append(getFullUnitName(comp))
+                .append('\n');
         });
 
         sb.append("\t}\n\tinterfaces: {\n");
-        operationInterfaces.forEach(op -> {
-            sb.append("\t\t");
-            sb.append(op.getQualifiedName());
+        operationInterfaces.forEach((iface, op) -> {
+            sb.append("\t\t")
+                .append(iface)
+                .append(":\n");
+            op.forEach(y -> sb.append("\t\t\t")
+                .append(y.getName())
+                .append('\n'));
             sb.append('\n');
         });
 
         sb.append("\t}\n\tprovided relations: {\n")
-            .append(mapToString(providedRelations, 2))
+            .append(mapToString(providedInterfaces, 2))
             .append("\t}\n\trequired interfaces: {\n")
             .append(mapToString(requiredInterfaces, 2))
             .append("\t}\n}");

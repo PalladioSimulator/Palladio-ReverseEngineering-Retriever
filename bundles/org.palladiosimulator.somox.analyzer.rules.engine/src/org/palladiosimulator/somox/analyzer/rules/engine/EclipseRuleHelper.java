@@ -13,14 +13,18 @@ import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -39,6 +43,17 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 public class EclipseRuleHelper {
 
     private static final Logger LOG = Logger.getLogger(EclipseRuleHelper.class);
+
+    public static String getUnitName(CompilationUnit unit) {
+        List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
+
+        String name = "NO NAME";
+        for (final AbstractTypeDeclaration abstType : types) {
+            name = abstType.getName().getFullyQualifiedName();
+        }
+        
+        return name;
+    }
 
     public static boolean isAbstraction(CompilationUnit unit) {
         List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
@@ -412,6 +427,97 @@ public class EclipseRuleHelper {
             .stream()
             .map(IAnnotationBinding::getName)
             .anyMatch(uniqueNames::contains);
+    }
+
+    public static String getMethodAnnotationStringValue(MethodDeclaration method, String annotation) {
+        return getMethodAnnotationStringValue(method, annotation, "value");
+    }
+
+    public static String getMethodAnnotationStringValue(MethodDeclaration method, String annotationName,
+            String memberName) {
+        List<Annotation> annotations = cast(method.modifiers(), IExtendedModifier.class).stream()
+            .filter(x -> x.isAnnotation())
+            .map(Annotation.class::cast)
+            .filter(x -> x.getTypeName()
+                .getFullyQualifiedName()
+                .endsWith(annotationName))
+            .collect(Collectors.toList());
+
+        for (Annotation annotation : annotations) {
+
+            Expression expression = null;
+            if (annotation.isSingleMemberAnnotation()) {
+                SingleMemberAnnotation smAnnotation = (SingleMemberAnnotation) annotation;
+                expression = smAnnotation.getValue();
+            } else if (annotation.isNormalAnnotation()) {
+                NormalAnnotation nAnnotation = (NormalAnnotation) annotation;
+                expression = cast(nAnnotation.values(), MemberValuePair.class).stream()
+                    .filter(x -> x.getName()
+                        .getIdentifier()
+                        .equals(memberName))
+                    .map(x -> x.getValue())
+                    .findFirst()
+                    .orElse(null);
+            }
+
+            if (expression == null) {
+                continue;
+            }
+
+            Object value = expression.resolveConstantExpressionValue();
+            if (value instanceof String) {
+                return (String) value;
+            }
+        }
+
+        return null;
+    }
+
+    public static String getUnitAnnotationStringValue(CompilationUnit unit, String annotation) {
+        return getUnitAnnotationStringValue(unit, annotation, "value");
+    }
+
+    public static String getUnitAnnotationStringValue(CompilationUnit unit, String annotationName, String memberName) {
+        List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
+
+        List<Annotation> annotations = types.stream()
+            .map(y -> cast(y.modifiers(), IExtendedModifier.class).stream()
+                .filter(x -> x.isAnnotation())
+                .map(Annotation.class::cast)
+                .filter(x -> x.getTypeName()
+                    .getFullyQualifiedName()
+                    .endsWith(annotationName))
+                .collect(Collectors.toList()))
+            .collect(() -> new ArrayList<Annotation>(), (acc, x) -> acc.addAll(x), (acc1, acc2) -> acc1.addAll(acc2));
+
+        for (Annotation annotation : annotations) {
+
+            Expression expression = null;
+            if (annotation.isSingleMemberAnnotation()) {
+                SingleMemberAnnotation smAnnotation = (SingleMemberAnnotation) annotation;
+                expression = smAnnotation.getValue();
+            } else if (annotation.isNormalAnnotation()) {
+                NormalAnnotation nAnnotation = (NormalAnnotation) annotation;
+                expression = cast(nAnnotation.values(), MemberValuePair.class).stream()
+                    .filter(x -> x.getName()
+                        .getIdentifier()
+                        .equals(memberName))
+                    .map(x -> x.getValue())
+                    .findFirst()
+                    .orElse(null);
+            }
+
+            if (expression == null) {
+                continue;
+            }
+
+            Object value = expression.resolveConstantExpressionValue();
+            if (value instanceof String) {
+                return (String) value;
+            }
+        }
+
+        return null;
     }
 
     // Concentrate the warnings to this single method. It is necessary due to the

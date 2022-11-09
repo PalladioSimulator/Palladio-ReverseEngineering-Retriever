@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -13,7 +12,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.palladiosimulator.pcm.repository.BasicComponent;
 import org.palladiosimulator.pcm.repository.CollectionDataType;
 import org.palladiosimulator.pcm.repository.DataType;
@@ -61,7 +59,7 @@ public class EclipsePCMInstanceCreator {
     public Repository createPCM(Map<String, List<CompilationUnitWrapper>> mapping) {
         final List<CompilationUnit> components = blackboard.getEclipsePCMDetector()
             .getComponents();
-        final List<ITypeBinding> interfaces = blackboard.getEclipsePCMDetector()
+        final Map<String, List<IMethodBinding>> interfaces = blackboard.getEclipsePCMDetector()
             .getOperationInterfaces();
 
         createPCMInterfaces(interfaces);
@@ -73,14 +71,14 @@ public class EclipsePCMInstanceCreator {
         return repo;
     }
 
-    private void createPCMInterfaces(List<ITypeBinding> interfaces) {
-        interfaces.forEach(inter -> {
-            LOG.info("Current PCM Interface: " + inter.getQualifiedName());
+    private void createPCMInterfaces(Map<String, List<IMethodBinding>> interfaces) {
+        interfaces.forEach((inter, methods) -> {
+            LOG.info("Current PCM Interface: " + inter);
 
             OperationInterfaceCreator pcmInterface = create.newOperationInterface()
-                .withName(wrapName(inter));
+                .withName(inter);
 
-            for (final IMethodBinding m : inter.getDeclaredMethods()) {
+            for (final IMethodBinding m : methods) {
                 OperationSignatureCreator signature = create.newOperationSignature()
                     .withName(m.getName());
 
@@ -108,43 +106,35 @@ public class EclipsePCMInstanceCreator {
             BasicComponentCreator pcmComp = create.newBasicComponent()
                 .withName(wrapName(firstTypeDecl.resolveBinding()));
 
-            final List<EclipseProvidesRelation> providedRelations = blackboard.getEclipsePCMDetector()
+            final Set<String> providedInterfaces = blackboard.getEclipsePCMDetector()
                 .getProvidedInterfaces(comp);
 
-            Set<ITypeBinding> realInterfaces = providedRelations.stream()
-                .map(relation -> relation.getOperationInterface())
-                .collect(Collectors.toSet());
-            for (ITypeBinding realInterface : realInterfaces) {
+            for (String iface : providedInterfaces) {
                 try {
-                    pcmComp.provides(create.fetchOfOperationInterface(wrapName(realInterface)), "dummy name");
+                    pcmComp.provides(create.fetchOfOperationInterface(iface), "dummy name");
                 } catch (FluentApiException e) {
                     // Add the interface on-demand if it was not in the model previously.
                     // This is necessary for interfaces that were not in the class path of the java
                     // parser.
                     create.newOperationInterface()
-                        .withName(wrapName(realInterface));
-                    pcmComp.provides(create.fetchOfOperationInterface(wrapName(realInterface)), "dummy name");
+                        .withName(iface);
+                    pcmComp.provides(create.fetchOfOperationInterface(iface), "dummy name");
                 }
             }
 
-            final List<List<VariableDeclaration>> requiredIs = blackboard.getEclipsePCMDetector()
+            final Set<String> requiredIs = blackboard.getEclipsePCMDetector()
                 .getRequiredInterfaces(comp);
-            Set<ITypeBinding> requireInterfaces = requiredIs.stream()
-                .map(variable -> variable.get(0)
-                    .resolveBinding()
-                    .getType())
-                .collect(Collectors.toSet());
 
-            for (ITypeBinding requInter : requireInterfaces) {
+            for (String requInter : requiredIs) {
                 try {
-                    pcmComp.requires(create.fetchOfOperationInterface(wrapName(requInter)), "dummy require name");
+                    pcmComp.requires(create.fetchOfOperationInterface(requInter), "dummy require name");
                 } catch (FluentApiException e) {
                     // Add the interface on-demand if it was not in the model previously.
                     // This is necessary for interfaces that were not in the class path of the java
                     // parser.
                     create.newOperationInterface()
-                        .withName(wrapName(requInter));
-                    pcmComp.requires(create.fetchOfOperationInterface(wrapName(requInter)), "dummy require name");
+                        .withName(requInter);
+                    pcmComp.requires(create.fetchOfOperationInterface(requInter), "dummy require name");
                 }
             }
             BasicComponent builtComp = pcmComp.build();

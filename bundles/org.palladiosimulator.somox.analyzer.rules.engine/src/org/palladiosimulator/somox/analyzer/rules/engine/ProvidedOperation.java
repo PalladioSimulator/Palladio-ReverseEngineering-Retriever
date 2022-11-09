@@ -6,11 +6,11 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 // Encapsulates the operation interface and method a component is providing.
 // This class is required because a method from the java model itself does not contain a reference to the interface
 // it comes from like variables do.
-public class EclipseProvidesRelation {
+public class ProvidedOperation {
     private final ITypeBinding operationInterface;
     private final IMethodBinding method;
 
-    public EclipseProvidesRelation(ITypeBinding opI, IMethodBinding method) {
+    public ProvidedOperation(ITypeBinding opI, IMethodBinding method) {
         super();
         this.operationInterface = opI;
         this.method = method;
@@ -37,7 +37,7 @@ public class EclipseProvidesRelation {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final EclipseProvidesRelation other = (EclipseProvidesRelation) obj;
+        final ProvidedOperation other = (ProvidedOperation) obj;
         if (!toString().equals(other.toString())) {
             return false;
         }
