@@ -16,6 +16,7 @@
       <import plugin="org.eclipse.xtend.lib"/>
       <import plugin="org.emftext.language.java"/>
       <import plugin="org.palladiosimulator.pcm"/>
+      <import plugin="org.palladiosimulator.pcm.resources"/>
       <import plugin="jamopp.parser"/>
       <import plugin="jamopp.parser.jdt"/>
       <import plugin="jamopp.resource"/>
@@ -28,6 +29,8 @@
       <import plugin="org.eclipse.equinox.app"/>
       <import plugin="org.eclipse.swt"/>
       <import plugin="org.palladiosimulator.commons"/>
+      <import plugin="tools.mdsd.mocore.framework"/>
+      <import plugin="tools.mdsd.mocore.framework.test"/>
    </requires>
 
    <plugin
@@ -64,5 +67,17 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+         
+   <plugin
+         id="tools.mdsd.mocore.instance"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+         
+   <plugin
+         id="tools.mdsd.mocore.instance.test"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
 </feature>
