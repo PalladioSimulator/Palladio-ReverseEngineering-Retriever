@@ -35,6 +35,11 @@
 			<unit id="tools.mdsd.library.emfeditutils" version="5.0.0.202111291006" />
 			<repository location="https://updatesite.mdsd.tools/library-emfeditutils/nightly/" />
 		</location>
+		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="false" refresh="true" type="InstallableUnit">
+			<unit id="tools.mdsd.mocore.framework" version="0.0.0" />
+			<unit id="tools.mdsd.mocore.framework.test" version="0.0.0" />
+			<repository location="https://updatesite.mdsd.tools/library-modelcompositionrefinement/nightly/" />
+		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="false" type="InstallableUnit">
 			<unit id="org.eclipse.wildwebdeveloper.feature.feature.group" version="0.10.10.202111090852" />
 			<repository location="https://download.eclipse.org/releases/2021-12/202112081000/" />
