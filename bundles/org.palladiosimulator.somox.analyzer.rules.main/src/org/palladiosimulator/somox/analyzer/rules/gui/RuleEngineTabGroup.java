@@ -13,7 +13,7 @@ public class RuleEngineTabGroup extends AbstractLaunchConfigurationTabGroup {
 
     @Override
     public void createTabs(final ILaunchConfigurationDialog dialog, final String mode) {
-        final List<ILaunchConfigurationTab> tabs = new ArrayList<ILaunchConfigurationTab>();
+        final List<ILaunchConfigurationTab> tabs = new ArrayList<>();
 
         tabs.add(new RuleEngineIoTab());
         tabs.add(new DebugEnabledCommonTab());

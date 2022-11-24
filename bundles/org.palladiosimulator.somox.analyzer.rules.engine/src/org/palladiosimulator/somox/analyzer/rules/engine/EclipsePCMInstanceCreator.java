@@ -27,6 +27,13 @@ import org.palladiosimulator.generator.fluent.repository.structure.interfaces.Op
 import org.palladiosimulator.generator.fluent.repository.structure.interfaces.OperationSignatureCreator;
 import org.palladiosimulator.generator.fluent.repository.structure.internals.Primitive;
 import org.palladiosimulator.generator.fluent.repository.structure.types.CompositeDataTypeCreator;
+import org.palladiosimulator.pcm.repository.BasicComponent;
+import org.palladiosimulator.pcm.repository.CollectionDataType;
+import org.palladiosimulator.pcm.repository.DataType;
+import org.palladiosimulator.pcm.repository.ParameterModifier;
+import org.palladiosimulator.pcm.repository.Repository;
+import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
+import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 
 // TODO Bug-fix, probably
 // Class to create a pcm instance out of all results from the detector class
@@ -66,9 +73,7 @@ public class EclipsePCMInstanceCreator {
 
         createPCMComponents(components);
 
-        Repository repo = repository.createRepositoryNow();
-
-        return repo;
+        return repository.createRepositoryNow();
     }
 
     private void createPCMInterfaces(Map<String, List<IMethodBinding>> interfaces) {
@@ -169,10 +174,10 @@ public class EclipsePCMInstanceCreator {
     }
 
     private OperationSignatureCreator handleSignatureDataType(OperationSignatureCreator signature, String varName,
-            ITypeBinding var, int varDimensions, boolean asReturnType) {
+            ITypeBinding variable, int varDimensions, boolean asReturnType) {
 
         // Parameter is a collection (extends Collection, is an array or a vararg)
-        DataType collectionType = handleCollectionType(var, varDimensions);
+        DataType collectionType = handleCollectionType(variable, varDimensions);
         if (collectionType != null) {
             if (asReturnType) {
                 return signature.withReturnType(collectionType);
@@ -181,7 +186,7 @@ public class EclipsePCMInstanceCreator {
         }
 
         // Check if type is a primitive type
-        Primitive prim = handlePrimitive(var);
+        Primitive prim = handlePrimitive(variable);
         if (prim != null) {
             if (asReturnType) {
                 return signature.withReturnType(prim);
@@ -190,8 +195,8 @@ public class EclipsePCMInstanceCreator {
         }
 
         // Check if type is void (not part of pcm primitives)
-        if (var.getQualifiedName()
-            .equals("void") && asReturnType) {
+        if ("void"
+            .equals(variable.getQualifiedName()) && asReturnType) {
             if (!create.containsDataType("Void")) {
                 repository.addToRepository(create.newCompositeDataType()
                     .withName("Void"));
@@ -200,7 +205,7 @@ public class EclipsePCMInstanceCreator {
         }
 
         // Parameter is Composite Type
-        DataType compositeType = handleCompositeType(var);
+        DataType compositeType = handleCompositeType(variable);
         if (compositeType != null) {
             if (asReturnType) {
                 return signature.withReturnType(compositeType);
@@ -229,7 +234,7 @@ public class EclipsePCMInstanceCreator {
             }
 
             collectionType = createCollectionWithTypeArg(collectionTypeName, ref, dimensions - 1);
-        } else if (isCollectionType(ref) && ref.getTypeArguments().length > 0) {
+        } else if (isCollectionType(ref) && (ref.getTypeArguments().length > 0)) {
             // TODO: I do not think this works properly for deeper collection types (e.g.
             // List<String>[]), especially the naming.
             typeName = wrapName(ref);
@@ -252,7 +257,6 @@ public class EclipsePCMInstanceCreator {
         return collectionType;
     }
 
-    @SuppressWarnings("static-access")
     private CollectionDataType createCollectionWithTypeArg(String collectionTypeName, ITypeBinding typeArg,
             int typeArgDimensions) {
         // Type argument is primitive
@@ -265,13 +269,13 @@ public class EclipsePCMInstanceCreator {
         // A type argument cannot be a vararg, therefore it is "ordinary"
         DataType collectionArg = handleCollectionType(typeArg, typeArgDimensions);
         if (collectionArg != null) {
-            return create.newCollectionDataType(collectionTypeName, collectionArg);
+            return FluentRepositoryFactory.newCollectionDataType(collectionTypeName, collectionArg);
         }
 
         // Type argument is a composite data type
         DataType compositeArg = handleCompositeType(typeArg);
         if (compositeArg != null) {
-            return create.newCollectionDataType(collectionTypeName, compositeArg);
+            return FluentRepositoryFactory.newCollectionDataType(collectionTypeName, compositeArg);
         }
 
         return null;
@@ -284,17 +288,16 @@ public class EclipsePCMInstanceCreator {
         if (varClassifier.isClass()) {
             refs.addAll(List.of(varClassifier.getInterfaces()));
         } else if (varClassifier.isInterface()) {
-            if (varClassifier.getQualifiedName()
-                .equals("java.util.Collection")) {
+            if ("java.util.Collection"
+                .equals(varClassifier.getQualifiedName())) {
                 return true;
-            } else {
-                refs.addAll(List.of(varClassifier.getInterfaces()));
             }
+            refs.addAll(List.of(varClassifier.getInterfaces()));
         }
 
         for (ITypeBinding ref : refs) {
-            if (ref.getQualifiedName()
-                .equals("java.util.Collection")) {
+            if ("java.util.Collection"
+                .equals(ref.getQualifiedName())) {
                 return true;
             }
         }
@@ -302,13 +305,13 @@ public class EclipsePCMInstanceCreator {
         return false;
     }
 
-    private static Primitive handlePrimitive(ITypeBinding var) {
-        if (var.isPrimitive()) {
-            return convertPrimitive(var);
+    private static Primitive handlePrimitive(ITypeBinding variable) {
+        if (variable.isPrimitive()) {
+            return convertPrimitive(variable);
         }
         // Parameter is String, which counts for PCM as Primitive
-        if (var.getQualifiedName()
-            .equals("java.lang.String")) {
+        if ("java.lang.String"
+            .equals(variable.getQualifiedName())) {
             return Primitive.STRING;
         }
         return null;
@@ -326,40 +329,6 @@ public class EclipsePCMInstanceCreator {
         }
 
         return create.fetchOfCompositeDataType(classifierName);
-    }
-
-    // TODO creation of CompositeDataTypes
-    @SuppressWarnings("unused")
-    private CompositeDataTypeCreator createTypesRecursively(ITypeBinding type) {
-        if (existingDataTypesMap.containsKey(wrapName(type))) {
-            return existingDataTypesMap.get(wrapName(type));
-        }
-
-        CompositeDataTypeCreator currentDataType = create.newCompositeDataType()
-            .withName(wrapName(type));
-        for (IVariableBinding f : type.getDeclaredFields()) {
-
-            if (f.getType()
-                .isPrimitive()) {
-                currentDataType = currentDataType.withInnerDeclaration(f.getName(), convertPrimitive(f.getType()));
-            } else if (f.getType()
-                .getQualifiedName()
-                .equals("java.lang.String")) {
-                currentDataType = currentDataType.withInnerDeclaration(f.getName(), Primitive.STRING);
-            } else if (f.getType()
-                .getQualifiedName()
-                .equals("java.util.List")) {
-                // TODO Why BYTE?
-                currentDataType = currentDataType.withInnerDeclaration(f.getName(),
-                        create.newCollectionDataType(f.getName(), Primitive.BYTE));
-            } else {
-                currentDataType = currentDataType.withInnerDeclaration(f.getName(),
-                        createTypesRecursively(f.getType()).build());
-            }
-        }
-
-        repository.addToRepository(currentDataType);
-        return currentDataType;
     }
 
     private static String wrapName(ITypeBinding name) {

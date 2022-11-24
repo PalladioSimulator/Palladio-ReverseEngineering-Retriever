@@ -1,6 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.workflow;
 
-import org.eclipse.core.runtime.CoreException;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.service.Analyst;
@@ -12,19 +11,19 @@ import de.uka.ipd.sdq.workflow.jobs.ParallelJob;
 
 public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
 
-    public RuleEngineJob(RuleEngineConfiguration configuration) throws CoreException {
-        setBlackboard(new RuleEngineBlackboard());
+    public RuleEngineJob(RuleEngineConfiguration configuration) {
+        super.setBlackboard(new RuleEngineBlackboard());
 
-        this.add(createDiscoverersJob(configuration));
+        super.add(createDiscoverersJob(configuration));
 
-        this.add(new RuleEngineBlackboardInteractingJob(configuration, getBlackboard()));
+        super.add(new RuleEngineBlackboardInteractingJob(configuration, getBlackboard()));
 
         // TODO Integrate SEFF extraction once it is done being developed.
 
-        this.add(createAnalystsJob(configuration));
+        super.add(createAnalystsJob(configuration));
     }
 
-    private ParallelJob createDiscoverersJob(RuleEngineConfiguration configuration) throws CoreException {
+    private ParallelJob createDiscoverersJob(RuleEngineConfiguration configuration) {
         ParallelJob parentJob = new ParallelJob();
         for (Discoverer discoverer : configuration.getDiscovererConfig()
             .getSelected()) {
@@ -36,7 +35,7 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
         return parentJob;
     }
 
-    private ParallelJob createAnalystsJob(RuleEngineConfiguration configuration) throws CoreException {
+    private ParallelJob createAnalystsJob(RuleEngineConfiguration configuration) {
         ParallelJob parentJob = new ParallelJob();
         for (Analyst analyst : configuration.getAnalystConfig()
             .getSelected()) {

@@ -1,5 +1,6 @@
 package org.palladiosimulator.somox.analyzer.rules.all;
 
+import java.awt.Image;
 import java.lang.reflect.InvocationTargetException;
 
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;

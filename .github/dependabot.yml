@@ -1,7 +1,4 @@
-# This workflow uses GitHub's built-in Dependabot for automatic dependency updates.
-name: Dependency Updates
 version: 2
-
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"

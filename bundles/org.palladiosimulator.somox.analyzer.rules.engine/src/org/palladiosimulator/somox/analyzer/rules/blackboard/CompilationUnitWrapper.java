@@ -13,7 +13,7 @@ import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 /**
  * A wrapper for both the EMFText {@code CompilationUnit[Impl]} and the Eclipse parser
  * {@code CompilationUnit}. It only contains one of the two variants per instance.
- * 
+ *
  * @author Florian Bossert
  *
  * @see org.emftext.language.java.containers.impl.CompilationUnitImpl
@@ -25,11 +25,11 @@ public class CompilationUnitWrapper {
 
     public CompilationUnitWrapper(CompilationUnitImpl emftextCompUnit) {
         this.emftextCompUnit = emftextCompUnit;
-        this.eclipseCompUnit = null;
+        eclipseCompUnit = null;
     }
 
     public CompilationUnitWrapper(CompilationUnit eclipseCompUnit) {
-        this.emftextCompUnit = null;
+        emftextCompUnit = null;
         this.eclipseCompUnit = eclipseCompUnit;
     }
 
@@ -52,12 +52,11 @@ public class CompilationUnitWrapper {
     public String getName() {
         if (isEMFTextCompilationUnit()) {
             return emftextCompUnit.getName();
-        } else {
-            // TODO is this actually only the name?
-            return ((AbstractTypeDeclaration) eclipseCompUnit.types()
-                .get(0)).getName()
-                    .getIdentifier();
         }
+        // TODO is this actually only the name?
+        return ((AbstractTypeDeclaration) eclipseCompUnit.types()
+            .get(0)).getName()
+                .getIdentifier();
     }
 
     @Override
@@ -69,9 +68,8 @@ public class CompilationUnitWrapper {
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
-        } else if (obj == null) {
-            return false;
-        } else if (getClass() != obj.getClass()) {
+        }
+        if ((obj == null) || (getClass() != obj.getClass())) {
             return false;
         }
         CompilationUnitWrapper other = (CompilationUnitWrapper) obj;
@@ -80,20 +78,21 @@ public class CompilationUnitWrapper {
     }
 
     public static <T> List<CompilationUnitWrapper> wrap(Collection<T> compUnits) {
-        if (compUnits == null) {
-            return null;
-        } else if (compUnits.stream()
-            .anyMatch(CompilationUnitImpl.class::isInstance)) {
-            return compUnits.stream()
-                .map(CompilationUnitImpl.class::cast)
-                .map(CompilationUnitWrapper::new)
-                .collect(Collectors.toCollection(ArrayList::new));
-        } else if (compUnits.stream()
-            .anyMatch(CompilationUnit.class::isInstance)) {
-            return compUnits.stream()
-                .map(CompilationUnit.class::cast)
-                .map(CompilationUnitWrapper::new)
-                .collect(Collectors.toCollection(ArrayList::new));
+        if (compUnits != null) {
+            if (compUnits.stream()
+                .anyMatch(CompilationUnitImpl.class::isInstance)) {
+                return compUnits.stream()
+                    .map(CompilationUnitImpl.class::cast)
+                    .map(CompilationUnitWrapper::new)
+                    .collect(Collectors.toCollection(ArrayList::new));
+            }
+            if (compUnits.stream()
+                .anyMatch(CompilationUnit.class::isInstance)) {
+                return compUnits.stream()
+                    .map(CompilationUnit.class::cast)
+                    .map(CompilationUnitWrapper::new)
+                    .collect(Collectors.toCollection(ArrayList::new));
+            }
         }
         return new ArrayList<>();
     }

@@ -43,6 +43,7 @@ public class BasicTest extends RuleEngineTest {
      * Tests the basic functionality of the RuleEngineAnalyzer. Requires it to execute without an
      * exception and produce an output file.
      */
+    @Override
     @ParameterizedTest
     @MethodSource("discovererProvider")
     void test(boolean emfText) {
@@ -57,8 +58,8 @@ public class BasicTest extends RuleEngineTest {
         OperationInterface conflictingMethods = getConflictingMethods(getInterfaces(emfText));
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (Parameter param : sig.getParameters__OperationSignature()) {
-                if (param.getParameterName()
-                    .equals("shortArg")) {
+                if ("shortArg"
+                    .equals(param.getParameterName())) {
                     assertTrue(param.getDataType__Parameter() instanceof PrimitiveDataType);
                     PrimitiveDataType primDT = (PrimitiveDataType) param.getDataType__Parameter();
                     assertNotEquals(PrimitiveTypeEnum.INT, primDT.getType());
@@ -73,8 +74,8 @@ public class BasicTest extends RuleEngineTest {
         OperationInterface conflictingMethods = getConflictingMethods(getInterfaces(emfText));
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (Parameter param : sig.getParameters__OperationSignature()) {
-                if (param.getParameterName()
-                    .equals("intArray")) {
+                if ("intArray"
+                    .equals(param.getParameterName())) {
                     assertTrue(param.getDataType__Parameter() instanceof CollectionDataType);
                     CollectionDataType collDT = (CollectionDataType) param.getDataType__Parameter();
                     assertTrue(collDT.getInnerType_CollectionDataType() instanceof PrimitiveDataType);
@@ -91,8 +92,8 @@ public class BasicTest extends RuleEngineTest {
         OperationInterface conflictingMethods = getConflictingMethods(getInterfaces(emfText));
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (Parameter param : sig.getParameters__OperationSignature()) {
-                if (param.getParameterName()
-                    .equals("longVararg")) {
+                if ("longVararg"
+                    .equals(param.getParameterName())) {
                     assertTrue(param.getDataType__Parameter() instanceof CollectionDataType);
                     CollectionDataType collDT = (CollectionDataType) param.getDataType__Parameter();
                     assertTrue(collDT.getInnerType_CollectionDataType() instanceof PrimitiveDataType);
@@ -107,7 +108,7 @@ public class BasicTest extends RuleEngineTest {
      * The RuleEngine produced inconsistent results if executed multiple times. Arguments and
      * methods appear multiple times. This probably has something to do with (discouraged) static
      * states somewhere in the stack.
-     * 
+     *
      * @throws ModelAnalyzerException
      *             forwarded from RuleEngineAnalyzer. Should cause the test to fail.
      * @throws UserCanceledException
@@ -122,8 +123,8 @@ public class BasicTest extends RuleEngineTest {
         int firstIntArgCount = 0;
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (Parameter param : sig.getParameters__OperationSignature()) {
-                if (param.getParameterName()
-                    .equals("intArg")) {
+                if ("intArg"
+                    .equals(param.getParameterName())) {
                     firstIntArgCount++;
                 }
             }
@@ -146,8 +147,8 @@ public class BasicTest extends RuleEngineTest {
         int secondIntArgCount = 0;
         for (OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (Parameter param : sig.getParameters__OperationSignature()) {
-                if (param.getParameterName()
-                    .equals("intArg")) {
+                if ("intArg"
+                    .equals(param.getParameterName())) {
                     secondIntArgCount++;
                 }
             }
@@ -159,8 +160,8 @@ public class BasicTest extends RuleEngineTest {
     private OperationInterface getConflictingMethods(List<Interface> interfaces) {
         OperationInterface conflictingMethods = null;
         for (Interface iface : interfaces) {
-            if (iface.getEntityName()
-                .equals("basic_ConflictingMethods")) {
+            if ("basic_ConflictingMethods"
+                .equals(iface.getEntityName())) {
                 assertTrue(iface instanceof OperationInterface);
                 conflictingMethods = (OperationInterface) iface;
             }

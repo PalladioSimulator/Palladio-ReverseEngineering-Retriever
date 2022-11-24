@@ -10,7 +10,7 @@ import org.eclipse.core.runtime.Platform;
 
 public class AnalystCollection implements ServiceCollection<Analyst> {
     public static final String EXTENSION_POINT = "org.palladiosimulator.somox.analyzer.rules.analyst";
-    private Set<Analyst> analysts = new HashSet<>();
+    private final Set<Analyst> analysts = new HashSet<>();
 
     public AnalystCollection() throws CoreException {
         for (IConfigurationElement extension : Platform.getExtensionRegistry()

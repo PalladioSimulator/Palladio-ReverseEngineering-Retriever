@@ -15,7 +15,7 @@ import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 /**
  * An analyst that currently does nothing. It is reserved for later use.
- * 
+ *
  * @author Florian Bossert
  */
 public class PerformanceAnalyst implements Analyst {

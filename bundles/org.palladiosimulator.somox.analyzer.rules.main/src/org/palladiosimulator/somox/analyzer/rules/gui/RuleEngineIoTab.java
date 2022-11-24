@@ -1,7 +1,19 @@
 package org.palladiosimulator.somox.analyzer.rules.gui;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.log4j.Logger;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
+import org.eclipse.emf.common.CommonPlugin;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -26,29 +38,14 @@ import de.uka.ipd.sdq.workflow.launchconfig.ImageRegistryHelper;
 import de.uka.ipd.sdq.workflow.launchconfig.LaunchConfigPlugin;
 import de.uka.ipd.sdq.workflow.launchconfig.tabs.TabHelper;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
-import org.eclipse.emf.common.CommonPlugin;
-import org.eclipse.emf.common.util.URI;
-
 public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
     public static final String NAME = "Rule Engine IO";
     public static final String PLUGIN_ID = "org.palladiosimulator.somox.analyzer.rules.runconfig.LaunchRuleEngineAnalyzer";
     private static final String FILENAME_TAB_IMAGE_PATH = "icons/RuleEngine_16x16.gif";
 
-    private String defaultPath;
-    private Composite container;
-    private ModifyListener modifyListener;
+    private final String defaultPath;
+        private final ModifyListener modifyListener;
 
     private Text in;
     private boolean useEMFTextParser;
@@ -56,8 +53,8 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     private Set<DefaultRule> rules;
     private Set<Button> ruleButtons;
     private Text out;
-    private ServiceConfigurationView<Analyst> analystConfigView;
-    private ServiceConfigurationView<Discoverer> discovererConfigView;
+    private final ServiceConfigurationView<Analyst> analystConfigView;
+    private final ServiceConfigurationView<Discoverer> discovererConfigView;
 
     public RuleEngineIoTab() {
         // Create the default path of this Eclipse application
@@ -70,13 +67,10 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         rules = new HashSet<>();
 
         // Create a listener for GUI modification events
-        modifyListener = new ModifyListener() {
-            @Override
-            public void modifyText(final ModifyEvent e) {
-                // e may be null here!
-                setDirty(true);
-                updateLaunchConfigurationDialog();
-            }
+        modifyListener = e -> {
+            // e may be null here!
+            setDirty(true);
+            updateLaunchConfigurationDialog();
         };
 
         ServiceCollection<Analyst> analystCollection = null;
@@ -85,7 +79,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         } catch (CoreException e) {
             Logger.getLogger(RuleEngineIoTab.class)
                 .error("Exception occurred while discovering analysts!");
-            analystCollection = new EmptyCollection<Analyst>();
+            analystCollection = new EmptyCollection<>();
         }
         analystConfigView = new ServiceConfigurationView<>(analystCollection, modifyListener, this::error, getName(),
                 RuleEngineConfiguration.RULE_ENGINE_ANALYST_CONFIG_PREFIX,
@@ -97,7 +91,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         } catch (CoreException e) {
             Logger.getLogger(RuleEngineIoTab.class)
                 .error("Exception occurred while discovering discoverers!");
-            discovererCollection = new EmptyCollection<Discoverer>();
+            discovererCollection = new EmptyCollection<>();
         }
         discovererConfigView = new ServiceConfigurationView<>(discovererCollection, modifyListener, this::error,
                 getName(), RuleEngineConfiguration.RULE_ENGINE_DISCOVERER_CONFIG_PREFIX,
@@ -113,7 +107,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     @Override
     public void createControl(Composite parent) {
         // Create a new Composite to hold the page's controls
-        container = new Composite(parent, SWT.NONE);
+        Composite container = new Composite(parent, SWT.NONE);
         setControl(container);
         container.setLayout(new GridLayout());
 
@@ -163,7 +157,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     }
 
     private boolean validateFolderInput(Text widget) {
-        if (widget == null || widget.getText() == null || widget.getText()
+        if ((widget == null) || (widget.getText() == null) || widget.getText()
             .isBlank()) {
             return error("Blank input.");
         }
@@ -187,7 +181,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         return message == null;
     }
 
-    private URI getURI(Text widget) {
+    private static URI getURI(Text widget) {
         String text = URI.decode(widget.getText());
         URI uri = URI.createURI(text);
         if (uri.isPlatform() || uri.isFile()) {
@@ -220,7 +214,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
     private void setParserSelection(ILaunchConfiguration configuration) {
         try {
-            useEMFTextParser = (boolean) configuration
+            useEMFTextParser = configuration
                 .getAttribute(RuleEngineConfiguration.RULE_ENGINE_USE_EMFTEXT_PARSER, false);
             parserSelection.select(useEMFTextParser ? 1 : 0);
         } catch (CoreException e) {
@@ -232,7 +226,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
     private void setButton(ILaunchConfiguration configuration, Button ruleButton, String attributeName) {
         try {
-            Set<String> configRules = (Set<String>) configuration.getAttribute(attributeName, new HashSet<>());
+            Set<String> configRules = configuration.getAttribute(attributeName, new HashSet<>());
             if (configRules.contains(ruleButton.getText())) {
                 ruleButton.setSelection(true);
                 rules.add(DefaultRule.valueOf(ruleButton.getText()));

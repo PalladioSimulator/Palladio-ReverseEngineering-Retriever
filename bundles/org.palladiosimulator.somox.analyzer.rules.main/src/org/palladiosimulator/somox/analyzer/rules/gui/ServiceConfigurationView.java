@@ -1,6 +1,7 @@
 package org.palladiosimulator.somox.analyzer.rules.gui;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -48,7 +49,7 @@ public class ServiceConfigurationView<T extends Service> {
         selectedServices = new HashSet<>();
         configTreeItems = new HashMap<>();
         serviceCheckboxes = new HashMap<>();
-        services = new ArrayList<T>(serviceCollection.getServices());
+        services = new ArrayList<>(serviceCollection.getServices());
 
         this.modifyListener = modifyListener;
         this.error = error;
@@ -68,8 +69,7 @@ public class ServiceConfigurationView<T extends Service> {
         tree.addListener(SWT.Selection, new TreeEditListener(tree, modifyListener, SERVICE_CONFIGURATION_VALUE_COLUMN));
 
         List<T> sortedServices = services.stream()
-            .sorted((a, b) -> a.getName()
-                .compareTo(b.getName()))
+            .sorted(Comparator.comparing(T::getName))
             .collect(Collectors.toList());
         for (T service : sortedServices) {
             TreeItem serviceItem = new TreeItem(tree, SWT.NONE);
@@ -125,7 +125,7 @@ public class ServiceConfigurationView<T extends Service> {
 
     private void setCheckbox(ILaunchConfiguration configuration, T service, Button checkbox, String attributeName) {
         try {
-            Set<String> configServiceIds = (Set<String>) configuration.getAttribute(attributeName, new HashSet<>());
+            Set<String> configServiceIds = configuration.getAttribute(attributeName, new HashSet<>());
             if (configServiceIds.contains(service.getID())) {
                 checkbox.setSelection(true);
                 selectedServices.add(service);
@@ -157,7 +157,6 @@ public class ServiceConfigurationView<T extends Service> {
         } catch (final Exception e) {
             LaunchConfigPlugin.errorLogger(tabName, attributeName, e.getMessage());
             error.accept(e.getLocalizedMessage());
-            return;
         }
     }
 
@@ -176,7 +175,7 @@ public class ServiceConfigurationView<T extends Service> {
         }
     }
 
-    private void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName,
+    private static void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName,
             Map<String, TreeItem> treeItems) {
         Map<String, String> strings = new HashMap<>();
         if (treeItems != null) {
@@ -197,7 +196,7 @@ public class ServiceConfigurationView<T extends Service> {
         setAttribute(configuration, selectedServicesKey, selectedServices);
     }
 
-    private void clearTreeItems(Map<String, TreeItem> treeItems) {
+    private static void clearTreeItems(Map<String, TreeItem> treeItems) {
     	if (treeItems != null) {
     		for (Entry<String, TreeItem> entry : treeItems.entrySet()) {
             	entry.getValue()

@@ -37,7 +37,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
  * numerous methods to query a certain state of a java model instance. For example, is a class is
  * annotated with a specific annotation name. Also the helper contains methods for retrieving
  * aspects of a class like the interfaces it is implementing.
- * 
+ *
  * @author Florian Bossert
  */
 public class EclipseRuleHelper {
@@ -59,7 +59,7 @@ public class EclipseRuleHelper {
         List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
 
         for (final AbstractTypeDeclaration abstType : types) {
-            if (abstType instanceof TypeDeclaration && ((TypeDeclaration) abstType).isInterface()) {
+            if ((abstType instanceof TypeDeclaration) && ((TypeDeclaration) abstType).isInterface()) {
                 return true;
             }
         }
@@ -99,7 +99,7 @@ public class EclipseRuleHelper {
         return containsAnnotationWithName(cast(statement.modifiers(), IExtendedModifier.class), name);
     }
 
-    public static boolean isClassifierAnnotatedWithName(AbstractTypeDeclaration abstTypeDecl, String name) {
+    public static boolean isClassifierAnnotatedWithName(BodyDeclaration abstTypeDecl, String name) {
         return containsAnnotationWithName(cast(abstTypeDecl.modifiers(), IExtendedModifier.class), name);
     }
 
@@ -191,7 +191,7 @@ public class EclipseRuleHelper {
                 List<BodyDeclaration> bodies = cast(anno.bodyDeclarations(), BodyDeclaration.class);
 
                 for (BodyDeclaration body : bodies) {
-                    if (body instanceof MethodDeclaration) {
+                    if (body instanceof FieldDeclaration) {
                         fields.add((FieldDeclaration) body);
                     }
                 }
@@ -257,7 +257,7 @@ public class EclipseRuleHelper {
         return false;
     }
 
-    public static boolean isFieldModifiedExactlyWith(FieldDeclaration field, String... names) {
+    public static boolean isFieldModifiedExactlyWith(BodyDeclaration field, String... names) {
         return areModifiersExactly(cast(field.modifiers(), IExtendedModifier.class), names);
     }
 
@@ -269,7 +269,7 @@ public class EclipseRuleHelper {
 
         long exactModifierCount = modifiers.stream()
             .filter(IExtendedModifier::isModifier)
-            .map(x -> (Modifier) x)
+            .map(Modifier.class::cast)
             .map(x -> x.getKeyword()
                 .toString()
                 .toLowerCase(Locale.US))
@@ -325,7 +325,7 @@ public class EclipseRuleHelper {
         return interfaces;
     }
 
-    public static boolean isFieldAnnotatedWithName(FieldDeclaration field, String name) {
+    public static boolean isFieldAnnotatedWithName(BodyDeclaration field, String name) {
         return containsAnnotationWithName(cast(field.modifiers(), IExtendedModifier.class), name);
     }
 
@@ -335,8 +335,7 @@ public class EclipseRuleHelper {
         for (AbstractTypeDeclaration abstType : types) {
             if (abstType instanceof TypeDeclaration) {
                 TypeDeclaration type = (TypeDeclaration) abstType;
-                if (!type.isInterface() && type.superInterfaceTypes()
-                    .size() > 0) {
+                if (!type.isInterface() && (!type.superInterfaceTypes().isEmpty())) {
                     return true;
                 }
             }
@@ -350,7 +349,7 @@ public class EclipseRuleHelper {
         for (AbstractTypeDeclaration abstType : types) {
             if (abstType instanceof TypeDeclaration) {
                 TypeDeclaration type = (TypeDeclaration) abstType;
-                if (!type.isInterface() && type.getSuperclassType() != null) {
+                if (!type.isInterface() && (type.getSuperclassType() != null)) {
                     return true;
                 }
             }
@@ -390,7 +389,7 @@ public class EclipseRuleHelper {
         return false;
     }
 
-    public static boolean isMethodModifiedExactlyWith(MethodDeclaration method, String... names) {
+    public static boolean isMethodModifiedExactlyWith(BodyDeclaration method, String... names) {
         return areModifiersExactly(cast(method.modifiers(), IExtendedModifier.class), names);
     }
 
@@ -528,6 +527,6 @@ public class EclipseRuleHelper {
             throw new ClassCastException("Illegal cast in EclipseRuleHelper!" + "\n" + list.get(0)
                 .getClass() + " -> " + clazz);
         }
-        return (List<T>) list;
+        return list;
     }
 }

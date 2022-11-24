@@ -21,12 +21,12 @@ import de.uka.ipd.sdq.workflow.blackboard.Blackboard;
 
 public class RuleEngineBlackboard extends Blackboard<Object> {
 
-    private Set<CompilationUnitWrapper> compilationUnits;
-    private Map<CompilationUnitWrapper, Path> compilationUnitLocations;
-    private Map<RepositoryComponent, CompilationUnitWrapper> repositoryComponentLocations;
-    private Map<Entity, CompilationUnitWrapper> entityLocations;
-    private Map<Path, Set<CompilationUnitWrapper>> systemAssociations;
-    private Map<System, Path> systemPaths;
+    private final Set<CompilationUnitWrapper> compilationUnits;
+    private final Map<CompilationUnitWrapper, Path> compilationUnitLocations;
+    private final Map<RepositoryComponent, CompilationUnitWrapper> repositoryComponentLocations;
+    private final Map<Entity, CompilationUnitWrapper> entityLocations;
+    private final Map<Path, Set<CompilationUnitWrapper>> systemAssociations;
+    private final Map<System, Path> systemPaths;
     private EMFTextPCMDetector emfTextPcmDetector;
     private EclipsePCMDetector eclipsePcmDetector;
 
@@ -80,19 +80,19 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
     }
 
     public void setEMFTextPCMDetector(EMFTextPCMDetector pcmDetector) {
-        this.emfTextPcmDetector = pcmDetector;
+        emfTextPcmDetector = pcmDetector;
     }
 
     public EMFTextPCMDetector getEMFTextPCMDetector() {
-        return this.emfTextPcmDetector;
+        return emfTextPcmDetector;
     }
 
     public void setEclipsePCMDetector(EclipsePCMDetector pcmDetector) {
-        this.eclipsePcmDetector = pcmDetector;
+        eclipsePcmDetector = pcmDetector;
     }
 
     public EclipsePCMDetector getEclipsePCMDetector() {
-        return this.eclipsePcmDetector;
+        return eclipsePcmDetector;
     }
 
     /**
@@ -100,7 +100,7 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
      * usually only be a single file. If {@code path == null}, all CompilationUnits that do not have
      * a path associated with them (e.g. standard library classes or other library classes) are
      * returned.
-     * 
+     *
      * @param path
      *            the path to look for registered CompilationUnits at
      * @return the CompilationUnits or {@code null} if there was none at the {@code path}

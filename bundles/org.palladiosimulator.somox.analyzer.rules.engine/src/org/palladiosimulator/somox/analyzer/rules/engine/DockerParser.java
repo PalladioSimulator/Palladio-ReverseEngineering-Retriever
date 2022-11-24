@@ -14,9 +14,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 import org.apache.log4j.Logger;
 // import org.yaml.snakeyaml.Yaml;
+import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 
 /**
  * The DockerParser parses a docker-compose file to extract a mapping between service names
@@ -60,17 +60,15 @@ public class DockerParser {
         } catch (final IOException e) {
             e.printStackTrace();
         }
-        if (paths.size() <= 0) {
+        if (paths.isEmpty()) {
             LOG.info("No docker compose file detected.");
             return null;
         }
         final Path firstPath = paths.get(0);
 
         final File initialFile = firstPath.toFile();
-        InputStream targetStream = null;
         try {
-            targetStream = new FileInputStream(initialFile);
-            return targetStream;
+            return new FileInputStream(initialFile);
         } catch (final FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -85,9 +83,7 @@ public class DockerParser {
      * @return the list of all service names found in the docker-compose file
      */
     @SuppressWarnings("unchecked")
-    private List<String> extractServiceNames(InputStream stream) {
-        // TODO why is this deactivated? Circumvents "unused" warning:
-        stream = (InputStream) stream;
+    private static List<String> extractServiceNames(InputStream stream) {
         // final Yaml yaml = new Yaml();
         final Map<String, Object> object = new HashMap<>(); // (Map<String, Object>)
                                                             // yaml.load(stream);
@@ -95,11 +91,9 @@ public class DockerParser {
         // get all service names from the map
         if (!object.containsKey("services")) {
             LOG.info("No property with name 'services' in docker compose file. File not usable");
-            return new ArrayList<String>();
+            return new ArrayList<>();
         }
-        final List<String> serviceNames = new ArrayList<>();
-        serviceNames.addAll(((Map<String, Object>) object.get("services")).keySet());
-        return serviceNames;
+        return new ArrayList<>(((Map<String, Object>) object.get("services")).keySet());
     }
 
     /**
@@ -123,7 +117,7 @@ public class DockerParser {
                     .contains(comp.getName()))
                     .collect(Collectors.toList());
 
-                if (foundPaths.size() > 0) {
+                if (!foundPaths.isEmpty()) {
                     serviceNames.forEach(serviceName -> {
                         if (foundPaths.get(0)
                             .toString()
