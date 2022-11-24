@@ -11,29 +11,27 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.palladiosimulator.pcm.core.composition.AssemblyContext;
 import org.palladiosimulator.pcm.repository.BasicComponent;
 import org.palladiosimulator.pcm.repository.CollectionDataType;
+import org.palladiosimulator.pcm.repository.CompositeComponent;
 import org.palladiosimulator.pcm.repository.DataType;
+import org.palladiosimulator.pcm.repository.OperationProvidedRole;
+import org.palladiosimulator.pcm.repository.OperationRequiredRole;
 import org.palladiosimulator.pcm.repository.ParameterModifier;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
+
 import org.palladiosimulator.generator.fluent.exceptions.FluentApiException;
 import org.palladiosimulator.generator.fluent.repository.api.Repo;
 import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
 import org.palladiosimulator.generator.fluent.repository.structure.components.BasicComponentCreator;
+import org.palladiosimulator.generator.fluent.repository.structure.components.CompositeComponentCreator;
 import org.palladiosimulator.generator.fluent.repository.structure.interfaces.OperationInterfaceCreator;
 import org.palladiosimulator.generator.fluent.repository.structure.interfaces.OperationSignatureCreator;
 import org.palladiosimulator.generator.fluent.repository.structure.internals.Primitive;
 import org.palladiosimulator.generator.fluent.repository.structure.types.CompositeDataTypeCreator;
-import org.palladiosimulator.pcm.repository.BasicComponent;
-import org.palladiosimulator.pcm.repository.CollectionDataType;
-import org.palladiosimulator.pcm.repository.DataType;
-import org.palladiosimulator.pcm.repository.ParameterModifier;
-import org.palladiosimulator.pcm.repository.Repository;
-import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
-import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 
 // TODO Bug-fix, probably
 // Class to create a pcm instance out of all results from the detector class
@@ -46,14 +44,46 @@ public class EclipsePCMInstanceCreator {
     private final RuleEngineBlackboard blackboard;
     private final Map<String, CompositeDataTypeCreator> existingDataTypesMap;
     private final Map<String, DataType> existingCollectionDataTypes;
+    private final Map<CompilationUnit, CompositeComponentCreator> unitCompositeCreators;
+    private final Map<String, CompositeComponentCreator> ifaceCompositeCreators;
+    private final Map<Composite, CompositeComponentCreator> compositeCreators;
 
     public EclipsePCMInstanceCreator(RuleEngineBlackboard blackboard) {
         existingDataTypesMap = new HashMap<>();
         existingCollectionDataTypes = new HashMap<>();
+        this.unitCompositeCreators = new HashMap<>();
+        this.ifaceCompositeCreators = new HashMap<>();
+        this.compositeCreators = new HashMap<>();
         create = new FluentRepositoryFactory();
         repository = create.newRepository()
             .withName(REPO_NAME);
         this.blackboard = blackboard;
+    }
+
+    private class Pair<T1, T2> {
+        private final T1 t1;
+        private final T2 t2;
+
+        public Pair(T1 t1, T2 t2) {
+            this.t1 = t1;
+            this.t2 = t2;
+        }
+
+        public T1 getT1() {
+            return t1;
+        }
+
+        public T2 getT2() {
+            return t2;
+        }
+    }
+
+    private <K, V> void put(Map<K, List<V>> map, K key, V value) {
+        if (!map.containsKey(key)) {
+            map.put(key, new ArrayList<V>());
+        }
+        map.get(key)
+            .add(value);
     }
 
     /**
@@ -68,10 +98,103 @@ public class EclipsePCMInstanceCreator {
             .getComponents();
         final Map<String, List<IMethodBinding>> interfaces = blackboard.getEclipsePCMDetector()
             .getOperationInterfaces();
+        final Set<Composite> composites = blackboard.getEclipsePCMDetector()
+            .getCompositeComponents();
 
         createPCMInterfaces(interfaces);
 
+        for (Composite composite : composites) {
+            CompositeComponentCreator c = create.newCompositeComponent()
+                .withName(composite.getName());
+            composite.getParts()
+                .forEach(x -> unitCompositeCreators.put(x, c));
+            composite.getInternalInterfaces()
+                .forEach(x -> ifaceCompositeCreators.put(x, c));
+            compositeCreators.put(composite, c);
+
+            for (String compRequiredIface : composite.getRequiredInterfaces()) {
+                c.requires(create.fetchOfOperationInterface(compRequiredIface));
+            }
+
+            for (String compProvidedIface : composite.getProvidedInterfaces()) {
+                c.provides(create.fetchOfOperationInterface(compProvidedIface));
+            }
+        }
+
         createPCMComponents(components);
+
+        // Add assemblyConnections to composite component.
+        for (Composite composite : composites) {
+            CompositeComponentCreator c = compositeCreators.get(composite);
+            CompositeComponent builtComp = (CompositeComponent) c.build();
+
+            Map<String, List<Pair<OperationRequiredRole, AssemblyContext>>> innerRequirements = new HashMap<>();
+            Map<String, List<Pair<OperationProvidedRole, AssemblyContext>>> innerProvisions = new HashMap<>();
+
+            // Find requiredRoles
+            builtComp.getAssemblyContexts__ComposedStructure()
+                .stream()
+                .forEach(x -> x.getEncapsulatedComponent__AssemblyContext()
+                    .getRequiredRoles_InterfaceRequiringEntity()
+                    .stream()
+                    .map(OperationRequiredRole.class::cast)
+                    .forEach(y -> put(innerRequirements, y.getRequiredInterface__OperationRequiredRole()
+                        .getEntityName(), new Pair<OperationRequiredRole, AssemblyContext>(y, x))));
+
+            // Find providedRoles
+            builtComp.getAssemblyContexts__ComposedStructure()
+                .stream()
+                .forEach(x -> x.getEncapsulatedComponent__AssemblyContext()
+                    .getProvidedRoles_InterfaceProvidingEntity()
+                    .stream()
+                    .map(OperationProvidedRole.class::cast)
+                    .forEach(y -> put(innerProvisions, y.getProvidedInterface__OperationProvidedRole()
+                        .getEntityName(), new Pair<OperationProvidedRole, AssemblyContext>(y, x))));
+
+            // Match them up
+            for (String internalIface : composite.getInternalInterfaces()) {
+                for (Pair<OperationRequiredRole, AssemblyContext> r : innerRequirements.getOrDefault(internalIface,
+                        List.of())) {
+                    for (Pair<OperationProvidedRole, AssemblyContext> p : innerProvisions.getOrDefault(internalIface,
+                            List.of())) {
+                        if (!r.getT2()
+                            .equals(p.getT2())) {
+                            c.withAssemblyConnection(p.getT1(), p.getT2(), r.getT1(), r.getT2());
+                        }
+                    }
+                }
+            }
+
+            Map<String, OperationRequiredRole> outerRequirements = new HashMap<>();
+            builtComp.getRequiredRoles_InterfaceRequiringEntity()
+                .stream()
+                .map(OperationRequiredRole.class::cast)
+                .forEach(x -> outerRequirements.put(x.getRequiredInterface__OperationRequiredRole()
+                    .getEntityName(), x));
+
+            for (String compRequiredIface : composite.getRequiredInterfaces()) {
+                for (Pair<OperationRequiredRole, AssemblyContext> r : innerRequirements.getOrDefault(compRequiredIface,
+                        List.of())) {
+                    c.withRequiredDelegationConnection(r.getT2(), r.getT1(), outerRequirements.get(compRequiredIface));
+                }
+            }
+
+            Map<String, OperationProvidedRole> outerProvisions = new HashMap<>();
+            builtComp.getProvidedRoles_InterfaceProvidingEntity()
+                .stream()
+                .map(OperationProvidedRole.class::cast)
+                .forEach(x -> outerProvisions.put(x.getProvidedInterface__OperationProvidedRole()
+                    .getEntityName(), x));
+
+            for (String compProvidedIface : composite.getProvidedInterfaces()) {
+                for (Pair<OperationProvidedRole, AssemblyContext> r : innerProvisions.getOrDefault(compProvidedIface,
+                        List.of())) {
+                    c.withProvidedDelegationConnection(r.getT2(), r.getT1(), outerProvisions.get(compProvidedIface));
+                }
+            }
+
+            repository.addToRepository(c);
+        }
 
         return repository.createRepositoryNow();
     }
@@ -99,6 +222,12 @@ public class EclipsePCMInstanceCreator {
 
                 pcmInterface.withOperationSignature(signature);
             }
+
+            /*
+             * // Add interfaces to its composite component, if it is an internal part of one.
+             * CompositeComponentCreator c = unitCompositeCreators.get(inter); if (c != null) {
+             * c.withAssemblyContext(builtIface); }
+             */
 
             repository.addToRepository(pcmInterface);
         });
@@ -143,6 +272,13 @@ public class EclipsePCMInstanceCreator {
                 }
             }
             BasicComponent builtComp = pcmComp.build();
+
+            // Add component to its composite, if it is part of one.
+            CompositeComponentCreator c = unitCompositeCreators.get(comp);
+            if (c != null) {
+                c.withAssemblyContext(builtComp);
+            }
+
             blackboard.putRepositoryComponentLocation(builtComp, new CompilationUnitWrapper(comp));
             repository.addToRepository(builtComp);
         }
@@ -195,8 +331,7 @@ public class EclipsePCMInstanceCreator {
         }
 
         // Check if type is void (not part of pcm primitives)
-        if ("void"
-            .equals(variable.getQualifiedName()) && asReturnType) {
+        if ("void".equals(variable.getQualifiedName()) && asReturnType) {
             if (!create.containsDataType("Void")) {
                 repository.addToRepository(create.newCompositeDataType()
                     .withName("Void"));
@@ -288,16 +423,14 @@ public class EclipsePCMInstanceCreator {
         if (varClassifier.isClass()) {
             refs.addAll(List.of(varClassifier.getInterfaces()));
         } else if (varClassifier.isInterface()) {
-            if ("java.util.Collection"
-                .equals(varClassifier.getQualifiedName())) {
+            if ("java.util.Collection".equals(varClassifier.getQualifiedName())) {
                 return true;
             }
             refs.addAll(List.of(varClassifier.getInterfaces()));
         }
 
         for (ITypeBinding ref : refs) {
-            if ("java.util.Collection"
-                .equals(ref.getQualifiedName())) {
+            if ("java.util.Collection".equals(ref.getQualifiedName())) {
                 return true;
             }
         }
@@ -310,8 +443,7 @@ public class EclipsePCMInstanceCreator {
             return convertPrimitive(variable);
         }
         // Parameter is String, which counts for PCM as Primitive
-        if ("java.lang.String"
-            .equals(variable.getQualifiedName())) {
+        if ("java.lang.String".equals(variable.getQualifiedName())) {
             return Primitive.STRING;
         }
         return null;

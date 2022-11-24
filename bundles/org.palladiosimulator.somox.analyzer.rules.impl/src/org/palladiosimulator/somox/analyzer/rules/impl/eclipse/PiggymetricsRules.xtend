@@ -66,7 +66,7 @@ class PiggymetricsRules extends IRule {
 				for (m : getMethods(unit)) {
 					val annotated = isMethodAnnotatedWithName(m, "RequestMapping");
 					if (annotated) {
-						pcmDetector.detectProvidedOperation(unit, ifaceName, m.resolveBinding);
+						pcmDetector.detectCompositeProvidedOperation(unit, ifaceName, m.resolveBinding);
 					}
 				}
 			}
@@ -86,7 +86,7 @@ class PiggymetricsRules extends IRule {
 					} else {
 						ifaceName = requestedMapping.substring(requestedMapping.lastIndexOf('/') + 1);
 					}
-					pcmDetector.detectRequiredInterface(unit, ifaceName);
+					pcmDetector.detectCompositeRequiredInterface(unit, ifaceName);
 				}
 			}
 		}

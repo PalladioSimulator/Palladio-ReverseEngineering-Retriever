@@ -33,12 +33,12 @@ public class EclipsePCMDetector implements IPCMDetector {
     private List<CompilationUnit> components = new ArrayList<>();
 
     private Map<CompilationUnit, Set<String>> providedInterfaces = new HashMap<>();
-
     private Map<CompilationUnit, Set<String>> requiredInterfaces = new HashMap<>();
-
     private Map<String, List<IMethodBinding>> operationInterfaces = new HashMap<>();
 
     private Map<String, CompositeBuilder> composites = new HashMap<>();
+    private Set<String> compositeProvidedInterfaces = new HashSet<>();
+    private Set<String> compositeRequiredInterfaces = new HashSet<>();
 
     private static String getFullUnitName(CompilationUnit unit) {
         // TODO this is potentially problematic, maybe restructure
@@ -128,19 +128,26 @@ public class EclipsePCMDetector implements IPCMDetector {
     }
 
     public void detectRequiredInterface(CompilationUnit unit, String interfaceName) {
+        detectRequiredInterface(unit, interfaceName, false);
+    }
+
+    public void detectRequiredInterface(CompilationUnit unit, String interfaceName, boolean compositeRequired) {
         if (requiredInterfaces.get(unit) == null) {
             requiredInterfaces.put(unit, new HashSet<>());
         }
         requiredInterfaces.get(unit)
             .add(interfaceName);
+        if (compositeRequired) {
+            addCompositeRequiredInterface(interfaceName);
+        }
         detectOperationInterface(unit, interfaceName);
     }
 
     public void detectRequiredInterface(CompilationUnit unit, FieldDeclaration field) {
-        detectRequiredInterface(unit, field, null);
+        detectRequiredInterface(unit, field, false);
     }
 
-    private void detectRequiredInterface(CompilationUnit unit, FieldDeclaration field, String compositeName) {
+    private void detectRequiredInterface(CompilationUnit unit, FieldDeclaration field, boolean compositeRequired) {
         if (requiredInterfaces.get(unit) == null) {
             requiredInterfaces.put(unit, new HashSet<>());
         }
@@ -153,20 +160,19 @@ public class EclipsePCMDetector implements IPCMDetector {
         requiredInterfaces.get(unit)
             .addAll(ifaceNames);
         detectOperationInterface(field.getType());
-        if (compositeName != null) {
-            CompositeBuilder composite = getComposite(compositeName);
+        if (compositeRequired) {
             for (String ifaceName : ifaceNames) {
-                composite.addRequiredInterface(ifaceName);
+                addCompositeRequiredInterface(ifaceName);
             }
         }
     }
 
     public void detectRequiredInterface(CompilationUnit unit, SingleVariableDeclaration parameter) {
-        detectRequiredInterface(unit, parameter, null);
+        detectRequiredInterface(unit, parameter, false);
     }
 
     private void detectRequiredInterface(CompilationUnit unit, SingleVariableDeclaration parameter,
-            String compositeName) {
+            boolean compositeRequired) {
         if (requiredInterfaces.get(unit) == null) {
             requiredInterfaces.put(unit, new HashSet<>());
         }
@@ -175,8 +181,8 @@ public class EclipsePCMDetector implements IPCMDetector {
         requiredInterfaces.get(unit)
             .add(ifaceName);
         detectOperationInterface(parameter.getType());
-        if (compositeName != null) {
-            getComposite(compositeName).addRequiredInterface(ifaceName);
+        if (compositeRequired) {
+            addCompositeRequiredInterface(ifaceName);
         }
     }
 
@@ -212,42 +218,47 @@ public class EclipsePCMDetector implements IPCMDetector {
         getComposite(compositeName).addPart(unit);
     }
 
-    public void detectCompositeRequiredInterface(String compositeName, CompilationUnit unit, String interfaceName) {
-        getComposite(compositeName).addRequiredInterface(interfaceName);
-        detectRequiredInterface(unit, interfaceName);
+    public void detectCompositeRequiredInterface(CompilationUnit unit, String interfaceName) {
+        detectRequiredInterface(unit, interfaceName, true);
     }
 
-    public void detectCompositeRequiredInterface(String compositeName, CompilationUnit unit, FieldDeclaration field) {
-        detectRequiredInterface(unit, field, compositeName);
+    public void detectCompositeRequiredInterface(CompilationUnit unit, FieldDeclaration field) {
+        detectRequiredInterface(unit, field, true);
     }
 
-    public void detectCompositeRequiredInterface(String compositeName, CompilationUnit unit,
-            SingleVariableDeclaration parameter) {
-        detectRequiredInterface(unit, parameter, compositeName);
+    public void detectCompositeRequiredInterface(CompilationUnit unit, SingleVariableDeclaration parameter) {
+        detectRequiredInterface(unit, parameter, true);
     }
 
-    public void detectCompositeProvidedOperation(String compositeName, CompilationUnit unit, IMethodBinding method) {
+    public void detectCompositeProvidedOperation(CompilationUnit unit, IMethodBinding method) {
         String declaringIface = NameConverter.toPCMIdentifier(method.getDeclaringClass());
-        getComposite(compositeName).addProvidedOperation(declaringIface, method);
+        addCompositeProvidedInterface(declaringIface);
         detectProvidedOperation(unit, declaringIface, method);
     }
 
-    public void detectCompositeProvidedOperation(String compositeName, CompilationUnit unit,
-            ITypeBinding declaringIface, IMethodBinding method) {
+    public void detectCompositeProvidedOperation(CompilationUnit unit, ITypeBinding declaringIface,
+            IMethodBinding method) {
         String declaringIfaceName = NameConverter.toPCMIdentifier(declaringIface);
-        getComposite(compositeName).addProvidedOperation(declaringIfaceName, method);
+        addCompositeProvidedInterface(declaringIfaceName);
         detectProvidedOperation(unit, declaringIfaceName, method);
     }
 
-    public void detectCompositeProvidedOperation(String compositeName, CompilationUnit unit, String declaringIface,
-            IMethodBinding method) {
-        getComposite(compositeName).addProvidedOperation(declaringIface, method);
+    public void detectCompositeProvidedOperation(CompilationUnit unit, String declaringIface, IMethodBinding method) {
+        addCompositeProvidedInterface(declaringIface);
         detectProvidedOperation(unit, declaringIface, method);
+    }
+
+    private void addCompositeRequiredInterface(String ifaceName) {
+        compositeRequiredInterfaces.add(ifaceName);
+    }
+
+    private void addCompositeProvidedInterface(String ifaceName) {
+        compositeProvidedInterfaces.add(ifaceName);
     }
 
     private CompositeBuilder getComposite(String name) {
         if (!composites.containsKey(name)) {
-            composites.put(name, new CompositeBuilder());
+            composites.put(name, new CompositeBuilder(name));
         }
         return composites.get(name);
     }
@@ -279,6 +290,14 @@ public class EclipsePCMDetector implements IPCMDetector {
 
     protected Map<String, List<IMethodBinding>> getOperationInterfaces() {
         return Collections.unmodifiableMap(operationInterfaces);
+    }
+
+    protected Set<Composite> getCompositeComponents() {
+        return composites.values()
+            .stream()
+            .map(x -> x.construct(requiredInterfaces, providedInterfaces, compositeRequiredInterfaces,
+                    compositeProvidedInterfaces))
+            .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
