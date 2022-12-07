@@ -34,8 +34,15 @@ public class CompositeBuilder {
         Set<CompilationUnit> allParts = new HashSet<>(parts);
         Set<String> internalInterfaces = new HashSet<>();
 
-        propagateRelations(totalProvisions, compositeProvisions, totalRequirements, allParts, internalInterfaces);
-        propagateRelations(totalRequirements, compositeRequirements, totalProvisions, allParts, internalInterfaces);
+        int previousPartCount = 0;
+        int previousInternalInterfaceCount = 0;
+        do {
+            previousPartCount = allParts.size();
+            previousInternalInterfaceCount = internalInterfaces.size();
+
+            propagateRelations(totalProvisions, compositeProvisions, totalRequirements, allParts, internalInterfaces);
+            propagateRelations(totalRequirements, compositeRequirements, totalProvisions, allParts, internalInterfaces);
+        } while (allParts.size() > previousPartCount && internalInterfaces.size() > previousInternalInterfaceCount);
 
         Set<String> requiredInterfaces = new HashSet<>();
         Set<String> providedInterfaces = new HashSet<>();
