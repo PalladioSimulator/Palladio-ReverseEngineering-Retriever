@@ -293,10 +293,35 @@ public class EclipsePCMDetector implements IPCMDetector {
     }
 
     protected Set<Composite> getCompositeComponents() {
-        return composites.values()
+        // Construct composites.
+        List<Composite> constructedComposites = composites.values()
             .stream()
             .map(x -> x.construct(requiredInterfaces, providedInterfaces, compositeRequiredInterfaces,
                     compositeProvidedInterfaces))
+            .collect(Collectors.toList());
+
+        // Remove redundant composites.
+        Set<Composite> redundantComposites = new HashSet<>();
+        for (int i = 0; i < constructedComposites.size(); ++i) {
+            Composite subject = constructedComposites.get(i);
+            long subsetCount = constructedComposites.subList(i + 1, constructedComposites.size())
+                .stream()
+                .filter(x -> subject.isSubsetOf(x) || x.isSubsetOf(subject))
+                .count();
+
+            // Any composite is guaranteed to be the subset of at least one composite in the list,
+            // namely itself. If it is the subset of any composites other than itself, it is
+            // redundant.
+            if (subsetCount > 0) {
+                redundantComposites.add(subject);
+            }
+
+            // TODO: Is there any merging necessary, like adapting the redundant composite's
+            // requirements to its peer?
+        }
+
+        return constructedComposites.stream()
+            .filter(x -> !redundantComposites.contains(x))
             .collect(Collectors.toUnmodifiableSet());
     }
 

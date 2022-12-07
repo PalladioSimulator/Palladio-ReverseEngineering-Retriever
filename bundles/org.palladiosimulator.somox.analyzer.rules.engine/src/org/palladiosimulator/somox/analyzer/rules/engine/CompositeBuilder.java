@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 
@@ -33,70 +34,8 @@ public class CompositeBuilder {
         Set<CompilationUnit> allParts = new HashSet<>(parts);
         Set<String> internalInterfaces = new HashSet<>();
 
-        Map<String, Set<CompilationUnit>> provisionsInverted = new HashMap<>();
-
-        for (Entry<CompilationUnit, Set<String>> entry : totalProvisions.entrySet()) {
-            for (String provision : entry.getValue()) {
-                if (compositeProvisions.contains(provision)) {
-                    // Do not include interfaces provided or required by composites.
-                    // This ensures that components requiring this composite do not become part of
-                    // it.
-                    continue;
-                }
-                if (!provisionsInverted.containsKey(provision)) {
-                    provisionsInverted.put(provision, new HashSet<>());
-                }
-                provisionsInverted.get(provision)
-                    .add(entry.getKey());
-            }
-        }
-
-        // Iterate through all units with requirements. If a unit requires a part of this composite,
-        // it also becomes part of it.
-        for (CompilationUnit requiringUnit : totalRequirements.keySet()) {
-
-            Stack<Helper> unitRequirements = new Stack<>();
-            totalRequirements.get(requiringUnit)
-                .stream()
-                .map(x -> new Helper(x))
-                .forEach(unitRequirements::add);
-
-            List<Helper> traversedInterfaces = new ArrayList<>();
-
-            boolean isPart = false;
-            while (!unitRequirements.isEmpty() && !isPart) {
-                Helper requirement = unitRequirements.pop();
-                Set<CompilationUnit> requiredUnits = provisionsInverted.get(requirement.last());
-
-                if (requiredUnits == null) {
-                    // Skip this requirement if no unit provides it.
-                    // TODO: why does this happen?
-                    continue;
-                }
-
-                for (CompilationUnit requiredUnit : requiredUnits) {
-                    if (allParts.contains(requiredUnit)) {
-                        isPart = true;
-                        traversedInterfaces.add(requirement);
-                        continue;
-                    }
-                    Set<String> transitiveRequirements = new HashSet<>(totalProvisions.get(requiredUnit));
-
-                    // Ignore units requiring themselves.
-                    transitiveRequirements.remove(requirement.last());
-
-                    transitiveRequirements.stream()
-                        .map(x -> requirement.extend(x))
-                        .forEach(unitRequirements::push);
-                }
-            }
-
-            // A unit is part of this composite if it depends on another part of it.
-            if (isPart) {
-                allParts.add(requiringUnit);
-                traversedInterfaces.forEach(x -> x.addTo(internalInterfaces));
-            }
-        }
+        propagateRelations(totalProvisions, compositeProvisions, totalRequirements, allParts, internalInterfaces);
+        propagateRelations(totalRequirements, compositeRequirements, totalProvisions, allParts, internalInterfaces);
 
         Set<String> requiredInterfaces = new HashSet<>();
         Set<String> providedInterfaces = new HashSet<>();
@@ -112,12 +51,100 @@ public class CompositeBuilder {
         return new Composite(name, allParts, requiredInterfaces, providedInterfaces, internalInterfaces);
     }
 
-    private class Helper {
-        // Requirement path where a given element requires all those following it.
-        private final List<String> path;
+    // Writes to allParts and internalInterfaces.
+    // The naming scheme is fixed to requirement propagation for readability, but this function also
+    // works for provision propagation. Replace all mentions of "requirement" with "provision" and
+    // vice versa.
+    private static void propagateRelations(final Map<CompilationUnit, Set<String>> allRequirements,
+            final Set<String> compositeRequirements, final Map<CompilationUnit, Set<String>> allProvisions,
+            Set<CompilationUnit> allParts, Set<String> internalInterfaces) {
 
-        public Helper(String... path) {
+        Map<String, Set<CompilationUnit>> provisionsInverted = invertMap(allRequirements);
+        // Do not include interfaces provided by composites.
+        // This ensures that composites providing for this composite do not become part of it.
+        compositeRequirements.forEach(provisionsInverted::remove);
+
+        // Iterate through all units with provisions. If a unit provides a part for this composite,
+        // it also becomes part of it.
+        for (CompilationUnit providingUnit : allProvisions.keySet()) {
+
+            List<RelationChain> traversedInterfaces = traceRelationToAPart(allRequirements, allProvisions, allParts,
+                    provisionsInverted, providingUnit);
+
+            // A unit is part of this composite if a part the composite requires it.
+            if (!traversedInterfaces.isEmpty()) {
+                allParts.add(providingUnit);
+                traversedInterfaces.forEach(x -> x.addTo(internalInterfaces));
+            }
+        }
+    }
+
+    private static <K, V> Map<V, Set<K>> invertMap(Map<K, Set<V>> map) {
+        Map<V, Set<K>> inverted = new HashMap<>();
+
+        for (Entry<K, Set<V>> entry : map.entrySet()) {
+            for (V value : entry.getValue()) {
+                if (!inverted.containsKey(value)) {
+                    inverted.put(value, new HashSet<>());
+                }
+                inverted.get(value)
+                    .add(entry.getKey());
+            }
+        }
+
+        return inverted;
+    }
+
+    private static List<RelationChain> traceRelationToAPart(final Map<CompilationUnit, Set<String>> allRequirements,
+            final Map<CompilationUnit, Set<String>> allProvisions, final Set<CompilationUnit> allParts,
+            final Map<String, Set<CompilationUnit>> provisionsInverted, final CompilationUnit providingUnit) {
+
+        Stack<RelationChain> unitProvisions = new Stack<>();
+        allProvisions.get(providingUnit)
+            .stream()
+            .map(x -> new RelationChain(x))
+            .forEach(unitProvisions::add);
+
+        List<RelationChain> traversedInterfaces = new ArrayList<>();
+        while (!unitProvisions.isEmpty()) {
+            RelationChain provision = unitProvisions.pop();
+            Set<CompilationUnit> providedUnits = provisionsInverted.get(provision.last());
+
+            // Skip this provision if no unit requires it.
+            if (providedUnits == null) {
+                continue;
+            }
+
+            for (CompilationUnit providedUnit : providedUnits) {
+                if (allParts.contains(providedUnit)) {
+                    traversedInterfaces.add(provision);
+                    continue;
+                }
+                Set<String> transitiveProvisions = new HashSet<>(allRequirements.get(providedUnit));
+
+                // Ignore units requiring themselves.
+                transitiveProvisions.remove(provision.last());
+
+                transitiveProvisions.stream()
+                    .map(x -> provision.extend(x))
+                    .filter(x -> x.isPresent())
+                    .map(x -> x.get())
+                    .forEach(unitProvisions::push);
+            }
+        }
+
+        return traversedInterfaces;
+    }
+
+    private static class RelationChain {
+        // Requirement/Provision path where a given element requires/provides all those following
+        // it.
+        private final List<String> path;
+        private final Set<String> memberSet;
+
+        public RelationChain(String... path) {
             this.path = List.of(path);
+            this.memberSet = Set.of(path);
         }
 
         public String last() {
@@ -128,10 +155,15 @@ public class CompositeBuilder {
             collection.addAll(path);
         }
 
-        public Helper extend(String parent) {
+        public Optional<RelationChain> extend(String next) {
+            // Avoid relation cycles.
+            if (memberSet.contains(next)) {
+                return Optional.empty();
+            }
+
             List<String> merged = new ArrayList<>(path);
-            merged.add(parent);
-            return new Helper(merged.toArray(new String[0]));
+            merged.add(next);
+            return Optional.of(new RelationChain(merged.toArray(new String[0])));
         }
 
         @Override

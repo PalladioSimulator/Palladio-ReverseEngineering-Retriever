@@ -12,15 +12,16 @@ public class Composite {
     private Set<String> internalInterfaces;
     private Set<String> requiredInterfaces;
     private Set<String> providedInterfaces;
-    
-    public Composite(String name, Set<CompilationUnit> parts, Set<String> requiredInterfaces, Set<String> providedInterfaces, Set<String> internalInterfaces) {
+
+    public Composite(String name, Set<CompilationUnit> parts, Set<String> requiredInterfaces,
+            Set<String> providedInterfaces, Set<String> internalInterfaces) {
         this.name = name;
         this.parts = parts;
         this.internalInterfaces = internalInterfaces;
         this.requiredInterfaces = requiredInterfaces;
         this.providedInterfaces = providedInterfaces;
     }
-    
+
     public String getName() {
         return name;
     }
@@ -39,5 +40,9 @@ public class Composite {
 
     public Set<String> getProvidedInterfaces() {
         return Collections.unmodifiableSet(providedInterfaces);
+    }
+
+    public boolean isSubsetOf(final Composite other) {
+        return other.getParts().containsAll(parts);
     }
 }
