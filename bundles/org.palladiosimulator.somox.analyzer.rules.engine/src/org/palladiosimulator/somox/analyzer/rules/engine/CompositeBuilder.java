@@ -52,8 +52,8 @@ public class CompositeBuilder {
             // TODO: This could lead to multiple components providing the same interface.
             providedInterfaces.addAll(totalProvisions.getOrDefault(part, Set.of()));
         }
-        requiredInterfaces.removeAll(internalInterfaces);
-        providedInterfaces.removeAll(internalInterfaces);
+        requiredInterfaces.removeIf(x -> !compositeRequirements.contains(x));
+        providedInterfaces.removeIf(x -> !compositeProvisions.contains(x));
 
         return new Composite(name, allParts, requiredInterfaces, providedInterfaces, internalInterfaces);
     }
