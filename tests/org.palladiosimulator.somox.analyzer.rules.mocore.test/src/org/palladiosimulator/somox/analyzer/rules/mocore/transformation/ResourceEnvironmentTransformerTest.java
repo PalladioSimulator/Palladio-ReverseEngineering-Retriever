@@ -13,7 +13,6 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Deplo
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.LinkResourceSpecification;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.DeploymentDeploymentRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.LinkResourceSpecificationRelation;
-import org.palladiosimulator.somox.analyzer.rules.mocore.transformation.ResourceEnvironmentTransformer;
 
 import com.gstuer.modelmerging.framework.transformation.TransformerTest;
 

@@ -1,7 +1,6 @@
 package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element;
 
 import org.palladiosimulator.pcm.seff.ResourceDemandingSEFF;
-import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.ServiceEffectSpecification;
 import org.palladiosimulator.somox.analyzer.rules.mocore.utility.ElementFactory;
 
 import com.gstuer.modelmerging.framework.surrogate.ElementTest;

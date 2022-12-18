@@ -18,7 +18,6 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.Inte
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceRequirementRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ServiceEffectSpecificationRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.SignatureProvisionRelation;
-import org.palladiosimulator.somox.analyzer.rules.mocore.transformation.RepositoryTransformer;
 
 import com.gstuer.modelmerging.framework.transformation.TransformerTest;
 

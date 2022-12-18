@@ -14,7 +14,6 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Inter
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentAssemblyRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceProvisionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceRequirementRelation;
-import org.palladiosimulator.somox.analyzer.rules.mocore.transformation.SystemTransformer;
 
 import com.gstuer.modelmerging.framework.transformation.TransformerTest;
 

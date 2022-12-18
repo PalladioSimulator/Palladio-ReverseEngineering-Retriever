@@ -2,8 +2,6 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation;
 
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Deployment;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.LinkResourceSpecification;
-import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.DeploymentDeploymentRelation;
-import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.LinkResourceSpecificationRelation;
 
 import com.gstuer.modelmerging.framework.surrogate.RelationTest;
 

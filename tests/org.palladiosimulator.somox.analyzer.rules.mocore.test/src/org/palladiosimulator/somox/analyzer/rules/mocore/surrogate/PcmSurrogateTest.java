@@ -1,7 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate;
 
-import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.PcmSurrogate;
-
 import com.gstuer.modelmerging.framework.surrogate.ModelTest;
 import com.gstuer.modelmerging.framework.surrogate.Relation;
 import com.gstuer.modelmerging.utility.SimpleElement;

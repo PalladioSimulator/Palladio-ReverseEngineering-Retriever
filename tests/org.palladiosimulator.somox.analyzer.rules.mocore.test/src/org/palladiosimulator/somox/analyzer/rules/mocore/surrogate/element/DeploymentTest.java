@@ -2,7 +2,6 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element;
 
 import org.palladiosimulator.pcm.resourceenvironment.ResourceContainer;
 import org.palladiosimulator.pcm.resourceenvironment.ResourceenvironmentFactory;
-import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Deployment;
 
 import com.gstuer.modelmerging.framework.surrogate.ElementTest;
 import com.gstuer.modelmerging.utility.IdentifierGenerator;

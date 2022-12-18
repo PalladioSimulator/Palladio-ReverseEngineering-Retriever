@@ -1,6 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.mocore.processor.relation;
 
-import org.palladiosimulator.somox.analyzer.rules.mocore.processor.relation.SignatureProvisionRelationProcessor;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;

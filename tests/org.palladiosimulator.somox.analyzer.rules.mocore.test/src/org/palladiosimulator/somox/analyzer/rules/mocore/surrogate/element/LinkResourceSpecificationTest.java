@@ -1,7 +1,6 @@
 package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element;
 
 import org.palladiosimulator.pcm.resourceenvironment.CommunicationLinkResourceSpecification;
-import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.LinkResourceSpecification;
 
 import com.gstuer.modelmerging.framework.surrogate.ElementTest;
 

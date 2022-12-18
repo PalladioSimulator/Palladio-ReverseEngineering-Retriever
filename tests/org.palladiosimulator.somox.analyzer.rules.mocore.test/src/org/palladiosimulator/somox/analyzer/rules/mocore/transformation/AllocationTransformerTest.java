@@ -11,7 +11,6 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Component;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Deployment;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentAllocationRelation;
-import org.palladiosimulator.somox.analyzer.rules.mocore.transformation.AllocationTransformer;
 
 import com.gstuer.modelmerging.framework.transformation.TransformerTest;
 

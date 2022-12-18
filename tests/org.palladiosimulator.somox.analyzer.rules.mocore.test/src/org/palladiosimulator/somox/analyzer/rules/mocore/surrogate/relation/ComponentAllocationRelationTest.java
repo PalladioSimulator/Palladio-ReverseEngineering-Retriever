@@ -2,7 +2,6 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation;
 
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Component;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Deployment;
-import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentAllocationRelation;
 
 import com.gstuer.modelmerging.framework.surrogate.RelationTest;
 

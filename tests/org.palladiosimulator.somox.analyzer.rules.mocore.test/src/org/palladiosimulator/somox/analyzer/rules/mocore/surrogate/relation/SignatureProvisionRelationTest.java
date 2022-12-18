@@ -2,7 +2,6 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation;
 
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;
-import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.SignatureProvisionRelation;
 
 import com.gstuer.modelmerging.framework.surrogate.RelationTest;
 

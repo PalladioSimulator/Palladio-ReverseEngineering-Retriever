@@ -2,7 +2,6 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element;
 
 import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
 import org.palladiosimulator.pcm.repository.BasicComponent;
-import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Component;
 
 import com.gstuer.modelmerging.framework.surrogate.ElementTest;
 import com.gstuer.modelmerging.utility.IdentifierGenerator;
