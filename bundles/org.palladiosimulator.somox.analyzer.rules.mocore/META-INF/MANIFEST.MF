@@ -7,13 +7,13 @@ Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.mocore
 Bundle-Vendor: palladiosimulator.org
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
-Export-Package: com.gstuer.modelmerging.instance.pcm.orchestration,
- com.gstuer.modelmerging.instance.pcm.processor.element,
- com.gstuer.modelmerging.instance.pcm.processor.relation,
- com.gstuer.modelmerging.instance.pcm.surrogate,
- com.gstuer.modelmerging.instance.pcm.surrogate.element,
- com.gstuer.modelmerging.instance.pcm.surrogate.relation,
- com.gstuer.modelmerging.instance.pcm.transformation
+Export-Package: org.palladiosimulator.somox.analyzer.rules.mocore.orchestration,
+ org.palladiosimulator.somox.analyzer.rules.mocore.processor.element,
+ org.palladiosimulator.somox.analyzer.rules.mocore.processor.relation,
+ org.palladiosimulator.somox.analyzer.rules.mocore.surrogate,
+ org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element,
+ org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation,
+ org.palladiosimulator.somox.analyzer.rules.mocore.transformation
 Require-Bundle: tools.mdsd.mocore.framework,
  org.palladiosimulator.pcm,
  org.palladiosimulator.pcm.resources,
