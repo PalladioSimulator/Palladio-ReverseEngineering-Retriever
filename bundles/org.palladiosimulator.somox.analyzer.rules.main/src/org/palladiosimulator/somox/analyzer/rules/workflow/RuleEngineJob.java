@@ -2,6 +2,7 @@ package org.palladiosimulator.somox.analyzer.rules.workflow;
 
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.mocore.workflow.MoCoReJob;
 import org.palladiosimulator.somox.analyzer.rules.service.Analyst;
 import org.palladiosimulator.somox.ast2seff.jobs.Ast2SeffJob;
 import org.palladiosimulator.somox.discoverer.Discoverer;
@@ -22,6 +23,8 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
         Ast2SeffJob ast2SeffJob = new Ast2SeffJob();
         ast2SeffJob.setBlackboard(getBlackboard());
         super.add(ast2SeffJob);
+
+        super.add(new MoCoReJob(getBlackboard()));
 
         super.add(createAnalystsJob(configuration));
     }
