@@ -69,13 +69,13 @@
          unpack="false"/>
          
    <plugin
-         id="tools.mdsd.mocore.instance"
+         id="org.palladiosimulator.somox.analyzer.rules.mocore"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
          
    <plugin
-         id="tools.mdsd.mocore.instance.test"
+         id="org.palladiosimulator.somox.analyzer.rules.mocore.test"
          download-size="0"
          install-size="0"
          version="0.0.0"/>

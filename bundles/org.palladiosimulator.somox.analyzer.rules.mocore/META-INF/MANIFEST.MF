@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: tools.mdsd.mocore.instance
-Bundle-SymbolicName: tools.mdsd.mocore.instance;singleton:=true
+Bundle-Name: org.palladiosimulator.somox.analyzer.rules.mocore
+Bundle-SymbolicName: org.palladiosimulator.somox.analyzer.rules.mocore;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Automatic-Module-Name: tools.mdsd.mocore.instance
-Bundle-Vendor: mdsd.tools
+Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.mocore
+Bundle-Vendor: palladiosimulator.org
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Export-Package: com.gstuer.modelmerging.instance.pcm.orchestration,
