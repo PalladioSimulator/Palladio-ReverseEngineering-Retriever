@@ -3,8 +3,8 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;
 
-import com.gstuer.modelmerging.framework.surrogate.Relation;
-import com.gstuer.modelmerging.framework.surrogate.Replaceable;
+import tools.mdsd.mocore.framework.surrogate.Relation;
+import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
 public class SignatureProvisionRelation extends Relation<Signature, Interface> {
     public SignatureProvisionRelation(Signature source, Interface destination, boolean isPlaceholder) {

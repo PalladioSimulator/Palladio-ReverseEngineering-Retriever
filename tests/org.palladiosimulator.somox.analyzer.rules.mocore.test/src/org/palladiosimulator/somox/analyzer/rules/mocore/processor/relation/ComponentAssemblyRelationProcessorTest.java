@@ -19,8 +19,8 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.Depl
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceProvisionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceRequirementRelation;
 
-import com.gstuer.modelmerging.framework.processor.RelationProcessorTest;
-import com.gstuer.modelmerging.framework.surrogate.Replaceable;
+import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
+import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
 public class ComponentAssemblyRelationProcessorTest extends RelationProcessorTest<ComponentAssemblyRelationProcessor,
         PcmSurrogate, ComponentAssemblyRelation, InterfaceProvisionRelation, InterfaceRequirementRelation> {

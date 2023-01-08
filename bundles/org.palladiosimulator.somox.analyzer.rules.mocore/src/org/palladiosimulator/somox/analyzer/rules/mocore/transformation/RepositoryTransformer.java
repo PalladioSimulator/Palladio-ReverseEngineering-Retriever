@@ -22,7 +22,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.Inte
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ServiceEffectSpecificationRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.SignatureProvisionRelation;
 
-import com.gstuer.modelmerging.framework.transformation.Transformer;
+import tools.mdsd.mocore.framework.transformation.Transformer;
 
 public class RepositoryTransformer implements Transformer<PcmSurrogate, Repository> {
     private static final String ROLE_PROVIDES_NAME_PATTERN = "%s Provider";

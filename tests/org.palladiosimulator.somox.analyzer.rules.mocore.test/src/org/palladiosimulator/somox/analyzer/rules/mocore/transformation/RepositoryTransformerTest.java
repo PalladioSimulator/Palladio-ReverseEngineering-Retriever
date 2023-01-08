@@ -19,7 +19,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.Inte
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ServiceEffectSpecificationRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.SignatureProvisionRelation;
 
-import com.gstuer.modelmerging.framework.transformation.TransformerTest;
+import tools.mdsd.mocore.framework.transformation.TransformerTest;
 
 public class RepositoryTransformerTest extends TransformerTest<RepositoryTransformer, PcmSurrogate, Repository> {
     @Test

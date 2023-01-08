@@ -7,7 +7,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Compo
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceProvisionRelation;
 
-import com.gstuer.modelmerging.framework.processor.Processor;
+import tools.mdsd.mocore.framework.processor.Processor;
 
 public class InterfaceProcessor extends Processor<PcmSurrogate, Interface> {
     public InterfaceProcessor(PcmSurrogate model) {

@@ -11,8 +11,8 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceProvisionRelation;
 
-import com.gstuer.modelmerging.framework.processor.ProcessorTest;
-import com.gstuer.modelmerging.framework.surrogate.Replaceable;
+import tools.mdsd.mocore.framework.processor.ProcessorTest;
+import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
 public class InterfaceProcessorTest extends ProcessorTest<InterfaceProcessor, PcmSurrogate, Interface> {
     @Test

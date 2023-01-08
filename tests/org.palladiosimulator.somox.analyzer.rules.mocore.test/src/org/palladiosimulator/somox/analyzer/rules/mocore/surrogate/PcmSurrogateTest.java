@@ -1,9 +1,9 @@
 package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate;
 
-import com.gstuer.modelmerging.framework.surrogate.ModelTest;
-import com.gstuer.modelmerging.framework.surrogate.Relation;
-import com.gstuer.modelmerging.utility.SimpleElement;
-import com.gstuer.modelmerging.utility.SimpleRelation;
+import tools.mdsd.mocore.framework.surrogate.ModelTest;
+import tools.mdsd.mocore.framework.surrogate.Relation;
+import tools.mdsd.mocore.utility.SimpleElement;
+import tools.mdsd.mocore.utility.SimpleRelation;
 
 public class PcmSurrogateTest extends ModelTest<PcmSurrogate, SimpleElement> {
     @Override

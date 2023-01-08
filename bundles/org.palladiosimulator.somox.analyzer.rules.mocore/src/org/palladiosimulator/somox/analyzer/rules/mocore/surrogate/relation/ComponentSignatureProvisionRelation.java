@@ -2,8 +2,8 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation;
 
 import java.util.Objects;
 
-import com.gstuer.modelmerging.framework.surrogate.Relation;
-import com.gstuer.modelmerging.framework.surrogate.Replaceable;
+import tools.mdsd.mocore.framework.surrogate.Relation;
+import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
 public class ComponentSignatureProvisionRelation extends Relation<InterfaceProvisionRelation, SignatureProvisionRelation> {
     private static final String ERROR_UNEQUAL_INTERFACE = "Interfaces of relations have to be equal.";

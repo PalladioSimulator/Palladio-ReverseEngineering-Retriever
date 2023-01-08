@@ -10,8 +10,8 @@ import org.junit.jupiter.api.condition.DisabledIf;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.ServiceEffectSpecification;
 
-import com.gstuer.modelmerging.framework.processor.ProcessorTest;
-import com.gstuer.modelmerging.framework.surrogate.Replaceable;
+import tools.mdsd.mocore.framework.processor.ProcessorTest;
+import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
 public class ServiceEffectSpecificationProcessorTest
         extends ProcessorTest<ServiceEffectSpecificationProcessor, PcmSurrogate, ServiceEffectSpecification> {

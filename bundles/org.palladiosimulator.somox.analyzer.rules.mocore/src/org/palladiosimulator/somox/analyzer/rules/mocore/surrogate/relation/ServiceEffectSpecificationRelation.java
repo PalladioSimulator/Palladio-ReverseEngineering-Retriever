@@ -2,8 +2,8 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation;
 
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.ServiceEffectSpecification;
 
-import com.gstuer.modelmerging.framework.surrogate.Relation;
-import com.gstuer.modelmerging.framework.surrogate.Replaceable;
+import tools.mdsd.mocore.framework.surrogate.Relation;
+import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
 public class ServiceEffectSpecificationRelation
         extends Relation<ComponentSignatureProvisionRelation, ServiceEffectSpecification> {

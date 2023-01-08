@@ -6,7 +6,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signa
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.SignatureProvisionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.utility.ElementFactory;
 
-import com.gstuer.modelmerging.framework.processor.RelationProcessorTest;
+import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 
 public class SignatureProvisionRelationProcessorTest extends RelationProcessorTest<SignatureProvisionRelationProcessor,
         PcmSurrogate, SignatureProvisionRelation, Signature, Interface> {

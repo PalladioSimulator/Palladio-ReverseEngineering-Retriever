@@ -12,8 +12,8 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.SignatureProvisionRelation;
 
-import com.gstuer.modelmerging.framework.processor.ProcessorTest;
-import com.gstuer.modelmerging.framework.surrogate.Replaceable;
+import tools.mdsd.mocore.framework.processor.ProcessorTest;
+import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
 public class SignatureProcessorTest extends ProcessorTest<SignatureProcessor, PcmSurrogate, Signature> {
     @Test

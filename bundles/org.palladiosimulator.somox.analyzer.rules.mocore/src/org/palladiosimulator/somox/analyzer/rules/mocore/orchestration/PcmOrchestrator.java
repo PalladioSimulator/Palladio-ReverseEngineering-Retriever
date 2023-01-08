@@ -17,7 +17,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.processor.relation.Serv
 import org.palladiosimulator.somox.analyzer.rules.mocore.processor.relation.SignatureProvisionRelationProcessor;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.PcmSurrogate;
 
-import com.gstuer.modelmerging.framework.orchestration.Orchestrator;
+import tools.mdsd.mocore.framework.orchestration.Orchestrator;
 
 public class PcmOrchestrator extends Orchestrator<PcmSurrogate> {
     public PcmOrchestrator(PcmSurrogate model) {

@@ -12,7 +12,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Compo
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Deployment;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentAllocationRelation;
 
-import com.gstuer.modelmerging.framework.transformation.TransformerTest;
+import tools.mdsd.mocore.framework.transformation.TransformerTest;
 
 public class AllocationTransformerTest extends TransformerTest<AllocationTransformer, PcmSurrogate, Allocation> {
     @ParameterizedTest

@@ -2,7 +2,7 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation;
 
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Deployment;
 
-import com.gstuer.modelmerging.framework.surrogate.RelationTest;
+import tools.mdsd.mocore.framework.surrogate.RelationTest;
 
 public class DeploymentDeploymentRelationTest
         extends RelationTest<DeploymentDeploymentRelation, Deployment, Deployment> {

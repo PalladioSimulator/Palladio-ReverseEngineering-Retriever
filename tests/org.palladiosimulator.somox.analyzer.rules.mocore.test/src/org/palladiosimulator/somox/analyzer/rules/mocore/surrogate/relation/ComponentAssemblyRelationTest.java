@@ -3,7 +3,7 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Component;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
 
-import com.gstuer.modelmerging.framework.surrogate.RelationTest;
+import tools.mdsd.mocore.framework.surrogate.RelationTest;
 
 public class ComponentAssemblyRelationTest
         extends RelationTest<ComponentAssemblyRelation, InterfaceProvisionRelation, InterfaceRequirementRelation> {

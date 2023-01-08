@@ -8,7 +8,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.LinkR
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.DeploymentDeploymentRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.LinkResourceSpecificationRelation;
 
-import com.gstuer.modelmerging.framework.processor.RelationProcessor;
+import tools.mdsd.mocore.framework.processor.RelationProcessor;
 
 public class DeploymentDeploymentRelationProcessor extends RelationProcessor<PcmSurrogate, DeploymentDeploymentRelation> {
     public DeploymentDeploymentRelationProcessor(PcmSurrogate model) {

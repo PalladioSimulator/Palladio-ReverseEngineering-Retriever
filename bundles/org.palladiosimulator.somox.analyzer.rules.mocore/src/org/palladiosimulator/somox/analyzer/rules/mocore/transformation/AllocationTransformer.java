@@ -11,7 +11,7 @@ import org.palladiosimulator.pcm.system.System;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentAllocationRelation;
 
-import com.gstuer.modelmerging.framework.transformation.Transformer;
+import tools.mdsd.mocore.framework.transformation.Transformer;
 
 public class AllocationTransformer implements Transformer<PcmSurrogate, Allocation> {
     @Override

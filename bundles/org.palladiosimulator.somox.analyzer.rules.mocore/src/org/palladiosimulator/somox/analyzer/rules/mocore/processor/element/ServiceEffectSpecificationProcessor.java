@@ -3,7 +3,7 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.processor.element;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.ServiceEffectSpecification;
 
-import com.gstuer.modelmerging.framework.processor.Processor;
+import tools.mdsd.mocore.framework.processor.Processor;
 
 public class ServiceEffectSpecificationProcessor extends Processor<PcmSurrogate, ServiceEffectSpecification> {
     public ServiceEffectSpecificationProcessor(PcmSurrogate model) {

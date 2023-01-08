@@ -8,7 +8,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.Comp
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceProvisionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.SignatureProvisionRelation;
 
-import com.gstuer.modelmerging.framework.processor.RelationProcessorTest;
+import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 
 public class ComponentSignatureProvisionRelationProcessorTest
         extends RelationProcessorTest<ComponentSignatureProvisionRelationProcessor, PcmSurrogate,

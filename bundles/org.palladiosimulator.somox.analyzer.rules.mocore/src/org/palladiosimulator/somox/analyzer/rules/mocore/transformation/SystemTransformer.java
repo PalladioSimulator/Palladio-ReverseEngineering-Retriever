@@ -11,7 +11,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Compo
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentAssemblyRelation;
 
-import com.gstuer.modelmerging.framework.transformation.Transformer;
+import tools.mdsd.mocore.framework.transformation.Transformer;
 
 public class SystemTransformer implements Transformer<PcmSurrogate, org.palladiosimulator.pcm.system.System> {
     private static final String ASSEMBLY_CONTEXT_NAME_PATTERN = "%s Assembly Context";

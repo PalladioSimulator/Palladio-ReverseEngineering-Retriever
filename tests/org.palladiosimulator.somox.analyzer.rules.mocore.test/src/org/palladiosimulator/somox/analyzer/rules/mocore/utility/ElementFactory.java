@@ -15,7 +15,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.LinkR
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.ServiceEffectSpecification;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;
 
-import com.gstuer.modelmerging.utility.IdentifierGenerator;
+import tools.mdsd.mocore.utility.IdentifierGenerator;
 
 public final class ElementFactory {
     private ElementFactory() {

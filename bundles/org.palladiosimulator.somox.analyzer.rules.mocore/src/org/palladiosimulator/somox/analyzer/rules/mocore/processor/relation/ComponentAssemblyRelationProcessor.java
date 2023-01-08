@@ -12,7 +12,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.Comp
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentAssemblyRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.DeploymentDeploymentRelation;
 
-import com.gstuer.modelmerging.framework.processor.RelationProcessor;
+import tools.mdsd.mocore.framework.processor.RelationProcessor;
 
 public class ComponentAssemblyRelationProcessor extends RelationProcessor<PcmSurrogate, ComponentAssemblyRelation> {
     public ComponentAssemblyRelationProcessor(PcmSurrogate model) {

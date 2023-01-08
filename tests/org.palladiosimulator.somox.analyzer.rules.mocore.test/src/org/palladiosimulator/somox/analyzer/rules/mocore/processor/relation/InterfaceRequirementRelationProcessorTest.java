@@ -6,7 +6,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Inter
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceRequirementRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.utility.ElementFactory;
 
-import com.gstuer.modelmerging.framework.processor.RelationProcessorTest;
+import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 
 public class InterfaceRequirementRelationProcessorTest
         extends RelationProcessorTest<InterfaceRequirementRelationProcessor,

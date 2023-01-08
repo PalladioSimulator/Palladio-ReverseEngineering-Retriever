@@ -5,7 +5,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Inter
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.ServiceEffectSpecification;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;
 
-import com.gstuer.modelmerging.framework.surrogate.RelationTest;
+import tools.mdsd.mocore.framework.surrogate.RelationTest;
 
 public class ServiceEffectSpecificationRelationTest extends RelationTest<ServiceEffectSpecificationRelation,
         ComponentSignatureProvisionRelation, ServiceEffectSpecification> {

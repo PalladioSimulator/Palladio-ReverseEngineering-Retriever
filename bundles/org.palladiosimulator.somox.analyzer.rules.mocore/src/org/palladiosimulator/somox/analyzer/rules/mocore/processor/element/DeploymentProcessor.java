@@ -3,7 +3,7 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.processor.element;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Deployment;
 
-import com.gstuer.modelmerging.framework.processor.Processor;
+import tools.mdsd.mocore.framework.processor.Processor;
 
 public class DeploymentProcessor extends Processor<PcmSurrogate, Deployment> {
     public DeploymentProcessor(PcmSurrogate model) {

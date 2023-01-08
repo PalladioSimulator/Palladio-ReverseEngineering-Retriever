@@ -7,7 +7,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.Depl
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.LinkResourceSpecificationRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.utility.ElementFactory;
 
-import com.gstuer.modelmerging.framework.processor.RelationProcessorTest;
+import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 
 public class LinkResourceSpecificationRelationProcessorTest
         extends RelationProcessorTest<LinkResourceSpecificationRelationProcessor, PcmSurrogate,

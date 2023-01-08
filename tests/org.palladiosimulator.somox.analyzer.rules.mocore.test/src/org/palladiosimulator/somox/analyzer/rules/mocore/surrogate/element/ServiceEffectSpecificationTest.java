@@ -3,7 +3,7 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element;
 import org.palladiosimulator.pcm.seff.ResourceDemandingSEFF;
 import org.palladiosimulator.somox.analyzer.rules.mocore.utility.ElementFactory;
 
-import com.gstuer.modelmerging.framework.surrogate.ElementTest;
+import tools.mdsd.mocore.framework.surrogate.ElementTest;
 
 public class ServiceEffectSpecificationTest
         extends ElementTest<ServiceEffectSpecification, ResourceDemandingSEFF> {

@@ -21,8 +21,8 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.Inte
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.LinkResourceSpecificationRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.utility.ElementFactory;
 
-import com.gstuer.modelmerging.framework.processor.RelationProcessorTest;
-import com.gstuer.modelmerging.framework.surrogate.Replaceable;
+import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
+import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
 public class DeploymentDeploymentRelationProcessorTest
         extends RelationProcessorTest<DeploymentDeploymentRelationProcessor,

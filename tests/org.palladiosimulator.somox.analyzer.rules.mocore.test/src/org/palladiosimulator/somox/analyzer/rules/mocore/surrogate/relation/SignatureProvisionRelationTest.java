@@ -3,7 +3,7 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;
 
-import com.gstuer.modelmerging.framework.surrogate.RelationTest;
+import tools.mdsd.mocore.framework.surrogate.RelationTest;
 
 public class SignatureProvisionRelationTest extends RelationTest<SignatureProvisionRelation, Signature, Interface> {
     @Override

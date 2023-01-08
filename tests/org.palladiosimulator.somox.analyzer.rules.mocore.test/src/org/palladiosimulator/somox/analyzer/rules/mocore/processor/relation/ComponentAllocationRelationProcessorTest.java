@@ -6,7 +6,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Deplo
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentAllocationRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.utility.ElementFactory;
 
-import com.gstuer.modelmerging.framework.processor.RelationProcessorTest;
+import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 
 public class ComponentAllocationRelationProcessorTest
         extends RelationProcessorTest<ComponentAllocationRelationProcessor,

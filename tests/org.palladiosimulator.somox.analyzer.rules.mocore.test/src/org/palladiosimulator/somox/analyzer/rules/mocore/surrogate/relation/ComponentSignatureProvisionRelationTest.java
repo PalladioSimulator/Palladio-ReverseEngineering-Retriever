@@ -4,7 +4,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Compo
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;
 
-import com.gstuer.modelmerging.framework.surrogate.RelationTest;
+import tools.mdsd.mocore.framework.surrogate.RelationTest;
 
 public class ComponentSignatureProvisionRelationTest extends
         RelationTest<ComponentSignatureProvisionRelation, InterfaceProvisionRelation, SignatureProvisionRelation> {

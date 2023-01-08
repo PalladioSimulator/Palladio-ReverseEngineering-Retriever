@@ -15,7 +15,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.Comp
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceProvisionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceRequirementRelation;
 
-import com.gstuer.modelmerging.framework.transformation.TransformerTest;
+import tools.mdsd.mocore.framework.transformation.TransformerTest;
 
 public class SystemTransformerTest extends TransformerTest<SystemTransformer, PcmSurrogate, System> {
     @Test

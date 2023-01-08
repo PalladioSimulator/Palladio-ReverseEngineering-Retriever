@@ -7,7 +7,7 @@ import org.junit.jupiter.api.condition.DisabledIf;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Deployment;
 
-import com.gstuer.modelmerging.framework.processor.ProcessorTest;
+import tools.mdsd.mocore.framework.processor.ProcessorTest;
 
 public class DeploymentProcessorTest extends ProcessorTest<DeploymentProcessor, PcmSurrogate, Deployment> {
     @Test

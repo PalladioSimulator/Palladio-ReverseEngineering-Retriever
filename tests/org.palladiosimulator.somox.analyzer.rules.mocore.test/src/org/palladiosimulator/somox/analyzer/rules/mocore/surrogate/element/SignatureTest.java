@@ -3,8 +3,8 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element;
 import org.palladiosimulator.pcm.repository.OperationSignature;
 import org.palladiosimulator.pcm.repository.RepositoryFactory;
 
-import com.gstuer.modelmerging.framework.surrogate.ElementTest;
-import com.gstuer.modelmerging.utility.IdentifierGenerator;
+import tools.mdsd.mocore.framework.surrogate.ElementTest;
+import tools.mdsd.mocore.utility.IdentifierGenerator;
 
 public class SignatureTest extends ElementTest<Signature, OperationSignature> {
     @Override

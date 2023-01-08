@@ -7,7 +7,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Inter
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.SignatureProvisionRelation;
 
-import com.gstuer.modelmerging.framework.processor.Processor;
+import tools.mdsd.mocore.framework.processor.Processor;
 
 public class SignatureProcessor extends Processor<PcmSurrogate, Signature> {
     public SignatureProcessor(PcmSurrogate model) {

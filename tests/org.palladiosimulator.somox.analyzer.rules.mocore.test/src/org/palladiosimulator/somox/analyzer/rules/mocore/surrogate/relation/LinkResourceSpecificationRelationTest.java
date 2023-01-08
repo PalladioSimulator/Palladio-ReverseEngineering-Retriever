@@ -3,7 +3,7 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Deployment;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.LinkResourceSpecification;
 
-import com.gstuer.modelmerging.framework.surrogate.RelationTest;
+import tools.mdsd.mocore.framework.surrogate.RelationTest;
 
 public class LinkResourceSpecificationRelationTest extends
         RelationTest<LinkResourceSpecificationRelation, LinkResourceSpecification, DeploymentDeploymentRelation> {

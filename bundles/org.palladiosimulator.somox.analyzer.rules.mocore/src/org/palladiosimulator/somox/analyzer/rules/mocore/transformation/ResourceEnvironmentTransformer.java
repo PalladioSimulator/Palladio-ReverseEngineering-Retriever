@@ -17,7 +17,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.LinkR
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.LinkResourceSpecificationRelation;
 
 import com.google.common.collect.HashMultimap;
-import com.gstuer.modelmerging.framework.transformation.Transformer;
+import tools.mdsd.mocore.framework.transformation.Transformer;
 
 public class ResourceEnvironmentTransformer implements Transformer<PcmSurrogate, ResourceEnvironment> {
     @Override

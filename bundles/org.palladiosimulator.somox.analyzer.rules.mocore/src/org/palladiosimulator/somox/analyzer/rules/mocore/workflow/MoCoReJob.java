@@ -9,7 +9,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.orchestration.PcmOrches
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.somox.analyzer.rules.mocore.transformation.RepositoryTransformer;
 
-import com.gstuer.modelmerging.framework.discovery.Discoverer;
+import tools.mdsd.mocore.framework.discovery.Discoverer;
 
 import de.uka.ipd.sdq.workflow.blackboard.Blackboard;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;

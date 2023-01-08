@@ -3,8 +3,8 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Component;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
 
-import com.gstuer.modelmerging.framework.surrogate.Relation;
-import com.gstuer.modelmerging.framework.surrogate.Replaceable;
+import tools.mdsd.mocore.framework.surrogate.Relation;
+import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
 public class InterfaceRequirementRelation extends Relation<Component, Interface> {
     public InterfaceRequirementRelation(Component source, Interface destination, boolean isPlaceholder) {
