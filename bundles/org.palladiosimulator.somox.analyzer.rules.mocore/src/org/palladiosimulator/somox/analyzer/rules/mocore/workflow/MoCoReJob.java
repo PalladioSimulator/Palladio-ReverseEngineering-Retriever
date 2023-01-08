@@ -4,23 +4,31 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.palladiosimulator.pcm.allocation.Allocation;
 import org.palladiosimulator.pcm.repository.Repository;
+import org.palladiosimulator.pcm.resourceenvironment.ResourceEnvironment;
+import org.palladiosimulator.pcm.system.System;
 import org.palladiosimulator.somox.analyzer.rules.mocore.orchestration.PcmOrchestrator;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.PcmSurrogate;
+import org.palladiosimulator.somox.analyzer.rules.mocore.transformation.AllocationTransformer;
 import org.palladiosimulator.somox.analyzer.rules.mocore.transformation.RepositoryTransformer;
-
-import tools.mdsd.mocore.framework.discovery.Discoverer;
+import org.palladiosimulator.somox.analyzer.rules.mocore.transformation.ResourceEnvironmentTransformer;
+import org.palladiosimulator.somox.analyzer.rules.mocore.transformation.SystemTransformer;
 
 import de.uka.ipd.sdq.workflow.blackboard.Blackboard;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;
 import de.uka.ipd.sdq.workflow.jobs.IBlackboardInteractingJob;
 import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
 import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
+import tools.mdsd.mocore.framework.discovery.Discoverer;
 
 public class MoCoReJob implements IBlackboardInteractingJob<Blackboard<Object>> {
     private static final String JOB_NAME = "Model Composition & Refinement Job";
     private static final String BLACKBOARD_INPUT_ID_REPOSITORY = "repository";
     private static final String BLACKBOARD_OUTPUT_ID_REPOSITORY = "repository";
+    private static final String BLACKBOARD_OUTPUT_ID_SYSTEM = "system";
+    private static final String BLACKBOARD_OUTPUT_ID_ALLOCATION = "allocation";
+    private static final String BLACKBOARD_OUTPUT_ID_RESOURCE_ENVIRONMENT = "resource";
 
     private Blackboard<Object> blackboard;
 
@@ -47,10 +55,16 @@ public class MoCoReJob implements IBlackboardInteractingJob<Blackboard<Object>> 
         monitor.subTask("Transforming surrogate model into output models");
         PcmSurrogate surrogate = orchestrator.getModel();
         Repository repository = new RepositoryTransformer().transform(surrogate);
+        System system = new SystemTransformer().transform(surrogate);
+        Allocation allocation = new AllocationTransformer().transform(surrogate);
+        ResourceEnvironment resourceEnvironment = new ResourceEnvironmentTransformer().transform(surrogate);
 
         // Add transformed models to blackboard
         monitor.subTask("Adding output models to blackboard");
         this.blackboard.addPartition(BLACKBOARD_OUTPUT_ID_REPOSITORY, repository);
+        this.blackboard.addPartition(BLACKBOARD_OUTPUT_ID_SYSTEM, system);
+        this.blackboard.addPartition(BLACKBOARD_OUTPUT_ID_ALLOCATION, allocation);
+        this.blackboard.addPartition(BLACKBOARD_OUTPUT_ID_RESOURCE_ENVIRONMENT, resourceEnvironment);
         monitor.done();
     }
 
