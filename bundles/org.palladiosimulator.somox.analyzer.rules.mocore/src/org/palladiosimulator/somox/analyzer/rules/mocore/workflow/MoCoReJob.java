@@ -1,13 +1,14 @@
 package org.palladiosimulator.somox.analyzer.rules.mocore.workflow;
 
+import java.util.Collection;
 import java.util.Objects;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.palladiosimulator.pcm.allocation.Allocation;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.resourceenvironment.ResourceEnvironment;
 import org.palladiosimulator.pcm.system.System;
+import org.palladiosimulator.somox.analyzer.rules.mocore.discovery.RepositoryDecompositor;
 import org.palladiosimulator.somox.analyzer.rules.mocore.orchestration.PcmOrchestrator;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.somox.analyzer.rules.mocore.transformation.AllocationTransformer;
@@ -42,9 +43,10 @@ public class MoCoReJob implements IBlackboardInteractingJob<Blackboard<Object>> 
         monitor.subTask("Retrieving job input from blackboard");
         Repository inputRepository = (Repository) this.blackboard.getPartition(BLACKBOARD_INPUT_ID_REPOSITORY);
 
-        // TODO Convert input into processable discoverers
+        // Convert input into processable discoverers
         monitor.subTask("Converting input into processable discoveries");
-        Set<Discoverer<?>> discoverers = null;
+        RepositoryDecompositor repositoryDecompositor = new RepositoryDecompositor();
+        Collection<Discoverer<?>> discoverers = repositoryDecompositor.decompose(inputRepository);
 
         // Composite & refine discoveries via PCM orchestrator
         monitor.subTask("Processing discoveries");
