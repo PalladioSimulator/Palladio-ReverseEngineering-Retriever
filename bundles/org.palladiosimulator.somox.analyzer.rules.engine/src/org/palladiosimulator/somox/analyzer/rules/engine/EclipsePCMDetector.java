@@ -72,6 +72,10 @@ public class EclipsePCMDetector implements IPCMDetector {
         for (Object type : unit.types()) {
             if (type instanceof TypeDeclaration) {
                 components.add(unit);
+                // TODO: remove and implement properly
+                ITypeBinding binding = ((TypeDeclaration) type).resolveBinding();
+                detectOperationInterface(unit);
+                detectProvidedOperation(unit, binding, null);
             }
         }
     }
@@ -205,7 +209,8 @@ public class EclipsePCMDetector implements IPCMDetector {
     public void detectProvidedOperation(CompilationUnit unit, String declaringIface, IMethodBinding method) {
         if (method == null) {
             LOG.warn("Unresolved method binding detected in " + getFullUnitName(unit) + "!");
-            return;
+            // TODO: re-enable
+//            return;
         }
         if (providedInterfaces.get(unit) == null) {
             providedInterfaces.put(unit, new HashSet<>());
