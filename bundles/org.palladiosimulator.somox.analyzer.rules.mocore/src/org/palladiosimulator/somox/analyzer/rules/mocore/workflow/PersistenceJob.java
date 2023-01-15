@@ -10,7 +10,6 @@ import org.palladiosimulator.pcm.allocation.Allocation;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.resourceenvironment.ResourceEnvironment;
 import org.palladiosimulator.pcm.system.System;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 
 import de.uka.ipd.sdq.workflow.blackboard.Blackboard;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;
@@ -28,13 +27,11 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
     private Blackboard<Object> blackboard;
     private final File outputFilePrefix;
 
-    public PersistenceJob(Blackboard<Object> blackboard, RuleEngineConfiguration configuration) {
+    public PersistenceJob(Blackboard<Object> blackboard, URI inputFolder, URI outputFolder) {
         this.blackboard = Objects.requireNonNull(blackboard);
-        URI configuredOutput = configuration.getOutputFolder();
-        URI configuredInput = configuration.getInputFolder();
-        String configuredInputProjectName = configuredInput.lastSegment();
+        String configuredInputProjectName = inputFolder.lastSegment();
         // Set path to output folder and prefix of all output files to name of input project folder
-        this.outputFilePrefix = new File(configuredOutput.toFileString(), configuredInputProjectName);
+        this.outputFilePrefix = new File(outputFolder.toFileString(), configuredInputProjectName);
     }
 
     @Override

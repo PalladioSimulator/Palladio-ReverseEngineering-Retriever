@@ -19,5 +19,4 @@ Require-Bundle: tools.mdsd.mocore.framework,
  org.palladiosimulator.pcm,
  org.palladiosimulator.pcm.resources,
  org.palladiosimulator.generator.fluent,
- de.uka.ipd.sdq.workflow,
- org.palladiosimulator.somox.analyzer.rules.main
+ de.uka.ipd.sdq.workflow
