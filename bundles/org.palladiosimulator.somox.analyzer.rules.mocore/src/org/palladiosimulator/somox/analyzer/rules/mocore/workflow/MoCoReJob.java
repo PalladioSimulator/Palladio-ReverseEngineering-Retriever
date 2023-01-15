@@ -25,23 +25,30 @@ import tools.mdsd.mocore.framework.discovery.Discoverer;
 
 public class MoCoReJob implements IBlackboardInteractingJob<Blackboard<Object>> {
     private static final String JOB_NAME = "Model Composition & Refinement Job";
-    private static final String BLACKBOARD_INPUT_ID_REPOSITORY = "repository";
-    private static final String BLACKBOARD_OUTPUT_ID_REPOSITORY = "repository";
-    private static final String BLACKBOARD_OUTPUT_ID_SYSTEM = "system";
-    private static final String BLACKBOARD_OUTPUT_ID_ALLOCATION = "allocation";
-    private static final String BLACKBOARD_OUTPUT_ID_RESOURCE_ENVIRONMENT = "resource";
 
     private Blackboard<Object> blackboard;
+    private final String repositoryInputKey;
+    private final String repositoryOutputKey;
+    private final String systemKey;
+    private final String allocationKey;
+    private final String resourceEnvironmentKey;
 
-    public MoCoReJob(Blackboard<Object> blackboard) {
+    public MoCoReJob(Blackboard<Object> blackboard, String repositoryInputKey, String repositoryOutputKey,
+            String systemKey, String allocationKey,
+            String resourceEnvironmentKey) {
         this.blackboard = Objects.requireNonNull(blackboard);
+        this.repositoryInputKey = repositoryInputKey;
+        this.repositoryOutputKey = repositoryOutputKey;
+        this.systemKey = systemKey;
+        this.allocationKey = allocationKey;
+        this.resourceEnvironmentKey = resourceEnvironmentKey;
     }
 
     @Override
     public void execute(IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
         // Fetch input from blackboard
         monitor.subTask("Retrieving job input from blackboard");
-        Repository inputRepository = (Repository) this.blackboard.getPartition(BLACKBOARD_INPUT_ID_REPOSITORY);
+        Repository inputRepository = (Repository) this.blackboard.getPartition(repositoryInputKey);
 
         // Convert input into processable discoverers
         monitor.subTask("Converting input into processable discoveries");
@@ -63,10 +70,10 @@ public class MoCoReJob implements IBlackboardInteractingJob<Blackboard<Object>> 
 
         // Add transformed models to blackboard
         monitor.subTask("Adding output models to blackboard");
-        this.blackboard.addPartition(BLACKBOARD_OUTPUT_ID_REPOSITORY, repository);
-        this.blackboard.addPartition(BLACKBOARD_OUTPUT_ID_SYSTEM, system);
-        this.blackboard.addPartition(BLACKBOARD_OUTPUT_ID_ALLOCATION, allocation);
-        this.blackboard.addPartition(BLACKBOARD_OUTPUT_ID_RESOURCE_ENVIRONMENT, resourceEnvironment);
+        this.blackboard.addPartition(repositoryOutputKey, repository);
+        this.blackboard.addPartition(systemKey, system);
+        this.blackboard.addPartition(allocationKey, allocation);
+        this.blackboard.addPartition(resourceEnvironmentKey, resourceEnvironment);
         monitor.done();
     }
 
