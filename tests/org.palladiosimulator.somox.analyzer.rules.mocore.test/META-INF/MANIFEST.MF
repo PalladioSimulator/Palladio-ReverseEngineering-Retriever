@@ -17,4 +17,6 @@ Require-Bundle: org.junit,
  org.palladiosimulator.pcm.resources,
  org.palladiosimulator.generator.fluent,
  org.palladiosimulator.somox.analyzer.rules.mocore,
- org.apache.log4j
+ org.apache.log4j,
+ org.apache.commons.io,
+ de.uka.ipd.sdq.workflow
