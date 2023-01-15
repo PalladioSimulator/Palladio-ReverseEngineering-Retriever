@@ -4,11 +4,13 @@ import java.io.File;
 import java.util.Objects;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.emf.common.util.URI;
 import org.palladiosimulator.generator.fluent.shared.util.ModelSaver;
 import org.palladiosimulator.pcm.allocation.Allocation;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.resourceenvironment.ResourceEnvironment;
 import org.palladiosimulator.pcm.system.System;
+import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 
 import de.uka.ipd.sdq.workflow.blackboard.Blackboard;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;
@@ -24,11 +26,15 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
     private static final String BLACKBOARD_INPUT_ID_RESOURCE_ENVIRONMENT = "resource";
 
     private Blackboard<Object> blackboard;
-    private String path;
+    private final File outputFilePrefix;
 
-    public PersistenceJob(Blackboard<Object> blackboard, String path) {
+    public PersistenceJob(Blackboard<Object> blackboard, RuleEngineConfiguration configuration) {
         this.blackboard = Objects.requireNonNull(blackboard);
-        this.path = new File(Objects.requireNonNull(path), "mocore").toString();
+        URI configuredOutput = configuration.getOutputFolder();
+        URI configuredInput = configuration.getInputFolder();
+        String configuredInputProjectName = configuredInput.lastSegment();
+        // Set path to output folder and prefix of all output files to name of input project folder
+        this.outputFilePrefix = new File(configuredOutput.toFileString(), configuredInputProjectName);
     }
 
     @Override
@@ -43,10 +49,10 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
 
         // Make blackboard models persistent by saving them as files
         monitor.subTask("Persisting models");
-        ModelSaver.saveRepository(repository, this.path, false);
-        ModelSaver.saveSystem(system, this.path, false);
-        ModelSaver.saveAllocation(allocation, this.path, false);
-        ModelSaver.saveResourceEnvironment(resourceEnvironment, this.path, false);
+        ModelSaver.saveRepository(repository, outputFilePrefix.getPath(), false);
+        ModelSaver.saveSystem(system, outputFilePrefix.getPath(), false);
+        ModelSaver.saveAllocation(allocation, outputFilePrefix.getPath(), false);
+        ModelSaver.saveResourceEnvironment(resourceEnvironment, outputFilePrefix.getPath(), false);
         monitor.done();
     }
 
