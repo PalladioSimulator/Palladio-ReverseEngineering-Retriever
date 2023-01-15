@@ -7,7 +7,8 @@ Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.mocore
 Bundle-Vendor: palladiosimulator.org
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
-Export-Package: org.palladiosimulator.somox.analyzer.rules.mocore.orchestration,
+Export-Package: org.palladiosimulator.somox.analyzer.rules.mocore.discovery,
+ org.palladiosimulator.somox.analyzer.rules.mocore.orchestration,
  org.palladiosimulator.somox.analyzer.rules.mocore.processor.element,
  org.palladiosimulator.somox.analyzer.rules.mocore.processor.relation,
  org.palladiosimulator.somox.analyzer.rules.mocore.surrogate,
