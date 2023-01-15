@@ -27,7 +27,8 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
 
         super.add(new MoCoReJob(getBlackboard()));
 
-        super.add(new PersistenceJob(getBlackboard(), configuration.getInputFolder(), configuration.getOutputFolder()));
+        super.add(new PersistenceJob(getBlackboard(), configuration.getInputFolder(), configuration.getOutputFolder(),
+                "repository", "system", "allocation", "resource"));
 
         super.add(createAnalystsJob(configuration));
     }

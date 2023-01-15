@@ -19,17 +19,22 @@ import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Object>> {
     private static final String JOB_NAME = "Model Persistence Job";
-    private static final String BLACKBOARD_INPUT_ID_REPOSITORY = "repository";
-    private static final String BLACKBOARD_INPUT_ID_SYSTEM = "system";
-    private static final String BLACKBOARD_INPUT_ID_ALLOCATION = "allocation";
-    private static final String BLACKBOARD_INPUT_ID_RESOURCE_ENVIRONMENT = "resource";
 
     private Blackboard<Object> blackboard;
+    private final String repositoryKey;
+    private final String systemKey;
+    private final String allocationKey;
+    private final String resourceEnvironmentKey;
     private final File outputFilePrefix;
 
-    public PersistenceJob(Blackboard<Object> blackboard, URI inputFolder, URI outputFolder) {
+    public PersistenceJob(Blackboard<Object> blackboard, URI inputFolder, URI outputFolder, String repositoryKey,
+            String systemKey, String allocationKey, String resourceEnvironmentKey) {
         this.blackboard = Objects.requireNonNull(blackboard);
         String configuredInputProjectName = inputFolder.lastSegment();
+        this.repositoryKey = repositoryKey;
+        this.systemKey = systemKey;
+        this.allocationKey = allocationKey;
+        this.resourceEnvironmentKey = resourceEnvironmentKey;
         // Set path to output folder and prefix of all output files to name of input project folder
         this.outputFilePrefix = new File(outputFolder.toFileString(), configuredInputProjectName);
     }
@@ -38,11 +43,11 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
     public void execute(IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
         // Fetch input from blackboard
         monitor.subTask("Retrieving job input from blackboard");
-        Repository repository = (Repository) this.blackboard.getPartition(BLACKBOARD_INPUT_ID_REPOSITORY);
-        System system = (System) this.blackboard.getPartition(BLACKBOARD_INPUT_ID_SYSTEM);
-        Allocation allocation = (Allocation) this.blackboard.getPartition(BLACKBOARD_INPUT_ID_ALLOCATION);
+        Repository repository = (Repository) this.blackboard.getPartition(repositoryKey);
+        System system = (System) this.blackboard.getPartition(systemKey);
+        Allocation allocation = (Allocation) this.blackboard.getPartition(allocationKey);
         ResourceEnvironment resourceEnvironment = (ResourceEnvironment) this.blackboard
-                .getPartition(BLACKBOARD_INPUT_ID_RESOURCE_ENVIRONMENT);
+                .getPartition(resourceEnvironmentKey);
 
         // Make blackboard models persistent by saving them as files
         monitor.subTask("Persisting models");
