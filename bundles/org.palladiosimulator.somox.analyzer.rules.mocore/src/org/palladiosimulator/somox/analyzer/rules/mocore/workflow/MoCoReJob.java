@@ -29,19 +29,18 @@ public class MoCoReJob implements IBlackboardInteractingJob<Blackboard<Object>> 
     private Blackboard<Object> blackboard;
     private final String repositoryInputKey;
     private final String repositoryOutputKey;
-    private final String systemKey;
-    private final String allocationKey;
-    private final String resourceEnvironmentKey;
+    private final String systemOutputKey;
+    private final String allocationOutputKey;
+    private final String resourceEnvironmentOutputKey;
 
     public MoCoReJob(Blackboard<Object> blackboard, String repositoryInputKey, String repositoryOutputKey,
-            String systemKey, String allocationKey,
-            String resourceEnvironmentKey) {
+            String systemOutputKey, String allocationOutputKey, String resourceEnvironmentOutputKey) {
         this.blackboard = Objects.requireNonNull(blackboard);
-        this.repositoryInputKey = repositoryInputKey;
-        this.repositoryOutputKey = repositoryOutputKey;
-        this.systemKey = systemKey;
-        this.allocationKey = allocationKey;
-        this.resourceEnvironmentKey = resourceEnvironmentKey;
+        this.repositoryInputKey = Objects.requireNonNull(repositoryInputKey);
+        this.repositoryOutputKey = Objects.requireNonNull(repositoryOutputKey);
+        this.systemOutputKey = Objects.requireNonNull(systemOutputKey);
+        this.allocationOutputKey = Objects.requireNonNull(allocationOutputKey);
+        this.resourceEnvironmentOutputKey = Objects.requireNonNull(resourceEnvironmentOutputKey);
     }
 
     @Override
@@ -71,9 +70,9 @@ public class MoCoReJob implements IBlackboardInteractingJob<Blackboard<Object>> 
         // Add transformed models to blackboard
         monitor.subTask("Adding output models to blackboard");
         this.blackboard.addPartition(repositoryOutputKey, repository);
-        this.blackboard.addPartition(systemKey, system);
-        this.blackboard.addPartition(allocationKey, allocation);
-        this.blackboard.addPartition(resourceEnvironmentKey, resourceEnvironment);
+        this.blackboard.addPartition(systemOutputKey, system);
+        this.blackboard.addPartition(allocationOutputKey, allocation);
+        this.blackboard.addPartition(resourceEnvironmentOutputKey, resourceEnvironment);
         monitor.done();
     }
 
