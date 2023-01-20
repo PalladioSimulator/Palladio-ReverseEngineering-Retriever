@@ -21,12 +21,20 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
 
         super.add(new RuleEngineBlackboardInteractingJob(configuration, getBlackboard()));
 
-        super.add(new Ast2SeffJob(getBlackboard(), "repository"));
+        super.add(new Ast2SeffJob(getBlackboard(), RuleEngineConfiguration.RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY));
 
-        super.add(new MoCoReJob(getBlackboard(), "repository", "repository", "system", "allocation", "resource"));
+        super.add(new MoCoReJob(getBlackboard(),
+                RuleEngineConfiguration.RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY,
+                RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_REPOSITORY,
+                RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_SYSTEM,
+                RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_ALLOCATION,
+                RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_RESOURCE_ENVIRONMENT));
 
         super.add(new PersistenceJob(getBlackboard(), configuration.getInputFolder(), configuration.getOutputFolder(),
-                "repository", "system", "allocation", "resource"));
+                RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_REPOSITORY,
+                RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_SYSTEM,
+                RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_ALLOCATION,
+                RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_RESOURCE_ENVIRONMENT));
 
         super.add(createAnalystsJob(configuration));
     }

@@ -33,6 +33,12 @@ public class RuleEngineConfiguration extends AbstractComposedJobConfiguration im
     public static final String RULE_ENGINE_ANALYST_CONFIG_PREFIX = CONFIG_PREFIX + "analystconfig.";
     public static final String RULE_ENGINE_DISCOVERER_CONFIG_PREFIX = CONFIG_PREFIX + "discovererconfig.";
     public static final String RULE_ENGINE_USE_EMFTEXT_PARSER = CONFIG_PREFIX + "use_emftext_parser";
+    public static final String RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY = CONFIG_PREFIX + "ast2seff.output.repository";
+    public static final String RULE_ENGINE_MOCORE_OUTPUT_REPOSITORY = CONFIG_PREFIX + "mocore.output.repository";
+    public static final String RULE_ENGINE_MOCORE_OUTPUT_SYSTEM = CONFIG_PREFIX + "mocore.output.system";
+    public static final String RULE_ENGINE_MOCORE_OUTPUT_ALLOCATION = CONFIG_PREFIX + "mocore.output.allocation";
+    public static final String RULE_ENGINE_MOCORE_OUTPUT_RESOURCE_ENVIRONMENT = CONFIG_PREFIX
+            + "mocore.output.resource_environment";
     public static final String RULE_LIST_SEPARATOR = ";";
 
     private /* not final */ URI inputFolder;
