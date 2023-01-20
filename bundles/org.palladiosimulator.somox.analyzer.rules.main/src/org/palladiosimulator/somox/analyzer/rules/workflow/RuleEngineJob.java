@@ -21,7 +21,7 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
 
         super.add(new RuleEngineBlackboardInteractingJob(configuration, getBlackboard()));
 
-        super.add(new Ast2SeffJob(getBlackboard()));
+        super.add(new Ast2SeffJob(getBlackboard(), "repository"));
 
         super.add(new MoCoReJob(getBlackboard(), "repository", "repository", "system", "allocation", "resource"));
 
