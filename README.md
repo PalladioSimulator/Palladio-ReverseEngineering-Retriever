@@ -36,7 +36,7 @@ The rules for the model-to-model transformations are implemented in [Xtend](http
 ## Getting Started
 ### Preconditions
 * [Installation of PCM Nightly](https://sdqweb.ipd.kit.edu/wiki/PCM_Installation#PCM_Nightly)
-  * Requires [Java Development Kit 11](https://adoptopenjdk.net/?variant=openjdk11&jvmVariant=hotspot) and [Eclipse 2021-12 Modeling Tools](https://www.eclipse.org/downloads/packages/release/2021-12/r/eclipse-modeling-tools)
+  * Requires [Java Development Kit 11](https://adoptopenjdk.net/?variant=openjdk11&jvmVariant=hotspot) and [Eclipse 2022-12 Modeling Tools](https://www.eclipse.org/downloads/packages/release/2022-12/r/eclipse-modeling-tools)
   * [Install](https://help.eclipse.org/latest/topic/org.eclipse.platform.doc.user/tasks/tasks-124.htm) PCM Nightly from the [update site](https://updatesite.palladio-simulator.com/palladio-build-updatesite/nightly/)
   * Do not install the *deprecated* categories
 
