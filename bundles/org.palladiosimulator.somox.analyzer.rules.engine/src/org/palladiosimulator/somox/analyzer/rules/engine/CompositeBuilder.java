@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 
+import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 public class CompositeBuilder {
@@ -29,6 +30,8 @@ public class CompositeBuilder {
     public Composite construct(Map<CompilationUnit, Set<String>> totalRequirements,
             Map<CompilationUnit, Set<String>> totalProvisions, Set<String> compositeRequirements,
             Set<String> compositeProvisions) {
+        Logger.getLogger(getClass())
+            .warn("Constructing composite component " + name);
 
         // Add all explicit parts.
         Set<CompilationUnit> allParts = new HashSet<>(parts);

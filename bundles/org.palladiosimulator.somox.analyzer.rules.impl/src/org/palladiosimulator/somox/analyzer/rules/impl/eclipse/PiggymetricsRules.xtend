@@ -9,6 +9,8 @@ import java.util.Map;
 import org.jdom2.Document
 import java.util.stream.Collectors
 import org.apache.log4j.Logger
+import org.eclipse.jdt.core.dom.MethodDeclaration
+import org.eclipse.jdt.core.dom.ITypeBinding
 
 class PiggymetricsRules extends IRule {
     static final Logger LOG = Logger.getLogger(PiggymetricsRules)
@@ -22,11 +24,11 @@ class PiggymetricsRules extends IRule {
 
 	override boolean processRules(Path path) {
 		val yamlObjects = blackboard.getPartition(YAML_DISCOVERER_ID)
-		val yamls = yamlObjects as Map<String, Map<String, Object>>
-		
+		val yamls = yamlObjects as Map<String, Iterable<Map<String, Object>>>
+
 		val pomObjects = blackboard.getPartition(XML_DISCOVERER_ID)
 		val poms = pomObjects as Map<String, Document>
-		
+
 		val projectRoot = getProjectRoot(path, poms)
 		val configRoot = getConfigRoot(poms)
 		val bootstrapYaml = getBootstrapYaml(projectRoot, yamls)
@@ -46,7 +48,7 @@ class PiggymetricsRules extends IRule {
 
 		return containedSuccessful
 	}
-	
+
 	def getProjectRoot(Path currentPath, Map<String, Document> poms) {
 		if (currentPath === null || poms === null) {
 			return null
@@ -64,7 +66,7 @@ class PiggymetricsRules extends IRule {
 			return null
 		}
 	}
-	
+
 	def getConfigRoot(Map<String, Document> poms) {
 		if (poms === null) {
 			return null
@@ -88,8 +90,8 @@ class PiggymetricsRules extends IRule {
 		}
 		return configRoots.get(0).key.parent
 	}
-	
-	def getBootstrapYaml(Path projectRoot, Map<String, Map<String, Object>> yamls) {
+
+	def getBootstrapYaml(Path projectRoot, Map<String, Iterable<Map<String, Object>>> yamls) {
 		if (projectRoot === null || yamls === null) {
 			return null
 		}
@@ -106,18 +108,28 @@ class PiggymetricsRules extends IRule {
 		}
 		return bootstrapYamls.get(0).value
 	}
-	
-	def getApplicationName(Map<String, Object> bootstrapYaml) {
+
+	def getApplicationName(Iterable<Map<String, Object>> bootstrapYaml) {
 		if (bootstrapYaml === null) {
 			return null
 		}
+		for (yaml : bootstrapYaml) {
+			val applicationName = getApplicationName(yaml)
+			if (applicationName != "/") {
+				return applicationName
+			}
+		}
+		return "/"
+	}
+
+	def getApplicationName(Map<String, Object> bootstrapYaml) {
 		val spring = bootstrapYaml.get("spring") as Map<String, Object>
 		val application = spring.get("application") as Map<String, Object>
 		val name = application.get("name") as String
 		return name
 	}
-	
-	def getProjectConfigYaml(Path configRoot, Map<String, Map<String, Object>> yamls, String projectName) {
+
+	def getProjectConfigYaml(Path configRoot, Map<String, Iterable<Map<String, Object>>> yamls, String projectName) {
 		if (configRoot === null || yamls === null || projectName === null) {
 			return null
 		}
@@ -133,10 +145,20 @@ class PiggymetricsRules extends IRule {
 		return projectYamls.get(0).value
 	}
 
-	def getContextPath(Map<String, Object> projectConfigYaml) {
+	def getContextPath(Iterable<Map<String, Object>> projectConfigYaml) {
 		if (projectConfigYaml === null) {
 			return "/"
 		}
+		for (yaml : projectConfigYaml) {
+			val contextPath = getContextPath(yaml)
+			if (contextPath != "/") {
+				return contextPath
+			}
+		}
+		return "/"
+	}
+
+	def getContextPath(Map<String, Object> projectConfigYaml) {
 		val server = projectConfigYaml.get("server") as Map<String, Object>
 		if (server === null) {
 			return "/"
@@ -164,9 +186,9 @@ class PiggymetricsRules extends IRule {
 		}
 
 		val isService = isUnitAnnotatedWithName(unit, "Service")
-		val isController = isUnitAnnotatedWithName(unit, "RestController")
+		val isController = isUnitAnnotatedWithName(unit, "RestController") || isUnitAnnotatedWithName(unit, "Controller")
 		val isClient = isUnitAnnotatedWithName(unit, "FeignClient")
-		val isRepository = isUnitAnnotatedWithName(unit, "Repository")
+		val isRepository = isRepository(unit)
 		val isComponent = isService || isController || isClient || isRepository
 
 		if (isComponent) {
@@ -176,13 +198,13 @@ class PiggymetricsRules extends IRule {
 		if (isService || isController) {
 			for (f : getFields(unit)) {
 				val annotated = isFieldAnnotatedWithName(f, "Autowired")
-				if (annotated) {
+				if (annotated || isRepository(f.type.resolveBinding)) {
 					pcmDetector.detectRequiredInterface(unit, f)
 				}
 			}
 		}
 
-		if (isService) {
+		if (isService || isController) {
 			pcmDetector.detectPartOfComposite(unit, getUnitName(unit));
 		}
 
@@ -192,9 +214,12 @@ class PiggymetricsRules extends IRule {
 			if (requestedUnitMapping !== null) {
 				ifaceName += requestedUnitMapping;
 			}
+			// Remove leading "//". This can occur if requestedUnitMapping
+			// has a leading "/" and the contextPath is "/".
+			ifaceName = ifaceName.replace("//", '/');
 			pcmDetector.detectOperationInterface(unit, ifaceName);
 			for (m : getMethods(unit)) {
-				val annotated = isMethodAnnotatedWithName(m, "RequestMapping");
+				val annotated = hasMapping(m);
 				if (annotated) {
 					pcmDetector.detectCompositeProvidedOperation(unit, ifaceName, m.resolveBinding);
 				}
@@ -203,12 +228,9 @@ class PiggymetricsRules extends IRule {
 
 		if (isClient) {
 			for (m : getMethods(unit)) {
-				val annotated = isMethodAnnotatedWithName(m, "RequestMapping");
+				val annotated = hasMapping(m);
 				if (annotated) {
-					var requestedMapping = getMethodAnnotationStringValue(m, "RequestMapping");
-					if (requestedMapping === null) {
-						requestedMapping = getMethodAnnotationStringValue(m, "RequestMapping", "path");
-					}
+					var requestedMapping = getMapping(m);
 					var ifaceName = requestedMapping;
 					val argumentIndex = requestedMapping.indexOf('{');
 					if (argumentIndex >= 0) {
@@ -232,5 +254,71 @@ class PiggymetricsRules extends IRule {
 		}
 
 		return true;
+	}
+
+	def hasMapping(MethodDeclaration m) {
+		return isMethodAnnotatedWithName(m, "RequestMapping")
+		    ||isMethodAnnotatedWithName(m, "GetMapping")
+    		||isMethodAnnotatedWithName(m, "PostMapping")
+	    	||isMethodAnnotatedWithName(m, "PutMapping")
+		    ||isMethodAnnotatedWithName(m, "DeleteMapping")
+    		||isMethodAnnotatedWithName(m, "PatchMapping");
+	}
+
+	def getMapping(MethodDeclaration m) {
+		val requestMapping = getMappingString(m, "RequestMapping");
+		if (requestMapping !== null) {
+			return requestMapping;
+		}
+
+		val getMapping = getMappingString(m, "GetMapping");
+		if (getMapping !== null) {
+			return getMapping;
+		}
+
+		val postMapping = getMappingString(m, "PostMapping");
+		if (postMapping !== null) {
+			return postMapping;
+		}
+
+		val putMapping = getMappingString(m, "PutMapping");
+		if (putMapping !== null) {
+			return putMapping;
+		}
+
+		val deleteMapping = getMappingString(m, "DeleteMapping");
+		if (deleteMapping !== null) {
+			return deleteMapping;
+		}
+
+		val patchMapping = getMappingString(m, "PatchMapping");
+		return patchMapping;
+	}
+
+	def getMappingString(MethodDeclaration m, String annotationName) {
+		val value = getMethodAnnotationStringValue(m, annotationName);
+		if (value !== null) {
+			return value;
+		}
+
+		val path = getMethodAnnotationStringValue(m, annotationName, "path");
+		return path;
+	}
+	
+	def isRepository(ITypeBinding binding) {
+		return isImplementingOrExtending(binding, "Repository")
+			|| isImplementingOrExtending(binding, "CrudRepository")
+			|| isImplementingOrExtending(binding, "JpaRepository")
+			|| isImplementingOrExtending(binding, "PagingAndSortingRepository")
+			|| isImplementingOrExtending(binding, "MongoRepository")
+	}
+
+	def isRepository(CompilationUnit unit) {
+		return isUnitAnnotatedWithName(unit, "Repository") 
+			|| isImplementingOrExtending(unit, "Repository")
+			|| isImplementingOrExtending(unit, "CrudRepository")
+			|| isImplementingOrExtending(unit, "JpaRepository")
+			|| isImplementingOrExtending(unit, "PagingAndSortingRepository")
+			|| isImplementingOrExtending(unit, "MongoRepository")
 	}
 }

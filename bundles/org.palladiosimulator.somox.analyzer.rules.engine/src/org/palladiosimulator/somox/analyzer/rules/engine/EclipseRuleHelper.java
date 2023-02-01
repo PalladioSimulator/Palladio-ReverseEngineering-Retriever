@@ -49,9 +49,10 @@ public class EclipseRuleHelper {
 
         String name = "NO NAME";
         for (final AbstractTypeDeclaration abstType : types) {
-            name = abstType.getName().getFullyQualifiedName();
+            name = abstType.getName()
+                .getFullyQualifiedName();
         }
-        
+
         return name;
     }
 
@@ -335,12 +336,57 @@ public class EclipseRuleHelper {
         for (AbstractTypeDeclaration abstType : types) {
             if (abstType instanceof TypeDeclaration) {
                 TypeDeclaration type = (TypeDeclaration) abstType;
-                if (!type.isInterface() && (!type.superInterfaceTypes().isEmpty())) {
+                if (!type.isInterface() && (!type.superInterfaceTypes()
+                    .isEmpty())) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    public static boolean isImplementingOrExtending(CompilationUnit unit, String ifaceName) {
+        List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
+
+        for (AbstractTypeDeclaration abstType : types) {
+            if (abstType instanceof TypeDeclaration) {
+                TypeDeclaration type = (TypeDeclaration) abstType;
+                if (isImplementingOrExtending(type.resolveBinding(), ifaceName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean isImplementingOrExtending(ITypeBinding binding, String ifaceName) {
+        if (equalsWithGeneric(binding.getName(), ifaceName)) {
+            return true;
+        }
+        ITypeBinding superClass = binding.getSuperclass();
+        if (superClass != null && isImplementingOrExtending(superClass, ifaceName)) {
+            return true;
+        }
+        for (ITypeBinding type : binding.getInterfaces()) {
+            if (equalsWithGeneric(type.getName(), ifaceName)) {
+                return true;
+            }
+            if (isImplementingOrExtending(type, ifaceName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean equalsWithGeneric(String withGeneric, String withoutGeneric) {
+        if (!withGeneric.startsWith(withoutGeneric)) {
+            return false;
+        }
+        String rest = withGeneric.substring(withoutGeneric.length());
+        if (!rest.startsWith("<") || !rest.endsWith(">")) {
+            return false;
+        }
+        return true;
     }
 
     public static boolean isClassExtending(CompilationUnit unit) {
