@@ -1,6 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.mocore.orchestration;
 
-import org.palladiosimulator.somox.analyzer.rules.mocore.processor.element.ComponentProcessor;
 import org.palladiosimulator.somox.analyzer.rules.mocore.processor.element.DeploymentProcessor;
 import org.palladiosimulator.somox.analyzer.rules.mocore.processor.element.InterfaceProcessor;
 import org.palladiosimulator.somox.analyzer.rules.mocore.processor.element.LinkResourceSpecificationProcessor;
@@ -21,7 +20,7 @@ import tools.mdsd.mocore.framework.orchestration.Orchestrator;
 
 public class PcmOrchestrator extends Orchestrator<PcmSurrogate> {
     public PcmOrchestrator(PcmSurrogate model) {
-        super(model, new SignatureProcessor(model), new InterfaceProcessor(model), new ComponentProcessor(model),
+        super(model, new SignatureProcessor(model), new InterfaceProcessor(model),
                 new DeploymentProcessor(model), new LinkResourceSpecificationProcessor(model),
                 new ServiceEffectSpecificationProcessor(model), new SignatureProvisionRelationProcessor(model),
                 new InterfaceProvisionRelationProcessor(model), new InterfaceRequirementRelationProcessor(model),
