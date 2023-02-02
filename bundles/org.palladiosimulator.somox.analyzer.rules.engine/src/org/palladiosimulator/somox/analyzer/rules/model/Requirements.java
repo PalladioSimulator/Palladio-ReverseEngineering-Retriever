@@ -3,9 +3,10 @@ package org.palladiosimulator.somox.analyzer.rules.model;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
-public class Requirements {
+public class Requirements implements Iterable<String> {
     private final Set<String> requiredInterfaces;
 
     public Requirements(Collection<String> requiredInterfaces) {
@@ -26,5 +27,11 @@ public class Requirements {
         return requiredInterfaces.stream()
             .anyMatch(x -> operation.getName()
                 .isPartOf(x));
+    }
+
+    @Override
+    public Iterator<String> iterator() {
+        return Collections.unmodifiableCollection(requiredInterfaces)
+            .iterator();
     }
 }

@@ -106,18 +106,18 @@ public class EclipsePCMInstanceCreator {
 
         for (Composite composite : composites) {
             CompositeComponentCreator c = create.newCompositeComponent()
-                .withName(composite.getName());
-            composite.getParts()
+                .withName(composite.name());
+            composite.parts()
                 .forEach(x -> componentCompositeCreators.put(x, c));
-            composite.getInternalInterfaces()
+            composite.internalInterfaces()
                 .forEach(x -> ifaceCompositeCreators.put(x, c));
             compositeCreators.put(composite, c);
 
-            for (String compRequiredIface : composite.getRequiredInterfaces()) {
+            for (String compRequiredIface : composite.requirements()) {
                 c.requires(create.fetchOfOperationInterface(compRequiredIface));
             }
 
-            for (Operation compProvidedOperation : composite.getProvidedInterfaces()) {
+            for (Operation compProvidedOperation : composite.provisions()) {
                 // TODO: merge operations into an interface
                 // c.provides(create.fetchOfOperationInterface(compProvidedOperation));
             }
@@ -154,7 +154,7 @@ public class EclipsePCMInstanceCreator {
                         .getEntityName(), new Pair<OperationProvidedRole, AssemblyContext>(y, x))));
 
             // Match them up
-            for (String internalIface : composite.getInternalInterfaces()) {
+            for (String internalIface : composite.internalInterfaces()) {
                 for (Pair<OperationRequiredRole, AssemblyContext> r : innerRequirements.getOrDefault(internalIface,
                         List.of())) {
                     for (Pair<OperationProvidedRole, AssemblyContext> p : innerProvisions.getOrDefault(internalIface,
@@ -174,7 +174,7 @@ public class EclipsePCMInstanceCreator {
                 .forEach(x -> outerRequirements.put(x.getRequiredInterface__OperationRequiredRole()
                     .getEntityName(), x));
 
-            for (String compRequiredIface : composite.getRequiredInterfaces()) {
+            for (String compRequiredIface : composite.requirements()) {
                 for (Pair<OperationRequiredRole, AssemblyContext> r : innerRequirements.getOrDefault(compRequiredIface,
                         List.of())) {
                     c.withRequiredDelegationConnection(r.getT2(), r.getT1(), outerRequirements.get(compRequiredIface));
@@ -188,7 +188,7 @@ public class EclipsePCMInstanceCreator {
                 .forEach(x -> outerProvisions.put(x.getProvidedInterface__OperationProvidedRole()
                     .getEntityName(), x));
 
-            for (Operation compProvidedOperation : composite.getProvidedInterfaces()) {
+            for (Operation compProvidedOperation : composite.provisions()) {
                 for (Pair<OperationProvidedRole, AssemblyContext> r : innerProvisions
                     .getOrDefault(compProvidedOperation, List.of())) {
                     // TODO: Map to interface
@@ -262,10 +262,7 @@ public class EclipsePCMInstanceCreator {
                 }
             }
 
-            final Set<String> requiredIs = comp.requirements()
-                .get();
-
-            for (String requInter : requiredIs) {
+            for (String requInter : comp.requirements()) {
                 try {
                     pcmComp.requires(create.fetchOfOperationInterface(requInter), "dummy require name");
                 } catch (FluentApiException e) {

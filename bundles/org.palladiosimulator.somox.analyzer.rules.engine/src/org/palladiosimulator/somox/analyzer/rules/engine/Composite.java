@@ -4,47 +4,48 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.palladiosimulator.somox.analyzer.rules.model.Component;
-import org.palladiosimulator.somox.analyzer.rules.model.Operation;
+import org.palladiosimulator.somox.analyzer.rules.model.Provisions;
+import org.palladiosimulator.somox.analyzer.rules.model.Requirements;
 
 public class Composite {
 
-    private String name;
-    private Set<Component> parts;
-    private Set<String> internalInterfaces;
-    private Set<String> requiredInterfaces;
-    private Set<Operation> providedOperations;
+    private final String name;
+    private final Set<Component> parts;
+    private final Set<String> internalInterfaces;
+    private final Requirements requirements;
+    private final Provisions provisions;
 
-    public Composite(String name, Set<Component> parts, Set<String> requiredInterfaces,
-            Set<Operation> providedOperations, Set<String> internalInterfaces) {
+    public Composite(String name, Set<Component> parts, Requirements requirements, Provisions provisions,
+            Set<String> internalInterfaces) {
         this.name = name;
         this.parts = parts;
         this.internalInterfaces = internalInterfaces;
-        this.requiredInterfaces = requiredInterfaces;
-        this.providedOperations = providedOperations;
+        this.requirements = requirements;
+        this.provisions = provisions;
     }
 
-    public String getName() {
+    public String name() {
         return name;
     }
 
-    public Set<Component> getParts() {
+    public Requirements requirements() {
+        return requirements;
+    }
+
+    public Provisions provisions() {
+        return provisions;
+    }
+
+    public Set<Component> parts() {
         return Collections.unmodifiableSet(parts);
     }
 
-    public Set<String> getInternalInterfaces() {
+    public Set<String> internalInterfaces() {
         return Collections.unmodifiableSet(internalInterfaces);
     }
 
-    public Set<String> getRequiredInterfaces() {
-        return Collections.unmodifiableSet(requiredInterfaces);
-    }
-
-    public Set<Operation> getProvidedInterfaces() {
-        return Collections.unmodifiableSet(providedOperations);
-    }
-
     public boolean isSubsetOf(final Composite other) {
-        return other.getParts()
+        return other.parts()
             .containsAll(parts);
     }
 }

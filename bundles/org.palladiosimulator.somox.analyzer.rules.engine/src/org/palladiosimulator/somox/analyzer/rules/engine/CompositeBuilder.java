@@ -13,6 +13,8 @@ import org.apache.log4j.Logger;
 import org.palladiosimulator.somox.analyzer.rules.model.Component;
 import org.palladiosimulator.somox.analyzer.rules.model.ComponentBuilder;
 import org.palladiosimulator.somox.analyzer.rules.model.Operation;
+import org.palladiosimulator.somox.analyzer.rules.model.ProvisionsBuilder;
+import org.palladiosimulator.somox.analyzer.rules.model.RequirementsBuilder;
 
 public class CompositeBuilder {
 
@@ -64,9 +66,14 @@ public class CompositeBuilder {
                 .get());
         }
         requiredInterfaces.removeIf(x -> !compositeRequirements.contains(x));
-        providedOperations.removeIf(x -> !compositeProvisions.contains(x));
+        RequirementsBuilder requirements = new RequirementsBuilder();
+        requirements.add(requiredInterfaces);
 
-        return new Composite(name, parts, requiredInterfaces, providedOperations, internalInterfaces);
+        providedOperations.removeIf(x -> !compositeProvisions.contains(x));
+        ProvisionsBuilder provisions = new ProvisionsBuilder();
+        provisions.add(providedOperations);
+
+        return new Composite(name, parts, requirements.create(), provisions.create(), internalInterfaces);
     }
 
     // Writes to allParts and internalInterfaces.
