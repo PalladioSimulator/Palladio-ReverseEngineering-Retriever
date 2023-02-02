@@ -293,9 +293,13 @@ public class EclipsePCMDetector implements IPCMDetector {
 
     protected Set<Composite> getCompositeComponents() {
         // Construct composites.
+        List<Component> constructedComponents = components.values()
+            .stream()
+            .map(ComponentBuilder::create)
+            .collect(Collectors.toList());
         List<Composite> constructedComposites = composites.values()
             .stream()
-            .map(x -> x.construct(components.values(), compositeRequiredInterfaces, compositeProvidedOperations))
+            .map(x -> x.construct(constructedComponents, compositeRequiredInterfaces, compositeProvidedOperations))
             .collect(Collectors.toList());
 
         // Remove redundant composites.

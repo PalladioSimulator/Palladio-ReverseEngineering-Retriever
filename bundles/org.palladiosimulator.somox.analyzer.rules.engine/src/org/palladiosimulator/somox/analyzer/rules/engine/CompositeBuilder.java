@@ -29,14 +29,10 @@ public class CompositeBuilder {
         explicitParts.add(componentBuilder);
     }
 
-    public Composite construct(Collection<ComponentBuilder> components, Set<String> compositeRequirements,
+    public Composite construct(Collection<Component> components, Set<String> compositeRequirements,
             Set<Operation> compositeProvisions) {
         Logger.getLogger(getClass())
             .warn("Constructing composite component " + name);
-
-        Collection<Component> builtComponents = components.stream()
-            .map(ComponentBuilder::create)
-            .collect(Collectors.toSet());
 
         // Create and add all explicit parts.
         Set<Component> parts = explicitParts.stream()
@@ -52,8 +48,8 @@ public class CompositeBuilder {
             previousPartCount = parts.size();
             previousInternalInterfaceCount = internalInterfaces.size();
 
-            propagateProvisions(builtComponents, compositeProvisions, parts, internalOperations);
-            propagateRequirements(builtComponents, compositeRequirements, parts, internalInterfaces);
+            propagateProvisions(components, compositeProvisions, parts, internalOperations);
+            propagateRequirements(components, compositeRequirements, parts, internalInterfaces);
         } while (parts.size() > previousPartCount && internalInterfaces.size() > previousInternalInterfaceCount);
 
         Set<String> requiredInterfaces = new HashSet<>();
