@@ -23,7 +23,7 @@ public class ComponentSignatureProvisionRelationProcessorTest
 
     @Override
     protected InterfaceProvisionRelation getUniqueNonPlaceholderSourceEntity() {
-        Component source = Component.getUniquePlaceholder();
+        Component<?> source = Component.getUniquePlaceholder();
         return new InterfaceProvisionRelation(source, RELATION_INTERFACE, false);
     }
 

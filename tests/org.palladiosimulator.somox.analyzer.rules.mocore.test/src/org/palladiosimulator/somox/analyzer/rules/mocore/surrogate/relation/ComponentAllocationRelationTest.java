@@ -5,15 +5,16 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Deplo
 
 import tools.mdsd.mocore.framework.surrogate.RelationTest;
 
-public class ComponentAllocationRelationTest extends RelationTest<ComponentAllocationRelation, Component, Deployment> {
+public class ComponentAllocationRelationTest
+        extends RelationTest<ComponentAllocationRelation, Component<?>, Deployment> {
     @Override
-    protected ComponentAllocationRelation createRelation(Component source, Deployment destination,
+    protected ComponentAllocationRelation createRelation(Component<?> source, Deployment destination,
             boolean isPlaceholder) {
         return new ComponentAllocationRelation(source, destination, isPlaceholder);
     }
 
     @Override
-    protected Component getUniqueSourceEntity() {
+    protected Component<?> getUniqueSourceEntity() {
         return Component.getUniquePlaceholder();
     }
 

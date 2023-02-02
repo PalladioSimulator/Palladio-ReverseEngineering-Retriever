@@ -97,9 +97,9 @@ public final class PcmEvaluationUtility {
         return equalName;
     }
 
-    public static boolean representSame(BasicComponent component, RepositoryComponent otherComponent) {
-        if (otherComponent instanceof BasicComponent) {
-            return representSame(component, (BasicComponent) otherComponent);
+    public static boolean representSame(RepositoryComponent component, RepositoryComponent otherComponent) {
+        if (otherComponent instanceof BasicComponent && component instanceof BasicComponent) {
+            return representSame((BasicComponent) component, (BasicComponent) otherComponent);
         }
         return false;
     }
@@ -156,7 +156,7 @@ public final class PcmEvaluationUtility {
         return Optional.empty();
     }
 
-    public static Optional<BasicComponent> getRepresentative(Repository repository, Component component) {
+    public static Optional<BasicComponent> getRepresentative(Repository repository, Component<?> component) {
         List<RepositoryComponent> components = repository.getComponents__Repository();
         for (RepositoryComponent repositoryComponent : components) {
             if (representSame(component.getValue(), repositoryComponent)) {
@@ -177,7 +177,7 @@ public final class PcmEvaluationUtility {
         return Optional.empty();
     }
 
-    public static boolean containsRepresentative(Repository repository, Component component) {
+    public static boolean containsRepresentative(Repository repository, Component<?> component) {
         return getRepresentative(repository, component).isPresent();
     }
 
@@ -228,7 +228,7 @@ public final class PcmEvaluationUtility {
 
     public static boolean containsRepresentative(Repository repository,
             ServiceEffectSpecificationRelation seffProvision) {
-        Component provider = seffProvision.getSource().getSource().getSource();
+        Component<?> provider = seffProvision.getSource().getSource().getSource();
         Signature signature = seffProvision.getSource().getDestination().getSource();
         ServiceEffectSpecification seff = seffProvision.getDestination();
 
@@ -297,7 +297,7 @@ public final class PcmEvaluationUtility {
 
     public static boolean containsRepresentative(Allocation allocation,
             ComponentAllocationRelation allocationRelation) {
-        Component component = allocationRelation.getSource();
+        Component<?> component = allocationRelation.getSource();
         Deployment deployment = allocationRelation.getDestination();
 
         List<AllocationContext> allocationContexts = allocation.getAllocationContexts_Allocation();
@@ -312,7 +312,7 @@ public final class PcmEvaluationUtility {
         return false;
     }
 
-    public static boolean containsRepresentative(System system, Component component) {
+    public static boolean containsRepresentative(System system, Component<?> component) {
         List<AssemblyContext> assemblyContexts = system.getAssemblyContexts__ComposedStructure();
         for (AssemblyContext assemblyContext : assemblyContexts) {
             if (representSame(component.getValue(), assemblyContext.getEncapsulatedComponent__AssemblyContext())) {
@@ -323,8 +323,8 @@ public final class PcmEvaluationUtility {
     }
 
     public static boolean containsRepresentative(System system, ComponentAssemblyRelation assemblyRelation) {
-        BasicComponent provider = assemblyRelation.getSource().getSource().getValue();
-        BasicComponent consumer = assemblyRelation.getDestination().getSource().getValue();
+        RepositoryComponent provider = assemblyRelation.getSource().getSource().getValue();
+        RepositoryComponent consumer = assemblyRelation.getDestination().getSource().getValue();
         OperationInterface providerConsumerInterface = assemblyRelation.getSource().getDestination().getValue();
 
         List<AssemblyConnector> assemblyConnectors = system.getConnectors__ComposedStructure().stream()

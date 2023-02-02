@@ -18,13 +18,13 @@ public class ComponentAssemblyRelationTest
 
     @Override
     protected InterfaceProvisionRelation getUniqueSourceEntity() {
-        Component source = Component.getUniquePlaceholder();
+        Component<?> source = Component.getUniquePlaceholder();
         return new InterfaceProvisionRelation(source, RELATION_DESTINATION, true);
     }
 
     @Override
     protected InterfaceRequirementRelation getUniqueDestinationEntity() {
-        Component source = Component.getUniquePlaceholder();
+        Component<?> source = Component.getUniquePlaceholder();
         return new InterfaceRequirementRelation(source, RELATION_DESTINATION, true);
     }
 }

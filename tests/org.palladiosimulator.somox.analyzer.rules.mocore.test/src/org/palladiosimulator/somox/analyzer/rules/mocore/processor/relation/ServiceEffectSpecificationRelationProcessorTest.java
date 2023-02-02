@@ -26,7 +26,7 @@ public class ServiceEffectSpecificationRelationProcessorTest extends
 
     @Override
     protected ComponentSignatureProvisionRelation getUniqueNonPlaceholderSourceEntity() {
-        Component component = Component.getUniquePlaceholder();
+        Component<?> component = Component.getUniquePlaceholder();
         Interface interfsc = Interface.getUniquePlaceholder();
         Signature signature = Signature.getUniquePlaceholder();
         InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(component,

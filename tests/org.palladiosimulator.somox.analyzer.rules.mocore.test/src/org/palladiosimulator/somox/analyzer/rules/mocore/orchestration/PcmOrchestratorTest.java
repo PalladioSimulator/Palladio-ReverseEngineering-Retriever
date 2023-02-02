@@ -27,7 +27,7 @@ public class PcmOrchestratorTest {
     @Test
     public void testExistsComponentAfterProcess() {
         PcmOrchestrator orchestrator = new PcmOrchestrator();
-        Component component = ElementFactory.createUniqueComponent(false);
+        Component<?> component = ElementFactory.createUniqueComponent(false);
         orchestrator.processDiscovery(component);
         assertTrue(orchestrator.getModel().contains(component));
     }
@@ -35,7 +35,7 @@ public class PcmOrchestratorTest {
     @Test
     public void testExistImplicitReplaceablesAfterProcess() {
         PcmOrchestrator orchestrator = new PcmOrchestrator();
-        Component component = ElementFactory.createUniqueComponent(false);
+        Component<?> component = ElementFactory.createUniqueComponent(false);
         orchestrator.processDiscovery(component);
 
         PcmSurrogate model = orchestrator.getModel();
@@ -65,10 +65,10 @@ public class PcmOrchestratorTest {
         //// Create concrete & placeholder elements
         Signature concreteSignature = ElementFactory.createUniqueSignature(false);
         Interface concreteInterface = ElementFactory.createUniqueInterface(false);
-        Component concreteComponent = ElementFactory.createUniqueComponent(false);
+        Component<?> concreteComponent = ElementFactory.createUniqueComponent(false);
         Deployment concreteDeployment = ElementFactory.createUniqueDeployment(false);
         Interface placeholderInterface = Interface.getUniquePlaceholder();
-        Component placeholderComponent = Component.getUniquePlaceholder();
+        Component<?> placeholderComponent = Component.getUniquePlaceholder();
         Deployment placeholderDeployment = Deployment.getUniquePlaceholder();
 
         //// Create non-conflicting relations between elements

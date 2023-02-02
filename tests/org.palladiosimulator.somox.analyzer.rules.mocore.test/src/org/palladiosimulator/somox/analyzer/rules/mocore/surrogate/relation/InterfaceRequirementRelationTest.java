@@ -5,15 +5,16 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Inter
 
 import tools.mdsd.mocore.framework.surrogate.RelationTest;
 
-public class InterfaceRequirementRelationTest extends RelationTest<InterfaceRequirementRelation, Component, Interface> {
+public class InterfaceRequirementRelationTest
+        extends RelationTest<InterfaceRequirementRelation, Component<?>, Interface> {
     @Override
-    protected InterfaceRequirementRelation createRelation(Component source, Interface destination,
+    protected InterfaceRequirementRelation createRelation(Component<?> source, Interface destination,
             boolean isPlaceholder) {
         return new InterfaceRequirementRelation(source, destination, isPlaceholder);
     }
 
     @Override
-    protected Component getUniqueSourceEntity() {
+    protected Component<?> getUniqueSourceEntity() {
         return Component.getUniquePlaceholder();
     }
 

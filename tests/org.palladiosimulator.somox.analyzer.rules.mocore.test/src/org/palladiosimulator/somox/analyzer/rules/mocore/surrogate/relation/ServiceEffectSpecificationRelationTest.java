@@ -17,7 +17,7 @@ public class ServiceEffectSpecificationRelationTest extends RelationTest<Service
 
     @Override
     protected ComponentSignatureProvisionRelation getUniqueSourceEntity() {
-        Component component = Component.getUniquePlaceholder();
+        Component<?> component = Component.getUniquePlaceholder();
         Interface interfsc = Interface.getUniquePlaceholder();
         Signature signature = Signature.getUniquePlaceholder();
         InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(component,

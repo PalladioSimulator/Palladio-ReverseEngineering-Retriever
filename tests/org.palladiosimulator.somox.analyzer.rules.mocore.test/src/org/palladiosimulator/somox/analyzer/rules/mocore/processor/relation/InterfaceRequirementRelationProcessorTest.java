@@ -10,21 +10,21 @@ import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 
 public class InterfaceRequirementRelationProcessorTest
         extends RelationProcessorTest<InterfaceRequirementRelationProcessor,
-                PcmSurrogate, InterfaceRequirementRelation, Component, Interface> {
+                PcmSurrogate, InterfaceRequirementRelation, Component<?>, Interface> {
     @Override
-    protected InterfaceRequirementRelation createRelation(Component source, Interface destination,
+    protected InterfaceRequirementRelation createRelation(Component<?> source, Interface destination,
             boolean isPlaceholder) {
         return new InterfaceRequirementRelation(source, destination, isPlaceholder);
     }
 
     @Override
-    protected Component getUniqueNonPlaceholderSourceEntity() {
+    protected Component<?> getUniqueNonPlaceholderSourceEntity() {
         return ElementFactory.createUniqueComponent(false);
     }
 
     @Override
-    protected Component getPlaceholderOfSourceEntity(Component source) {
-        return new Component(source.getValue(), true);
+    protected Component<?> getPlaceholderOfSourceEntity(Component<?> source) {
+        return new Component<>(source.getValue(), true);
     }
 
     @Override

@@ -11,7 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
 import org.palladiosimulator.pcm.repository.Repository;
-import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Component;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.AtomicComponent;
 
 import tools.mdsd.mocore.framework.discovery.Discoverer;
 
@@ -23,7 +23,7 @@ public class RepositoryDecompositorTest extends DecompositorTest<RepositoryDecom
         Repository repository = createEmptyRepository();
 
         Collection<Discoverer<?>> discoverers = decompositor.decompose(repository);
-        assertEquals(5, discoverers.size());
+        assertEquals(6, discoverers.size());
         discoverers.forEach((discoverer) -> assertTrue(discoverer.getDiscoveries().isEmpty()));
     }
 
@@ -41,20 +41,22 @@ public class RepositoryDecompositorTest extends DecompositorTest<RepositoryDecom
 
         Collection<Discoverer<?>> discoverers = decompositor.decompose(repository);
         assertFalse(discoverers.isEmpty());
-        assertEquals(5, discoverers.size());
+        assertEquals(6, discoverers.size());
 
         // Remove all discoverers except component discoverer
         List<Discoverer<?>> modifiableDiscoverers = new ArrayList<>(discoverers);
-        modifiableDiscoverers.removeIf((discoverer) -> discoverer.getDiscoveryType() != Component.class);
+        modifiableDiscoverers.removeIf((discoverer) -> discoverer.getDiscoveryType() != AtomicComponent.class);
         assertEquals(1, modifiableDiscoverers.size());
 
         // Get and check component discoverer
-        Discoverer<Component> componentDiscoverer = (Discoverer<Component>) modifiableDiscoverers.iterator().next();
+        Discoverer<AtomicComponent> componentDiscoverer = (Discoverer<AtomicComponent>) modifiableDiscoverers.iterator()
+                .next();
         assertEquals(5, componentDiscoverer.getDiscoveries().size());
         for (int i = 1; i <= 5; i++) {
             final int j = i;
             assertTrue(componentDiscoverer.getDiscoveries().stream()
-                    .anyMatch((Component component) -> component.getValue().getEntityName().equals("Component_" + j)));
+                    .anyMatch((AtomicComponent component) -> component.getValue().getEntityName()
+                            .equals("Component_" + j)));
         }
     }
 

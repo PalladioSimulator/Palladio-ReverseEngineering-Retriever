@@ -10,21 +10,21 @@ import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 
 public class ComponentAllocationRelationProcessorTest
         extends RelationProcessorTest<ComponentAllocationRelationProcessor,
-                PcmSurrogate, ComponentAllocationRelation, Component, Deployment> {
+                PcmSurrogate, ComponentAllocationRelation, Component<?>, Deployment> {
     @Override
-    protected ComponentAllocationRelation createRelation(Component source, Deployment destination,
+    protected ComponentAllocationRelation createRelation(Component<?> source, Deployment destination,
             boolean isPlaceholder) {
         return new ComponentAllocationRelation(source, destination, isPlaceholder);
     }
 
     @Override
-    protected Component getUniqueNonPlaceholderSourceEntity() {
+    protected Component<?> getUniqueNonPlaceholderSourceEntity() {
         return ElementFactory.createUniqueComponent(false);
     }
 
     @Override
-    protected Component getPlaceholderOfSourceEntity(Component source) {
-        return new Component(source.getValue(), true);
+    protected Component<?> getPlaceholderOfSourceEntity(Component<?> source) {
+        return new Component<>(source.getValue(), true);
     }
 
     @Override

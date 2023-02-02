@@ -153,7 +153,7 @@ public class ComponentAssemblyRelationProcessorTest extends RelationProcessorTes
 
     @Override
     protected InterfaceProvisionRelation getUniqueNonPlaceholderSourceEntity() {
-        Component source = Component.getUniquePlaceholder();
+        Component<?> source = Component.getUniquePlaceholder();
         return new InterfaceProvisionRelation(source, RELATION_DESTINATION, false);
     }
 
@@ -164,7 +164,7 @@ public class ComponentAssemblyRelationProcessorTest extends RelationProcessorTes
 
     @Override
     protected InterfaceRequirementRelation getUniqueNonPlaceholderDestinationEntity() {
-        Component source = Component.getUniquePlaceholder();
+        Component<?> source = Component.getUniquePlaceholder();
         return new InterfaceRequirementRelation(source, RELATION_DESTINATION, false);
     }
 

@@ -18,7 +18,7 @@ public class ComponentSignatureProvisionRelationTest extends
 
     @Override
     protected InterfaceProvisionRelation getUniqueSourceEntity() {
-        Component source = Component.getUniquePlaceholder();
+        Component<?> source = Component.getUniquePlaceholder();
         return new InterfaceProvisionRelation(source, RELATION_INTERFACE, true);
     }
 

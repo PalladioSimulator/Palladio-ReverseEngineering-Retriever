@@ -65,8 +65,8 @@ public class DeploymentDeploymentRelationProcessorTest
         DeploymentDeploymentRelationProcessor processor = createProcessor(model);
         DeploymentDeploymentRelation relation = createUniqueReplaceable();
 
-        Component provider = Component.getUniquePlaceholder();
-        Component consumer = Component.getUniquePlaceholder();
+        Component<?> provider = Component.getUniquePlaceholder();
+        Component<?> consumer = Component.getUniquePlaceholder();
         Interface interfc = Interface.getUniquePlaceholder();
         InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider, interfc, false);
         InterfaceRequirementRelation interfaceRequirement = new InterfaceRequirementRelation(consumer, interfc, false);
@@ -109,8 +109,8 @@ public class DeploymentDeploymentRelationProcessorTest
         DeploymentDeploymentRelationProcessor processor = createProcessor(model);
         DeploymentDeploymentRelation relation = createUniqueReplaceable();
 
-        Component provider = Component.getUniquePlaceholder();
-        Component consumer = Component.getUniquePlaceholder();
+        Component<?> provider = Component.getUniquePlaceholder();
+        Component<?> consumer = Component.getUniquePlaceholder();
         Interface interfc = Interface.getUniquePlaceholder();
         InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider, interfc, false);
         InterfaceRequirementRelation interfaceRequirement = new InterfaceRequirementRelation(consumer, interfc, false);

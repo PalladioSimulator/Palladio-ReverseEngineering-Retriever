@@ -27,7 +27,7 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
         // Test data
         RepositoryTransformer transformer = createTransformer();
         PcmSurrogate model = createEmptyModel();
-        Component component = Component.getUniquePlaceholder();
+        Component<?> component = Component.getUniquePlaceholder();
 
         model.add(component);
 
@@ -62,7 +62,7 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
         // Test data
         RepositoryTransformer transformer = createTransformer();
         PcmSurrogate model = createEmptyModel();
-        Component provider = Component.getUniquePlaceholder();
+        Component<?> provider = Component.getUniquePlaceholder();
         Interface providerInterface = Interface.getUniquePlaceholder();
         InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider,
                 providerInterface, isPlaceholderRelation);
@@ -87,7 +87,7 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
         // Test data
         RepositoryTransformer transformer = createTransformer();
         PcmSurrogate model = createEmptyModel();
-        Component consumer = Component.getUniquePlaceholder();
+        Component<?> consumer = Component.getUniquePlaceholder();
         Interface consumerInterface = Interface.getUniquePlaceholder();
         InterfaceRequirementRelation interfaceRequirement = new InterfaceRequirementRelation(consumer,
                 consumerInterface, isPlaceholderRelation);
@@ -112,7 +112,7 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
         // Test data
         RepositoryTransformer transformer = createTransformer();
         PcmSurrogate model = createEmptyModel();
-        Component provider = Component.getUniquePlaceholder();
+        Component<?> provider = Component.getUniquePlaceholder();
         Interface providerInterface = Interface.getUniquePlaceholder();
         InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider,
                 providerInterface, false);
@@ -143,7 +143,7 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
         // Test data
         RepositoryTransformer transformer = createTransformer();
         PcmSurrogate model = createEmptyModel();
-        Component provider = Component.getUniquePlaceholder();
+        Component<?> provider = Component.getUniquePlaceholder();
         Interface providerInterface = Interface.getUniquePlaceholder();
         InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider,
                 providerInterface, false);

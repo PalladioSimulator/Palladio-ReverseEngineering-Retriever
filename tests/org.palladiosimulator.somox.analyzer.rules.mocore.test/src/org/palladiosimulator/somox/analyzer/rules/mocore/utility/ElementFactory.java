@@ -8,6 +8,7 @@ import org.palladiosimulator.pcm.repository.RepositoryFactory;
 import org.palladiosimulator.pcm.resourceenvironment.CommunicationLinkResourceSpecification;
 import org.palladiosimulator.pcm.resourceenvironment.ResourceContainer;
 import org.palladiosimulator.pcm.resourceenvironment.ResourceenvironmentFactory;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.AtomicComponent;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Component;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Deployment;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
@@ -35,10 +36,10 @@ public final class ElementFactory {
         return new Interface(value, isPlaceholder);
     }
 
-    public static Component createUniqueComponent(boolean isPlaceholder) {
+    public static Component<?> createUniqueComponent(boolean isPlaceholder) {
         String identifier = IdentifierGenerator.getUniqueIdentifier();
         BasicComponent value = new FluentRepositoryFactory().newBasicComponent().withName(identifier).build();
-        return new Component(value, isPlaceholder);
+        return new AtomicComponent(value, isPlaceholder);
     }
 
     public static Deployment createUniqueDeployment(boolean isPlaceholder) {

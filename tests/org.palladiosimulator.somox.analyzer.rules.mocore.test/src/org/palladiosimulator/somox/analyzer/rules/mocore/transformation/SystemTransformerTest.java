@@ -23,7 +23,7 @@ public class SystemTransformerTest extends TransformerTest<SystemTransformer, Pc
         // Test data
         SystemTransformer transformer = createTransformer();
         PcmSurrogate model = createEmptyModel();
-        Component component = Component.getUniquePlaceholder();
+        Component<?> component = Component.getUniquePlaceholder();
 
         model.add(component);
 
@@ -42,8 +42,8 @@ public class SystemTransformerTest extends TransformerTest<SystemTransformer, Pc
         SystemTransformer transformer = createTransformer();
         PcmSurrogate model = createEmptyModel();
 
-        Component provider = Component.getUniquePlaceholder();
-        Component consumer = Component.getUniquePlaceholder();
+        Component<?> provider = Component.getUniquePlaceholder();
+        Component<?> consumer = Component.getUniquePlaceholder();
         Interface providerConsumerInterface = Interface.getUniquePlaceholder();
         InterfaceProvisionRelation provisionRelation = new InterfaceProvisionRelation(provider,
                 providerConsumerInterface, false);

@@ -14,14 +14,15 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.Comp
 import tools.mdsd.mocore.framework.processor.ProcessorTest;
 import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
-public class ComponentProcessorTest extends ProcessorTest<ComponentProcessor, PcmSurrogate, Component> {
+public abstract class ComponentProcessorTest<T extends Component<?>>
+        extends ProcessorTest<ComponentProcessor<T>, PcmSurrogate, T> {
     @Test
     @DisabledIf(TEST_API_ONLY_METHOD_NAME)
     public void testRefineWithValidElementAddsCorrectImplications() {
         // Test data
         PcmSurrogate model = createEmptyModel();
-        ComponentProcessor processor = createProcessor(model);
-        Component element = createUniqueReplaceable();
+        ComponentProcessor<T> processor = createProcessor(model);
+        T element = createUniqueReplaceable();
 
         // Assertions: Pre-execution
         assertTrue(processor.getImplications().isEmpty());
@@ -41,17 +42,7 @@ public class ComponentProcessorTest extends ProcessorTest<ComponentProcessor, Pc
     }
 
     @Override
-    protected ComponentProcessor createProcessor(PcmSurrogate model) {
-        return new ComponentProcessor(model);
-    }
-
-    @Override
     protected PcmSurrogate createEmptyModel() {
         return new PcmSurrogate();
-    }
-
-    @Override
-    protected Component createUniqueReplaceable() {
-        return Component.getUniquePlaceholder();
     }
 }

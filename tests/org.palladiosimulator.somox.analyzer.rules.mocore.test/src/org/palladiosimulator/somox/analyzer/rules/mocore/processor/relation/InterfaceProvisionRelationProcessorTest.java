@@ -9,21 +9,21 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.utility.ElementFactory;
 import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 
 public class InterfaceProvisionRelationProcessorTest extends RelationProcessorTest<InterfaceProvisionRelationProcessor,
-        PcmSurrogate, InterfaceProvisionRelation, Component, Interface> {
+        PcmSurrogate, InterfaceProvisionRelation, Component<?>, Interface> {
     @Override
-    protected InterfaceProvisionRelation createRelation(Component source, Interface destination,
+    protected InterfaceProvisionRelation createRelation(Component<?> source, Interface destination,
             boolean isPlaceholder) {
         return new InterfaceProvisionRelation(source, destination, isPlaceholder);
     }
 
     @Override
-    protected Component getUniqueNonPlaceholderSourceEntity() {
+    protected Component<?> getUniqueNonPlaceholderSourceEntity() {
         return ElementFactory.createUniqueComponent(false);
     }
 
     @Override
-    protected Component getPlaceholderOfSourceEntity(Component source) {
-        return new Component(source.getValue(), true);
+    protected Component<?> getPlaceholderOfSourceEntity(Component<?> source) {
+        return new Component<>(source.getValue(), true);
     }
 
     @Override
