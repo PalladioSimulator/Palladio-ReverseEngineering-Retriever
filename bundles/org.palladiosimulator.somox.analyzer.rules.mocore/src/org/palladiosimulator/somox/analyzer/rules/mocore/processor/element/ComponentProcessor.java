@@ -9,13 +9,13 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.Comp
 
 import tools.mdsd.mocore.framework.processor.Processor;
 
-public class ComponentProcessor extends Processor<PcmSurrogate, Component> {
-    public ComponentProcessor(PcmSurrogate model) {
-        super(model, Component.class);
+public abstract class ComponentProcessor<T extends Component<?>> extends Processor<PcmSurrogate, T> {
+    public ComponentProcessor(PcmSurrogate model, Class<T> processableType) {
+        super(model, processableType);
     }
 
     @Override
-    protected void refine(Component discovery) {
+    protected void refine(T discovery) {
         List<ComponentAllocationRelation> deploymentRelations = getModel().getByType(ComponentAllocationRelation.class);
         deploymentRelations.removeIf(relation -> !relation.getSource().equals(discovery));
 

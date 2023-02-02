@@ -22,7 +22,7 @@ public class InterfaceProcessor extends Processor<PcmSurrogate, Interface> {
         requiresRelations.removeIf(relation -> !relation.getDestination().equals(discovery));
 
         if (providesRelations.isEmpty() && requiresRelations.isEmpty()) {
-            Component component = Component.getUniquePlaceholder();
+            Component<?> component = Component.getUniquePlaceholder();
             InterfaceProvisionRelation relation = new InterfaceProvisionRelation(component, discovery, true);
             addImplication(relation);
         }

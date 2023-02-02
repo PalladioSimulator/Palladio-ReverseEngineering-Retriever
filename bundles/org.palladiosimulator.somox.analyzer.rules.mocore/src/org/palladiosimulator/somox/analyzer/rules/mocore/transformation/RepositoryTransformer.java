@@ -14,7 +14,7 @@ import org.palladiosimulator.pcm.repository.OperationSignature;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.seff.ServiceEffectSpecification;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.PcmSurrogate;
-import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Component;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.AtomicComponent;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceProvisionRelation;
@@ -59,8 +59,9 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
             }
         }
 
+        // TODO Add handling of composite components
         // Add components to fluent repository
-        for (Component component : model.getByType(Component.class)) {
+        for (AtomicComponent component : model.getByType(AtomicComponent.class)) {
             BasicComponentCreator componentCreator = getCreator(repositoryFactory, component);
 
             // Add provided interfaces
@@ -120,7 +121,7 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
         return fluentRepository.createRepositoryNow();
     }
 
-    private BasicComponentCreator getCreator(FluentRepositoryFactory fluentFactory, Component component) {
+    private BasicComponentCreator getCreator(FluentRepositoryFactory fluentFactory, AtomicComponent component) {
         BasicComponentCreator componentCreator = fluentFactory.newBasicComponent();
 
         // TODO Identify important information within wrapped component

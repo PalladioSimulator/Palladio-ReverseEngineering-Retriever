@@ -22,8 +22,8 @@ public class ComponentAssemblyRelationProcessor extends RelationProcessor<PcmSur
     @Override
     protected void refine(ComponentAssemblyRelation discovery) {
         // Identify all allocations of the providing and consuming component in the assembly
-        Component provider = discovery.getSource().getSource();
-        Component consumer = discovery.getDestination().getSource();
+        Component<?> provider = discovery.getSource().getSource();
+        Component<?> consumer = discovery.getDestination().getSource();
         Interface providerConsumerInterface = discovery.getSource().getDestination();
         List<Deployment> providerAllocations = getAllocatedContainers(provider);
         List<Deployment> consumerAllocations = getAllocatedContainers(consumer);
@@ -62,8 +62,8 @@ public class ComponentAssemblyRelationProcessor extends RelationProcessor<PcmSur
             if (discovery.equals(placeholderAssembly)) {
                 continue;
             }
-            Component source = placeholderAssembly.getSource().getSource();
-            Component destination = placeholderAssembly.getDestination().getSource();
+            Component<?> source = placeholderAssembly.getSource().getSource();
+            Component<?> destination = placeholderAssembly.getDestination().getSource();
             Interface sourceDestinationInterface = placeholderAssembly.getSource().getDestination();
             // Placeholder are unique and can only be allocated to a single container
             Optional<Deployment> optionalSourceContainer = getAllocatedContainers(source)
@@ -93,7 +93,7 @@ public class ComponentAssemblyRelationProcessor extends RelationProcessor<PcmSur
         super.refine(discovery);
     }
 
-    private List<Deployment> getAllocatedContainers(Component component) {
+    private List<Deployment> getAllocatedContainers(Component<?> component) {
         List<ComponentAllocationRelation> allocations = this.getModel().getByType(ComponentAllocationRelation.class);
         return allocations.stream()
                 .filter(allocation -> allocation.getSource().equals(component))

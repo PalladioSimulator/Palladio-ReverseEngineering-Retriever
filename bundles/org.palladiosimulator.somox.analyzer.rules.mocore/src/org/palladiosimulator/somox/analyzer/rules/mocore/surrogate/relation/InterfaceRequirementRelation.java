@@ -6,8 +6,8 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Inter
 import tools.mdsd.mocore.framework.surrogate.Relation;
 import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
-public class InterfaceRequirementRelation extends Relation<Component, Interface> {
-    public InterfaceRequirementRelation(Component source, Interface destination, boolean isPlaceholder) {
+public class InterfaceRequirementRelation extends Relation<Component<?>, Interface> {
+    public InterfaceRequirementRelation(Component<?> source, Interface destination, boolean isPlaceholder) {
         super(source, destination, isPlaceholder);
     }
 
@@ -20,7 +20,7 @@ public class InterfaceRequirementRelation extends Relation<Component, Interface>
         if (this.equals(original)) {
             return (InterfaceRequirementRelation) replacement;
         }
-        Component source = getSourceReplacement(original, replacement);
+        Component<?> source = getSourceReplacement(original, replacement);
         Interface destination = getDestinationReplacement(original, replacement);
         return new InterfaceRequirementRelation(source, destination, this.isPlaceholder());
     }
