@@ -281,8 +281,10 @@ public class EclipsePCMDetector implements IPCMDetector {
     }
 
     protected List<Component> getComponents() {
-        return List.of(components.values()
-            .toArray(new Component[0]));
+        return components.values()
+            .stream()
+            .map(ComponentBuilder::create)
+            .collect(Collectors.toList());
     }
 
     protected Map<String, List<IMethodBinding>> getOperationInterfaces() {
@@ -293,13 +295,9 @@ public class EclipsePCMDetector implements IPCMDetector {
 
     protected Set<Composite> getCompositeComponents() {
         // Construct composites.
-        List<Component> constructedComponents = components.values()
-            .stream()
-            .map(ComponentBuilder::create)
-            .collect(Collectors.toList());
         List<Composite> constructedComposites = composites.values()
             .stream()
-            .map(x -> x.construct(constructedComponents, compositeRequiredInterfaces, compositeProvidedOperations))
+            .map(x -> x.construct(getComponents(), compositeRequiredInterfaces, compositeProvidedOperations))
             .collect(Collectors.toList());
 
         // Remove redundant composites.
