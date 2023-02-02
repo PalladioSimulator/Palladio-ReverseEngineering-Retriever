@@ -1,16 +1,13 @@
 package org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element;
 
-import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
-import org.palladiosimulator.pcm.repository.BasicComponent;
+import org.palladiosimulator.pcm.repository.RepositoryComponent;
 
-public class Component extends PcmElement<BasicComponent> {
-    public Component(BasicComponent value, boolean isPlaceholder) {
+public class Component<T extends RepositoryComponent> extends PcmElement<T> {
+    public Component(T value, boolean isPlaceholder) {
         super(value, isPlaceholder);
     }
 
-    public static Component getUniquePlaceholder() {
-        String identifier = "Placeholder_" + getUniqueValue();
-        BasicComponent value = new FluentRepositoryFactory().newBasicComponent().withName(identifier).build();
-        return new Component(value, true);
+    public static Component<?> getUniquePlaceholder() {
+        return AtomicComponent.getUniquePlaceholder();
     }
 }
