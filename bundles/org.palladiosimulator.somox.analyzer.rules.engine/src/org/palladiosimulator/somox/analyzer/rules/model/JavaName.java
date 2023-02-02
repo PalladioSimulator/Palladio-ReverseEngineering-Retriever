@@ -25,6 +25,11 @@ public class JavaName implements OperationName {
     }
 
     @Override
+    public String getInterface() {
+        return iface;
+    }
+
+    @Override
     public boolean isPartOf(String iface) {
         return this.iface.equals(iface);
     }

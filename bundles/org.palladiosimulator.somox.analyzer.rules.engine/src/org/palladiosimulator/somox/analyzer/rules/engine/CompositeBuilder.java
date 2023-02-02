@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 import org.palladiosimulator.somox.analyzer.rules.model.Component;
 import org.palladiosimulator.somox.analyzer.rules.model.ComponentBuilder;
-import org.palladiosimulator.somox.analyzer.rules.model.Operation;
+import org.palladiosimulator.somox.analyzer.rules.model.Provision;
 import org.palladiosimulator.somox.analyzer.rules.model.ProvisionsBuilder;
 import org.palladiosimulator.somox.analyzer.rules.model.RequirementsBuilder;
 
@@ -30,7 +30,7 @@ public class CompositeBuilder {
     }
 
     public Composite construct(Collection<Component> components, Set<String> compositeRequirements,
-            Set<Operation> compositeProvisions) {
+            Set<Provision> compositeProvisions) {
         Logger.getLogger(getClass())
             .warn("Constructing composite component " + name);
 
@@ -39,37 +39,38 @@ public class CompositeBuilder {
             .map(ComponentBuilder::create)
             .collect(Collectors.toSet());
 
-        Set<String> internalInterfaces = new HashSet<>();
-        Set<Operation> internalOperations = new HashSet<>();
+        Set<String> internalRequirements = new HashSet<>();
+        Set<Provision> internalProvisions = new HashSet<>();
 
         int previousPartCount = 0;
         int previousInternalInterfaceCount = 0;
         do {
             previousPartCount = parts.size();
-            previousInternalInterfaceCount = internalInterfaces.size();
+            previousInternalInterfaceCount = internalRequirements.size();
 
-            propagateProvisions(components, compositeProvisions, parts, internalOperations);
-            propagateRequirements(components, compositeRequirements, parts, internalInterfaces);
-        } while (parts.size() > previousPartCount && internalInterfaces.size() > previousInternalInterfaceCount);
+            propagateProvisions(components, compositeProvisions, parts, internalProvisions);
+            propagateRequirements(components, compositeRequirements, parts, internalRequirements);
+        } while (parts.size() > previousPartCount && internalRequirements.size() > previousInternalInterfaceCount);
 
-        Set<String> requiredInterfaces = new HashSet<>();
-        Set<Operation> providedOperations = new HashSet<>();
+        Set<String> requirements = new HashSet<>();
+        Set<Provision> provisions = new HashSet<>();
 
         for (Component part : parts) {
-            requiredInterfaces.addAll(part.requirements()
+            requirements.addAll(part.requirements()
                 .get());
-            providedOperations.addAll(part.provisions()
+            provisions.addAll(part.provisions()
                 .get());
         }
-        requiredInterfaces.removeIf(x -> !compositeRequirements.contains(x));
-        RequirementsBuilder requirements = new RequirementsBuilder();
-        requirements.add(requiredInterfaces);
+        requirements.removeIf(x -> !compositeRequirements.contains(x));
+        RequirementsBuilder requirementsBuilder = new RequirementsBuilder();
+        requirementsBuilder.add(requirements);
 
-        providedOperations.removeIf(x -> !compositeProvisions.contains(x));
-        ProvisionsBuilder provisions = new ProvisionsBuilder();
-        provisions.add(providedOperations);
+        provisions.removeIf(x -> !compositeProvisions.contains(x));
+        ProvisionsBuilder provisionsBuilder = new ProvisionsBuilder();
+        provisionsBuilder.add(provisions);
 
-        return new Composite(name, parts, requirements.create(), provisions.create(), internalInterfaces);
+        return new Composite(name, parts, requirementsBuilder.create(), provisionsBuilder.create(),
+                internalRequirements);
     }
 
     // Writes to allParts and internalInterfaces.
@@ -92,7 +93,7 @@ public class CompositeBuilder {
 
     // Writes to allParts and internalOperations.
     private static void propagateProvisions(final Collection<Component> allComponents,
-            final Set<Operation> compositeProvisions, Set<Component> allParts, Set<Operation> internalOperations) {
+            final Set<Provision> compositeProvisions, Set<Component> allParts, Set<Provision> internalOperations) {
 
         // Iterate through all units with provisions. If a unit provides a part for this composite,
         // it also becomes part of it.
@@ -129,6 +130,7 @@ public class CompositeBuilder {
             Set<Component> providingComponents = allComponents.stream()
                 .filter(x -> x.provisions()
                     .contains(requirementChain.last()))
+                .filter(x -> !requiringComponent.equals(x))
                 .collect(Collectors.toSet());
 
             // Skip this requirement if no unit provides it.
@@ -141,10 +143,6 @@ public class CompositeBuilder {
                     traversedOperations.add(requirementChain);
                     continue;
                 }
-
-                // Ignore units requiring themselves.
-                // TODO: Can this still happen?
-                // transitiveProvisions.remove(provision.last());
 
                 providingComponent.requirements()
                     .get()
@@ -161,7 +159,7 @@ public class CompositeBuilder {
     }
 
     private static List<ProvisionChain> traceProvisionToAPart(final Collection<Component> allComponents,
-            Set<Operation> compositeProvisions, final Set<Component> allParts, final Component providingComponent) {
+            Set<Provision> compositeProvisions, final Set<Component> allParts, final Component providingComponent) {
 
         Stack<ProvisionChain> componentProvisions = new Stack<>();
         providingComponent.provisions()
@@ -180,7 +178,9 @@ public class CompositeBuilder {
 
             Set<Component> requiringComponents = allComponents.stream()
                 .filter(x -> x.requirements()
-                    .contains(provisionChain.last()))
+                    .contains(provisionChain.last()
+                        .getInterface()))
+                .filter(x -> providingComponent.equals(x))
                 .collect(Collectors.toSet());
 
             // Skip this provision if no unit requires it.
@@ -193,10 +193,6 @@ public class CompositeBuilder {
                     traversedOperations.add(provisionChain);
                     continue;
                 }
-
-                // Ignore units requiring themselves.
-                // TODO: Can this still happen?
-                // transitiveProvisions.remove(provision.last());
 
                 requiringComponent.provisions()
                     .get()
@@ -214,31 +210,31 @@ public class CompositeBuilder {
 
     private static class ProvisionChain {
         // Provision path where a given element provides all those following it.
-        private final List<Operation> path;
-        private final Set<Operation> memberSet;
+        private final List<Provision> path;
+        private final Set<Provision> memberSet;
 
-        public ProvisionChain(Operation... path) {
+        public ProvisionChain(Provision... path) {
             this.path = List.of(path);
             this.memberSet = Set.of(path);
         }
 
-        public Operation last() {
+        public Provision last() {
             return path.get(path.size() - 1);
         }
 
-        public void addTo(Collection<Operation> collection) {
+        public void addTo(Collection<Provision> collection) {
             collection.addAll(path);
         }
 
-        public Optional<ProvisionChain> extend(Operation next) {
+        public Optional<ProvisionChain> extend(Provision next) {
             // Avoid relation cycles.
             if (memberSet.contains(next)) {
                 return Optional.empty();
             }
 
-            List<Operation> merged = new ArrayList<>(path);
+            List<Provision> merged = new ArrayList<>(path);
             merged.add(next);
-            return Optional.of(new ProvisionChain(merged.toArray(new Operation[0])));
+            return Optional.of(new ProvisionChain(merged.toArray(new Provision[0])));
         }
 
         @Override

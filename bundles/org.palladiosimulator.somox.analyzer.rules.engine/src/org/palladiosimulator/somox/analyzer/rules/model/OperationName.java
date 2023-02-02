@@ -7,5 +7,7 @@ public interface OperationName {
 
     Optional<String> getName(String baseInterface);
 
+    String getInterface();
+
     boolean isPartOf(String iface);
 }

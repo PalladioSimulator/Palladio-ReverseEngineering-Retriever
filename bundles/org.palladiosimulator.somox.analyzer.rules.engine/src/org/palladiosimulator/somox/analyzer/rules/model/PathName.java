@@ -22,6 +22,11 @@ public class PathName implements OperationName {
         return Optional.of(path.substring(baseInterface.length()));
     }
 
+    @Override
+    public String getInterface() {
+        return path;
+    }
+
     // TODO: How are path separators '/' handled?
     // /page/info is not a parent of /page/information/user.
     @Override

@@ -24,6 +24,7 @@ import org.palladiosimulator.somox.analyzer.rules.model.Component;
 import org.palladiosimulator.somox.analyzer.rules.model.ComponentBuilder;
 import org.palladiosimulator.somox.analyzer.rules.model.JavaName;
 import org.palladiosimulator.somox.analyzer.rules.model.Operation;
+import org.palladiosimulator.somox.analyzer.rules.model.Provision;
 
 /**
  * This class is used to detect and hold all relevant elements found during the processing of rules.
@@ -38,8 +39,8 @@ public class EclipsePCMDetector implements IPCMDetector {
     private Map<String, List<IMethodBinding>> operationInterfaces = new HashMap<>();
 
     private Map<String, CompositeBuilder> composites = new HashMap<>();
-    private Set<Operation> compositeProvidedOperations = new HashSet<>();
-    private Set<String> compositeRequiredInterfaces = new HashSet<>();
+    private Set<Provision> compositeProvisions = new HashSet<>();
+    private Set<String> compositeRequirements = new HashSet<>();
 
     private static String getFullUnitName(CompilationUnit unit) {
         // TODO this is potentially problematic, maybe restructure
@@ -261,11 +262,11 @@ public class EclipsePCMDetector implements IPCMDetector {
     }
 
     private void addCompositeRequiredInterface(String ifaceName) {
-        compositeRequiredInterfaces.add(ifaceName);
+        compositeRequirements.add(ifaceName);
     }
 
     private void addCompositeProvidedOperation(Operation operation) {
-        compositeProvidedOperations.add(operation);
+        compositeProvisions.add(operation);
     }
 
     private CompositeBuilder getComposite(String name) {
@@ -297,7 +298,7 @@ public class EclipsePCMDetector implements IPCMDetector {
         // Construct composites.
         List<Composite> constructedComposites = composites.values()
             .stream()
-            .map(x -> x.construct(getComponents(), compositeRequiredInterfaces, compositeProvidedOperations))
+            .map(x -> x.construct(getComponents(), compositeRequirements, compositeProvisions))
             .collect(Collectors.toList());
 
         // Remove redundant composites.

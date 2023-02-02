@@ -6,30 +6,31 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public class Provisions implements Iterable<Operation> {
-    private final Set<Operation> providedOperations;
+public class Provisions implements Iterable<Provision> {
+    private final Set<Provision> provisions;
 
-    public Provisions(Collection<Operation> providedOperations) {
-        this.providedOperations = new HashSet<>(providedOperations);
+    public Provisions(Collection<Provision> provisions) {
+        // TODO: Grouping algorithm - longest common prefix etc.,
+        // probably requires more functionality in Provision
+
+        this.provisions = Collections.unmodifiableSet(new HashSet<>(provisions));
     }
 
-    public Set<Operation> get() {
-        return Collections.unmodifiableSet(providedOperations);
+    public Set<Provision> get() {
+        return provisions;
     }
 
     public boolean contains(String iface) {
-        return providedOperations.stream()
-            .anyMatch(x -> x.getName()
-                .isPartOf(iface));
+        return provisions.stream()
+            .anyMatch(x -> x.isPartOf(iface));
     }
 
     public boolean contains(Operation operation) {
-        return providedOperations.contains(operation);
+        return provisions.contains(operation);
     }
 
     @Override
-    public Iterator<Operation> iterator() {
-        return Collections.unmodifiableCollection(providedOperations)
-            .iterator();
+    public Iterator<Provision> iterator() {
+        return provisions.iterator();
     }
 }

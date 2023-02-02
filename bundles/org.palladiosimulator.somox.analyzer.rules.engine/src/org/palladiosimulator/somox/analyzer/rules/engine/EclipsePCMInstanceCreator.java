@@ -32,7 +32,7 @@ import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.model.Component;
-import org.palladiosimulator.somox.analyzer.rules.model.Operation;
+import org.palladiosimulator.somox.analyzer.rules.model.Provision;
 
 // TODO Bug-fix, probably
 // Class to create a pcm instance out of all results from the detector class
@@ -117,9 +117,8 @@ public class EclipsePCMInstanceCreator {
                 c.requires(create.fetchOfOperationInterface(compRequiredIface));
             }
 
-            for (Operation compProvidedOperation : composite.provisions()) {
-                // TODO: merge operations into an interface
-                // c.provides(create.fetchOfOperationInterface(compProvidedOperation));
+            for (Provision compProvision : composite.provisions()) {
+                c.provides(create.fetchOfOperationInterface(compProvision.getInterface()));
             }
         }
 
@@ -188,12 +187,11 @@ public class EclipsePCMInstanceCreator {
                 .forEach(x -> outerProvisions.put(x.getProvidedInterface__OperationProvidedRole()
                     .getEntityName(), x));
 
-            for (Operation compProvidedOperation : composite.provisions()) {
-                for (Pair<OperationProvidedRole, AssemblyContext> r : innerProvisions
-                    .getOrDefault(compProvidedOperation, List.of())) {
-                    // TODO: Map to interface
-                    // c.withProvidedDelegationConnection(r.getT2(), r.getT1(),
-                    // outerProvisions.get(compProvidedOperation));
+            for (Provision compProvision : composite.provisions()) {
+                String providedInterface = compProvision.getInterface();
+                for (Pair<OperationProvidedRole, AssemblyContext> r : innerProvisions.getOrDefault(providedInterface,
+                        List.of())) {
+                    c.withProvidedDelegationConnection(r.getT2(), r.getT1(), outerProvisions.get(providedInterface));
                 }
             }
 

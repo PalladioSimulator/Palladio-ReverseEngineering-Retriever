@@ -3,20 +3,19 @@ package org.palladiosimulator.somox.analyzer.rules.model;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 public class ProvisionsBuilder {
-    private final List<Operation> providedOperations = new LinkedList<>();
+    private final List<Provision> provisions = new LinkedList<>();
 
-    public void add(Operation... operations) {
-        this.add(Set.of(operations));
+    public void add(Provision... provisions) {
+        this.add(List.of(provisions));
     }
 
-    public void add(Collection<Operation> operations) {
-        providedOperations.addAll(operations);
+    public void add(Collection<Provision> provisions) {
+        this.provisions.addAll(provisions);
     }
 
     public Provisions create() {
-        return new Provisions(providedOperations);
+        return new Provisions(provisions);
     }
 }
