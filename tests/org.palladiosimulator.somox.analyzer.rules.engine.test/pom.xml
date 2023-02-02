@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.palladiosimulator</groupId>
 		<artifactId>eclipse-parent-updatesite</artifactId>
-		<version>0.7.5</version>
+		<version>0.8.5</version>
 		<relativePath>../../</relativePath>
 	</parent>
 
@@ -34,7 +34,7 @@
 			<plugin>
 				<groupId>com.googlecode.maven-download-plugin</groupId>
 				<artifactId>download-maven-plugin</artifactId>
-				<version>1.6.0</version>
+				<version>1.6.8</version>
 				<executions>
 					<execution>
 						<id>download-test-resource-acmeair</id>
