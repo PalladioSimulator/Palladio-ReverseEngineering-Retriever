@@ -3,30 +3,31 @@ package org.palladiosimulator.somox.analyzer.rules.engine;
 import java.util.Collections;
 import java.util.Set;
 
-import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.palladiosimulator.somox.analyzer.rules.model.Component;
+import org.palladiosimulator.somox.analyzer.rules.model.Operation;
 
 public class Composite {
 
     private String name;
-    private Set<CompilationUnit> parts;
+    private Set<Component> parts;
     private Set<String> internalInterfaces;
     private Set<String> requiredInterfaces;
-    private Set<String> providedInterfaces;
+    private Set<Operation> providedOperations;
 
-    public Composite(String name, Set<CompilationUnit> parts, Set<String> requiredInterfaces,
-            Set<String> providedInterfaces, Set<String> internalInterfaces) {
+    public Composite(String name, Set<Component> parts, Set<String> requiredInterfaces,
+            Set<Operation> providedOperations, Set<String> internalInterfaces) {
         this.name = name;
         this.parts = parts;
         this.internalInterfaces = internalInterfaces;
         this.requiredInterfaces = requiredInterfaces;
-        this.providedInterfaces = providedInterfaces;
+        this.providedOperations = providedOperations;
     }
 
     public String getName() {
         return name;
     }
 
-    public Set<CompilationUnit> getParts() {
+    public Set<Component> getParts() {
         return Collections.unmodifiableSet(parts);
     }
 
@@ -38,11 +39,12 @@ public class Composite {
         return Collections.unmodifiableSet(requiredInterfaces);
     }
 
-    public Set<String> getProvidedInterfaces() {
-        return Collections.unmodifiableSet(providedInterfaces);
+    public Set<Operation> getProvidedInterfaces() {
+        return Collections.unmodifiableSet(providedOperations);
     }
 
     public boolean isSubsetOf(final Composite other) {
-        return other.getParts().containsAll(parts);
+        return other.getParts()
+            .containsAll(parts);
     }
 }

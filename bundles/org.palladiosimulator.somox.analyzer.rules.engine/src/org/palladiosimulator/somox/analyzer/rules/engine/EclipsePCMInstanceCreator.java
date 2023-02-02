@@ -11,6 +11,15 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.palladiosimulator.generator.fluent.exceptions.FluentApiException;
+import org.palladiosimulator.generator.fluent.repository.api.Repo;
+import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
+import org.palladiosimulator.generator.fluent.repository.structure.components.BasicComponentCreator;
+import org.palladiosimulator.generator.fluent.repository.structure.components.CompositeComponentCreator;
+import org.palladiosimulator.generator.fluent.repository.structure.interfaces.OperationInterfaceCreator;
+import org.palladiosimulator.generator.fluent.repository.structure.interfaces.OperationSignatureCreator;
+import org.palladiosimulator.generator.fluent.repository.structure.internals.Primitive;
+import org.palladiosimulator.generator.fluent.repository.structure.types.CompositeDataTypeCreator;
 import org.palladiosimulator.pcm.core.composition.AssemblyContext;
 import org.palladiosimulator.pcm.repository.BasicComponent;
 import org.palladiosimulator.pcm.repository.CollectionDataType;
@@ -22,16 +31,8 @@ import org.palladiosimulator.pcm.repository.ParameterModifier;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-
-import org.palladiosimulator.generator.fluent.exceptions.FluentApiException;
-import org.palladiosimulator.generator.fluent.repository.api.Repo;
-import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
-import org.palladiosimulator.generator.fluent.repository.structure.components.BasicComponentCreator;
-import org.palladiosimulator.generator.fluent.repository.structure.components.CompositeComponentCreator;
-import org.palladiosimulator.generator.fluent.repository.structure.interfaces.OperationInterfaceCreator;
-import org.palladiosimulator.generator.fluent.repository.structure.interfaces.OperationSignatureCreator;
-import org.palladiosimulator.generator.fluent.repository.structure.internals.Primitive;
-import org.palladiosimulator.generator.fluent.repository.structure.types.CompositeDataTypeCreator;
+import org.palladiosimulator.somox.analyzer.rules.model.Component;
+import org.palladiosimulator.somox.analyzer.rules.model.Operation;
 
 // TODO Bug-fix, probably
 // Class to create a pcm instance out of all results from the detector class
@@ -44,14 +45,14 @@ public class EclipsePCMInstanceCreator {
     private final RuleEngineBlackboard blackboard;
     private final Map<String, CompositeDataTypeCreator> existingDataTypesMap;
     private final Map<String, DataType> existingCollectionDataTypes;
-    private final Map<CompilationUnit, CompositeComponentCreator> unitCompositeCreators;
+    private final Map<Component, CompositeComponentCreator> componentCompositeCreators;
     private final Map<String, CompositeComponentCreator> ifaceCompositeCreators;
     private final Map<Composite, CompositeComponentCreator> compositeCreators;
 
     public EclipsePCMInstanceCreator(RuleEngineBlackboard blackboard) {
         existingDataTypesMap = new HashMap<>();
         existingCollectionDataTypes = new HashMap<>();
-        this.unitCompositeCreators = new HashMap<>();
+        this.componentCompositeCreators = new HashMap<>();
         this.ifaceCompositeCreators = new HashMap<>();
         this.compositeCreators = new HashMap<>();
         create = new FluentRepositoryFactory();
@@ -94,7 +95,7 @@ public class EclipsePCMInstanceCreator {
      * @return the PCM repository model
      */
     public Repository createPCM(Map<String, List<CompilationUnitWrapper>> mapping) {
-        final List<CompilationUnit> components = blackboard.getEclipsePCMDetector()
+        final List<Component> components = blackboard.getEclipsePCMDetector()
             .getComponents();
         final Map<String, List<IMethodBinding>> interfaces = blackboard.getEclipsePCMDetector()
             .getOperationInterfaces();
@@ -107,7 +108,7 @@ public class EclipsePCMInstanceCreator {
             CompositeComponentCreator c = create.newCompositeComponent()
                 .withName(composite.getName());
             composite.getParts()
-                .forEach(x -> unitCompositeCreators.put(x, c));
+                .forEach(x -> componentCompositeCreators.put(x, c));
             composite.getInternalInterfaces()
                 .forEach(x -> ifaceCompositeCreators.put(x, c));
             compositeCreators.put(composite, c);
@@ -116,8 +117,9 @@ public class EclipsePCMInstanceCreator {
                 c.requires(create.fetchOfOperationInterface(compRequiredIface));
             }
 
-            for (String compProvidedIface : composite.getProvidedInterfaces()) {
-                c.provides(create.fetchOfOperationInterface(compProvidedIface));
+            for (Operation compProvidedOperation : composite.getProvidedInterfaces()) {
+                // TODO: merge operations into an interface
+                // c.provides(create.fetchOfOperationInterface(compProvidedOperation));
             }
         }
 
@@ -186,10 +188,12 @@ public class EclipsePCMInstanceCreator {
                 .forEach(x -> outerProvisions.put(x.getProvidedInterface__OperationProvidedRole()
                     .getEntityName(), x));
 
-            for (String compProvidedIface : composite.getProvidedInterfaces()) {
-                for (Pair<OperationProvidedRole, AssemblyContext> r : innerProvisions.getOrDefault(compProvidedIface,
-                        List.of())) {
-                    c.withProvidedDelegationConnection(r.getT2(), r.getT1(), outerProvisions.get(compProvidedIface));
+            for (Operation compProvidedOperation : composite.getProvidedInterfaces()) {
+                for (Pair<OperationProvidedRole, AssemblyContext> r : innerProvisions
+                    .getOrDefault(compProvidedOperation, List.of())) {
+                    // TODO: Map to interface
+                    // c.withProvidedDelegationConnection(r.getT2(), r.getT1(),
+                    // outerProvisions.get(compProvidedOperation));
                 }
             }
 
@@ -233,15 +237,17 @@ public class EclipsePCMInstanceCreator {
         });
     }
 
-    private void createPCMComponents(List<CompilationUnit> components) {
-        for (final CompilationUnit comp : components) {
-            AbstractTypeDeclaration firstTypeDecl = (AbstractTypeDeclaration) comp.types()
+    private void createPCMComponents(List<Component> components) {
+        for (final Component comp : components) {
+            final CompilationUnit compUnit = comp.compilationUnit();
+            AbstractTypeDeclaration firstTypeDecl = (AbstractTypeDeclaration) compUnit.types()
                 .get(0);
             BasicComponentCreator pcmComp = create.newBasicComponent()
                 .withName(wrapName(firstTypeDecl.resolveBinding()));
 
-            final Set<String> providedInterfaces = blackboard.getEclipsePCMDetector()
-                .getProvidedInterfaces(comp);
+            // TODO: Implement
+            final Set<String> providedInterfaces = Set.of(); // blackboard.getEclipsePCMDetector()
+                                                             // .getProvidedInterfaces(comp);
 
             for (String iface : providedInterfaces) {
                 try {
@@ -256,8 +262,8 @@ public class EclipsePCMInstanceCreator {
                 }
             }
 
-            final Set<String> requiredIs = blackboard.getEclipsePCMDetector()
-                .getRequiredInterfaces(comp);
+            final Set<String> requiredIs = comp.requirements()
+                .get();
 
             for (String requInter : requiredIs) {
                 try {
@@ -274,12 +280,12 @@ public class EclipsePCMInstanceCreator {
             BasicComponent builtComp = pcmComp.build();
 
             // Add component to its composite, if it is part of one.
-            CompositeComponentCreator c = unitCompositeCreators.get(comp);
+            CompositeComponentCreator c = componentCompositeCreators.get(comp);
             if (c != null) {
                 c.withAssemblyContext(builtComp);
             }
 
-            blackboard.putRepositoryComponentLocation(builtComp, new CompilationUnitWrapper(comp));
+            blackboard.putRepositoryComponentLocation(builtComp, new CompilationUnitWrapper(compUnit));
             repository.addToRepository(builtComp);
         }
     }

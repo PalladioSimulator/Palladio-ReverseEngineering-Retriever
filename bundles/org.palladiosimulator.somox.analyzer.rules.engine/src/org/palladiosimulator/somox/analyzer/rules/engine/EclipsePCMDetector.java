@@ -1,7 +1,6 @@
 package org.palladiosimulator.somox.analyzer.rules.engine;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,6 +20,10 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
+import org.palladiosimulator.somox.analyzer.rules.model.Component;
+import org.palladiosimulator.somox.analyzer.rules.model.ComponentBuilder;
+import org.palladiosimulator.somox.analyzer.rules.model.JavaName;
+import org.palladiosimulator.somox.analyzer.rules.model.Operation;
 
 /**
  * This class is used to detect and hold all relevant elements found during the processing of rules.
@@ -30,14 +33,12 @@ import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrap
  */
 public class EclipsePCMDetector implements IPCMDetector {
     private static final Logger LOG = Logger.getLogger(EclipsePCMDetector.class);
-    private List<CompilationUnit> components = new ArrayList<>();
 
-    private Map<CompilationUnit, Set<String>> providedInterfaces = new HashMap<>();
-    private Map<CompilationUnit, Set<String>> requiredInterfaces = new HashMap<>();
+    private Map<CompilationUnit, ComponentBuilder> components = new HashMap<>();
     private Map<String, List<IMethodBinding>> operationInterfaces = new HashMap<>();
 
     private Map<String, CompositeBuilder> composites = new HashMap<>();
-    private Set<String> compositeProvidedInterfaces = new HashSet<>();
+    private Set<Operation> compositeProvidedOperations = new HashSet<>();
     private Set<String> compositeRequiredInterfaces = new HashSet<>();
 
     private static String getFullUnitName(CompilationUnit unit) {
@@ -71,7 +72,7 @@ public class EclipsePCMDetector implements IPCMDetector {
     public void detectComponent(CompilationUnit unit) {
         for (Object type : unit.types()) {
             if (type instanceof TypeDeclaration) {
-                components.add(unit);
+                components.put(unit, new ComponentBuilder(unit));
                 // TODO: remove and implement properly
                 ITypeBinding binding = ((TypeDeclaration) type).resolveBinding();
                 detectOperationInterface(unit);
@@ -136,10 +137,11 @@ public class EclipsePCMDetector implements IPCMDetector {
     }
 
     public void detectRequiredInterface(CompilationUnit unit, String interfaceName, boolean compositeRequired) {
-        if (requiredInterfaces.get(unit) == null) {
-            requiredInterfaces.put(unit, new HashSet<>());
+        if (components.get(unit) == null) {
+            components.put(unit, new ComponentBuilder(unit));
         }
-        requiredInterfaces.get(unit)
+        components.get(unit)
+            .requirements()
             .add(interfaceName);
         if (compositeRequired) {
             addCompositeRequiredInterface(interfaceName);
@@ -152,8 +154,8 @@ public class EclipsePCMDetector implements IPCMDetector {
     }
 
     private void detectRequiredInterface(CompilationUnit unit, FieldDeclaration field, boolean compositeRequired) {
-        if (requiredInterfaces.get(unit) == null) {
-            requiredInterfaces.put(unit, new HashSet<>());
+        if (components.get(unit) == null) {
+            components.put(unit, new ComponentBuilder(unit));
         }
         @SuppressWarnings("unchecked")
         List<String> ifaceNames = ((List<VariableDeclaration>) field.fragments()).stream()
@@ -161,8 +163,9 @@ public class EclipsePCMDetector implements IPCMDetector {
                 .getType())
             .map(NameConverter::toPCMIdentifier)
             .collect(Collectors.toList());
-        requiredInterfaces.get(unit)
-            .addAll(ifaceNames);
+        components.get(unit)
+            .requirements()
+            .add(ifaceNames);
         detectOperationInterface(field.getType());
         if (compositeRequired) {
             for (String ifaceName : ifaceNames) {
@@ -177,12 +180,13 @@ public class EclipsePCMDetector implements IPCMDetector {
 
     private void detectRequiredInterface(CompilationUnit unit, SingleVariableDeclaration parameter,
             boolean compositeRequired) {
-        if (requiredInterfaces.get(unit) == null) {
-            requiredInterfaces.put(unit, new HashSet<>());
+        if (components.get(unit) == null) {
+            components.put(unit, new ComponentBuilder(unit));
         }
         String ifaceName = NameConverter.toPCMIdentifier(parameter.resolveBinding()
             .getType());
-        requiredInterfaces.get(unit)
+        components.get(unit)
+            .requirements()
             .add(ifaceName);
         detectOperationInterface(parameter.getType());
         if (compositeRequired) {
@@ -212,15 +216,19 @@ public class EclipsePCMDetector implements IPCMDetector {
             // TODO: re-enable
 //            return;
         }
-        if (providedInterfaces.get(unit) == null) {
-            providedInterfaces.put(unit, new HashSet<>());
+        if (components.get(unit) == null) {
+            components.put(unit, new ComponentBuilder(unit));
         }
-        providedInterfaces.get(unit)
-            .add(declaringIface);
+        components.get(unit)
+            .provisions()
+            .add(new Operation(method, new JavaName(declaringIface, method.getName())));
     }
 
     public void detectPartOfComposite(CompilationUnit unit, String compositeName) {
-        getComposite(compositeName).addPart(unit);
+        if (components.get(unit) == null) {
+            components.put(unit, new ComponentBuilder(unit));
+        }
+        getComposite(compositeName).addPart(components.get(unit));
     }
 
     public void detectCompositeRequiredInterface(CompilationUnit unit, String interfaceName) {
@@ -236,20 +244,17 @@ public class EclipsePCMDetector implements IPCMDetector {
     }
 
     public void detectCompositeProvidedOperation(CompilationUnit unit, IMethodBinding method) {
-        String declaringIface = NameConverter.toPCMIdentifier(method.getDeclaringClass());
-        addCompositeProvidedInterface(declaringIface);
-        detectProvidedOperation(unit, declaringIface, method);
+        detectCompositeProvidedOperation(unit, method.getDeclaringClass(), method);
     }
 
     public void detectCompositeProvidedOperation(CompilationUnit unit, ITypeBinding declaringIface,
             IMethodBinding method) {
         String declaringIfaceName = NameConverter.toPCMIdentifier(declaringIface);
-        addCompositeProvidedInterface(declaringIfaceName);
-        detectProvidedOperation(unit, declaringIfaceName, method);
+        detectCompositeProvidedOperation(unit, declaringIfaceName, method);
     }
 
     public void detectCompositeProvidedOperation(CompilationUnit unit, String declaringIface, IMethodBinding method) {
-        addCompositeProvidedInterface(declaringIface);
+        addCompositeProvidedOperation(new Operation(method, new JavaName(declaringIface, method.getName())));
         detectProvidedOperation(unit, declaringIface, method);
     }
 
@@ -257,8 +262,8 @@ public class EclipsePCMDetector implements IPCMDetector {
         compositeRequiredInterfaces.add(ifaceName);
     }
 
-    private void addCompositeProvidedInterface(String ifaceName) {
-        compositeProvidedInterfaces.add(ifaceName);
+    private void addCompositeProvidedOperation(Operation operation) {
+        compositeProvidedOperations.add(operation);
     }
 
     private CompositeBuilder getComposite(String name) {
@@ -270,30 +275,17 @@ public class EclipsePCMDetector implements IPCMDetector {
 
     @Override
     public List<CompilationUnitWrapper> getWrappedComponents() {
-        return CompilationUnitWrapper.wrap(components);
+        return CompilationUnitWrapper.wrap(components.keySet());
     }
 
-    protected List<CompilationUnit> getComponents() {
-        return components;
-    }
-
-    protected Set<String> getProvidedInterfaces(CompilationUnit unit) {
-        final Set<String> set = providedInterfaces.get(unit);
-        if (set == null) {
-            return new HashSet<>();
-        }
-        return Collections.unmodifiableSet(set);
-    }
-
-    protected Set<String> getRequiredInterfaces(CompilationUnit unit) {
-        final Set<String> set = requiredInterfaces.get(unit);
-        if (set == null) {
-            return new HashSet<>();
-        }
-        return Collections.unmodifiableSet(set);
+    protected List<Component> getComponents() {
+        return List.of(components.values()
+            .toArray(new Component[0]));
     }
 
     protected Map<String, List<IMethodBinding>> getOperationInterfaces() {
+        // TODO: Map the component representation to a list of interfaces with
+        // (potentially renamed) methods.
         return Collections.unmodifiableMap(operationInterfaces);
     }
 
@@ -301,8 +293,7 @@ public class EclipsePCMDetector implements IPCMDetector {
         // Construct composites.
         List<Composite> constructedComposites = composites.values()
             .stream()
-            .map(x -> x.construct(requiredInterfaces, providedInterfaces, compositeRequiredInterfaces,
-                    compositeProvidedInterfaces))
+            .map(x -> x.construct(components.values(), compositeRequiredInterfaces, compositeProvidedOperations))
             .collect(Collectors.toList());
 
         // Remove redundant composites.
@@ -333,12 +324,15 @@ public class EclipsePCMDetector implements IPCMDetector {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(149);
-        sb.append("[PCMDetectorSimple] {\n\tcomponents: {\n");
-        components.forEach(comp -> {
-            sb.append("\t\t")
-                .append(getFullUnitName(comp))
-                .append('\n');
-        });
+        sb.append("[EclipsePCMDetector] {\n\tcomponents: {\n");
+        components.entrySet()
+            .forEach(entry -> {
+                sb.append("\t\t\"");
+                sb.append(entry.getKey());
+                sb.append("\" -> {");
+                sb.append(entry.getValue());
+                sb.append("\t\t}\n");
+            });
 
         sb.append("\t}\n\tinterfaces: {\n");
         operationInterfaces.forEach((iface, op) -> {
@@ -351,33 +345,6 @@ public class EclipsePCMDetector implements IPCMDetector {
             sb.append('\n');
         });
 
-        sb.append("\t}\n\tprovided relations: {\n")
-            .append(mapToString(providedInterfaces, 2))
-            .append("\t}\n\trequired interfaces: {\n")
-            .append(mapToString(requiredInterfaces, 2))
-            .append("\t}\n}");
         return sb.toString();
     }
-
-    private static String mapToString(Map<?, ? extends Collection<?>> map, int indentation) {
-        StringBuilder sb = new StringBuilder();
-        String indentString = "\t".repeat(indentation);
-        map.entrySet()
-            .forEach(entry -> {
-                sb.append(indentString);
-                sb.append('\"');
-                sb.append(entry.getKey());
-                sb.append("\" -> {");
-                entry.getValue()
-                    .forEach(value -> {
-                        sb.append("\t".repeat(indentation + 1));
-                        sb.append(value);
-                        sb.append('\n');
-                    });
-                sb.append(indentString);
-                sb.append("}\n");
-            });
-        return sb.toString();
-    }
-
 }
