@@ -7,16 +7,22 @@ import java.util.function.Predicate;
 import org.palladiosimulator.generator.fluent.repository.api.Repo;
 import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
 import org.palladiosimulator.generator.fluent.repository.structure.components.BasicComponentCreator;
+import org.palladiosimulator.generator.fluent.repository.structure.components.CompositeComponentCreator;
 import org.palladiosimulator.generator.fluent.repository.structure.interfaces.OperationInterfaceCreator;
 import org.palladiosimulator.pcm.repository.BasicComponent;
+import org.palladiosimulator.pcm.repository.CompositeComponent;
 import org.palladiosimulator.pcm.repository.OperationInterface;
 import org.palladiosimulator.pcm.repository.OperationSignature;
 import org.palladiosimulator.pcm.repository.Repository;
+import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.seff.ServiceEffectSpecification;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.AtomicComponent;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Component;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Composite;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.CompositionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceProvisionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceRequirementRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ServiceEffectSpecificationRelation;
@@ -59,8 +65,7 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
             }
         }
 
-        // TODO Add handling of composite components
-        // Add components to fluent repository
+        // Add basic components with their roles and seff to fluent repository
         for (AtomicComponent component : model.getByType(AtomicComponent.class)) {
             BasicComponentCreator componentCreator = getCreator(repositoryFactory, component);
 
@@ -115,8 +120,66 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
                 }
             }
 
+            // Add created basic component with roles and seff to repository
             fluentRepository.addToRepository(repositoryComponent);
         }
+
+        // Add composite components with their roles to fluent repository
+        for (Composite composite : model.getByType(Composite.class)) {
+            CompositeComponentCreator compositeCreator = getCreator(repositoryFactory, composite);
+
+            // Add provided interfaces
+            for (InterfaceProvisionRelation relation : provisionRelations) {
+                Interface interfaceInstance = relation.getDestination();
+                if (relation.getSource().equals(composite)) {
+                    String interfaceName = interfaceInstance.getValue().getEntityName();
+                    OperationInterface operationInterface = repositoryFactory.fetchOfOperationInterface(interfaceName);
+                    compositeCreator.provides(operationInterface, getProvidedRoleName(interfaceInstance));
+                }
+            }
+
+            // Add required interfaces
+            for (InterfaceRequirementRelation relation : requirementRelations) {
+                Interface interfaceInstance = relation.getDestination();
+                if (relation.getSource().equals(composite)) {
+                    String interfaceName = interfaceInstance.getValue().getEntityName();
+                    OperationInterface operationInterface = repositoryFactory.fetchOfOperationInterface(interfaceName);
+                    compositeCreator.requires(operationInterface, getRequiredRoleName(interfaceInstance));
+                }
+            }
+
+            // Add composite to fluent repository
+            fluentRepository.addToRepository(compositeCreator);
+        }
+
+        // Add compositions to repository -> All composites & composites have to be added beforehand
+        List<CompositionRelation> compositionRelations = model.getByType(CompositionRelation.class);
+        for (CompositionRelation relation : compositionRelations) {
+            Composite composite = relation.getSource();
+            Component<?> destination = relation.getDestination();
+
+            // Fetch composite from repository
+            CompositeComponent persistedCompositeComponent = repositoryFactory
+                    .fetchOfCompositeComponent(composite.getValue().getEntityName());
+            persistedCompositeComponent.getAssemblyContexts__ComposedStructure();
+
+            // Fetch composite child from repository & create temporary fluent creator
+            CompositeComponentCreator temporaryCreator = repositoryFactory.newCompositeComponent();
+            if (destination instanceof AtomicComponent) {
+                temporaryCreator.withAssemblyContext(
+                        repositoryFactory.fetchOfBasicComponent(destination.getValue().getEntityName()));
+            } else if (destination instanceof Composite) {
+                temporaryCreator.withAssemblyContext(
+                        repositoryFactory.fetchOfCompositeComponent(destination.getValue().getEntityName()));
+            }
+            CompositeComponent temporaryComposite = (CompositeComponent) temporaryCreator.build();
+
+            // Copy assembly contexts from temporary to persisted composite
+            persistedCompositeComponent.getAssemblyContexts__ComposedStructure()
+                    .addAll(temporaryComposite.getAssemblyContexts__ComposedStructure());
+        }
+
+        // TODO Add composite delegations
 
         return fluentRepository.createRepositoryNow();
     }
@@ -130,6 +193,17 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
         componentCreator.withName(wrappedComponent.getEntityName());
 
         return componentCreator;
+    }
+
+    private CompositeComponentCreator getCreator(FluentRepositoryFactory fluentFactory, Composite component) {
+        CompositeComponentCreator compositeCreator = fluentFactory.newCompositeComponent();
+
+        // TODO Identify important information within wrapped component
+        // Copy information from wrapped component, dismiss deprecated information.
+        RepositoryComponent wrappedComponent = component.getValue();
+        compositeCreator.withName(wrappedComponent.getEntityName());
+
+        return compositeCreator;
     }
 
     private OperationInterfaceCreator getCreator(FluentRepositoryFactory fluentFactory, Interface interfaceInstance) {

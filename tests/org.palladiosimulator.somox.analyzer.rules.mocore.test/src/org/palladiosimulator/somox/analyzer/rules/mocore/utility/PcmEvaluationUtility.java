@@ -13,6 +13,7 @@ import org.palladiosimulator.pcm.allocation.AllocationContext;
 import org.palladiosimulator.pcm.core.composition.AssemblyConnector;
 import org.palladiosimulator.pcm.core.composition.AssemblyContext;
 import org.palladiosimulator.pcm.repository.BasicComponent;
+import org.palladiosimulator.pcm.repository.CompositeComponent;
 import org.palladiosimulator.pcm.repository.DataType;
 import org.palladiosimulator.pcm.repository.Interface;
 import org.palladiosimulator.pcm.repository.OperationInterface;
@@ -37,6 +38,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Servi
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentAllocationRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentAssemblyRelation;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.CompositionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.DeploymentDeploymentRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceProvisionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceRequirementRelation;
@@ -100,11 +102,20 @@ public final class PcmEvaluationUtility {
     public static boolean representSame(RepositoryComponent component, RepositoryComponent otherComponent) {
         if (otherComponent instanceof BasicComponent && component instanceof BasicComponent) {
             return representSame((BasicComponent) component, (BasicComponent) otherComponent);
+        } else if (otherComponent instanceof CompositeComponent && component instanceof CompositeComponent) {
+            return representSame((CompositeComponent) component, (CompositeComponent) otherComponent);
         }
         return false;
     }
 
     public static boolean representSame(BasicComponent component, BasicComponent otherComponent) {
+        boolean equalName = Objects.equals(component.getEntityName(), otherComponent.getEntityName());
+        boolean equalType = Objects.equals(component.getComponentType(), otherComponent.getComponentType());
+        // TODO Check parameter usage => Is there a palladio equal check?
+        return equalName && equalType;
+    }
+
+    public static boolean representSame(CompositeComponent component, CompositeComponent otherComponent) {
         boolean equalName = Objects.equals(component.getEntityName(), otherComponent.getEntityName());
         boolean equalType = Objects.equals(component.getComponentType(), otherComponent.getComponentType());
         // TODO Check parameter usage => Is there a palladio equal check?
@@ -156,11 +167,11 @@ public final class PcmEvaluationUtility {
         return Optional.empty();
     }
 
-    public static Optional<BasicComponent> getRepresentative(Repository repository, Component<?> component) {
+    public static Optional<RepositoryComponent> getRepresentative(Repository repository, Component<?> component) {
         List<RepositoryComponent> components = repository.getComponents__Repository();
         for (RepositoryComponent repositoryComponent : components) {
             if (representSame(component.getValue(), repositoryComponent)) {
-                return Optional.of((BasicComponent) repositoryComponent);
+                return Optional.of(repositoryComponent);
             }
         }
         return Optional.empty();
@@ -181,6 +192,19 @@ public final class PcmEvaluationUtility {
         return getRepresentative(repository, component).isPresent();
     }
 
+    public static boolean containsRepresentative(Repository repository, CompositionRelation composition) {
+        CompositeComponent wrappedComposite = composition.getSource().getValue();
+        RepositoryComponent wrappedChild = composition.getDestination().getValue();
+        return repository.getComponents__Repository()
+                .stream()
+                .filter(component -> component instanceof CompositeComponent)
+                .map(component -> (CompositeComponent) component)
+                .filter(composite -> composite.getEntityName().equals(wrappedComposite.getEntityName()))
+                .flatMap(composite -> composite.getAssemblyContexts__ComposedStructure().stream())
+                .anyMatch(assemblyContext -> assemblyContext.getEncapsulatedComponent__AssemblyContext().getEntityName()
+                        .equals(wrappedChild.getEntityName()));
+    }
+
     public static boolean containsRepresentative(Repository repository,
             org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface interFace) {
         return getRepresentative(repository, interFace).isPresent();
@@ -189,7 +213,7 @@ public final class PcmEvaluationUtility {
     public static boolean containsRepresentative(Repository repository,
             InterfaceProvisionRelation interfaceProvision) {
         OperationInterface wrappedInterface = interfaceProvision.getDestination().getValue();
-        Optional<BasicComponent> optionalComponent = getRepresentative(repository, interfaceProvision.getSource());
+        Optional<RepositoryComponent> optionalComponent = getRepresentative(repository, interfaceProvision.getSource());
         if (optionalComponent.isPresent()) {
             List<ProvidedRole> roles = optionalComponent.get().getProvidedRoles_InterfaceProvidingEntity();
             return roles.stream()
@@ -205,7 +229,8 @@ public final class PcmEvaluationUtility {
     public static boolean containsRepresentative(Repository repository,
             InterfaceRequirementRelation interfaceRequirement) {
         OperationInterface wrappedInterface = interfaceRequirement.getDestination().getValue();
-        Optional<BasicComponent> optionalComponent = getRepresentative(repository, interfaceRequirement.getSource());
+        Optional<RepositoryComponent> optionalComponent = getRepresentative(repository,
+                interfaceRequirement.getSource());
         if (optionalComponent.isPresent()) {
             List<RequiredRole> roles = optionalComponent.get().getRequiredRoles_InterfaceRequiringEntity();
             return roles.stream()
@@ -232,9 +257,9 @@ public final class PcmEvaluationUtility {
         Signature signature = seffProvision.getSource().getDestination().getSource();
         ServiceEffectSpecification seff = seffProvision.getDestination();
 
-        Optional<BasicComponent> optionalComponent = getRepresentative(repository, provider);
-        if (optionalComponent.isPresent()) {
-            BasicComponent component = optionalComponent.get();
+        Optional<RepositoryComponent> optionalComponent = getRepresentative(repository, provider);
+        if (optionalComponent.isPresent() && optionalComponent.get() instanceof BasicComponent) {
+            BasicComponent component = (BasicComponent) optionalComponent.get();
             for (org.palladiosimulator.pcm.seff.ServiceEffectSpecification componentSeff : component
                     .getServiceEffectSpecifications__BasicComponent()) {
                 if (representSame(seff.getValue(), componentSeff)) {

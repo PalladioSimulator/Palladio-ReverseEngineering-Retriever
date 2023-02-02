@@ -9,11 +9,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.PcmSurrogate;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.AtomicComponent;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Component;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Composite;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.ServiceEffectSpecification;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentSignatureProvisionRelation;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.CompositionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceProvisionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceRequirementRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ServiceEffectSpecificationRelation;
@@ -27,7 +30,7 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
         // Test data
         RepositoryTransformer transformer = createTransformer();
         PcmSurrogate model = createEmptyModel();
-        Component<?> component = Component.getUniquePlaceholder();
+        AtomicComponent component = AtomicComponent.getUniquePlaceholder();
 
         model.add(component);
 
@@ -37,6 +40,99 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
         // Assertion
         assertNotNull(repository);
         assertTrue(containsRepresentative(repository, component));
+    }
+
+    @Test
+    public void testTransformSingleEmptyComposite() {
+        // Test data
+        RepositoryTransformer transformer = createTransformer();
+        PcmSurrogate model = createEmptyModel();
+        Composite composite = Composite.getUniquePlaceholder();
+
+        model.add(composite);
+
+        // Execution
+        Repository repository = transformer.transform(model);
+
+        // Assertion
+        assertNotNull(repository);
+        assertTrue(containsRepresentative(repository, composite));
+    }
+
+    @Test
+    public void testTransformCompositeWithAtomicComponentChild() {
+        // Test data
+        RepositoryTransformer transformer = createTransformer();
+        PcmSurrogate model = createEmptyModel();
+        Composite composite = Composite.getUniquePlaceholder();
+        AtomicComponent component = AtomicComponent.getUniquePlaceholder();
+        CompositionRelation compositionRelation = new CompositionRelation(composite, component, false);
+
+        model.add(composite);
+        model.add(component);
+        model.add(compositionRelation);
+
+        // Execution
+        Repository repository = transformer.transform(model);
+
+        // Assertion
+        assertNotNull(repository);
+        assertTrue(containsRepresentative(repository, composite));
+        assertTrue(containsRepresentative(repository, component));
+        assertTrue(containsRepresentative(repository, compositionRelation));
+    }
+
+    @Test
+    public void testTransformCompositeWithCompositeChild() {
+        // Test data
+        RepositoryTransformer transformer = createTransformer();
+        PcmSurrogate model = createEmptyModel();
+        Composite composite = Composite.getUniquePlaceholder();
+        Composite child = Composite.getUniquePlaceholder();
+        CompositionRelation compositionRelation = new CompositionRelation(composite, child, false);
+
+        model.add(composite);
+        model.add(child);
+        model.add(compositionRelation);
+
+        // Execution
+        Repository repository = transformer.transform(model);
+
+        // Assertion
+        assertNotNull(repository);
+        assertTrue(containsRepresentative(repository, composite));
+        assertTrue(containsRepresentative(repository, child));
+        assertTrue(containsRepresentative(repository, compositionRelation));
+    }
+
+    @Test
+    public void testTransformCompositeWithMultilevelChildren() {
+        // Test data
+        RepositoryTransformer transformer = createTransformer();
+        PcmSurrogate model = createEmptyModel();
+        Composite compositeLevelZero = Composite.getUniquePlaceholder();
+        Composite compositeLevelOne = Composite.getUniquePlaceholder();
+        AtomicComponent component = AtomicComponent.getUniquePlaceholder();
+        CompositionRelation compositionRelationFst = new CompositionRelation(compositeLevelZero,
+                compositeLevelOne, false);
+        CompositionRelation compositionRelationSnd = new CompositionRelation(compositeLevelOne, component, false);
+
+        model.add(compositeLevelZero);
+        model.add(compositeLevelOne);
+        model.add(component);
+        model.add(compositionRelationFst);
+        model.add(compositionRelationSnd);
+
+        // Execution
+        Repository repository = transformer.transform(model);
+
+        // Assertion
+        assertNotNull(repository);
+        assertTrue(containsRepresentative(repository, compositeLevelZero));
+        assertTrue(containsRepresentative(repository, compositeLevelOne));
+        assertTrue(containsRepresentative(repository, component));
+        assertTrue(containsRepresentative(repository, compositionRelationFst));
+        assertTrue(containsRepresentative(repository, compositionRelationSnd));
     }
 
     @Test
