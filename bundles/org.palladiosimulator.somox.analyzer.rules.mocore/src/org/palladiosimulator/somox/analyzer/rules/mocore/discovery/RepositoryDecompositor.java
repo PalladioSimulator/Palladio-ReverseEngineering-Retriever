@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.palladiosimulator.pcm.repository.BasicComponent;
+import org.palladiosimulator.pcm.repository.CompositeComponent;
 import org.palladiosimulator.pcm.repository.OperationProvidedRole;
 import org.palladiosimulator.pcm.repository.OperationRequiredRole;
 import org.palladiosimulator.pcm.repository.OperationSignature;
@@ -14,7 +15,9 @@ import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.repository.RequiredRole;
 import org.palladiosimulator.pcm.seff.ResourceDemandingSEFF;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.AtomicComponent;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Component;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Composite;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.ServiceEffectSpecification;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;
@@ -33,20 +36,53 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
     @Override
     public Collection<Discoverer<?>> decompose(Repository repository) {
         // Fetch components, interface provisions and requirements, signatures, and service effect specifications
-        Set<Component> components = new HashSet<>();
+        Set<AtomicComponent> atomicComponents = new HashSet<>();
+        Set<Composite> composites = new HashSet<>();
         Set<InterfaceProvisionRelation> interfaceProvisions = new HashSet<>();
         Set<InterfaceRequirementRelation> interfaceRequirements = new HashSet<>();
         Set<SignatureProvisionRelation> signatureProvisions = new HashSet<>();
         Set<ServiceEffectSpecificationRelation> seffProvisions = new HashSet<>();
         for (RepositoryComponent repositoryComponent : repository.getComponents__Repository()) {
-            Component component;
+            Component<?> component;
             if (repositoryComponent instanceof BasicComponent) {
-                component = new Component((BasicComponent) repositoryComponent, false);
-                components.add(component);
+                AtomicComponent atomicComponent = new AtomicComponent((BasicComponent) repositoryComponent, false);
+                atomicComponents.add(atomicComponent);
+                component = atomicComponent;
+
+                // Basic component specific behavior
+                // Fetch service effect specifications from basic component
+                for (org.palladiosimulator.pcm.seff.ServiceEffectSpecification seff : atomicComponent.getValue()
+                        .getServiceEffectSpecifications__BasicComponent()) {
+                    if (seff instanceof ResourceDemandingSEFF) {
+                        if (seff.getDescribedService__SEFF() instanceof OperationSignature) {
+                            ServiceEffectSpecification seffWrapper = new ServiceEffectSpecification(
+                                    (ResourceDemandingSEFF) seff, false);
+                            OperationSignature operationSignature = (OperationSignature) seff
+                                    .getDescribedService__SEFF();
+                            Signature signature = new Signature(operationSignature, false);
+                            Interface interFace = new Interface(operationSignature.getInterface__OperationSignature(),
+                                    false);
+                            SignatureProvisionRelation signatureProvision = new SignatureProvisionRelation(signature,
+                                    interFace, false);
+                            InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(component,
+                                    interFace, false);
+                            ComponentSignatureProvisionRelation componentSignatureProvision = new ComponentSignatureProvisionRelation(
+                                    interfaceProvision, signatureProvision, false);
+                            seffProvisions.add(new ServiceEffectSpecificationRelation(componentSignatureProvision,
+                                    seffWrapper, false));
+                        }
+                    }
+                }
+            } else if (repositoryComponent instanceof CompositeComponent) {
+                Composite composite = new Composite((CompositeComponent) repositoryComponent, false);
+                composites.add(composite);
+                component = composite;
+                // TODO No composite specific behavior -> Add compositions
             } else {
                 continue;
             }
 
+            // Behavior for generic repository components
             // Transform provided roles into interface provision relations
             for (ProvidedRole providedRole : repositoryComponent.getProvidedRoles_InterfaceProvidingEntity()) {
                 if (providedRole instanceof OperationProvidedRole) {
@@ -82,32 +118,11 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                     }
                 }
             }
-
-            // Fetch service effect specifications from component
-            for (org.palladiosimulator.pcm.seff.ServiceEffectSpecification seff : component.getValue()
-                    .getServiceEffectSpecifications__BasicComponent()) {
-                if (seff instanceof ResourceDemandingSEFF) {
-                    if (seff.getDescribedService__SEFF() instanceof OperationSignature) {
-                        ServiceEffectSpecification seffWrapper = new ServiceEffectSpecification(
-                                (ResourceDemandingSEFF) seff, false);
-                        OperationSignature operationSignature = (OperationSignature) seff.getDescribedService__SEFF();
-                        Signature signature = new Signature(operationSignature, false);
-                        Interface interFace = new Interface(operationSignature.getInterface__OperationSignature(),
-                                false);
-                        SignatureProvisionRelation signatureProvision = new SignatureProvisionRelation(signature,
-                                interFace, false);
-                        InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(component,
-                                interFace, false);
-                        ComponentSignatureProvisionRelation componentSignatureProvision = new ComponentSignatureProvisionRelation(
-                                interfaceProvision, signatureProvision, false);
-                        seffProvisions.add(new ServiceEffectSpecificationRelation(componentSignatureProvision,
-                                seffWrapper, false));
-                    }
-                }
-            }
         }
 
-        SimpleDiscoverer<Component> componentDiscoverer = new SimpleDiscoverer<>(components, Component.class);
+        SimpleDiscoverer<AtomicComponent> atomicComponentDiscoverer = new SimpleDiscoverer<>(atomicComponents,
+                AtomicComponent.class);
+        SimpleDiscoverer<Composite> compositeDiscoverer = new SimpleDiscoverer<>(composites, Composite.class);
         SimpleDiscoverer<SignatureProvisionRelation> signatureProvisionDiscoverer = new SimpleDiscoverer<>(
                 signatureProvisions, SignatureProvisionRelation.class);
         SimpleDiscoverer<InterfaceProvisionRelation> interfaceProvisionDiscoverer = new SimpleDiscoverer<>(
@@ -116,7 +131,7 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                 interfaceRequirements, InterfaceRequirementRelation.class);
         SimpleDiscoverer<ServiceEffectSpecificationRelation> seffProvisionDiscoverer = new SimpleDiscoverer<>(
                 seffProvisions, ServiceEffectSpecificationRelation.class);
-        return List.of(componentDiscoverer, signatureProvisionDiscoverer,
+        return List.of(atomicComponentDiscoverer, compositeDiscoverer, signatureProvisionDiscoverer,
                 interfaceProvisionDiscoverer, interfaceRequirementDiscoverer, seffProvisionDiscoverer);
     }
 }
