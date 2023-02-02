@@ -8,7 +8,7 @@ public class RequirementsBuilder {
     private final List<String> requiredInterfaces = new LinkedList<>();
 
     public void add(String... interfaces) {
-        this.add(interfaces);
+        this.add(List.of(interfaces));
     }
 
     public void add(Collection<String> interfaces) {

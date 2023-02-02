@@ -211,17 +211,19 @@ public class EclipsePCMDetector implements IPCMDetector {
     }
 
     public void detectProvidedOperation(CompilationUnit unit, String declaringIface, IMethodBinding method) {
-        if (method == null) {
-            LOG.warn("Unresolved method binding detected in " + getFullUnitName(unit) + "!");
-            // TODO: re-enable
-//            return;
-        }
         if (components.get(unit) == null) {
             components.put(unit, new ComponentBuilder(unit));
         }
+        String operationName;
+        if (method == null) {
+            LOG.warn("Unresolved method binding detected in " + getFullUnitName(unit) + "!");
+            operationName = "[unresolved]";
+        } else {
+            operationName = method.getName();
+        }
         components.get(unit)
             .provisions()
-            .add(new Operation(method, new JavaName(declaringIface, method.getName())));
+            .add(new Operation(method, new JavaName(declaringIface, operationName)));
     }
 
     public void detectPartOfComposite(CompilationUnit unit, String compositeName) {
