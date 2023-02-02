@@ -1,11 +1,7 @@
-package org.palladiosimulator.somox.analyzer.rules.engine;
+package org.palladiosimulator.somox.analyzer.rules.model;
 
 import java.util.Collections;
 import java.util.Set;
-
-import org.palladiosimulator.somox.analyzer.rules.model.Component;
-import org.palladiosimulator.somox.analyzer.rules.model.Provisions;
-import org.palladiosimulator.somox.analyzer.rules.model.Requirements;
 
 public class Composite {
 

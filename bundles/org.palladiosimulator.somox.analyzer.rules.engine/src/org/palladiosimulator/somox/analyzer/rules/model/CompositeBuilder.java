@@ -1,4 +1,4 @@
-package org.palladiosimulator.somox.analyzer.rules.engine;
+package org.palladiosimulator.somox.analyzer.rules.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,11 +10,6 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
-import org.palladiosimulator.somox.analyzer.rules.model.Component;
-import org.palladiosimulator.somox.analyzer.rules.model.ComponentBuilder;
-import org.palladiosimulator.somox.analyzer.rules.model.Provision;
-import org.palladiosimulator.somox.analyzer.rules.model.ProvisionsBuilder;
-import org.palladiosimulator.somox.analyzer.rules.model.RequirementsBuilder;
 
 public class CompositeBuilder {
 

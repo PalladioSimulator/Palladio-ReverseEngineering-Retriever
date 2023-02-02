@@ -22,6 +22,8 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 import org.palladiosimulator.somox.analyzer.rules.model.Component;
 import org.palladiosimulator.somox.analyzer.rules.model.ComponentBuilder;
+import org.palladiosimulator.somox.analyzer.rules.model.Composite;
+import org.palladiosimulator.somox.analyzer.rules.model.CompositeBuilder;
 import org.palladiosimulator.somox.analyzer.rules.model.JavaName;
 import org.palladiosimulator.somox.analyzer.rules.model.Operation;
 import org.palladiosimulator.somox.analyzer.rules.model.Provision;
