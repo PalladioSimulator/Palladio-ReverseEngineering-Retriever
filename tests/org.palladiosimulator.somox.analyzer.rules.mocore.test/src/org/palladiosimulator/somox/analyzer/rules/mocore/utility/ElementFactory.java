@@ -2,14 +2,17 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.utility;
 
 import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
 import org.palladiosimulator.pcm.repository.BasicComponent;
+import org.palladiosimulator.pcm.repository.CompositeComponent;
 import org.palladiosimulator.pcm.repository.OperationInterface;
 import org.palladiosimulator.pcm.repository.OperationSignature;
+import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.repository.RepositoryFactory;
 import org.palladiosimulator.pcm.resourceenvironment.CommunicationLinkResourceSpecification;
 import org.palladiosimulator.pcm.resourceenvironment.ResourceContainer;
 import org.palladiosimulator.pcm.resourceenvironment.ResourceenvironmentFactory;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.AtomicComponent;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Component;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Composite;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Deployment;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.LinkResourceSpecification;
@@ -40,6 +43,12 @@ public final class ElementFactory {
         String identifier = IdentifierGenerator.getUniqueIdentifier();
         BasicComponent value = new FluentRepositoryFactory().newBasicComponent().withName(identifier).build();
         return new AtomicComponent(value, isPlaceholder);
+    }
+
+    public static Composite createUniqueComposite(boolean isPlaceholder) {
+        String identifier = IdentifierGenerator.getUniqueIdentifier();
+        RepositoryComponent value = new FluentRepositoryFactory().newCompositeComponent().withName(identifier).build();
+        return new Composite((CompositeComponent) value, isPlaceholder);
     }
 
     public static Deployment createUniqueDeployment(boolean isPlaceholder) {
