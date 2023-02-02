@@ -23,7 +23,7 @@ public class RepositoryDecompositorTest extends DecompositorTest<RepositoryDecom
         Repository repository = createEmptyRepository();
 
         Collection<Discoverer<?>> discoverers = decompositor.decompose(repository);
-        assertEquals(6, discoverers.size());
+        assertEquals(7, discoverers.size());
         discoverers.forEach((discoverer) -> assertTrue(discoverer.getDiscoveries().isEmpty()));
     }
 
@@ -41,7 +41,7 @@ public class RepositoryDecompositorTest extends DecompositorTest<RepositoryDecom
 
         Collection<Discoverer<?>> discoverers = decompositor.decompose(repository);
         assertFalse(discoverers.isEmpty());
-        assertEquals(6, discoverers.size());
+        assertEquals(7, discoverers.size());
 
         // Remove all discoverers except component discoverer
         List<Discoverer<?>> modifiableDiscoverers = new ArrayList<>(discoverers);
@@ -61,6 +61,7 @@ public class RepositoryDecompositorTest extends DecompositorTest<RepositoryDecom
     }
 
     // TODO Add tests for interface, signatures, seff, and all relevant relations
+    // TODO Add tests for composition, delegation
 
     @Override
     protected RepositoryDecompositor createDecompositor() {

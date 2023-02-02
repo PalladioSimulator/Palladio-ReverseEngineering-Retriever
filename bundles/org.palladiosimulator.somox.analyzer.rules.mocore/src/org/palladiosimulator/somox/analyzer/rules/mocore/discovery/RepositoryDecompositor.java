@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.palladiosimulator.pcm.core.composition.AssemblyContext;
 import org.palladiosimulator.pcm.repository.BasicComponent;
 import org.palladiosimulator.pcm.repository.CompositeComponent;
 import org.palladiosimulator.pcm.repository.OperationProvidedRole;
@@ -22,6 +23,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Inter
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.ServiceEffectSpecification;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentSignatureProvisionRelation;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.CompositionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceProvisionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceRequirementRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ServiceEffectSpecificationRelation;
@@ -38,10 +40,12 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
         // Fetch components, interface provisions and requirements, signatures, and service effect specifications
         Set<AtomicComponent> atomicComponents = new HashSet<>();
         Set<Composite> composites = new HashSet<>();
+        Set<CompositionRelation> compositions = new HashSet<>();
         Set<InterfaceProvisionRelation> interfaceProvisions = new HashSet<>();
         Set<InterfaceRequirementRelation> interfaceRequirements = new HashSet<>();
         Set<SignatureProvisionRelation> signatureProvisions = new HashSet<>();
         Set<ServiceEffectSpecificationRelation> seffProvisions = new HashSet<>();
+
         for (RepositoryComponent repositoryComponent : repository.getComponents__Repository()) {
             Component<?> component;
             if (repositoryComponent instanceof BasicComponent) {
@@ -77,8 +81,32 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                 Composite composite = new Composite((CompositeComponent) repositoryComponent, false);
                 composites.add(composite);
                 component = composite;
-                // TODO No composite specific behavior -> Add compositions
+
+                // Composite specific behavior
+                // Create composition relations for each composite
+                for (AssemblyContext assemblyContext : composite.getValue().getAssemblyContexts__ComposedStructure()) {
+                    RepositoryComponent encapsulatedComponent = assemblyContext
+                            .getEncapsulatedComponent__AssemblyContext();
+
+                    // Create appropriate wrapper for child component
+                    Component<?> childWrapper;
+                    if (encapsulatedComponent instanceof BasicComponent) {
+                        childWrapper = new AtomicComponent((BasicComponent) encapsulatedComponent, false);
+                    } else if (repositoryComponent instanceof CompositeComponent) {
+                        childWrapper = new Composite((CompositeComponent) encapsulatedComponent, false);
+                    } else {
+                        // Ignore child that is neither basic nor composite
+                        continue;
+                    }
+
+                    // Create composition for composite & child
+                    CompositionRelation composition = new CompositionRelation(composite, childWrapper, false);
+                    compositions.add(composition);
+                }
+
+                // TODO Create delegations for composite
             } else {
+                // Ignore repository components that are neither basic nor composite
                 continue;
             }
 
@@ -123,6 +151,8 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
         SimpleDiscoverer<AtomicComponent> atomicComponentDiscoverer = new SimpleDiscoverer<>(atomicComponents,
                 AtomicComponent.class);
         SimpleDiscoverer<Composite> compositeDiscoverer = new SimpleDiscoverer<>(composites, Composite.class);
+        SimpleDiscoverer<CompositionRelation> compositionDiscoverer = new SimpleDiscoverer<>(compositions,
+                CompositionRelation.class);
         SimpleDiscoverer<SignatureProvisionRelation> signatureProvisionDiscoverer = new SimpleDiscoverer<>(
                 signatureProvisions, SignatureProvisionRelation.class);
         SimpleDiscoverer<InterfaceProvisionRelation> interfaceProvisionDiscoverer = new SimpleDiscoverer<>(
@@ -131,7 +161,8 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                 interfaceRequirements, InterfaceRequirementRelation.class);
         SimpleDiscoverer<ServiceEffectSpecificationRelation> seffProvisionDiscoverer = new SimpleDiscoverer<>(
                 seffProvisions, ServiceEffectSpecificationRelation.class);
-        return List.of(atomicComponentDiscoverer, compositeDiscoverer, signatureProvisionDiscoverer,
-                interfaceProvisionDiscoverer, interfaceRequirementDiscoverer, seffProvisionDiscoverer);
+        return List.of(atomicComponentDiscoverer, compositeDiscoverer, compositionDiscoverer,
+                signatureProvisionDiscoverer, interfaceProvisionDiscoverer, interfaceRequirementDiscoverer,
+                seffProvisionDiscoverer);
     }
 }
