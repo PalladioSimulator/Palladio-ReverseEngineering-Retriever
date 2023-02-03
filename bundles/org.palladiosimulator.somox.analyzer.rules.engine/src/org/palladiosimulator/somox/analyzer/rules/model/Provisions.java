@@ -4,33 +4,43 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-public class Provisions implements Iterable<Provision> {
-    private final Set<Provision> provisions;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.palladiosimulator.somox.analyzer.rules.engine.MapMerger;
 
-    public Provisions(Collection<Provision> provisions) {
+public class Provisions implements Iterable<OperationInterface> {
+    private final Set<OperationInterface> provisions;
+
+    public Provisions(Collection<OperationInterface> provisions) {
         // TODO: Grouping algorithm - longest common prefix etc.,
         // probably requires more functionality in Provision
 
         this.provisions = Collections.unmodifiableSet(new HashSet<>(provisions));
     }
 
-    public Set<Provision> get() {
+    public Set<OperationInterface> get() {
         return provisions;
     }
 
-    public boolean contains(String iface) {
+    public boolean contains(OperationInterface iface) {
         return provisions.stream()
             .anyMatch(x -> x.isPartOf(iface));
     }
 
-    public boolean contains(Operation operation) {
-        return provisions.contains(operation);
+    @Override
+    public Iterator<OperationInterface> iterator() {
+        return provisions.iterator();
     }
 
-    @Override
-    public Iterator<Provision> iterator() {
-        return provisions.iterator();
+    public Map<String, List<IMethodBinding>> simplified() {
+        List<Map<String, List<IMethodBinding>>> simplifiedInterfaces = provisions.stream()
+            .map(OperationInterface::simplified)
+            .collect(Collectors.toList());
+
+        return MapMerger.merge(simplifiedInterfaces);
     }
 }

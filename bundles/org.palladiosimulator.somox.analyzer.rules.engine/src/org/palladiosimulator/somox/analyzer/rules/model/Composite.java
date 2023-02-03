@@ -7,12 +7,12 @@ public class Composite {
 
     private final String name;
     private final Set<Component> parts;
-    private final Set<String> internalInterfaces;
+    private final Set<OperationInterface> internalInterfaces;
     private final Requirements requirements;
     private final Provisions provisions;
 
     public Composite(String name, Set<Component> parts, Requirements requirements, Provisions provisions,
-            Set<String> internalInterfaces) {
+            Set<OperationInterface> internalInterfaces) {
         this.name = name;
         this.parts = parts;
         this.internalInterfaces = internalInterfaces;
@@ -36,7 +36,7 @@ public class Composite {
         return Collections.unmodifiableSet(parts);
     }
 
-    public Set<String> internalInterfaces() {
+    public Set<OperationInterface> internalInterfaces() {
         return Collections.unmodifiableSet(internalInterfaces);
     }
 

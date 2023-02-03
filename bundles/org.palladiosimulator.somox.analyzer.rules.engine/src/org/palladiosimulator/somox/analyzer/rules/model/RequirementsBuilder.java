@@ -5,17 +5,17 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class RequirementsBuilder {
-    private final List<String> requiredInterfaces = new LinkedList<>();
+    private final List<EntireInterface> requirements = new LinkedList<>();
 
-    public void add(String... interfaces) {
+    public void add(EntireInterface... interfaces) {
         this.add(List.of(interfaces));
     }
 
-    public void add(Collection<String> interfaces) {
-        requiredInterfaces.addAll(interfaces);
+    public void add(Collection<EntireInterface> interfaces) {
+        requirements.addAll(interfaces);
     }
 
     public Requirements create() {
-        return new Requirements(requiredInterfaces);
+        return new Requirements(requirements);
     }
 }

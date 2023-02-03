@@ -217,7 +217,6 @@ class PiggymetricsRules extends IRule {
 			// Remove leading "//". This can occur if requestedUnitMapping
 			// has a leading "/" and the contextPath is "/".
 			ifaceName = ifaceName.replace("//", '/');
-			pcmDetector.detectOperationInterface(unit, ifaceName);
 			for (m : getMethods(unit)) {
 				val annotated = hasMapping(m);
 				if (annotated) {
@@ -242,12 +241,12 @@ class PiggymetricsRules extends IRule {
 			}
 		}
 
+		// TODO: This can be solved differently now, for all implemented interfaces instead of just one.
 		var inFs = getAllInterfaces(unit)
 		val isImplementingOne = inFs.size == 1
 
 		if (isComponent && isImplementingOne) {
 			var firstIn = inFs.get(0)
-			pcmDetector.detectOperationInterface(firstIn)
 			for (m : getMethods(firstIn)) {
 				pcmDetector.detectProvidedOperation(unit, firstIn.resolveBinding, m)
 			}

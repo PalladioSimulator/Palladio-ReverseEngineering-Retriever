@@ -5,13 +5,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ProvisionsBuilder {
-    private final List<Provision> provisions = new LinkedList<>();
+    private final List<OperationInterface> provisions = new LinkedList<>();
 
-    public void add(Provision... provisions) {
+    public void add(OperationInterface... provisions) {
         this.add(List.of(provisions));
     }
 
-    public void add(Collection<Provision> provisions) {
+    public void add(Collection<OperationInterface> provisions) {
         this.provisions.addAll(provisions);
     }
 

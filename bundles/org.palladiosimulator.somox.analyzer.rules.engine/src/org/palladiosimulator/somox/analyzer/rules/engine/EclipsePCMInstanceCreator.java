@@ -2,6 +2,7 @@ package org.palladiosimulator.somox.analyzer.rules.engine;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +34,8 @@ import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrap
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.model.Component;
 import org.palladiosimulator.somox.analyzer.rules.model.Composite;
-import org.palladiosimulator.somox.analyzer.rules.model.Provision;
+import org.palladiosimulator.somox.analyzer.rules.model.EntireInterface;
+import org.palladiosimulator.somox.analyzer.rules.model.OperationInterface;
 
 // TODO Bug-fix, probably
 // Class to create a pcm instance out of all results from the detector class
@@ -96,7 +98,7 @@ public class EclipsePCMInstanceCreator {
      * @return the PCM repository model
      */
     public Repository createPCM(Map<String, List<CompilationUnitWrapper>> mapping) {
-        final List<Component> components = blackboard.getEclipsePCMDetector()
+        final Set<Component> components = blackboard.getEclipsePCMDetector()
             .getComponents();
         final Map<String, List<IMethodBinding>> interfaces = blackboard.getEclipsePCMDetector()
             .getOperationInterfaces();
@@ -111,14 +113,14 @@ public class EclipsePCMInstanceCreator {
             composite.parts()
                 .forEach(x -> componentCompositeCreators.put(x, c));
             composite.internalInterfaces()
-                .forEach(x -> ifaceCompositeCreators.put(x, c));
+                .forEach(x -> ifaceCompositeCreators.put(x.getInterface(), c));
             compositeCreators.put(composite, c);
 
-            for (String compRequiredIface : composite.requirements()) {
-                c.requires(create.fetchOfOperationInterface(compRequiredIface));
+            for (EntireInterface compRequirement : composite.requirements()) {
+                c.requires(create.fetchOfOperationInterface(compRequirement.getInterface()));
             }
 
-            for (Provision compProvision : composite.provisions()) {
+            for (OperationInterface compProvision : composite.provisions()) {
                 c.provides(create.fetchOfOperationInterface(compProvision.getInterface()));
             }
         }
@@ -154,10 +156,11 @@ public class EclipsePCMInstanceCreator {
                         .getEntityName(), new Pair<OperationProvidedRole, AssemblyContext>(y, x))));
 
             // Match them up
-            for (String internalIface : composite.internalInterfaces()) {
-                for (Pair<OperationRequiredRole, AssemblyContext> r : innerRequirements.getOrDefault(internalIface,
+            for (OperationInterface internalInterface : composite.internalInterfaces()) {
+                String ifaceName = internalInterface.getInterface();
+                for (Pair<OperationRequiredRole, AssemblyContext> r : innerRequirements.getOrDefault(ifaceName,
                         List.of())) {
-                    for (Pair<OperationProvidedRole, AssemblyContext> p : innerProvisions.getOrDefault(internalIface,
+                    for (Pair<OperationProvidedRole, AssemblyContext> p : innerProvisions.getOrDefault(ifaceName,
                             List.of())) {
                         if (!r.getT2()
                             .equals(p.getT2())) {
@@ -174,10 +177,11 @@ public class EclipsePCMInstanceCreator {
                 .forEach(x -> outerRequirements.put(x.getRequiredInterface__OperationRequiredRole()
                     .getEntityName(), x));
 
-            for (String compRequiredIface : composite.requirements()) {
-                for (Pair<OperationRequiredRole, AssemblyContext> r : innerRequirements.getOrDefault(compRequiredIface,
+            for (EntireInterface compRequirement : composite.requirements()) {
+                String requiredInterface = compRequirement.getInterface();
+                for (Pair<OperationRequiredRole, AssemblyContext> r : innerRequirements.getOrDefault(requiredInterface,
                         List.of())) {
-                    c.withRequiredDelegationConnection(r.getT2(), r.getT1(), outerRequirements.get(compRequiredIface));
+                    c.withRequiredDelegationConnection(r.getT2(), r.getT1(), outerRequirements.get(requiredInterface));
                 }
             }
 
@@ -188,7 +192,7 @@ public class EclipsePCMInstanceCreator {
                 .forEach(x -> outerProvisions.put(x.getProvidedInterface__OperationProvidedRole()
                     .getEntityName(), x));
 
-            for (Provision compProvision : composite.provisions()) {
+            for (OperationInterface compProvision : composite.provisions()) {
                 String providedInterface = compProvision.getInterface();
                 for (Pair<OperationProvidedRole, AssemblyContext> r : innerProvisions.getOrDefault(providedInterface,
                         List.of())) {
@@ -236,7 +240,7 @@ public class EclipsePCMInstanceCreator {
         });
     }
 
-    private void createPCMComponents(List<Component> components) {
+    private void createPCMComponents(Set<Component> components) {
         for (final Component comp : components) {
             final CompilationUnit compUnit = comp.compilationUnit();
             AbstractTypeDeclaration firstTypeDecl = (AbstractTypeDeclaration) compUnit.types()
@@ -244,33 +248,36 @@ public class EclipsePCMInstanceCreator {
             BasicComponentCreator pcmComp = create.newBasicComponent()
                 .withName(wrapName(firstTypeDecl.resolveBinding()));
 
-            // TODO: Implement
-            final Set<String> providedInterfaces = Set.of(); // blackboard.getEclipsePCMDetector()
-                                                             // .getProvidedInterfaces(comp);
-
-            for (String iface : providedInterfaces) {
+            Set<String> distinctInterfaces = new HashSet<>();
+            for (OperationInterface provision : comp.provisions()) {
+                String providedInterface = provision.getInterface();
+                if (distinctInterfaces.contains(providedInterface)) {
+                    continue;
+                }
+                distinctInterfaces.add(providedInterface);
                 try {
-                    pcmComp.provides(create.fetchOfOperationInterface(iface), "dummy name");
+                    pcmComp.provides(create.fetchOfOperationInterface(providedInterface), "dummy name");
                 } catch (FluentApiException e) {
                     // Add the interface on-demand if it was not in the model previously.
                     // This is necessary for interfaces that were not in the class path of the java
                     // parser.
                     create.newOperationInterface()
-                        .withName(iface);
-                    pcmComp.provides(create.fetchOfOperationInterface(iface), "dummy name");
+                        .withName(providedInterface);
+                    pcmComp.provides(create.fetchOfOperationInterface(providedInterface), "dummy name");
                 }
             }
 
-            for (String requInter : comp.requirements()) {
+            for (EntireInterface requirement : comp.requirements()) {
+                String requiredInterface = requirement.getInterface();
                 try {
-                    pcmComp.requires(create.fetchOfOperationInterface(requInter), "dummy require name");
+                    pcmComp.requires(create.fetchOfOperationInterface(requiredInterface), "dummy require name");
                 } catch (FluentApiException e) {
                     // Add the interface on-demand if it was not in the model previously.
                     // This is necessary for interfaces that were not in the class path of the java
                     // parser.
                     create.newOperationInterface()
-                        .withName(requInter);
-                    pcmComp.requires(create.fetchOfOperationInterface(requInter), "dummy require name");
+                        .withName(requiredInterface);
+                    pcmComp.requires(create.fetchOfOperationInterface(requiredInterface), "dummy require name");
                 }
             }
             BasicComponent builtComp = pcmComp.build();

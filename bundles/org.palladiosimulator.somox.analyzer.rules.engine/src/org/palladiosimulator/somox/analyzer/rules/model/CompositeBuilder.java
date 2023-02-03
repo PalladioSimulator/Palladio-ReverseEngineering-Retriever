@@ -24,8 +24,8 @@ public class CompositeBuilder {
         explicitParts.add(componentBuilder);
     }
 
-    public Composite construct(Collection<Component> components, Set<String> compositeRequirements,
-            Set<Provision> compositeProvisions) {
+    public Composite construct(Collection<Component> components, Set<EntireInterface> compositeRequirements,
+            Set<OperationInterface> compositeProvisions) {
         Logger.getLogger(getClass())
             .warn("Constructing composite component " + name);
 
@@ -34,21 +34,20 @@ public class CompositeBuilder {
             .map(ComponentBuilder::create)
             .collect(Collectors.toSet());
 
-        Set<String> internalRequirements = new HashSet<>();
-        Set<Provision> internalProvisions = new HashSet<>();
+        Set<OperationInterface> internalInterfaces = new HashSet<>();
 
         int previousPartCount = 0;
         int previousInternalInterfaceCount = 0;
         do {
             previousPartCount = parts.size();
-            previousInternalInterfaceCount = internalRequirements.size();
+            previousInternalInterfaceCount = internalInterfaces.size();
 
-            propagateProvisions(components, compositeProvisions, parts, internalProvisions);
-            propagateRequirements(components, compositeRequirements, parts, internalRequirements);
-        } while (parts.size() > previousPartCount && internalRequirements.size() > previousInternalInterfaceCount);
+            propagateProvisions(components, compositeProvisions, parts, internalInterfaces);
+            propagateRequirements(components, compositeRequirements, parts, internalInterfaces);
+        } while (parts.size() > previousPartCount && internalInterfaces.size() > previousInternalInterfaceCount);
 
-        Set<String> requirements = new HashSet<>();
-        Set<Provision> provisions = new HashSet<>();
+        Set<EntireInterface> requirements = new HashSet<>();
+        Set<OperationInterface> provisions = new HashSet<>();
 
         for (Component part : parts) {
             requirements.addAll(part.requirements()
@@ -64,21 +63,21 @@ public class CompositeBuilder {
         ProvisionsBuilder provisionsBuilder = new ProvisionsBuilder();
         provisionsBuilder.add(provisions);
 
-        return new Composite(name, parts, requirementsBuilder.create(), provisionsBuilder.create(),
-                internalRequirements);
+        return new Composite(name, parts, requirementsBuilder.create(), provisionsBuilder.create(), internalInterfaces);
     }
 
     // Writes to allParts and internalInterfaces.
     private static void propagateRequirements(final Collection<Component> allComponents,
-            final Set<String> compositeRequirements, Set<Component> allParts, Set<String> internalInterfaces) {
+            final Set<EntireInterface> compositeRequirements, Set<Component> allParts,
+            Set<OperationInterface> internalInterfaces) {
 
         // Iterate through all units with provisions. If a unit provides a part for this composite,
         // it also becomes part of it.
         for (Component requiringComponent : allComponents) {
-            List<RequirementChain> traversedInterfaces = traceRequirementToAPart(allComponents, compositeRequirements,
+            List<InterfaceChain> traversedInterfaces = traceRequirementToAPart(allComponents, compositeRequirements,
                     allParts, requiringComponent);
 
-            // A unit is part of this composite if a part the composite requires it.
+            // A unit is part of this composite if a part of the composite requires it.
             if (!traversedInterfaces.isEmpty()) {
                 allParts.add(requiringComponent);
                 traversedInterfaces.forEach(x -> x.addTo(internalInterfaces));
@@ -88,13 +87,14 @@ public class CompositeBuilder {
 
     // Writes to allParts and internalOperations.
     private static void propagateProvisions(final Collection<Component> allComponents,
-            final Set<Provision> compositeProvisions, Set<Component> allParts, Set<Provision> internalOperations) {
+            final Set<OperationInterface> compositeProvisions, Set<Component> allParts,
+            Set<OperationInterface> internalOperations) {
 
         // Iterate through all units with provisions. If a unit provides a part for this composite,
         // it also becomes part of it.
         for (Component providingComponent : allComponents) {
 
-            List<ProvisionChain> traversedOperations = traceProvisionToAPart(allComponents, compositeProvisions,
+            List<InterfaceChain> traversedOperations = traceProvisionToAPart(allComponents, compositeProvisions,
                     allParts, providingComponent);
 
             // A unit is part of this composite if a part the composite requires it.
@@ -105,23 +105,23 @@ public class CompositeBuilder {
         }
     }
 
-    private static List<RequirementChain> traceRequirementToAPart(final Collection<Component> allComponents,
-            final Set<String> compositeRequirements, final Set<Component> allParts,
+    private static List<InterfaceChain> traceRequirementToAPart(final Collection<Component> allComponents,
+            final Set<EntireInterface> compositeRequirements, final Set<Component> allParts,
             final Component requiringComponent) {
 
-        Stack<RequirementChain> componentRequirements = new Stack<>();
+        Stack<InterfaceChain> componentRequirements = new Stack<>();
         requiringComponent.requirements()
             .get()
             .stream()
             // Do not include interfaces required by composites.
             // This ensures that composites providing for this composite do not become part of it.
             .filter(x -> !compositeRequirements.contains(x))
-            .map(x -> new RequirementChain(x))
+            .map(x -> new InterfaceChain(x))
             .forEach(componentRequirements::add);
 
-        List<RequirementChain> traversedOperations = new ArrayList<>();
+        List<InterfaceChain> traversedOperations = new ArrayList<>();
         while (!componentRequirements.isEmpty()) {
-            RequirementChain requirementChain = componentRequirements.pop();
+            InterfaceChain requirementChain = componentRequirements.pop();
             Set<Component> providingComponents = allComponents.stream()
                 .filter(x -> x.provisions()
                     .contains(requirementChain.last()))
@@ -153,10 +153,11 @@ public class CompositeBuilder {
         return traversedOperations;
     }
 
-    private static List<ProvisionChain> traceProvisionToAPart(final Collection<Component> allComponents,
-            Set<Provision> compositeProvisions, final Set<Component> allParts, final Component providingComponent) {
+    private static List<InterfaceChain> traceProvisionToAPart(final Collection<Component> allComponents,
+            Set<OperationInterface> compositeProvisions, final Set<Component> allParts,
+            final Component providingComponent) {
 
-        Stack<ProvisionChain> componentProvisions = new Stack<>();
+        Stack<InterfaceChain> componentProvisions = new Stack<>();
         providingComponent.provisions()
             .get()
             .stream()
@@ -164,17 +165,16 @@ public class CompositeBuilder {
             // This ensures that composites requiring this composite
             // do not become part of it.
             .filter(x -> !compositeProvisions.contains(x))
-            .map(x -> new ProvisionChain(x))
+            .map(x -> new InterfaceChain(x))
             .forEach(componentProvisions::add);
 
-        List<ProvisionChain> traversedOperations = new ArrayList<>();
+        List<InterfaceChain> traversedOperations = new ArrayList<>();
         while (!componentProvisions.isEmpty()) {
-            ProvisionChain provisionChain = componentProvisions.pop();
+            InterfaceChain provisionChain = componentProvisions.pop();
 
             Set<Component> requiringComponents = allComponents.stream()
                 .filter(x -> x.requirements()
-                    .contains(provisionChain.last()
-                        .getInterface()))
+                    .contains(provisionChain.last()))
                 .filter(x -> providingComponent.equals(x))
                 .collect(Collectors.toSet());
 
@@ -203,69 +203,34 @@ public class CompositeBuilder {
         return traversedOperations;
     }
 
-    private static class ProvisionChain {
-        // Provision path where a given element provides all those following it.
-        private final List<Provision> path;
-        private final Set<Provision> memberSet;
-
-        public ProvisionChain(Provision... path) {
-            this.path = List.of(path);
-            this.memberSet = Set.of(path);
-        }
-
-        public Provision last() {
-            return path.get(path.size() - 1);
-        }
-
-        public void addTo(Collection<Provision> collection) {
-            collection.addAll(path);
-        }
-
-        public Optional<ProvisionChain> extend(Provision next) {
-            // Avoid relation cycles.
-            if (memberSet.contains(next)) {
-                return Optional.empty();
-            }
-
-            List<Provision> merged = new ArrayList<>(path);
-            merged.add(next);
-            return Optional.of(new ProvisionChain(merged.toArray(new Provision[0])));
-        }
-
-        @Override
-        public String toString() {
-            return path.toString();
-        }
-    }
-
-    private static class RequirementChain {
-        // Requirement/Provision path where a given element requires/provides all those following
+    private static class InterfaceChain {
+        // Provision/Requirement path where a given element provides/requires all those following
         // it.
-        private final List<String> path;
-        private final Set<String> memberSet;
+        private final List<OperationInterface> path;
+        private final Set<OperationInterface> memberSet;
 
-        public RequirementChain(String... path) {
+        public InterfaceChain(OperationInterface... path) {
             this.path = List.of(path);
             this.memberSet = Set.of(path);
         }
 
-        public String last() {
+        public OperationInterface last() {
             return path.get(path.size() - 1);
         }
 
-        public void addTo(Collection<String> collection) {
+        public void addTo(Collection<OperationInterface> collection) {
             collection.addAll(path);
         }
 
-        public Optional<RequirementChain> extend(String next) {
+        public Optional<InterfaceChain> extend(OperationInterface next) {
             // Avoid relation cycles.
             if (memberSet.contains(next)) {
                 return Optional.empty();
             }
 
-            List<String> merged = new ArrayList<>(path);
+            List<OperationInterface> merged = new ArrayList<>(path);
             merged.add(next);
-            return Optional.of(new RequirementChain(merged.toArray(new String[0])));
+            return Optional.of(new InterfaceChain(merged.toArray(new OperationInterface[0])));
         }
 
         @Override
