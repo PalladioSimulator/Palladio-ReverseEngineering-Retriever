@@ -5,7 +5,7 @@ import java.util.Optional;
 public interface OperationName {
     String getFullName();
 
-    Optional<String> getName(String baseInterface);
+    Optional<String> forInterface(String baseInterface);
 
     String getInterface();
 

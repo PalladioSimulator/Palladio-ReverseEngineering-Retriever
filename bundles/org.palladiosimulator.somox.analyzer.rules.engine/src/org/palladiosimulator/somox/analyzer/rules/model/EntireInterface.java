@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 // TODO: Handle paths properly
@@ -46,7 +45,7 @@ public class EntireInterface implements OperationInterface {
     }
 
     @Override
-    public Map<String, List<IMethodBinding>> simplified() {
+    public Map<String, List<Operation>> simplified() {
         return Map.of(name, List.of());
     }
 }

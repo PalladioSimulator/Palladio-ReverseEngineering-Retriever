@@ -26,6 +26,7 @@ import org.palladiosimulator.somox.analyzer.rules.model.EntireInterface;
 import org.palladiosimulator.somox.analyzer.rules.model.JavaName;
 import org.palladiosimulator.somox.analyzer.rules.model.Operation;
 import org.palladiosimulator.somox.analyzer.rules.model.OperationInterface;
+import org.palladiosimulator.somox.analyzer.rules.model.OperationName;
 
 /**
  * This class is used to detect and hold all relevant elements found during the processing of rules.
@@ -165,9 +166,6 @@ public class EclipsePCMDetector implements IPCMDetector {
     }
 
     public void detectProvidedOperation(CompilationUnit unit, String declaringIface, IMethodBinding method) {
-        if (components.get(unit) == null) {
-            components.put(unit, new ComponentBuilder(unit));
-        }
         String operationName;
         if (method == null) {
             LOG.warn("Unresolved method binding detected in " + getFullUnitName(unit) + "!");
@@ -175,9 +173,17 @@ public class EclipsePCMDetector implements IPCMDetector {
         } else {
             operationName = method.getName();
         }
+
+        detectProvidedOperation(unit, method, new JavaName(declaringIface, operationName));
+    }
+
+    public void detectProvidedOperation(CompilationUnit unit, IMethodBinding method, OperationName name) {
+        if (components.get(unit) == null) {
+            components.put(unit, new ComponentBuilder(unit));
+        }
         components.get(unit)
             .provisions()
-            .add(new Operation(method, new JavaName(declaringIface, operationName)));
+            .add(new Operation(method, name));
     }
 
     public void detectPartOfComposite(CompilationUnit unit, String compositeName) {
@@ -205,17 +211,17 @@ public class EclipsePCMDetector implements IPCMDetector {
 
     public void detectCompositeProvidedOperation(CompilationUnit unit, ITypeBinding declaringIface,
             IMethodBinding method) {
-        String declaringIfaceName = NameConverter.toPCMIdentifier(declaringIface);
-        detectCompositeProvidedOperation(unit, declaringIfaceName, method);
+        detectCompositeProvidedOperation(unit, NameConverter.toPCMIdentifier(declaringIface), method);
     }
 
     public void detectCompositeProvidedOperation(CompilationUnit unit, String declaringIface, IMethodBinding method) {
-        addCompositeProvidedOperation(new Operation(method, new JavaName(declaringIface, method.getName())));
+        compositeProvisions.add(new Operation(method, new JavaName(declaringIface, method.getName())));
         detectProvidedOperation(unit, declaringIface, method);
     }
 
-    private void addCompositeProvidedOperation(Operation operation) {
-        compositeProvisions.add(operation);
+    public void detectCompositeProvidedOperation(CompilationUnit unit, IMethodBinding method, OperationName name) {
+        compositeProvisions.add(new Operation(method, name));
+        detectProvidedOperation(unit, method, name);
     }
 
     private CompositeBuilder getComposite(String name) {
@@ -237,8 +243,8 @@ public class EclipsePCMDetector implements IPCMDetector {
             .collect(Collectors.toSet());
     }
 
-    protected Map<String, List<IMethodBinding>> getOperationInterfaces() {
-        List<Map<String, List<IMethodBinding>>> operationInterfaces = getComponents().stream()
+    protected Map<String, List<Operation>> getOperationInterfaces() {
+        List<Map<String, List<Operation>>> operationInterfaces = getComponents().stream()
             .map(x -> x.provisions()
                 .simplified())
             .collect(Collectors.toList());

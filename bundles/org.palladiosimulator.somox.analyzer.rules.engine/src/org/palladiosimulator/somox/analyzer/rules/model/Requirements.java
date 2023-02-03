@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.palladiosimulator.somox.analyzer.rules.engine.MapMerger;
 
 public class Requirements implements Iterable<EntireInterface> {
@@ -34,8 +33,8 @@ public class Requirements implements Iterable<EntireInterface> {
             .iterator();
     }
 
-    public Map<String, List<IMethodBinding>> simplified() {
-        List<Map<String, List<IMethodBinding>>> simplifiedInterfaces = requirements.stream()
+    public Map<String, List<Operation>> simplified() {
+        List<Map<String, List<Operation>>> simplifiedInterfaces = requirements.stream()
             .map(OperationInterface::simplified)
             .collect(Collectors.toList());
 

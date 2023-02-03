@@ -15,7 +15,7 @@ public class PathName implements OperationName {
     }
 
     @Override
-    public Optional<String> getName(String baseInterface) {
+    public Optional<String> forInterface(String baseInterface) {
         if (!path.startsWith(baseInterface)) {
             return Optional.empty();
         }

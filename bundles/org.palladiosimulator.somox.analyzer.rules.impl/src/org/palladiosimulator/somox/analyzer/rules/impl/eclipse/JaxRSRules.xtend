@@ -44,7 +44,6 @@ class JaxRSRules extends IRule{
 		val isUnitController = isUnitAnnotatedWithName(unit, "Path")
 		if(isUnitController){
 			pcmDetector.detectComponent(unit) 
-			pcmDetector.detectOperationInterface(unit)
 			getMethods(unit).forEach[m|
 			if(isMethodAnnotatedWithName(m,"DELETE","GET","HEAD","PUT","POST","OPTIONS")) pcmDetector.detectProvidedOperation(unit,m.resolveBinding)]
 			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
@@ -54,7 +53,6 @@ class JaxRSRules extends IRule{
 		val isWebListener = isUnitAnnotatedWithName(unit, "WebListener","WebServlet")
 		if(isWebListener){
 			pcmDetector.detectComponent(unit)
-			pcmDetector.detectOperationInterface(unit)
 			getMethods(unit).forEach[m|
 			if(isMethodModifiedExactlyWith(m,"public") || isMethodModifiedExactlyWith(m,"protected")) pcmDetector.detectProvidedOperation(unit,m.resolveBinding)]
 			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
@@ -66,7 +64,6 @@ class JaxRSRules extends IRule{
 		if(isUnit && !isUnitController && !isWebListener && getAllInterfaces(unit).size() > 0){
 			pcmDetector.detectComponent(unit)
 			val firstIn = getAllInterfaces(unit).get(0)
-			pcmDetector.detectOperationInterface(firstIn)
 			getMethods(firstIn).forEach[m|pcmDetector.detectProvidedOperation(unit, firstIn.resolveBinding, m)]
 			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
 			return true
@@ -87,7 +84,6 @@ class JaxRSRules extends IRule{
 		val pcmDetector = blackboard.getEclipsePCMDetector()
 
 		pcmDetector.detectComponent(unit)
-		pcmDetector.detectOperationInterface(unit)
 		getAllPublicMethods(unit).forEach[m|pcmDetector.detectProvidedOperation(unit,m.resolveBinding)]
 		getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
 	}

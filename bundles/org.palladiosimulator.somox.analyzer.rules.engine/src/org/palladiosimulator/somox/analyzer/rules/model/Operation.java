@@ -43,8 +43,8 @@ public class Operation implements OperationInterface {
     }
 
     @Override
-    public Map<String, List<IMethodBinding>> simplified() {
-        return Map.of(getInterface(), List.of(binding));
+    public Map<String, List<Operation>> simplified() {
+        return Map.of(getInterface(), List.of(this));
     }
 
     @Override

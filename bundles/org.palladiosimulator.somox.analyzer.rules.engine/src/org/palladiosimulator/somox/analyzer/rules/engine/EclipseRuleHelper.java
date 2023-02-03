@@ -503,10 +503,12 @@ public class EclipseRuleHelper {
                     .map(x -> x.getValue())
                     .findFirst()
                     .orElse(null);
+            } else if (annotation.isMarkerAnnotation()) {
+                return "";
             }
 
             if (expression == null) {
-                continue;
+                return "";
             }
 
             Object value = expression.resolveConstantExpressionValue();

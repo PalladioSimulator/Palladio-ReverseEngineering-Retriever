@@ -11,6 +11,7 @@ import java.util.stream.Collectors
 import org.apache.log4j.Logger
 import org.eclipse.jdt.core.dom.MethodDeclaration
 import org.eclipse.jdt.core.dom.ITypeBinding
+import org.palladiosimulator.somox.analyzer.rules.model.PathName
 
 class PiggymetricsRules extends IRule {
     static final Logger LOG = Logger.getLogger(PiggymetricsRules)
@@ -214,13 +215,14 @@ class PiggymetricsRules extends IRule {
 			if (requestedUnitMapping !== null) {
 				ifaceName += requestedUnitMapping;
 			}
-			// Remove leading "//". This can occur if requestedUnitMapping
-			// has a leading "/" and the contextPath is "/".
-			ifaceName = ifaceName.replace("//", '/');
 			for (m : getMethods(unit)) {
 				val annotated = hasMapping(m);
 				if (annotated) {
-					pcmDetector.detectCompositeProvidedOperation(unit, ifaceName, m.resolveBinding);
+					var methodName = ifaceName + "/" + getMapping(m);
+					// Remove "//". This can occur if requestedUnitMapping
+					// has a leading "/" and the contextPath is "/" or analogous for method and unit mapping.
+					methodName = methodName.replace("//", '/');
+					pcmDetector.detectCompositeProvidedOperation(unit, m.resolveBinding, new PathName(methodName));
 				}
 			}
 		}
@@ -272,26 +274,30 @@ class PiggymetricsRules extends IRule {
 
 		val getMapping = getMappingString(m, "GetMapping");
 		if (getMapping !== null) {
-			return getMapping;
+			return getMapping + "[GET]";
 		}
 
 		val postMapping = getMappingString(m, "PostMapping");
 		if (postMapping !== null) {
-			return postMapping;
+			return postMapping + "[POST]";
 		}
 
 		val putMapping = getMappingString(m, "PutMapping");
 		if (putMapping !== null) {
-			return putMapping;
+			return putMapping + "[PUT]";
 		}
 
 		val deleteMapping = getMappingString(m, "DeleteMapping");
 		if (deleteMapping !== null) {
-			return deleteMapping;
+			return deleteMapping + "[DELETE]";
 		}
 
 		val patchMapping = getMappingString(m, "PatchMapping");
-		return patchMapping;
+		if (patchMapping !== null) {
+			return patchMapping + "[PATCH]";
+		}
+		
+		return null;
 	}
 
 	def getMappingString(MethodDeclaration m, String annotationName) {

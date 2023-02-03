@@ -7,7 +7,8 @@ Bundle-Vendor: palladiosimulator.org
 Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.engine
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: org.palladiosimulator.somox.analyzer.rules.blackboard,
- org.palladiosimulator.somox.analyzer.rules.engine
+ org.palladiosimulator.somox.analyzer.rules.engine,
+ org.palladiosimulator.somox.analyzer.rules.model
 Require-Bundle: jamopp.parser,
  jamopp.parser.jdt,
  jamopp.resource,

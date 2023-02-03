@@ -35,6 +35,7 @@ import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboar
 import org.palladiosimulator.somox.analyzer.rules.model.Component;
 import org.palladiosimulator.somox.analyzer.rules.model.Composite;
 import org.palladiosimulator.somox.analyzer.rules.model.EntireInterface;
+import org.palladiosimulator.somox.analyzer.rules.model.Operation;
 import org.palladiosimulator.somox.analyzer.rules.model.OperationInterface;
 
 // TODO Bug-fix, probably
@@ -100,7 +101,7 @@ public class EclipsePCMInstanceCreator {
     public Repository createPCM(Map<String, List<CompilationUnitWrapper>> mapping) {
         final Set<Component> components = blackboard.getEclipsePCMDetector()
             .getComponents();
-        final Map<String, List<IMethodBinding>> interfaces = blackboard.getEclipsePCMDetector()
+        final Map<String, List<Operation>> interfaces = blackboard.getEclipsePCMDetector()
             .getOperationInterfaces();
         final Set<Composite> composites = blackboard.getEclipsePCMDetector()
             .getCompositeComponents();
@@ -206,26 +207,31 @@ public class EclipsePCMInstanceCreator {
         return repository.createRepositoryNow();
     }
 
-    private void createPCMInterfaces(Map<String, List<IMethodBinding>> interfaces) {
-        interfaces.forEach((inter, methods) -> {
+    private void createPCMInterfaces(Map<String, List<Operation>> interfaces) {
+        interfaces.forEach((inter, operations) -> {
             LOG.info("Current PCM Interface: " + inter);
 
             OperationInterfaceCreator pcmInterface = create.newOperationInterface()
                 .withName(inter);
 
-            for (final IMethodBinding m : methods) {
+            for (final Operation operation : operations) {
                 OperationSignatureCreator signature = create.newOperationSignature()
-                    .withName(m.getName());
+                    .withName(operation.getName()
+                        .forInterface(inter)
+                        .orElseThrow());
+
+                IMethodBinding method = operation.getBinding();
 
                 // parameter type
-                for (final ITypeBinding p : m.getParameterTypes()) {
-                    signature = handleSignatureDataType(signature, p.getName(), p, p.getDimensions(), false);
+                for (final ITypeBinding parameter : method.getParameterTypes()) {
+                    signature = handleSignatureDataType(signature, parameter.getName(), parameter,
+                            parameter.getDimensions(), false);
                 }
 
                 // Return type: Cast Method Return Type to Variable
                 // OrdinaryParameterImpl is sufficient since return types cannot be varargs.
-                ITypeBinding rt = m.getReturnType();
-                signature = handleSignatureDataType(signature, "", rt, rt.getDimensions(), true);
+                ITypeBinding returned = method.getReturnType();
+                signature = handleSignatureDataType(signature, "", returned, returned.getDimensions(), true);
 
                 pcmInterface.withOperationSignature(signature);
             }

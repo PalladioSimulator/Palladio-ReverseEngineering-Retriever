@@ -3,8 +3,6 @@ package org.palladiosimulator.somox.analyzer.rules.model;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jdt.core.dom.IMethodBinding;
-
 public interface OperationInterface {
     String getInterface();
 
@@ -12,5 +10,5 @@ public interface OperationInterface {
 
     boolean isEntireInterface();
 
-    Map<String, List<IMethodBinding>> simplified();
+    Map<String, List<Operation>> simplified();
 }

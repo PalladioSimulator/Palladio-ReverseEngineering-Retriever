@@ -59,7 +59,6 @@ class SpringRules extends IRule {
 		// Component Detection for Spring Repository
 		if((isUnitAnnotatedWithName(unit,"FeignClient","Repository") || (isUnitNamedWith(unit, "Repository")) && isAbstract)) {
 			pcmDetector.detectComponent(unit) 
-			pcmDetector.detectOperationInterface(unit)
 			getMethods(unit).forEach[m|pcmDetector.detectProvidedOperation(unit, m.resolveBinding)]
 		}
 		
@@ -69,7 +68,6 @@ class SpringRules extends IRule {
 		val isImplementingOne = inFs.size==1
 		if(isComponent && isImplementingOne) {
 			var firstIn = inFs.get(0)
-			pcmDetector.detectOperationInterface(firstIn)
 			for(IMethodBinding m: getMethods(firstIn)){
 				pcmDetector.detectProvidedOperation(unit, firstIn.resolveBinding, m)
 			}
@@ -83,7 +81,6 @@ class SpringRules extends IRule {
 
 				if(annoWithName) {
 					pcmDetector.detectProvidedOperation(unit, m.resolveBinding)
-					pcmDetector.detectOperationInterface(unit)
 				}
 			}
 			
@@ -91,7 +88,6 @@ class SpringRules extends IRule {
 				val annoWithName = isMethodAnnotatedWithName(m, annoNames)
 				if(!annoWithName) {
 					pcmDetector.detectProvidedOperation(unit, m.resolveBinding)
-					pcmDetector.detectOperationInterface(unit)
 				}
 			}
 				
