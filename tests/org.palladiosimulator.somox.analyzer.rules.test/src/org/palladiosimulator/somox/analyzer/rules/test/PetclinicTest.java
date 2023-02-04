@@ -1,4 +1,4 @@
-package org.palladiosimulator.somox.analyzer.rules.engine.test;
+package org.palladiosimulator.somox.analyzer.rules.test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

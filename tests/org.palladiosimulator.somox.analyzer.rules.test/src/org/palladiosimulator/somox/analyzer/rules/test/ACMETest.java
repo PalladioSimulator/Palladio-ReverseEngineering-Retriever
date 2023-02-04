@@ -1,4 +1,4 @@
-package org.palladiosimulator.somox.analyzer.rules.engine.test;
+package org.palladiosimulator.somox.analyzer.rules.test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -6,10 +6,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 
-public class TeaStoreTest extends RuleEngineTest {
+public class ACMETest extends RuleEngineTest {
 
-    protected TeaStoreTest() {
-        super("external/TeaStore-1.4.1", DefaultRule.JAX_RS, DefaultRule.JAX_RS_EMFTEXT);
+    protected ACMETest() {
+        super("external/acmeair-1.2.0", DefaultRule.JAX_RS, DefaultRule.JAX_RS_EMFTEXT);
     }
 
     /**
@@ -21,8 +21,8 @@ public class TeaStoreTest extends RuleEngineTest {
     @ParameterizedTest
     @MethodSource("discovererProvider")
     void test(boolean emfText) {
-        assertTrue(containsComponent("tools_descartes_teastore_auth_security_BCryptProvider", emfText));
-        assertTrue(
-                containsOperationInterface("tools_descartes_teastore_kieker_probes_records_IPayloadCharacterization", emfText));
+        assertTrue(containsComponent("com_acmeair_entities_Flight", emfText));
+        assertTrue(containsComponent("com_acmeair_wxs_service_FlightServiceImpl", emfText));
+        assertMaxParameterCount(2, "com_acmeair_service_BookingService", "bookFlight", emfText);
     }
 }
