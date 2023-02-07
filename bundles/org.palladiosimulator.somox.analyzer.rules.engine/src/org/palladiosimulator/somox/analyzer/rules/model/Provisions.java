@@ -2,10 +2,14 @@ package org.palladiosimulator.somox.analyzer.rules.model;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,12 +17,32 @@ import org.palladiosimulator.somox.analyzer.rules.engine.MapMerger;
 
 public class Provisions implements Iterable<OperationInterface> {
     private final Set<OperationInterface> provisions;
+    private final Map<OperationInterface, List<OperationInterface>> groupedProvisions;
 
     public Provisions(Collection<OperationInterface> provisions) {
-        // TODO: Grouping algorithm - longest common prefix etc.,
-        // probably requires more functionality in Provision
-
         this.provisions = Collections.unmodifiableSet(new HashSet<>(provisions));
+        this.groupedProvisions = new HashMap<>();
+        if (provisions.isEmpty()) {
+            return;
+        }
+
+        Queue<OperationInterface> sortedProvisions = new PriorityQueue<>(provisions);
+
+        while (!sortedProvisions.isEmpty()) {
+            OperationInterface provision = sortedProvisions.poll();
+            boolean isRoot = true;
+            for (OperationInterface rootInterface : groupedProvisions.keySet()) {
+                if (provision.isPartOf(rootInterface)) {
+                    groupedProvisions.get(rootInterface)
+                        .add(provision);
+                    isRoot = false;
+                    break;
+                }
+            }
+            if (isRoot) {
+                groupedProvisions.put(provision, new LinkedList<>());
+            }
+        }
     }
 
     public Set<OperationInterface> get() {
@@ -36,10 +60,19 @@ public class Provisions implements Iterable<OperationInterface> {
     }
 
     public Map<String, List<Operation>> simplified() {
-        List<Map<String, List<Operation>>> simplifiedInterfaces = provisions.stream()
-            .map(OperationInterface::simplified)
-            .collect(Collectors.toList());
-
+        List<Map<String, List<Operation>>> simplifiedInterfaces = new LinkedList<>();
+        for (OperationInterface root : groupedProvisions.keySet()) {
+            Map<String, List<Operation>> simplifiedRoot = root.simplified();
+            for (OperationInterface member : groupedProvisions.get(root)) {
+                simplifiedRoot.get(root.getInterface())
+                    .addAll(member.simplified()
+                        .values()
+                        .stream()
+                        .flatMap(x -> x.stream())
+                        .collect(Collectors.toList()));
+            }
+            simplifiedInterfaces.add(simplifiedRoot);
+        }
         return MapMerger.merge(simplifiedInterfaces);
     }
 }

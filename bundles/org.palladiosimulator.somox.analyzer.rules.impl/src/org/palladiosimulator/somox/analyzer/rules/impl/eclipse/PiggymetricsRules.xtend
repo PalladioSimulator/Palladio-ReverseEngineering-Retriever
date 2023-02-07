@@ -249,6 +249,7 @@ class PiggymetricsRules extends IRule {
 
 		if (isComponent && isImplementingOne) {
 			var firstIn = inFs.get(0)
+			pcmDetector.detectProvidedInterface(unit, firstIn.resolveBinding)
 			for (m : getMethods(firstIn)) {
 				pcmDetector.detectProvidedOperation(unit, firstIn.resolveBinding, m)
 			}
