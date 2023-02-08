@@ -1,5 +1,6 @@
 package org.palladiosimulator.somox.analyzer.rules.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
@@ -39,6 +41,20 @@ public class Provisions implements Iterable<OperationInterface> {
                     break;
                 }
             }
+            for (OperationInterface rootInterface : groupedProvisions.keySet()) {
+                Optional<String> commonInterface = provision.getName()
+                    .getCommonInterface(rootInterface.getName());
+                if (commonInterface.isPresent()) {
+                    // De-duplicate interfaces.
+                    Set<OperationInterface> interfaces = new HashSet<>(groupedProvisions.remove(rootInterface));
+                    interfaces.add(rootInterface);
+                    interfaces.add(provision);
+                    groupedProvisions.put(new EntireInterface(rootInterface.getName()
+                        .createInterface(commonInterface.get())), new ArrayList<>(interfaces));
+                    isRoot = false;
+                    break;
+                }
+            }
             if (isRoot) {
                 groupedProvisions.put(provision, new LinkedList<>());
             }
@@ -62,7 +78,12 @@ public class Provisions implements Iterable<OperationInterface> {
     public Map<String, List<Operation>> simplified() {
         List<Map<String, List<Operation>>> simplifiedInterfaces = new LinkedList<>();
         for (OperationInterface root : groupedProvisions.keySet()) {
-            Map<String, List<Operation>> simplifiedRoot = root.simplified();
+            Map<String, List<Operation>> simplifiedRoot = new HashMap<>();
+            simplifiedRoot.put(root.getInterface(), new ArrayList<>(root.simplified()
+                .values()
+                .stream()
+                .flatMap(x -> x.stream())
+                .collect(Collectors.toList())));
             for (OperationInterface member : groupedProvisions.get(root)) {
                 simplifiedRoot.get(root.getInterface())
                     .addAll(member.simplified()

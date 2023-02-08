@@ -20,19 +20,18 @@ public class PathTest {
     @Test
     void pathsArePartOfTheirPrefixes() {
         String path = "/some/path";
-        EntireInterface entireInterface = new EntireInterface(path);
-        PathName specificPath = new PathName(path + "/that/is/more/specific");
-        Operation operation = new Operation(null, specificPath);
+        PathName interfaceName = new PathName(path);
+        PathName specificName = new PathName(path + "/that/is/more/specific");
 
-        assertTrue(operation.isPartOf(entireInterface), "specific path is not part of its prefix");
-        assertFalse(entireInterface.isPartOf(operation), "prefix is part of a longer path");
+        assertTrue(specificName.isPartOf(interfaceName.getName()), "specific path is not part of its prefix");
+        assertFalse(interfaceName.isPartOf(specificName.getName()), "prefix is part of a longer path");
     }
 
     @Test
     void prefixesAreSeparatorAware() {
         // This is NOT a legal prefix of "/some/path/..."
         String somePath = "/some/pa";
-        EntireInterface entireInterface = new EntireInterface(somePath);
+        EntireInterface entireInterface = new EntireInterface(new PathName(somePath));
         PathName specificPathName = new PathName("/some/path/that/is/more/specific");
         Operation operation = new Operation(null, specificPathName);
 

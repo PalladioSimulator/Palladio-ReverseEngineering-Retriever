@@ -14,7 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.palladiosimulator.somox.analyzer.rules.model.Component;
 import org.palladiosimulator.somox.analyzer.rules.model.ComponentBuilder;
 import org.palladiosimulator.somox.analyzer.rules.model.EntireInterface;
-import org.palladiosimulator.somox.analyzer.rules.model.JavaName;
+import org.palladiosimulator.somox.analyzer.rules.model.JavaInterfaceName;
+import org.palladiosimulator.somox.analyzer.rules.model.JavaOperationName;
 import org.palladiosimulator.somox.analyzer.rules.model.Operation;
 import org.palladiosimulator.somox.analyzer.rules.model.PathName;
 
@@ -23,7 +24,7 @@ public class InterfaceTest {
     @Test
     void singleJavaOperation() {
         ComponentBuilder builder = new ComponentBuilder(null);
-        Operation expectedOperation = new Operation(null, new JavaName("Interface", "method"));
+        Operation expectedOperation = new Operation(null, new JavaOperationName("Interface", "method"));
         builder.provisions()
             .add(expectedOperation);
 
@@ -96,11 +97,11 @@ public class InterfaceTest {
     void entireJavaInterface() {
         ComponentBuilder builder = new ComponentBuilder(null);
         builder.provisions()
-            .add(new Operation(null, new JavaName("CommonInterface", "firstMethod")));
+            .add(new Operation(null, new JavaOperationName("CommonInterface", "firstMethod")));
         builder.provisions()
-            .add(new Operation(null, new JavaName("CommonInterface", "secondMethod")));
+            .add(new Operation(null, new JavaOperationName("CommonInterface", "secondMethod")));
         Component builtComponent = builder.create();
-        EntireInterface expectedInterface = new EntireInterface("CommonInterface");
+        EntireInterface expectedInterface = new EntireInterface(new JavaInterfaceName("CommonInterface"));
         assertTrue(builtComponent.provisions()
             .contains(expectedInterface));
 
@@ -147,7 +148,7 @@ public class InterfaceTest {
         builder.provisions()
             .add(new Operation(null, new PathName("/common_interface/second_method")));
         Component builtComponent = builder.create();
-        EntireInterface expectedInterface = new EntireInterface("/common_interface");
+        EntireInterface expectedInterface = new EntireInterface(new PathName("/common_interface"));
         assertTrue(builtComponent.provisions()
             .contains(expectedInterface));
 
@@ -166,7 +167,7 @@ public class InterfaceTest {
         assertEquals(2, operations.size(), "wrong number of operations in the interface");
 
         List<Operation> firstMethodCandidates = operations.stream()
-            .filter(x -> Optional.of("/first_method")
+            .filter(x -> Optional.of("first_method")
                 .equals(x.getName()
                     .forInterface("/common_interface")))
             .collect(Collectors.toList());
@@ -175,7 +176,7 @@ public class InterfaceTest {
         assertEquals(1, firstMethodCandidates.size(), "interface contains multiple instances of first method");
 
         List<Operation> secondMethodCandidates = operations.stream()
-            .filter(x -> Optional.of("/second_method")
+            .filter(x -> Optional.of("second_method")
                 .equals(x.getName()
                     .forInterface("/common_interface")))
             .collect(Collectors.toList());

@@ -238,7 +238,7 @@ class PiggymetricsRules extends IRule {
 						val lastSegmentStart = requestedMapping.lastIndexOf('/', argumentIndex)
 						ifaceName = requestedMapping.substring(0, lastSegmentStart);
 					}
-					pcmDetector.detectCompositeRequiredInterface(unit, ifaceName);
+					pcmDetector.detectCompositeRequiredInterface(unit, new PathName(ifaceName));
 				}
 			}
 		}

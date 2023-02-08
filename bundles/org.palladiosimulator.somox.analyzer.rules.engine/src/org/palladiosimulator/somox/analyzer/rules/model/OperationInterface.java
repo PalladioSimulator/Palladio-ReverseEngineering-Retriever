@@ -4,13 +4,18 @@ import java.util.List;
 import java.util.Map;
 
 public interface OperationInterface extends Comparable<OperationInterface> {
-    String getInterface();
-
-    boolean isPartOf(OperationInterface other);
-
-    boolean isEntireInterface();
+    Name getName();
 
     Map<String, List<Operation>> simplified();
+
+    /**
+     * @returns the most specific interface name
+     */
+    String getInterface();
+
+    default boolean isPartOf(OperationInterface other) {
+        return getName().isPartOf(other.getInterface());
+    }
 
     @Override
     default int compareTo(OperationInterface other) {

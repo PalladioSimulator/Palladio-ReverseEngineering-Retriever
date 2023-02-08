@@ -1,12 +1,13 @@
 package org.palladiosimulator.somox.analyzer.rules.model;
 
+import java.util.List;
 import java.util.Optional;
 
-public class JavaName implements OperationName {
+public class JavaOperationName implements OperationName {
     private final String iface;
     private final String method;
 
-    public JavaName(String iface, String method) {
+    public JavaOperationName(String iface, String method) {
         this.iface = iface;
         this.method = method;
     }
@@ -25,12 +26,17 @@ public class JavaName implements OperationName {
     }
 
     @Override
+    public List<String> getInterfaces() {
+        return List.of(getFullName(), iface);
+    }
+
+    @Override
     public String getInterface() {
         return iface;
     }
 
     @Override
-    public boolean isPartOf(String iface) {
-        return this.iface.equals(iface);
+    public InterfaceName createInterface(String name) {
+        return new JavaInterfaceName(name);
     }
 }

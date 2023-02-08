@@ -6,17 +6,16 @@ import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
-// TODO: Handle paths properly
 public class EntireInterface implements OperationInterface {
     private final Optional<ITypeBinding> binding;
-    private final String name;
+    private final InterfaceName name;
 
-    public EntireInterface(String name) {
+    public EntireInterface(InterfaceName name) {
         this.binding = Optional.empty();
         this.name = name;
     }
 
-    public EntireInterface(ITypeBinding binding, String name) {
+    public EntireInterface(ITypeBinding binding, InterfaceName name) {
         this.binding = Optional.of(binding);
         this.name = name;
     }
@@ -25,27 +24,18 @@ public class EntireInterface implements OperationInterface {
         return binding;
     }
 
-    public String getName() {
+    public Name getName() {
         return name;
     }
 
     @Override
-    public String getInterface() {
-        return getName();
-    }
-
-    @Override
-    public boolean isPartOf(OperationInterface other) {
-        return name.equals(other.getInterface());
-    }
-
-    @Override
-    public boolean isEntireInterface() {
-        return true;
-    }
-
-    @Override
     public Map<String, List<Operation>> simplified() {
-        return Map.of(name, List.of());
+        return Map.of(name.getName(), List.of());
+    }
+
+    @Override
+    public String getInterface() {
+        return name.getInterfaces()
+            .get(0);
     }
 }

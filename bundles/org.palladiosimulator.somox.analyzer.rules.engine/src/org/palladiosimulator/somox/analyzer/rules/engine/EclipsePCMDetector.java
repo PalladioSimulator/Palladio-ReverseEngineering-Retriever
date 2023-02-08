@@ -23,7 +23,9 @@ import org.palladiosimulator.somox.analyzer.rules.model.ComponentBuilder;
 import org.palladiosimulator.somox.analyzer.rules.model.Composite;
 import org.palladiosimulator.somox.analyzer.rules.model.CompositeBuilder;
 import org.palladiosimulator.somox.analyzer.rules.model.EntireInterface;
-import org.palladiosimulator.somox.analyzer.rules.model.JavaName;
+import org.palladiosimulator.somox.analyzer.rules.model.InterfaceName;
+import org.palladiosimulator.somox.analyzer.rules.model.JavaInterfaceName;
+import org.palladiosimulator.somox.analyzer.rules.model.JavaOperationName;
 import org.palladiosimulator.somox.analyzer.rules.model.Operation;
 import org.palladiosimulator.somox.analyzer.rules.model.OperationInterface;
 import org.palladiosimulator.somox.analyzer.rules.model.OperationName;
@@ -80,11 +82,11 @@ public class EclipsePCMDetector implements IPCMDetector {
         }
     }
 
-    public void detectRequiredInterface(CompilationUnit unit, String interfaceName) {
+    public void detectRequiredInterface(CompilationUnit unit, InterfaceName interfaceName) {
         detectRequiredInterface(unit, interfaceName, false);
     }
 
-    public void detectRequiredInterface(CompilationUnit unit, String interfaceName, boolean compositeRequired) {
+    public void detectRequiredInterface(CompilationUnit unit, InterfaceName interfaceName, boolean compositeRequired) {
         if (components.get(unit) == null) {
             components.put(unit, new ComponentBuilder(unit));
         }
@@ -109,7 +111,7 @@ public class EclipsePCMDetector implements IPCMDetector {
         List<EntireInterface> ifaces = ((List<VariableDeclaration>) field.fragments()).stream()
             .map(x -> x.resolveBinding()
                 .getType())
-            .map(x -> new EntireInterface(x, NameConverter.toPCMIdentifier(x)))
+            .map(x -> new EntireInterface(x, new JavaInterfaceName(NameConverter.toPCMIdentifier(x))))
             .collect(Collectors.toList());
         components.get(unit)
             .requirements()
@@ -130,7 +132,8 @@ public class EclipsePCMDetector implements IPCMDetector {
         }
         ITypeBinding binding = parameter.resolveBinding()
             .getType();
-        EntireInterface iface = new EntireInterface(binding, NameConverter.toPCMIdentifier(binding));
+        EntireInterface iface = new EntireInterface(binding,
+                new JavaInterfaceName(NameConverter.toPCMIdentifier(binding)));
         components.get(unit)
             .requirements()
             .add(iface);
@@ -146,7 +149,7 @@ public class EclipsePCMDetector implements IPCMDetector {
         }
         components.get(unit)
             .provisions()
-            .add(new EntireInterface(iface, NameConverter.toPCMIdentifier(iface)));
+            .add(new EntireInterface(iface, new JavaInterfaceName(NameConverter.toPCMIdentifier(iface))));
     }
 
     public void detectProvidedOperation(CompilationUnit unit, IMethodBinding method) {
@@ -174,7 +177,7 @@ public class EclipsePCMDetector implements IPCMDetector {
             operationName = method.getName();
         }
 
-        detectProvidedOperation(unit, method, new JavaName(declaringIface, operationName));
+        detectProvidedOperation(unit, method, new JavaOperationName(declaringIface, operationName));
     }
 
     public void detectProvidedOperation(CompilationUnit unit, IMethodBinding method, OperationName name) {
@@ -193,7 +196,7 @@ public class EclipsePCMDetector implements IPCMDetector {
         getComposite(compositeName).addPart(components.get(unit));
     }
 
-    public void detectCompositeRequiredInterface(CompilationUnit unit, String interfaceName) {
+    public void detectCompositeRequiredInterface(CompilationUnit unit, InterfaceName interfaceName) {
         detectRequiredInterface(unit, interfaceName, true);
     }
 
@@ -215,7 +218,7 @@ public class EclipsePCMDetector implements IPCMDetector {
     }
 
     public void detectCompositeProvidedOperation(CompilationUnit unit, String declaringIface, IMethodBinding method) {
-        compositeProvisions.add(new Operation(method, new JavaName(declaringIface, method.getName())));
+        compositeProvisions.add(new Operation(method, new JavaOperationName(declaringIface, method.getName())));
         detectProvidedOperation(unit, declaringIface, method);
     }
 

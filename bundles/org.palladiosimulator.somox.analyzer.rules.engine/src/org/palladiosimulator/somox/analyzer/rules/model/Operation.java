@@ -24,25 +24,6 @@ public class Operation implements OperationInterface {
     }
 
     @Override
-    public String getInterface() {
-        return name.getInterface();
-    }
-
-    @Override
-    public boolean isPartOf(OperationInterface other) {
-        if (other.isEntireInterface()) {
-            return name.isPartOf(other.getInterface());
-        } else {
-            return this.equals(other);
-        }
-    }
-
-    @Override
-    public boolean isEntireInterface() {
-        return false;
-    }
-
-    @Override
     public Map<String, List<Operation>> simplified() {
         return Map.of(getInterface(), List.of(this));
     }
@@ -65,6 +46,11 @@ public class Operation implements OperationInterface {
         }
         Operation other = (Operation) obj;
         return Objects.equals(binding, other.binding) && Objects.equals(name, other.name);
+    }
+
+    @Override
+    public String getInterface() {
+        return name.getInterface();
     }
 
 }
