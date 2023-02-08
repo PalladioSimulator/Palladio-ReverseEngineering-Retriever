@@ -11,7 +11,7 @@ public class PathName implements InterfaceName, OperationName {
     private final Path path;
 
     public PathName(String path) {
-        this.path = Path.of(path);
+        this.path = Path.of(cutOffWildcard(path));
     }
 
     @Override
@@ -33,7 +33,7 @@ public class PathName implements InterfaceName, OperationName {
     public Optional<String> forInterface(String baseInterface) {
         Path interfacePath;
         try {
-            interfacePath = Path.of(baseInterface);
+            interfacePath = Path.of(cutOffWildcard(baseInterface));
         } catch (InvalidPathException e) {
             return Optional.empty();
         }
@@ -65,14 +65,33 @@ public class PathName implements InterfaceName, OperationName {
         return interfaces;
     }
 
+    @Override
+    public InterfaceName createInterface(String name) {
+        return new PathName(name);
+    }
+
     private static String toName(Path path) {
         // Result in the same paths on Windows as on other operating systems.
         return path.toString()
             .replace('\\', '/');
     }
 
-    @Override
-    public InterfaceName createInterface(String name) {
-        return new PathName(name);
+    private static String cutOffWildcard(String path) {
+        int wildcardIndex = -1;
+        if (path.contains("*")) {
+            wildcardIndex = path.indexOf('*');
+        }
+        if (path.contains("{")) {
+            if (wildcardIndex > -1) {
+                wildcardIndex = Math.min(wildcardIndex, path.indexOf('{'));
+            } else {
+                wildcardIndex = path.indexOf('{');
+            }
+        }
+        if (wildcardIndex > -1) {
+            return path.substring(0, wildcardIndex);
+        } else {
+            return path;
+        }
     }
 }

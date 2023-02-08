@@ -12,7 +12,6 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.palladiosimulator.generator.fluent.exceptions.FluentApiException;
 import org.palladiosimulator.generator.fluent.repository.api.Repo;
 import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
 import org.palladiosimulator.generator.fluent.repository.structure.components.BasicComponentCreator;
@@ -52,6 +51,7 @@ public class EclipsePCMInstanceCreator {
     private final Map<Component, CompositeComponentCreator> componentCompositeCreators;
     private final Map<String, CompositeComponentCreator> ifaceCompositeCreators;
     private final Map<Composite, CompositeComponentCreator> compositeCreators;
+    private final Map<String, org.palladiosimulator.pcm.repository.OperationInterface> interfaces;
 
     public EclipsePCMInstanceCreator(RuleEngineBlackboard blackboard) {
         existingDataTypesMap = new HashMap<>();
@@ -59,6 +59,7 @@ public class EclipsePCMInstanceCreator {
         this.componentCompositeCreators = new HashMap<>();
         this.ifaceCompositeCreators = new HashMap<>();
         this.compositeCreators = new HashMap<>();
+        this.interfaces = new HashMap<>();
         create = new FluentRepositoryFactory();
         repository = create.newRepository()
             .withName(REPO_NAME);
@@ -118,11 +119,11 @@ public class EclipsePCMInstanceCreator {
             compositeCreators.put(composite, c);
 
             for (EntireInterface compRequirement : composite.requirements()) {
-                c.requires(create.fetchOfOperationInterface(compRequirement.getInterface()));
+                c.requires(fetchInterface(compRequirement));
             }
 
             for (OperationInterface compProvision : composite.provisions()) {
-                c.provides(create.fetchOfOperationInterface(compProvision.getInterface()));
+                c.provides(fetchInterface(compProvision));
             }
         }
 
@@ -243,6 +244,7 @@ public class EclipsePCMInstanceCreator {
              */
 
             repository.addToRepository(pcmInterface);
+            this.interfaces.put(inter, create.fetchOfOperationInterface(inter));
         });
     }
 
@@ -254,37 +256,18 @@ public class EclipsePCMInstanceCreator {
             BasicComponentCreator pcmComp = create.newBasicComponent()
                 .withName(wrapName(firstTypeDecl.resolveBinding()));
 
-            Set<String> distinctInterfaces = new HashSet<>();
+            Set<org.palladiosimulator.pcm.repository.OperationInterface> distinctInterfaces = new HashSet<>();
             for (OperationInterface provision : comp.provisions()) {
-                String providedInterface = provision.getInterface();
+                org.palladiosimulator.pcm.repository.OperationInterface providedInterface = fetchInterface(provision);
                 if (distinctInterfaces.contains(providedInterface)) {
                     continue;
                 }
                 distinctInterfaces.add(providedInterface);
-                try {
-                    pcmComp.provides(create.fetchOfOperationInterface(providedInterface), "dummy name");
-                } catch (FluentApiException e) {
-                    // Add the interface on-demand if it was not in the model previously.
-                    // This is necessary for interfaces that were not in the class path of the java
-                    // parser.
-                    create.newOperationInterface()
-                        .withName(providedInterface);
-                    pcmComp.provides(create.fetchOfOperationInterface(providedInterface), "dummy name");
-                }
+                pcmComp.provides(providedInterface, "dummy name");
             }
 
             for (EntireInterface requirement : comp.requirements()) {
-                String requiredInterface = requirement.getInterface();
-                try {
-                    pcmComp.requires(create.fetchOfOperationInterface(requiredInterface), "dummy require name");
-                } catch (FluentApiException e) {
-                    // Add the interface on-demand if it was not in the model previously.
-                    // This is necessary for interfaces that were not in the class path of the java
-                    // parser.
-                    create.newOperationInterface()
-                        .withName(requiredInterface);
-                    pcmComp.requires(create.fetchOfOperationInterface(requiredInterface), "dummy require name");
-                }
+                pcmComp.requires(fetchInterface(requirement), "dummy require name");
             }
             BasicComponent builtComp = pcmComp.build();
 
@@ -297,6 +280,19 @@ public class EclipsePCMInstanceCreator {
             blackboard.putRepositoryComponentLocation(builtComp, new CompilationUnitWrapper(compUnit));
             repository.addToRepository(builtComp);
         }
+    }
+
+    private org.palladiosimulator.pcm.repository.OperationInterface fetchInterface(OperationInterface iface) {
+        if (interfaces.containsKey(iface.getInterface())) {
+            return interfaces.get(iface.getInterface());
+        }
+        for (String registeredInterfaceName : interfaces.keySet()) {
+            if (iface.getName()
+                .isPartOf(registeredInterfaceName)) {
+                return interfaces.get(registeredInterfaceName);
+            }
+        }
+        throw new IllegalArgumentException();
     }
 
     private static Primitive convertPrimitive(ITypeBinding primT) {

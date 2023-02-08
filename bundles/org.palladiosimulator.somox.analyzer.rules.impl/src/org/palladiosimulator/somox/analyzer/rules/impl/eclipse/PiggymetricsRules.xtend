@@ -12,6 +12,7 @@ import org.apache.log4j.Logger
 import org.eclipse.jdt.core.dom.MethodDeclaration
 import org.eclipse.jdt.core.dom.ITypeBinding
 import org.palladiosimulator.somox.analyzer.rules.model.PathName
+import org.palladiosimulator.somox.analyzer.rules.engine.EclipseRuleHelper
 
 class PiggymetricsRules extends IRule {
     static final Logger LOG = Logger.getLogger(PiggymetricsRules)

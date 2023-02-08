@@ -247,6 +247,7 @@ public class EclipsePCMDetector implements IPCMDetector {
     }
 
     protected Map<String, List<Operation>> getOperationInterfaces() {
+        // TODO: This has to include composite interfaces as well
         List<Map<String, List<Operation>>> operationInterfaces = getComponents().stream()
             .map(x -> x.provisions()
                 .simplified())
