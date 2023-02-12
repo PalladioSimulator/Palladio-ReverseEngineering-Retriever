@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
@@ -237,5 +238,25 @@ public class CompositeBuilder {
         public String toString() {
             return path.toString();
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(explicitParts, name);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        CompositeBuilder other = (CompositeBuilder) obj;
+        return Objects.equals(explicitParts, other.explicitParts) && Objects.equals(name, other.name);
     }
 }

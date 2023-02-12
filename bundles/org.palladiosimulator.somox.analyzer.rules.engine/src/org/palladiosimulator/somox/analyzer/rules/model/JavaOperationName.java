@@ -1,6 +1,7 @@
 package org.palladiosimulator.somox.analyzer.rules.model;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class JavaOperationName implements OperationName {
@@ -38,5 +39,25 @@ public class JavaOperationName implements OperationName {
     @Override
     public InterfaceName createInterface(String name) {
         return new JavaInterfaceName(name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(iface, method);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        JavaOperationName other = (JavaOperationName) obj;
+        return Objects.equals(iface, other.iface) && Objects.equals(method, other.method);
     }
 }

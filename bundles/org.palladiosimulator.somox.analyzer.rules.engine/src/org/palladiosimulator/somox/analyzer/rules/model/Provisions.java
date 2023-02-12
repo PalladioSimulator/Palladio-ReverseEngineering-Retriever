@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -95,5 +96,25 @@ public class Provisions implements Iterable<OperationInterface> {
             simplifiedInterfaces.add(simplifiedRoot);
         }
         return MapMerger.merge(simplifiedInterfaces);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(provisions);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Provisions other = (Provisions) obj;
+        return Objects.equals(provisions, other.provisions);
     }
 }

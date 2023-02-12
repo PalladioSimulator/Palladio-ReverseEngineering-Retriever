@@ -1,6 +1,7 @@
 package org.palladiosimulator.somox.analyzer.rules.model;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 public class Composite {
@@ -43,5 +44,27 @@ public class Composite {
     public boolean isSubsetOf(final Composite other) {
         return other.parts()
             .containsAll(parts);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(internalInterfaces, name, parts, provisions, requirements);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Composite other = (Composite) obj;
+        return Objects.equals(internalInterfaces, other.internalInterfaces) && Objects.equals(name, other.name)
+                && Objects.equals(parts, other.parts) && Objects.equals(provisions, other.provisions)
+                && Objects.equals(requirements, other.requirements);
     }
 }
