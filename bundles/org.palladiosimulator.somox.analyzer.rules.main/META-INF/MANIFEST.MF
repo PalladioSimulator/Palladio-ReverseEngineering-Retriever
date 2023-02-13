@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.palladiosimulator.somox.analyzer.rules.main;singleton:=
 Bundle-Version: 5.1.0.qualifier
 Bundle-Vendor: palladiosimulator.org
 Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.main
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: jamopp.parser,
  jamopp.parser.jdt,
  jamopp.resource,

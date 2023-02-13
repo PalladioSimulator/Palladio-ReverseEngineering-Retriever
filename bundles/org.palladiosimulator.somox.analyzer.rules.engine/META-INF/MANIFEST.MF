@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.palladiosimulator.somox.analyzer.rules.engine;singleton
 Bundle-Version: 5.1.0.qualifier
 Bundle-Vendor: palladiosimulator.org
 Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.engine
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.palladiosimulator.somox.analyzer.rules.blackboard,
  org.palladiosimulator.somox.analyzer.rules.engine,
  org.palladiosimulator.somox.analyzer.rules.model
