@@ -60,7 +60,6 @@ public class CompositeTest {
         assertTrue(result.provisions()
             .get()
             .isEmpty(), "this composite should not have provisions");
-        ;
 
         Component component = result.parts()
             .stream()
@@ -98,7 +97,6 @@ public class CompositeTest {
         assertEquals(1, result.provisions()
             .get()
             .size(), "this composite should have exactly one provision");
-        ;
     }
 
     @Test
@@ -134,7 +132,6 @@ public class CompositeTest {
         assertEquals(2, result.provisions()
             .get()
             .size(), "this composite should have exactly two provisions");
-        ;
     }
 
     @Test
@@ -174,7 +171,6 @@ public class CompositeTest {
         assertEquals(1, result.provisions()
             .get()
             .size(), "this composite should have exactly one provision");
-        ;
     }
 
     @Test
@@ -196,6 +192,5 @@ public class CompositeTest {
         assertEquals(1, result.provisions()
             .get()
             .size(), "this composite should have exactly one provision");
-        ;
     }
 }
