@@ -52,12 +52,12 @@ class SpringRules extends IRule {
 		}
 		
 		// Component detection
-		val isComponent = !isAbstract && !isExceptionHandler && isUnitAnnotatedWithName(unit, "Service","Controller","RestController","RequestMapping","ControllerAdvice")
+		val isComponent = !isAbstract && !isExceptionHandler && isUnitAnnotatedWithName(unit, "Service","Controller","RestController","RequestMapping","ControllerAdvice","Component")
 		
 		if(isComponent) pcmDetector.detectComponent(unit)
 		
 		// Component Detection for Spring Repository
-		if((isUnitAnnotatedWithName(unit,"FeignClient","Repository") || (isUnitNamedWith(unit, "Repository")) && isAbstract)) {
+		if((isUnitAnnotatedWithName(unit,"FeignClient","Repository") || isRepository(unit) && isAbstract)) {
 			pcmDetector.detectComponent(unit) 
 			getMethods(unit).forEach[m|pcmDetector.detectProvidedOperation(unit, m.resolveBinding)]
 		}
@@ -145,5 +145,14 @@ class SpringRules extends IRule {
 			}];
 		}
 		return true;
+	}
+
+	def isRepository(CompilationUnit unit) {
+		return isUnitAnnotatedWithName(unit, "Repository") 
+			|| isImplementingOrExtending(unit, "Repository")
+			|| isImplementingOrExtending(unit, "CrudRepository")
+			|| isImplementingOrExtending(unit, "JpaRepository")
+			|| isImplementingOrExtending(unit, "PagingAndSortingRepository")
+			|| isImplementingOrExtending(unit, "MongoRepository")
 	}
 }
