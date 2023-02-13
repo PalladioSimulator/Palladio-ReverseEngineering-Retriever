@@ -14,11 +14,6 @@ public class JavaOperationName implements OperationName {
     }
 
     @Override
-    public String getFullName() {
-        return iface + "#" + method;
-    }
-
-    @Override
     public Optional<String> forInterface(String baseInterface) {
         if (!iface.equals(baseInterface)) {
             return Optional.empty();
@@ -28,7 +23,7 @@ public class JavaOperationName implements OperationName {
 
     @Override
     public List<String> getInterfaces() {
-        return List.of(getFullName(), iface);
+        return List.of(iface);
     }
 
     @Override

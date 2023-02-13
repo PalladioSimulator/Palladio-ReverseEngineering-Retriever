@@ -21,11 +21,6 @@ public class PathName implements InterfaceName, OperationName {
     }
 
     @Override
-    public String getFullName() {
-        return toName(path);
-    }
-
-    @Override
     public String getInterface() {
         return toName(path);
     }
