@@ -27,8 +27,9 @@ import org.palladiosimulator.somox.analyzer.rules.model.InterfaceName;
 import org.palladiosimulator.somox.analyzer.rules.model.JavaInterfaceName;
 import org.palladiosimulator.somox.analyzer.rules.model.JavaOperationName;
 import org.palladiosimulator.somox.analyzer.rules.model.Operation;
-import org.palladiosimulator.somox.analyzer.rules.model.OperationInterface;
 import org.palladiosimulator.somox.analyzer.rules.model.OperationName;
+import org.palladiosimulator.somox.analyzer.rules.model.ProvisionsBuilder;
+import org.palladiosimulator.somox.analyzer.rules.model.RequirementsBuilder;
 
 /**
  * This class is used to detect and hold all relevant elements found during the processing of rules.
@@ -41,8 +42,8 @@ public class EclipsePCMDetector implements IPCMDetector {
 
     private Map<CompilationUnit, ComponentBuilder> components = new HashMap<>();
     private Map<String, CompositeBuilder> composites = new HashMap<>();
-    private Set<OperationInterface> compositeProvisions = new HashSet<>();
-    private Set<EntireInterface> compositeRequirements = new HashSet<>();
+    private ProvisionsBuilder compositeProvisions = new ProvisionsBuilder();
+    private RequirementsBuilder compositeRequirements = new RequirementsBuilder();
 
     private static String getFullUnitName(CompilationUnit unit) {
         // TODO this is potentially problematic, maybe restructure
@@ -117,7 +118,7 @@ public class EclipsePCMDetector implements IPCMDetector {
             .requirements()
             .add(ifaces);
         if (compositeRequired) {
-            compositeRequirements.addAll(ifaces);
+            compositeRequirements.add(ifaces);
         }
     }
 
@@ -263,7 +264,7 @@ public class EclipsePCMDetector implements IPCMDetector {
         // Construct composites.
         List<Composite> constructedComposites = composites.values()
             .stream()
-            .map(x -> x.construct(getComponents(), compositeRequirements, compositeProvisions))
+            .map(x -> x.construct(getComponents(), compositeRequirements.create(), compositeProvisions.create()))
             .collect(Collectors.toList());
 
         // Remove redundant composites.

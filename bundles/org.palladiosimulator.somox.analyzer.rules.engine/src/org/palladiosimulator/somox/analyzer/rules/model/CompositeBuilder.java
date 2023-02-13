@@ -25,8 +25,8 @@ public class CompositeBuilder {
         explicitParts.add(componentBuilder);
     }
 
-    public Composite construct(Collection<Component> components, Set<EntireInterface> compositeRequirements,
-            Set<OperationInterface> compositeProvisions) {
+    public Composite construct(Collection<Component> components, Requirements compositeRequirements,
+            Provisions compositeProvisions) {
         Logger.getLogger(getClass())
             .warn("Constructing composite component " + name);
 
@@ -69,7 +69,7 @@ public class CompositeBuilder {
 
     // Writes to allParts and internalInterfaces.
     private static void propagateRequirements(final Collection<Component> allComponents,
-            final Set<EntireInterface> compositeRequirements, Set<Component> allParts,
+            final Requirements compositeRequirements, Set<Component> allParts,
             Set<OperationInterface> internalInterfaces) {
 
         // Iterate through all units with provisions. If a unit provides a part for this composite,
@@ -88,8 +88,7 @@ public class CompositeBuilder {
 
     // Writes to allParts and internalOperations.
     private static void propagateProvisions(final Collection<Component> allComponents,
-            final Set<OperationInterface> compositeProvisions, Set<Component> allParts,
-            Set<OperationInterface> internalOperations) {
+            final Provisions compositeProvisions, Set<Component> allParts, Set<OperationInterface> internalOperations) {
 
         // Iterate through all units with provisions. If a unit provides a part for this composite,
         // it also becomes part of it.
@@ -107,7 +106,7 @@ public class CompositeBuilder {
     }
 
     private static List<InterfaceChain> traceRequirementToAPart(final Collection<Component> allComponents,
-            final Set<EntireInterface> compositeRequirements, final Set<Component> allParts,
+            final Requirements compositeRequirements, final Set<Component> allParts,
             final Component requiringComponent) {
 
         Stack<InterfaceChain> componentRequirements = new Stack<>();
@@ -155,8 +154,7 @@ public class CompositeBuilder {
     }
 
     private static List<InterfaceChain> traceProvisionToAPart(final Collection<Component> allComponents,
-            Set<OperationInterface> compositeProvisions, final Set<Component> allParts,
-            final Component providingComponent) {
+            final Provisions compositeProvisions, final Set<Component> allParts, final Component providingComponent) {
 
         Stack<InterfaceChain> componentProvisions = new Stack<>();
         providingComponent.provisions()

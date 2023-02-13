@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
-import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.somox.analyzer.rules.model.Component;
@@ -16,13 +15,16 @@ import org.palladiosimulator.somox.analyzer.rules.model.JavaInterfaceName;
 import org.palladiosimulator.somox.analyzer.rules.model.JavaOperationName;
 import org.palladiosimulator.somox.analyzer.rules.model.Operation;
 import org.palladiosimulator.somox.analyzer.rules.model.OperationInterface;
+import org.palladiosimulator.somox.analyzer.rules.model.Provisions;
+import org.palladiosimulator.somox.analyzer.rules.model.Requirements;
 
 public class CompositeTest {
 
     @Test
     void emptyComposite() {
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
-        Composite result = compositeBuilder.construct(List.of(), Set.of(), Set.of());
+        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of()),
+                new Provisions(List.of()));
 
         assertTrue(result.parts()
             .isEmpty(), "empty composite should have no parts");
@@ -47,7 +49,8 @@ public class CompositeTest {
 
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
-        Composite result = compositeBuilder.construct(List.of(), Set.of(), Set.of());
+        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of()),
+                new Provisions(List.of()));
 
         assertEquals(1, result.parts()
             .size(), "this composite should have exactly one part");
@@ -84,7 +87,8 @@ public class CompositeTest {
 
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
-        Composite result = compositeBuilder.construct(List.of(), Set.of(requirement), Set.of(provision));
+        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(requirement)),
+                new Provisions(List.of(provision)));
 
         assertEquals(1, result.parts()
             .size(), "this composite should have exactly one part");
@@ -119,8 +123,8 @@ public class CompositeTest {
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder1);
         compositeBuilder.addPart(componentBuilder2);
-        Composite result = compositeBuilder.construct(List.of(), Set.of(requirement1, requirement2),
-                Set.of(provision1, provision2));
+        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(requirement1, requirement2)),
+                new Provisions(List.of(provision1, provision2)));
 
         assertEquals(2, result.parts()
             .size(), "this composite should have exactly two parts");
@@ -159,7 +163,8 @@ public class CompositeTest {
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder1);
         compositeBuilder.addPart(componentBuilder2);
-        Composite result = compositeBuilder.construct(List.of(), Set.of(requirement), Set.of(provision));
+        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(requirement)),
+                new Provisions(List.of(provision)));
 
         assertEquals(2, result.parts()
             .size(), "this composite should have exactly two parts");
@@ -183,7 +188,8 @@ public class CompositeTest {
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
         OperationInterface provisionInterface = new EntireInterface(new JavaInterfaceName("Interface"));
-        Composite result = compositeBuilder.construct(List.of(), Set.of(), Set.of(provisionInterface));
+        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of()),
+                new Provisions(List.of(provisionInterface)));
 
         assertEquals(1, result.parts()
             .size(), "this composite should have exactly one part");
