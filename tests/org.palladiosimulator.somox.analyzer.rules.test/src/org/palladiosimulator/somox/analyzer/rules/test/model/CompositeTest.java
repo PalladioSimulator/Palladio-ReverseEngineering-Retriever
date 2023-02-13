@@ -171,4 +171,25 @@ public class CompositeTest {
             .size(), "this composite should have exactly one provision");
         ;
     }
+
+    @Test
+    void impreciseExposure() {
+        OperationInterface provision = new Operation(null, new JavaOperationName("Interface", "providedMethod"));
+
+        ComponentBuilder componentBuilder = new ComponentBuilder(null);
+        componentBuilder.provisions()
+            .add(provision);
+
+        CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
+        compositeBuilder.addPart(componentBuilder);
+        OperationInterface provisionInterface = new EntireInterface(new JavaInterfaceName("Interface"));
+        Composite result = compositeBuilder.construct(List.of(), Set.of(), Set.of(provisionInterface));
+
+        assertEquals(1, result.parts()
+            .size(), "this composite should have exactly one part");
+        assertEquals(1, result.provisions()
+            .get()
+            .size(), "this composite should have exactly one provision");
+        ;
+    }
 }
