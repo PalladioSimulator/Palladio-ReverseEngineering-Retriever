@@ -44,4 +44,9 @@ public class JavaInterfaceName implements InterfaceName {
         JavaInterfaceName other = (JavaInterfaceName) obj;
         return Objects.equals(name, other.name);
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

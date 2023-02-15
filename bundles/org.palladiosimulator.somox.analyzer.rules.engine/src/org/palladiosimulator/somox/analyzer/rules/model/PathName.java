@@ -110,4 +110,9 @@ public class PathName implements InterfaceName, OperationName {
         PathName other = (PathName) obj;
         return Objects.equals(path, other.path);
     }
+
+    @Override
+    public String toString() {
+        return path.toString();
+    }
 }

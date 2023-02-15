@@ -67,4 +67,28 @@ public class Composite {
                 && Objects.equals(parts, other.parts) && Objects.equals(provisions, other.provisions)
                 && Objects.equals(requirements, other.requirements);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Name: ");
+        builder.append(name);
+        builder.append("\nRequirements:\n\t");
+        builder.append(requirements.toString()
+            .replace("\n", "\n\t"));
+        builder.append("\nProvisions:\n\t");
+        builder.append(provisions.toString()
+            .replace("\n", "\n\t"));
+        builder.append("\nInternal interfaces:\n");
+        internalInterfaces.forEach(x -> builder.append('\t')
+            .append(x.toString()
+                .replace("\n", "\n\t"))
+            .append('\n'));
+        builder.append("\nParts:\n");
+        parts.forEach(x -> builder.append('\t')
+            .append(x.toString()
+                .replace("\n", "\n\t"))
+            .append('\n'));
+        return builder.toString();
+    }
 }

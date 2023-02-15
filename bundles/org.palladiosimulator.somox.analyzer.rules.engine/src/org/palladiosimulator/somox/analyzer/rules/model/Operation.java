@@ -53,4 +53,8 @@ public class Operation implements OperationInterface {
         return name.getInterface();
     }
 
+    @Override
+    public String toString() {
+        return getName().toString();
+    }
 }

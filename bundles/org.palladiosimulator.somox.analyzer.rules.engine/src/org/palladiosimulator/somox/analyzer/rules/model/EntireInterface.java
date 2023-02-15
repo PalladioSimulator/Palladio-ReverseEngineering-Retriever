@@ -59,4 +59,9 @@ public class EntireInterface implements OperationInterface {
         EntireInterface other = (EntireInterface) obj;
         return Objects.equals(binding, other.binding) && Objects.equals(name, other.name);
     }
+
+    @Override
+    public String toString() {
+        return name.toString();
+    }
 }

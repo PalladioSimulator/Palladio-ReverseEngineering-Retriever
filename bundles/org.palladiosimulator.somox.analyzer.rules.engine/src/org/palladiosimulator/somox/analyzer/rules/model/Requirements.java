@@ -61,4 +61,25 @@ public class Requirements implements Iterable<EntireInterface> {
         Requirements other = (Requirements) obj;
         return Objects.equals(requirements, other.requirements);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        Map<String, List<Operation>> simplified = simplified();
+
+        for (String iface : simplified.keySet()) {
+            builder.append(iface);
+            simplified.get(iface)
+                .forEach(x -> builder.append("\n\t")
+                    .append(x));
+            builder.append('\n');
+        }
+
+        String result = builder.toString();
+        if (result.endsWith("\n")) {
+            result = result.substring(0, result.length() - 1);
+        }
+
+        return result;
+    }
 }

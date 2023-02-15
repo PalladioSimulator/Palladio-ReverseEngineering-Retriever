@@ -117,4 +117,25 @@ public class Provisions implements Iterable<OperationInterface> {
         Provisions other = (Provisions) obj;
         return Objects.equals(provisions, other.provisions);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        Map<String, List<Operation>> simplified = simplified();
+
+        for (String iface : simplified.keySet()) {
+            builder.append(iface);
+            simplified.get(iface)
+                .forEach(x -> builder.append("\n\t")
+                    .append(x));
+            builder.append('\n');
+        }
+
+        String result = builder.toString();
+        if (result.endsWith("\n")) {
+            result = result.substring(0, result.length() - 1);
+        }
+
+        return result;
+    }
 }

@@ -55,4 +55,9 @@ public class JavaOperationName implements OperationName {
         JavaOperationName other = (JavaOperationName) obj;
         return Objects.equals(iface, other.iface) && Objects.equals(method, other.method);
     }
+
+    @Override
+    public String toString() {
+        return iface + "#" + method;
+    }
 }
