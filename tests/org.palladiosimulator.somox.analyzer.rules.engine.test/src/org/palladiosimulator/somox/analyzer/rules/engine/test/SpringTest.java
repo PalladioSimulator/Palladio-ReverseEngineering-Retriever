@@ -8,7 +8,7 @@ import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 public class SpringTest extends RuleEngineTest {
 
 	protected SpringTest() {
-		super("SpringProject", DefaultRule.SPRING, DefaultRule.SPRING_EMFTEXT);
+		super("SpringProject", DefaultRule.SPRING);
 	}
 
 	/**

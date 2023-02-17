@@ -23,7 +23,6 @@ import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboar
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineException;
 import org.palladiosimulator.somox.discoverer.Discoverer;
-import org.palladiosimulator.somox.discoverer.EmfTextDiscoverer;
 import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
 
 import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
@@ -32,7 +31,7 @@ import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 public class BasicTest extends RuleEngineTest {
 
 	private static final String PROJECT_NAME = "BasicProject";
-	private static final DefaultRule[] RULES = { DefaultRule.JAX_RS, DefaultRule.JAX_RS_EMFTEXT };
+	private static final DefaultRule[] RULES = { DefaultRule.JAX_RS };
 
 	protected BasicTest() {
 		super(PROJECT_NAME, RULES);
@@ -89,7 +88,7 @@ public class BasicTest extends RuleEngineTest {
 	 *                                the test to fail.
 	 */
 	@Test
-	void testRepeatability(boolean emfText) throws RuleEngineException, JobFailedException, UserCanceledException {
+	void testRepeatability() throws RuleEngineException, JobFailedException, UserCanceledException {
 		OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
 		int firstIntArgCount = 0;
 		for (final OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
@@ -103,12 +102,12 @@ public class BasicTest extends RuleEngineTest {
 		// Run the RuleEngine again on the same project
 		final RuleEngineBlackboard blackboard = new RuleEngineBlackboard();
 		final RuleEngineAnalyzer analyzer = new RuleEngineAnalyzer(blackboard);
-		final Discoverer discoverer = emfText ? new EmfTextDiscoverer() : new JavaDiscoverer();
+		final Discoverer discoverer = new JavaDiscoverer();
 		discoverer.create(getConfig(), blackboard).execute(null);
 
 		analyzer.analyze(getConfig(), null);
 
-		final String discovererSegment = emfText ? "emfText" : "jdt";
+		final String discovererSegment = "jdt";
 		final RepositoryImpl repo = loadRepository(
 				OUT_DIR.appendSegment(discovererSegment).appendSegment("pcm.repository"));
 		conflictingMethods = getConflictingMethods(repo.getInterfaces__Repository());
