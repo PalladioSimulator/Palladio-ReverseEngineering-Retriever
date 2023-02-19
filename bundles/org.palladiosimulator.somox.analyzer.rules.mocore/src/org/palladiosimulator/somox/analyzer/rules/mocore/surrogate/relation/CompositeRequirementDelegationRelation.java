@@ -27,7 +27,7 @@ public class CompositeRequirementDelegationRelation
         }
 
         // Check whether interfaces are equal
-        if (source.getDestination().equals(destination.getDestination())) {
+        if (!source.getDestination().equals(destination.getDestination())) {
             // TODO Allow child/parent interfaces
             throw new IllegalArgumentException(ERROR_NON_EQUAL_INTERFACES);
         }
