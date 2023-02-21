@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: RuleEngineTraceModel
+Bundle-SymbolicName: org.palladiosimulator.somox.analyzer.rules.trace
+Bundle-Version: 5.1.0.qualifier
+Require-Bundle: org.eclipse.capra.core,
+ org.eclipse.capra.generic.artifactmodel,
+ org.eclipse.capra.generic.tracemodel,
+ org.eclipse.emf.transaction,
+ org.eclipse.emf.ecore.xmi,
+ de.uka.ipd.sdq.workflow
+Bundle-Vendor: palladiosimulator.org
+Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.trace
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-17

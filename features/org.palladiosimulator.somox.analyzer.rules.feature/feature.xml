@@ -8,26 +8,38 @@
       license-feature-version="1.0.0">
 
    <license url="">
-
+      
    </license>
 
    <requires>
+      <import plugin="com.github.jsqlparser"/>
+      <import plugin="de.uka.ipd.sdq.workflow.launchconfig"/>
+      <import plugin="de.uka.ipd.sdq.workflow"/>
+      <import plugin="jamopp.parser.jdt"/>
+      <import plugin="jamopp.parser"/>
+      <import plugin="jamopp.resource"/>
+      <import plugin="org.apache.commons.cli"/>
+      <import plugin="org.apache.commons.csv"/>
+      <import plugin="org.apache.log4j"/>
+      <import plugin="org.eclipse.capra.core"/>
+      <import plugin="org.eclipse.capra.generic.artifactmodel"/>
+      <import plugin="org.eclipse.capra.generic.tracemodel"/>
       <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.debug.ui"/>
+      <import plugin="org.eclipse.emf.ecore.xmi"/>
+      <import plugin="org.eclipse.emf.ecore"/>
+      <import plugin="org.eclipse.emf.transaction"/>
+      <import plugin="org.eclipse.equinox.app"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.swt"/>
       <import plugin="org.eclipse.xtend.lib"/>
       <import plugin="org.emftext.language.java"/>
-      <import plugin="org.palladiosimulator.pcm"/>
-      <import plugin="jamopp.parser"/>
-      <import plugin="jamopp.parser.jdt"/>
-      <import plugin="jamopp.resource"/>
-      <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.palladiosimulator.generator.fluent"/>
-      <import plugin="org.apache.log4j"/>
-      <import plugin="de.uka.ipd.sdq.workflow"/>
-      <import plugin="de.uka.ipd.sdq.workflow.launchconfig"/>
-      <import plugin="org.eclipse.debug.ui"/>
-      <import plugin="org.eclipse.equinox.app"/>
-      <import plugin="org.eclipse.swt"/>
+      <import plugin="org.jdom2"/>
+      <import plugin="org.json"/>
       <import plugin="org.palladiosimulator.commons"/>
+      <import plugin="org.palladiosimulator.generator.fluent"/>
+      <import plugin="org.palladiosimulator.pcm"/>
+      <import plugin="org.yaml.snakeyaml"/>
    </requires>
 
    <plugin
@@ -60,6 +72,13 @@
 
    <plugin
          id="org.palladiosimulator.somox.analyzer.rules.main"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.palladiosimulator.somox.analyzer.rules.trace"
          download-size="0"
          install-size="0"
          version="0.0.0"
