@@ -51,7 +51,7 @@ public class EclipsePCMInstanceCreator {
     private final Map<Component, CompositeComponentCreator> componentCompositeCreators;
     private final Map<String, CompositeComponentCreator> ifaceCompositeCreators;
     private final Map<Composite, CompositeComponentCreator> compositeCreators;
-    private final Map<String, org.palladiosimulator.pcm.repository.OperationInterface> interfaces;
+    private final Map<String, org.palladiosimulator.pcm.repository.OperationInterface> pcmInterfaces;
 
     public EclipsePCMInstanceCreator(RuleEngineBlackboard blackboard) {
         existingDataTypesMap = new HashMap<>();
@@ -59,7 +59,7 @@ public class EclipsePCMInstanceCreator {
         this.componentCompositeCreators = new HashMap<>();
         this.ifaceCompositeCreators = new HashMap<>();
         this.compositeCreators = new HashMap<>();
-        this.interfaces = new HashMap<>();
+        this.pcmInterfaces = new HashMap<>();
         create = new FluentRepositoryFactory();
         repository = create.newRepository()
             .withName(REPO_NAME);
@@ -118,12 +118,25 @@ public class EclipsePCMInstanceCreator {
                 .forEach(x -> ifaceCompositeCreators.put(x.getInterface(), c));
             compositeCreators.put(composite, c);
 
+            Set<org.palladiosimulator.pcm.repository.OperationInterface> distinctInterfaces = new HashSet<>();
             for (EntireInterface compRequirement : composite.requirements()) {
-                c.requires(fetchInterface(compRequirement));
+                org.palladiosimulator.pcm.repository.OperationInterface requiredInterface = fetchInterface(
+                        compRequirement);
+                if (distinctInterfaces.contains(requiredInterface)) {
+                    continue;
+                }
+                c.requires(requiredInterface);
             }
 
+            distinctInterfaces.clear();
             for (OperationInterface compProvision : composite.provisions()) {
-                c.provides(fetchInterface(compProvision));
+                org.palladiosimulator.pcm.repository.OperationInterface providedInterface = fetchInterface(
+                        compProvision);
+                if (distinctInterfaces.contains(providedInterface)) {
+                    continue;
+                }
+                distinctInterfaces.add(providedInterface);
+                c.provides(providedInterface);
             }
         }
 
@@ -194,8 +207,9 @@ public class EclipsePCMInstanceCreator {
                 .forEach(x -> outerProvisions.put(x.getProvidedInterface__OperationProvidedRole()
                     .getEntityName(), x));
 
-            for (OperationInterface compProvision : composite.provisions()) {
-                String providedInterface = compProvision.getInterface();
+            for (String providedInterface : composite.provisions()
+                .simplified()
+                .keySet()) {
                 for (Pair<OperationProvidedRole, AssemblyContext> r : innerProvisions.getOrDefault(providedInterface,
                         List.of())) {
                     c.withProvidedDelegationConnection(r.getT2(), r.getT1(), outerProvisions.get(providedInterface));
@@ -244,7 +258,7 @@ public class EclipsePCMInstanceCreator {
              */
 
             repository.addToRepository(pcmInterface);
-            this.interfaces.put(inter, create.fetchOfOperationInterface(inter));
+            this.pcmInterfaces.put(inter, create.fetchOfOperationInterface(inter));
         });
     }
 
@@ -263,12 +277,21 @@ public class EclipsePCMInstanceCreator {
                     continue;
                 }
                 distinctInterfaces.add(providedInterface);
-                pcmComp.provides(providedInterface, "dummy name");
+                pcmComp.provides(providedInterface, provision.getName()
+                    .toString());
             }
 
+            distinctInterfaces.clear();
             for (EntireInterface requirement : comp.requirements()) {
-                pcmComp.requires(fetchInterface(requirement), "dummy require name");
+                org.palladiosimulator.pcm.repository.OperationInterface requiredInterface = fetchInterface(requirement);
+                if (distinctInterfaces.contains(requiredInterface)) {
+                    continue;
+                }
+                distinctInterfaces.add(requiredInterface);
+                pcmComp.requires(requiredInterface, requirement.getName()
+                    .toString());
             }
+
             BasicComponent builtComp = pcmComp.build();
 
             // Add component to its composite, if it is part of one.
@@ -283,13 +306,13 @@ public class EclipsePCMInstanceCreator {
     }
 
     private org.palladiosimulator.pcm.repository.OperationInterface fetchInterface(OperationInterface iface) {
-        if (interfaces.containsKey(iface.getInterface())) {
-            return interfaces.get(iface.getInterface());
+        if (pcmInterfaces.containsKey(iface.getInterface())) {
+            return pcmInterfaces.get(iface.getInterface());
         }
-        for (String registeredInterfaceName : interfaces.keySet()) {
+        for (String registeredInterfaceName : pcmInterfaces.keySet()) {
             if (iface.getName()
                 .isPartOf(registeredInterfaceName)) {
-                return interfaces.get(registeredInterfaceName);
+                return pcmInterfaces.get(registeredInterfaceName);
             }
         }
         throw new IllegalArgumentException();

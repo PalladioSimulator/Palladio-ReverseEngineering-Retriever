@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
@@ -80,7 +82,25 @@ public class CompositeBuilder {
         for (Component providingPart : parts) {
             List<OperationInterface> traversedInterfaces = findRequiringComponents(remainingComponents,
                     compositeRequirements, compositeProvisions, newParts, providingPart);
-            internalInterfaces.addAll(traversedInterfaces);
+
+            Queue<OperationInterface> sortedInterfaces = new PriorityQueue<>(traversedInterfaces);
+            while (!sortedInterfaces.isEmpty()) {
+                OperationInterface iface = sortedInterfaces.poll();
+                boolean isRoot = true;
+                for (OperationInterface rootInterface : internalInterfaces) {
+                    if (iface.isPartOf(rootInterface)) {
+                        isRoot = false;
+                        break;
+                    }
+                    if (rootInterface.isPartOf(iface)) {
+                        internalInterfaces.remove(rootInterface);
+                        break;
+                    }
+                }
+                if (isRoot) {
+                    internalInterfaces.add(iface);
+                }
+            }
         }
 
         parts.addAll(newParts);
@@ -95,7 +115,25 @@ public class CompositeBuilder {
         for (Component requiringPart : parts) {
             List<OperationInterface> traversedInterfaces = findProvidingComponents(remainingComponents,
                     compositeRequirements, compositeProvisions, newParts, requiringPart);
-            internalInterfaces.addAll(traversedInterfaces);
+
+            Queue<OperationInterface> sortedInterfaces = new PriorityQueue<>(traversedInterfaces);
+            while (!sortedInterfaces.isEmpty()) {
+                OperationInterface iface = sortedInterfaces.poll();
+                boolean isRoot = true;
+                for (OperationInterface rootInterface : internalInterfaces) {
+                    if (iface.isPartOf(rootInterface)) {
+                        isRoot = false;
+                        break;
+                    }
+                    if (rootInterface.isPartOf(iface)) {
+                        internalInterfaces.remove(rootInterface);
+                        break;
+                    }
+                }
+                if (isRoot) {
+                    internalInterfaces.add(iface);
+                }
+            }
         }
 
         parts.addAll(newParts);
