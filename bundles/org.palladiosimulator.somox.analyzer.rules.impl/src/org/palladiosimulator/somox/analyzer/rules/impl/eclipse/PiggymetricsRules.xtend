@@ -222,7 +222,7 @@ class PiggymetricsRules extends IRule {
 					var methodName = ifaceName + "/" + getMapping(m);
 					// Remove "//". This can occur if requestedUnitMapping
 					// has a leading "/" and the contextPath is "/" or analogous for method and unit mapping.
-					methodName = methodName.replace("//", '/');
+					methodName = methodName.replaceAll("/+", "/");
 					pcmDetector.detectCompositeProvidedOperation(unit, m.resolveBinding, new PathName(methodName));
 				}
 			}
