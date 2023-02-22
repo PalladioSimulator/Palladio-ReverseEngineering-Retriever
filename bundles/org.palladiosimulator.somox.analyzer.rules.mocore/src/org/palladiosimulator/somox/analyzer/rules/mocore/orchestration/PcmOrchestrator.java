@@ -10,6 +10,8 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.processor.element.Signa
 import org.palladiosimulator.somox.analyzer.rules.mocore.processor.relation.ComponentAllocationRelationProcessor;
 import org.palladiosimulator.somox.analyzer.rules.mocore.processor.relation.ComponentAssemblyRelationProcessor;
 import org.palladiosimulator.somox.analyzer.rules.mocore.processor.relation.ComponentSignatureProvisionRelationProcessor;
+import org.palladiosimulator.somox.analyzer.rules.mocore.processor.relation.CompositeProvisionDelegationRelationProcessor;
+import org.palladiosimulator.somox.analyzer.rules.mocore.processor.relation.CompositeRequirementDelegationRelationProcessor;
 import org.palladiosimulator.somox.analyzer.rules.mocore.processor.relation.CompositionRelationProcessor;
 import org.palladiosimulator.somox.analyzer.rules.mocore.processor.relation.DeploymentDeploymentRelationProcessor;
 import org.palladiosimulator.somox.analyzer.rules.mocore.processor.relation.InterfaceProvisionRelationProcessor;
@@ -31,7 +33,8 @@ public class PcmOrchestrator extends Orchestrator<PcmSurrogate> {
                 new DeploymentDeploymentRelationProcessor(model), new LinkResourceSpecificationRelationProcessor(model),
                 new ServiceEffectSpecificationRelationProcessor(model), new AtomicComponentProcessor(model),
                 new ComponentSignatureProvisionRelationProcessor(model), new CompositeProcessor(model),
-                new CompositionRelationProcessor(model));
+                new CompositionRelationProcessor(model), new CompositeRequirementDelegationRelationProcessor(model),
+                new CompositeProvisionDelegationRelationProcessor(model));
     }
 
     public PcmOrchestrator() {
