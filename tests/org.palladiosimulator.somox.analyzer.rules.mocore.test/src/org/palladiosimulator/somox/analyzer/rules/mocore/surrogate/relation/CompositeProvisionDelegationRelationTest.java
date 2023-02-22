@@ -10,7 +10,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Inter
 
 import tools.mdsd.mocore.framework.surrogate.RelationTest;
 
-public class CompositionProvisionDelegationRelationTest extends RelationTest<CompositeProvisionDelegationRelation,
+public class CompositeProvisionDelegationRelationTest extends RelationTest<CompositeProvisionDelegationRelation,
         InterfaceProvisionRelation, InterfaceProvisionRelation> {
     private static final Interface RELATION_INTERFACE = Interface.getUniquePlaceholder();
 
