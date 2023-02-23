@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.capra.generic.artifactmodel.ArtifactWrapper;
 import org.eclipse.capra.generic.artifactmodel.ArtifactWrapperContainer;
@@ -15,29 +16,16 @@ import org.eclipse.capra.generic.tracemodel.GenericTraceModel;
 import org.eclipse.capra.generic.tracemodel.RelatedTo;
 import org.eclipse.capra.generic.tracemodel.TracemodelFactory;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.ENamedElement;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
+import org.palladiosimulator.pcm.core.entity.NamedElement;
 
 public class ArtifactTraceCreator {
-	
-	private static String valueOf(Object object) {
-		if (object == null) {
-			return "null";
-		} else if (object instanceof URI uri) {
-			return Paths.get(uri.path()).toAbsolutePath().normalize().toString();
-	    } else if (object instanceof Path path) {
-			return path.toAbsolutePath().normalize().toString();
-	    } else if (object instanceof File file) {
-	    	return Paths.get(file.getPath()).toAbsolutePath().normalize().toString();
-	    }
-		
-		// TODO Add AST, components, interfaces, CVEs and much more...
-		
-		return String.valueOf(object);	
-	}
 
 	private static void save(Resource resource) {
 		((XMIResource) resource).setEncoding("UTF-8");
@@ -46,48 +34,38 @@ public class ArtifactTraceCreator {
 		saveOptions.put(XMIResource.OPTION_USE_ENCODED_ATTRIBUTE_STYLE, Boolean.TRUE);
 		saveOptions.put(XMIResource.OPTION_SCHEMA_LOCATION, Boolean.TRUE);
 		saveOptions.put(XMIResource.OPTION_EXTENDED_META_DATA, Boolean.TRUE);
-
 		try {
 			resource.save(saveOptions);
-			// ((XMIResource) resource).save(java.lang.System.out, ((XMIResource) resource).getDefaultSaveOptions());
+			// ((XMIResource) resource).save(java.lang.System.out, ((XMIResource)
+			// resource).getDefaultSaveOptions());
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private final ResourceSet resources;
-	private final Resource artifactResource;
-	private final Resource traceResource;
+	private final Path base;
+	private final ArtifactWrapperContainer artifactContainer;
+	private final ArtifactmodelFactory artifactFactory;
+	private final GenericTraceModel traceContainer;
+	private final TracemodelFactory traceFactory;
 
-	private final ArtifactmodelFactory artifactFactory = ArtifactmodelFactory.eINSTANCE;
-	private final ArtifactWrapperContainer artifactContainer = this.artifactFactory.createArtifactWrapperContainer();
+	public ArtifactTraceCreator(URI inputFolder) {
+		base = Paths.get(inputFolder.devicePath()).toAbsolutePath().normalize();
 
-	private final TracemodelFactory traceFactory = TracemodelFactory.eINSTANCE;
-	private final GenericTraceModel traceContainer = this.traceFactory.createGenericTraceModel();
+		artifactFactory = ArtifactmodelFactory.eINSTANCE;
+		artifactContainer = artifactFactory.createArtifactWrapperContainer();
 
-	public ArtifactTraceCreator() {
-		this.resources = new ResourceSetImpl();
-		this.resources.getResourceFactoryRegistry().getExtensionToFactoryMap().put("xmi", new XMIResourceFactoryImpl());
-
-		this.artifactResource = this.resources.createResource(URI.createFileURI("./artifacts.xmi"));
-		this.artifactResource.getContents().add(this.artifactContainer);
-
-		this.traceResource = this.resources.createResource(URI.createFileURI("./traces.xmi"));
-		this.traceResource.getContents().add(this.traceContainer);
+		traceFactory = TracemodelFactory.eINSTANCE;
+		traceContainer = traceFactory.createGenericTraceModel();
 	}
 
-	public void save() {
-		save(this.artifactResource);
-		save(this.traceResource);
-	}
+	public RelatedTo addTrace(Object from, Object... to) {
+		final EObject origin = valueOf(from);
+		final List<EObject> targets = Arrays.stream(to).map(this::valueOf).toList();
 
-	public RelatedTo addTrace(String from, String... to) {
-		final ArtifactWrapper origin = this.addWrapper(from);
-		final List<ArtifactWrapper> targets = Arrays.stream(to).map(this::addWrapper).toList();
-
-		for (final RelatedTo trace : this.traceContainer.getTraces()) {
+		for (final RelatedTo trace : traceContainer.getTraces()) {
 			if (trace.getOrigin().equals(origin)) {
-				for (final ArtifactWrapper artifact : targets) {
+				for (final EObject artifact : targets) {
 					if (!trace.getTargets().contains(artifact)) {
 						trace.getTargets().add(artifact);
 					}
@@ -96,28 +74,94 @@ public class ArtifactTraceCreator {
 			}
 		}
 
-		final RelatedTo trace = this.traceFactory.createRelatedTo();
-		trace.setName(String.valueOf(from));
+		final RelatedTo trace = traceFactory.createRelatedTo();
+		trace.setName(getName(from));
 		trace.setOrigin(origin);
 		trace.getTargets().addAll(targets);
-		this.traceContainer.getTraces().add(trace);
+		traceContainer.getTraces().add(trace);
 		return trace;
 	}
 
-	public ArtifactWrapper addWrapper(String uri) {
-		final String value = String.valueOf(uri);
+	public ArtifactWrapper addWrapper(Object object) {
+		final String value = String.valueOf(object);
 
-		for (final ArtifactWrapper artifact : this.artifactContainer.getArtifacts()) {
-			if (artifact.getUri().equals(value)) {
+		for (final ArtifactWrapper artifact : artifactContainer.getArtifacts()) {
+			if (artifact.getName().equals(value)) {
 				return artifact;
 			}
 		}
 
-		final ArtifactWrapper wrapper = this.artifactFactory.createArtifactWrapper();
+		final ArtifactWrapper wrapper = artifactFactory.createArtifactWrapper();
 		wrapper.setName(value);
-		wrapper.setUri(value);
-		this.artifactContainer.getArtifacts().add(wrapper);
+		artifactContainer.getArtifacts().add(wrapper);
 		return wrapper;
+	}
+
+	private String getName(Object object) {
+		if (object == null) {
+			return "null";
+		}
+		if (object instanceof final NamedElement element) {
+			return String.valueOf(element.getEntityName());
+		}
+		if (object instanceof final ENamedElement element) {
+			return String.valueOf(element.getName());
+		}
+		if (object instanceof final URI uri) {
+			return base.relativize(Paths.get(uri.devicePath()).toAbsolutePath().normalize()).toString();
+		}
+		if (object instanceof final Path path) {
+			return base.relativize(path.toAbsolutePath().normalize()).toString();
+		}
+		if (object instanceof final File file) {
+			return base.relativize(Paths.get(file.getPath()).toAbsolutePath().normalize()).toString();
+		}
+		return object.toString();
+	}
+
+	public void save(Path path, String project) {
+		final String out = Paths
+				.get(Objects.requireNonNull(path).toAbsolutePath().normalize().toString(), String.valueOf(project))
+				.toString();
+
+		final ResourceSet resources = new ResourceSetImpl();
+		resources.getResourceFactoryRegistry().getExtensionToFactoryMap().put("xmi", new XMIResourceFactoryImpl());
+
+		final Resource artifactResource = resources.createResource(URI.createFileURI(out + "_artifacts.xmi"));
+		artifactResource.getContents().add(artifactContainer);
+		save(artifactResource);
+
+		final Resource traceResource = resources.createResource(URI.createFileURI(out + "_traces.xmi"));
+		traceResource.getContents().add(traceContainer);
+		save(traceResource);
+	}
+
+	private EObject valueOf(Object object) {
+		if (object == null) {
+			return addWrapper("null");
+		}
+		if (object instanceof final EObject eObject) {
+			return eObject;
+		}
+		if (object instanceof final URI uri) {
+			final Path normalized = Paths.get(uri.devicePath()).toAbsolutePath().normalize();
+			final ArtifactWrapper wrapper = addWrapper(base.relativize(normalized));
+			wrapper.setUri(URI.createURI(normalized.toString()).toString());
+			return wrapper;
+		}
+		if (object instanceof final Path path) {
+			final Path normalized = path.toAbsolutePath().normalize();
+			final ArtifactWrapper wrapper = addWrapper(base.relativize(normalized));
+			wrapper.setUri(URI.createURI(normalized.toString()).toString());
+			return wrapper;
+		}
+		if (object instanceof final File file) {
+			final Path normalized = Paths.get(file.getPath()).toAbsolutePath().normalize();
+			final ArtifactWrapper wrapper = addWrapper(base.relativize(normalized));
+			wrapper.setUri(URI.createURI(normalized.toString()).toString());
+			return wrapper;
+		}
+		return addWrapper(object);
 	}
 
 }

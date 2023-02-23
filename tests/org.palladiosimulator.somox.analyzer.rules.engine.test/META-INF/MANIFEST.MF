@@ -3,6 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: SoMoX Rule Engine Test
 Bundle-SymbolicName: org.palladiosimulator.somox.analyzer.rules.engine.test;singleton:=true
 Bundle-Version: 5.1.0.qualifier
+Import-Package: org.junit.jupiter.api
 Bundle-Vendor: palladiosimulator.org
 Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.engine.test
 Bundle-RequiredExecutionEnvironment: JavaSE-17
@@ -27,4 +28,6 @@ Require-Bundle: com.google.guava,
  org.palladiosimulator.somox.analyzer.rules.impl,
  org.palladiosimulator.somox.analyzer.rules.main,
  org.apache.log4j,
- org.palladiosimulator.generator.fluent
+ org.palladiosimulator.generator.fluent,
+ org.palladiosimulator.somox.analyzer.rules.trace,
+ org.eclipse.capra.generic.tracemodel
