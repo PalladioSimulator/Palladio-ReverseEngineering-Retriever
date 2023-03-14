@@ -40,166 +40,189 @@ import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
 import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 abstract class RuleEngineTest {
-	public static final URI TEST_DIR = CommonPlugin
-			.asLocalURI(URI.createFileURI(URI.decode(new File("res").getAbsolutePath())));
+    public static final URI TEST_DIR = CommonPlugin
+        .asLocalURI(URI.createFileURI(URI.decode(new File("res").getAbsolutePath())));
 
-	public static final URI OUT_DIR = TEST_DIR.appendSegment("out");
+    public static final URI OUT_DIR = TEST_DIR.appendSegment("out");
 
-	protected static URI getOutputDirectory() {
-		return OUT_DIR.appendSegment("jdt");
-	}
+    protected static URI getOutputDirectory() {
+        return OUT_DIR.appendSegment("jdt");
+    }
 
-	public static RepositoryImpl loadRepository(URI repoXMI) {
-		final List<EObject> contents = new ResourceSetImpl().getResource(repoXMI, true).getContents();
+    public static RepositoryImpl loadRepository(URI repoXMI) {
+        final List<EObject> contents = new ResourceSetImpl().getResource(repoXMI, true)
+            .getContents();
 
-		assertEquals(1, contents.size());
-		assertTrue(contents.get(0) instanceof RepositoryImpl);
+        assertEquals(1, contents.size());
+        assertTrue(contents.get(0) instanceof RepositoryImpl);
 
-		// TODO activate this again when SEFF is included
-		// validate(contents.get(0));
+        // TODO activate this again when SEFF is included
+        // validate(contents.get(0));
 
-		return (RepositoryImpl) contents.get(0);
-	}
+        return (RepositoryImpl) contents.get(0);
+    }
 
-	public static void validate(EObject eObject) {
-		EcoreUtil.resolveAll(eObject);
-		assertEquals(Diagnostic.OK, Diagnostician.INSTANCE.validate(eObject).getSeverity());
-	}
+    public static void validate(EObject eObject) {
+        EcoreUtil.resolveAll(eObject);
+        assertEquals(Diagnostic.OK, Diagnostician.INSTANCE.validate(eObject)
+            .getSeverity());
+    }
 
-	// Seperate instances for every child test
-	private final Logger logger = Logger.getLogger(this.getClass());
+    // Seperate instances for every child test
+    private final Logger logger = Logger.getLogger(this.getClass());
 
-	private boolean isCreated;
-	private List<RepositoryComponent> components;
-	private final RuleEngineConfiguration config = new RuleEngineConfiguration();
-	private List<DataType> datatypes;
-	private List<FailureType> failuretypes;
-	private List<Interface> interfaces;
-	private RepositoryImpl repository;
-	private final Set<DefaultRule> rules;
+    private boolean isCreated;
+    private List<RepositoryComponent> components;
+    private final RuleEngineConfiguration config = new RuleEngineConfiguration();
+    private List<DataType> datatypes;
+    private List<FailureType> failuretypes;
+    private List<Interface> interfaces;
+    private RepositoryImpl repository;
+    private RuleEngineBlackboard blackboard;
+    private final Set<DefaultRule> rules;
 
-	/**
-	 * Tests the basic functionality of the RuleEngineAnalyzer. Requires it to
-	 * execute without an exception and produce an output file.
-	 *
-	 * @param projectDirectory the name of the project directory that will be
-	 *                         analyzed
-	 */
-	protected RuleEngineTest(String projectDirectory, DefaultRule... rules) {
-		final RuleEngineBlackboard jdtBlackboard = new RuleEngineBlackboard();
-		final RuleEngineAnalyzer jdtAnalyzer = new RuleEngineAnalyzer(jdtBlackboard);
-		final Discoverer jdtDiscoverer = new JavaDiscoverer();
+    /**
+     * Tests the basic functionality of the RuleEngineAnalyzer. Requires it to execute without an
+     * exception and produce an output file.
+     *
+     * @param projectDirectory
+     *            the name of the project directory that will be analyzed
+     */
+    protected RuleEngineTest(String projectDirectory, DefaultRule... rules) {
+        blackboard = new RuleEngineBlackboard();
+        final RuleEngineAnalyzer jdtAnalyzer = new RuleEngineAnalyzer(blackboard);
+        final Discoverer jdtDiscoverer = new JavaDiscoverer();
 
-		this.rules = Set.of(rules);
+        this.rules = Set.of(rules);
 
-		config.setInputFolder(TEST_DIR.appendSegments(projectDirectory.split("/")));
-		config.setOutputFolder(getOutputDirectory());
-		config.setUseEMFTextParser(false);
-		config.setSelectedRules(this.rules);
+        config.setInputFolder(TEST_DIR.appendSegments(projectDirectory.split("/")));
+        config.setOutputFolder(getOutputDirectory());
+        config.setUseEMFTextParser(false);
+        config.setSelectedRules(this.rules);
 
-		try {
-			jdtDiscoverer.create(config, jdtBlackboard).execute(null);
-			jdtAnalyzer.analyze(config, null);
-			isCreated = true;
-		} catch (RuleEngineException | JobFailedException | UserCanceledException e) {
-			isCreated = false;
-		}
+        try {
+            jdtDiscoverer.create(config, blackboard)
+                .execute(null);
+            jdtAnalyzer.analyze(config, null);
+            isCreated = true;
+        } catch (RuleEngineException | JobFailedException | UserCanceledException e) {
+            isCreated = false;
+        }
 
-		final String jdtRepoPath = getOutputDirectory().appendSegment("pcm.repository").devicePath();
-		assertTrue(!isCreated || new File(jdtRepoPath).exists());
+        final String jdtRepoPath = getOutputDirectory().appendSegment("pcm.repository")
+            .devicePath();
+        assertTrue(!isCreated || new File(jdtRepoPath).exists());
 
-		if (isCreated) {
-			repository = loadRepository(URI.createFileURI(jdtRepoPath));
-		}
-		if (isCreated) {
-			components = repository.getComponents__Repository();
-			datatypes = repository.getDataTypes__Repository();
-			failuretypes = repository.getFailureTypes__Repository();
-			interfaces = repository.getInterfaces__Repository();
-		}
-	}
+        if (isCreated) {
+            repository = loadRepository(URI.createFileURI(jdtRepoPath));
+        }
+        if (isCreated) {
+            components = repository.getComponents__Repository();
+            datatypes = repository.getDataTypes__Repository();
+            failuretypes = repository.getFailureTypes__Repository();
+            interfaces = repository.getInterfaces__Repository();
+        }
+    }
 
-	private void assertCreated() {
-		assertTrue(isCreated, "Failed to create model using JavaDiscoverer!");
-	}
+    private void assertCreated() {
+        assertTrue(isCreated, "Failed to create model using JavaDiscoverer!");
+    }
 
-	public void assertMaxParameterCount(int expectedMaxParameterCount, String interfaceName, String signatureName) {
-		assertTrue(containsOperationInterface(interfaceName));
-		assertTrue(containsOperationSignature(interfaceName, signatureName));
-		assertEquals(expectedMaxParameterCount, getSignatureMaxParameterCount(interfaceName, signatureName));
-	}
+    public void assertMaxParameterCount(int expectedMaxParameterCount, String interfaceName, String signatureName) {
+        assertTrue(containsOperationInterface(interfaceName));
+        assertTrue(containsOperationSignature(interfaceName, signatureName));
+        assertEquals(expectedMaxParameterCount, getSignatureMaxParameterCount(interfaceName, signatureName));
+    }
 
-	@AfterEach
-	void cleanUp() {
-		final File target = new File(OUT_DIR.devicePath(), this.getClass().getSimpleName() + ".repository");
-		if (!target.delete()) {
-			logger.error("Could not save delete repository \"" + target.getAbsolutePath() + "\"!");
-		}
-		if (!new File(OUT_DIR.devicePath(), "pcm.repository").renameTo(target)) {
-			logger.error("Could not save created repository to \"" + target.getAbsolutePath() + "\"!");
-		}
-	}
+    @AfterEach
+    void cleanUp() {
+        final File target = new File(OUT_DIR.devicePath(), this.getClass()
+            .getSimpleName() + ".repository");
+        if (!target.delete()) {
+            logger.error("Could not save delete repository \"" + target.getAbsolutePath() + "\"!");
+        }
+        if (!new File(OUT_DIR.devicePath(), "pcm.repository").renameTo(target)) {
+            logger.error("Could not save created repository to \"" + target.getAbsolutePath() + "\"!");
+        }
+    }
 
-	public boolean containsComponent(String name) {
-		return getComponents().stream().anyMatch(x -> x.getEntityName().equals(name));
-	}
+    public boolean containsComponent(String name) {
+        return getComponents().stream()
+            .anyMatch(x -> x.getEntityName()
+                .equals(name));
+    }
 
-	public boolean containsOperationInterface(String name) {
-		return getInterfaces().stream().filter(OperationInterface.class::isInstance)
-				.anyMatch(x -> x.getEntityName().equals(name));
-	}
+    public boolean containsOperationInterface(String name) {
+        return getInterfaces().stream()
+            .filter(OperationInterface.class::isInstance)
+            .anyMatch(x -> x.getEntityName()
+                .equals(name));
+    }
 
-	public boolean containsOperationSignature(String interfaceName, String signatureName) {
-		return !getOperationSignature(interfaceName, signatureName).isEmpty();
-	}
+    public boolean containsOperationSignature(String interfaceName, String signatureName) {
+        return !getOperationSignature(interfaceName, signatureName).isEmpty();
+    }
 
-	public List<RepositoryComponent> getComponents() {
-		assertCreated();
-		return Collections.unmodifiableList(components);
-	}
+    public List<RepositoryComponent> getComponents() {
+        assertCreated();
+        return Collections.unmodifiableList(components);
+    }
 
-	public RuleEngineConfiguration getConfig() {
-		assertCreated();
-		return config;
-	}
+    public RuleEngineConfiguration getConfig() {
+        assertCreated();
+        return config;
+    }
 
-	public List<DataType> getDatatypes() {
-		assertCreated();
-		return Collections.unmodifiableList(datatypes);
-	}
+    public List<DataType> getDatatypes() {
+        assertCreated();
+        return Collections.unmodifiableList(datatypes);
+    }
 
-	public List<FailureType> getFailuretypes() {
-		assertCreated();
-		return Collections.unmodifiableList(failuretypes);
-	}
+    public List<FailureType> getFailuretypes() {
+        assertCreated();
+        return Collections.unmodifiableList(failuretypes);
+    }
 
-	public List<Interface> getInterfaces() {
-		assertCreated();
-		return Collections.unmodifiableList(interfaces);
-	}
+    public List<Interface> getInterfaces() {
+        assertCreated();
+        return Collections.unmodifiableList(interfaces);
+    }
 
-	private Set<OperationSignature> getOperationSignature(String interfaceName, String signatureName) {
-		return getInterfaces().stream().filter(OperationInterface.class::isInstance).map(OperationInterface.class::cast)
-				.filter(x -> x.getEntityName().equals(interfaceName))
-				.map(x -> x.getSignatures__OperationInterface().stream()
-						.filter(y -> y.getEntityName().equals(signatureName)).collect(Collectors.toSet()))
-				.reduce(new HashSet<>(), Sets::union);
-	}
+    private Set<OperationSignature> getOperationSignature(String interfaceName, String signatureName) {
+        return getInterfaces().stream()
+            .filter(OperationInterface.class::isInstance)
+            .map(OperationInterface.class::cast)
+            .filter(x -> x.getEntityName()
+                .equals(interfaceName))
+            .map(x -> x.getSignatures__OperationInterface()
+                .stream()
+                .filter(y -> y.getEntityName()
+                    .equals(signatureName))
+                .collect(Collectors.toSet()))
+            .reduce(new HashSet<>(), Sets::union);
+    }
 
-	public RepositoryImpl getRepo() {
-		assertCreated();
-		return repository;
-	}
+    public RepositoryImpl getRepo() {
+        assertCreated();
+        return repository;
+    }
 
-	public Set<DefaultRule> getRules() {
-		return Collections.unmodifiableSet(rules);
-	}
+    public RuleEngineBlackboard getBlackboard() {
+        assertCreated();
+        return blackboard;
+    }
 
-	public int getSignatureMaxParameterCount(String interfaceName, String signatureName) {
-		final Set<OperationSignature> sigs = getOperationSignature(interfaceName, signatureName);
-		return sigs.stream().map(OperationSignature::getParameters__OperationSignature).map(List::size).reduce(0,
-				Math::max);
-	}
+    public Set<DefaultRule> getRules() {
+        return Collections.unmodifiableSet(rules);
+    }
 
-	abstract void test();
+    public int getSignatureMaxParameterCount(String interfaceName, String signatureName) {
+        final Set<OperationSignature> sigs = getOperationSignature(interfaceName, signatureName);
+        return sigs.stream()
+            .map(OperationSignature::getParameters__OperationSignature)
+            .map(List::size)
+            .reduce(0, Math::max);
+    }
+
+    abstract void test();
 }
