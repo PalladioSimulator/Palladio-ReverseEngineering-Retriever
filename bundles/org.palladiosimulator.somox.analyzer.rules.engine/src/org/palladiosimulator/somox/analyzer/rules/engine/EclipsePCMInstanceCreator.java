@@ -5,9 +5,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -29,6 +31,7 @@ import org.palladiosimulator.pcm.repository.OperationProvidedRole;
 import org.palladiosimulator.pcm.repository.OperationRequiredRole;
 import org.palladiosimulator.pcm.repository.ParameterModifier;
 import org.palladiosimulator.pcm.repository.Repository;
+import org.palladiosimulator.pcm.seff.ResourceDemandingSEFF;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.model.Component;
@@ -223,6 +226,7 @@ public class EclipsePCMInstanceCreator {
     }
 
     private void createPCMInterfaces(Map<String, List<Operation>> interfaces) {
+        Map<String, Integer> signatureNameCount = new HashMap<>();
         interfaces.forEach((inter, operations) -> {
             LOG.info("Current PCM Interface: " + inter);
 
@@ -230,10 +234,17 @@ public class EclipsePCMInstanceCreator {
                 .withName(inter);
 
             for (final Operation operation : operations) {
+                String name = operation.getName()
+                    .forInterface(inter)
+                    .orElseThrow();
+                Integer oldCount = signatureNameCount.getOrDefault(name, 0);
+                signatureNameCount.put(name, oldCount + 1);
+                // Omit suffix for first occurrence.
+                if (oldCount > 0) {
+                    name = name + "$" + signatureNameCount.get(name);
+                }
                 OperationSignatureCreator signature = create.newOperationSignature()
-                    .withName(operation.getName()
-                        .forInterface(inter)
-                        .orElseThrow());
+                    .withName(name);
 
                 IMethodBinding method = operation.getBinding();
 
@@ -249,17 +260,29 @@ public class EclipsePCMInstanceCreator {
                 signature = handleSignatureDataType(signature, "", returned, returned.getDimensions(), true);
 
                 pcmInterface.withOperationSignature(signature);
-            }
 
-            /*
-             * // Add interfaces to its composite component, if it is an internal part of one.
-             * CompositeComponentCreator c = unitCompositeCreators.get(inter); if (c != null) {
-             * c.withAssemblyContext(builtIface); }
-             */
+                Optional<ASTNode> astNode = getDeclaration(method);
+                if (astNode.isPresent() && blackboard.getSeffAssociation(astNode.get()) == null) {
+                    ResourceDemandingSEFF seff = create.newSeff()
+                        .onSignature(create.fetchOfSignature(name))
+                        .buildRDSeff();
+                    blackboard.putSeffAssociation(astNode.get(), seff);
+                }
+            }
 
             repository.addToRepository(pcmInterface);
             this.pcmInterfaces.put(inter, create.fetchOfOperationInterface(inter));
         });
+    }
+
+    private Optional<ASTNode> getDeclaration(IMethodBinding binding) {
+        return blackboard.getCompilationUnits()
+            .stream()
+            .filter(CompilationUnitWrapper::isEclipseCompilationUnit)
+            .map(CompilationUnitWrapper::getEclipseCompilationUnit)
+            .map(unit -> unit.findDeclaringNode(binding))
+            .filter(node -> node != null)
+            .findAny();
     }
 
     private void createPCMComponents(Set<Component> components) {
@@ -279,6 +302,20 @@ public class EclipsePCMInstanceCreator {
                 distinctInterfaces.add(providedInterface);
                 pcmComp.provides(providedInterface, provision.getName()
                     .toString());
+            }
+
+            for (OperationInterface provision : comp.provisions()) {
+                Map<String, List<Operation>> operations = provision.simplified();
+                // This is usually only a single interface per provision.
+                for (String iface : operations.keySet()) {
+                    for (Operation operation : operations.get(iface)) {
+                        IMethodBinding method = operation.getBinding();
+                        Optional<ASTNode> declaration = getDeclaration(method);
+                        if (declaration.isPresent()) {
+                            pcmComp.withServiceEffectSpecification(blackboard.getSeffAssociation(declaration.get()));
+                        }
+                    }
+                }
             }
 
             distinctInterfaces.clear();

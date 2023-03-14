@@ -9,8 +9,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.palladiosimulator.pcm.core.entity.Entity;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
+import org.palladiosimulator.pcm.seff.ServiceEffectSpecification;
 import org.palladiosimulator.pcm.system.System;
 import org.palladiosimulator.somox.analyzer.rules.engine.EMFTextPCMDetector;
 import org.palladiosimulator.somox.analyzer.rules.engine.EclipsePCMDetector;
@@ -27,6 +29,7 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
     private final Map<Entity, CompilationUnitWrapper> entityLocations;
     private final Map<Path, Set<CompilationUnitWrapper>> systemAssociations;
     private final Map<System, Path> systemPaths;
+    private final Map<ASTNode, ServiceEffectSpecification> seffAssociations;
     private EMFTextPCMDetector emfTextPcmDetector;
     private EclipsePCMDetector eclipsePcmDetector;
 
@@ -37,6 +40,7 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
         entityLocations = new HashMap<>();
         systemAssociations = new HashMap<>();
         systemPaths = new HashMap<>();
+        seffAssociations = new HashMap<>();
     }
 
     public Path putCompilationUnitLocation(CompilationUnitWrapper compilationUnit, Path path) {
@@ -145,5 +149,17 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
 
     public void putSystemPath(System system, Path path) {
         systemPaths.put(system, path);
+    }
+
+    public void putSeffAssociation(ASTNode astNode, ServiceEffectSpecification seff) {
+        seffAssociations.put(astNode, seff);
+    }
+
+    public ServiceEffectSpecification getSeffAssociation(ASTNode astNode) {
+        return seffAssociations.get(astNode);
+    }
+
+    public Map<ASTNode, ServiceEffectSpecification> getSeffAssociations() {
+        return Collections.unmodifiableMap(seffAssociations);
     }
 }
