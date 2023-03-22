@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.common.util.URI;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
+import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.service.Analyst;
 import org.palladiosimulator.somox.analyzer.rules.service.AnalystCollection;
 import org.palladiosimulator.somox.analyzer.rules.service.EmptyCollection;
@@ -33,6 +34,8 @@ public class RuleEngineConfiguration extends AbstractComposedJobConfiguration im
     public static final String RULE_ENGINE_ANALYST_CONFIG_PREFIX = CONFIG_PREFIX + "analystconfig.";
     public static final String RULE_ENGINE_DISCOVERER_CONFIG_PREFIX = CONFIG_PREFIX + "discovererconfig.";
     public static final String RULE_ENGINE_USE_EMFTEXT_PARSER = CONFIG_PREFIX + "use_emftext_parser";
+    public static final String RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY = RuleEngineBlackboard.KEY_REPOSITORY;
+    public static final String RULE_ENGINE_BLACKBOARD_KEY_SEFF_ASSOCIATIONS = RuleEngineBlackboard.KEY_SEFF_ASSOCIATIONS;
     public static final String RULE_LIST_SEPARATOR = ";";
 
     private /* not final */ URI inputFolder;

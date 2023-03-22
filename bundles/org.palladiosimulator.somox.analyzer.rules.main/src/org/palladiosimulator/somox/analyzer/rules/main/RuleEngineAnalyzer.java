@@ -162,8 +162,7 @@ public class RuleEngineAnalyzer {
             String guessedPath = String.join(File.separator, pathSegments) + ".java";
 
             try (final Stream<Path> walk = Files.walk(root)) {
-                walk
-                    .filter(Files::isRegularFile)
+                walk.filter(Files::isRegularFile)
                     .filter(x -> x.endsWith(guessedPath))
                     .forEach(x -> blackboard.putCompilationUnitLocation(compilationUnitWrapper, x));
             } catch (IOException e) {
@@ -337,14 +336,17 @@ public class RuleEngineAnalyzer {
             }
         }
 
+        Repository pcm;
         // Persist the repository at ./pcm.repository
         if (expectEMFTextParser) {
-            ModelSaver.saveRepository(emfTextPcm, outPath.resolve("pcm")
-                .toString(), false);
+            pcm = emfTextPcm;
         } else {
-            ModelSaver.saveRepository(eclipsePcm, outPath.resolve("pcm")
-                .toString(), false);
+            pcm = eclipsePcm;
         }
+
+        blackboard.addPartition(RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY, pcm);
+        ModelSaver.saveRepository(pcm, outPath.resolve("pcm")
+            .toString(), false);
     }
 
     /**

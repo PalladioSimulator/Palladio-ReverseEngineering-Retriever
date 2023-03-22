@@ -23,13 +23,15 @@ import de.uka.ipd.sdq.workflow.blackboard.Blackboard;
 
 public class RuleEngineBlackboard extends Blackboard<Object> {
 
+    public static final String KEY_REPOSITORY = "org.palladiosimulator.somox.analyzer.repository";
+    public static final String KEY_SEFF_ASSOCIATIONS = "org.palladiosimulator.somox.analyzer.seff_associations";
+
     private final Set<CompilationUnitWrapper> compilationUnits;
     private final Map<CompilationUnitWrapper, Path> compilationUnitLocations;
     private final Map<RepositoryComponent, CompilationUnitWrapper> repositoryComponentLocations;
     private final Map<Entity, CompilationUnitWrapper> entityLocations;
     private final Map<Path, Set<CompilationUnitWrapper>> systemAssociations;
     private final Map<System, Path> systemPaths;
-    private final Map<ASTNode, ServiceEffectSpecification> seffAssociations;
     private EMFTextPCMDetector emfTextPcmDetector;
     private EclipsePCMDetector eclipsePcmDetector;
 
@@ -40,7 +42,7 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
         entityLocations = new HashMap<>();
         systemAssociations = new HashMap<>();
         systemPaths = new HashMap<>();
-        seffAssociations = new HashMap<>();
+        addPartition(KEY_SEFF_ASSOCIATIONS, new HashMap<>());
     }
 
     public Path putCompilationUnitLocation(CompilationUnitWrapper compilationUnit, Path path) {
@@ -152,14 +154,23 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
     }
 
     public void putSeffAssociation(ASTNode astNode, ServiceEffectSpecification seff) {
+        @SuppressWarnings("unchecked")
+        Map<ASTNode, ServiceEffectSpecification> seffAssociations = (Map<ASTNode, ServiceEffectSpecification>) getPartition(
+                KEY_SEFF_ASSOCIATIONS);
         seffAssociations.put(astNode, seff);
     }
 
     public ServiceEffectSpecification getSeffAssociation(ASTNode astNode) {
+        @SuppressWarnings("unchecked")
+        Map<ASTNode, ServiceEffectSpecification> seffAssociations = (Map<ASTNode, ServiceEffectSpecification>) getPartition(
+                KEY_SEFF_ASSOCIATIONS);
         return seffAssociations.get(astNode);
     }
 
     public Map<ASTNode, ServiceEffectSpecification> getSeffAssociations() {
+        @SuppressWarnings("unchecked")
+        Map<ASTNode, ServiceEffectSpecification> seffAssociations = (Map<ASTNode, ServiceEffectSpecification>) getPartition(
+                KEY_SEFF_ASSOCIATIONS);
         return Collections.unmodifiableMap(seffAssociations);
     }
 }
