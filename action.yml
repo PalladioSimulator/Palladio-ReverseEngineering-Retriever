@@ -1,0 +1,80 @@
+# A GitHub Action that allows to run the RuleEngine on arbitrary GitHub repositories.
+
+name: 'Run RuleEngine'
+description: 'Reverse-engineers a project''s source into a Palladio Component Model'
+
+inputs:
+  source_path:
+    description: 'The location of the project to reverse-engineer'
+    required: true
+    default: '.'
+  rules:
+    description: 'The rules to reverse-engineer with, as a comma-separated list'
+    required: true
+    default: 'SPRING, MAVEN'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set Up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Create temporary directory
+      shell: bash
+      run: |
+        TMP_DIR=$(mktemp -d)
+        echo "tmp_dir=$TMP_DIR" >> $GITHUB_ENV
+        mkdir $TMP_DIR/ruleengine_out
+
+    - name: Get action version
+      shell: bash
+      # Assuming a format like in the GitHub Actions documentation:
+      # /home/runner/work/_actions/repo-owner/name-of-action-repo/v1
+      # There, the 7th segment is the action's tag. This is bumped up
+      # to 8 since `cut` counts the empty string before the first / as well.
+      run: |
+        ACTION_VERSION=$(echo ${{ github.action_path }} | cut -d / -f 8- -)
+        echo "action_version=$ACTION_VERSION" >>  $GITHUB_ENV
+
+    - name: Download RuleEngine
+      shell: bash
+      # Downloads the RuleEngine with the same version that this action has
+      # (not necessarily the most recent one!).
+      run: |
+        curl -s https://api.github.com/repos/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/releases/tags/${{ env.action_version }} \
+          | grep -E 'browser_download_url' \
+          | grep linux \
+          | grep x86_64 \
+          | grep -Eo 'https://[^\"]*' \
+          | xargs wget -O "${{ env.tmp_dir }}/ruleengine.zip"
+
+    - name: Extract RuleEngine
+      shell: bash
+      working-directory: ${{ env.tmp_dir }}
+      run: unzip ruleengine.zip -d ruleengine
+
+    - name: Execute RuleEngine
+      shell: bash
+      working-directory: ${{ env.tmp_dir }}/ruleengine
+      run: ./eclipse -i "~/${{ inputs.source_path }}" -o "${{ env.tmp_dir }}/ruleengine_out" -r "${{ inputs.rules }}"
+
+    - name: Upload analysis results
+      uses: actions/upload-artifact@v3
+      with:
+        name: result
+        path: ${{ env.tmp_dir }}/ruleengine_out/**
+
+    - name: Upload Eclipse logs
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: eclipse-logs
+        path: ${{ env.tmp_dir }}/ruleengine/configuration/*.log
+
+    - name: Delete temporary directory
+      if: always()
+      shell: bash
+      run: rm -rf ${{ env.tmp_dir }}
