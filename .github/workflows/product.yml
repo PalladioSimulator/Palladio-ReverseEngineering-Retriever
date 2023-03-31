@@ -29,8 +29,8 @@ jobs:
     - name: Generate Release Tag
       run: |
         PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-        # Replace SNAPSHOT with the current date: v5.1.0-SNAPSHOT -> v5.1.0-19700101
-        RELEASE_TAG=v$(echo $PROJECT_VERSION | sed "s/SNAPSHOT/$(date +%Y%m%d)/")
+        # Replace SNAPSHOT with the current date and time: v5.1.0-SNAPSHOT -> v5.1.0.197001010000
+        RELEASE_TAG=v$(echo $PROJECT_VERSION | sed "s/-SNAPSHOT/.$(date +%Y%m%d%H%M)/")
         echo "release_tag=$RELEASE_TAG" >> $GITHUB_ENV 
     - name: Release Products
       uses: softprops/action-gh-release@v1
