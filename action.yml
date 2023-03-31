@@ -11,7 +11,7 @@ inputs:
   rules:
     description: 'The rules to reverse-engineer with, as a comma-separated list'
     required: true
-    default: 'SPRING, MAVEN'
+    default: 'SPRING,MAVEN'
 
 runs:
   using: "composite"
