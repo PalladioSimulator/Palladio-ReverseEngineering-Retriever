@@ -29,22 +29,25 @@ runs:
         echo "tmp_dir=$TMP_DIR" >> $GITHUB_ENV
         mkdir $TMP_DIR/ruleengine_out
 
-    - name: Get action version
+    - name: Download RuleEngine
+      if: ${{ github.ref == "master" }}
       shell: bash
-      # Assuming a format like in the GitHub Actions documentation:
-      # /home/runner/work/_actions/repo-owner/name-of-action-repo/v1
-      # There, the 7th segment is the action's tag. This is bumped up
-      # to 8 since `cut` counts the empty string before the first / as well.
+      # Downloads the latest release.
       run: |
-        ACTION_VERSION=$(echo ${{ github.action_path }} | cut -d / -f 8- -)
-        echo "action_version=$ACTION_VERSION" >>  $GITHUB_ENV
+        curl -s https://api.github.com/repos/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/releases/latest \
+          | grep -E 'browser_download_url' \
+          | grep linux \
+          | grep x86_64 \
+          | grep -Eo 'https://[^\"]*' \
+          | xargs wget -O "${{ env.tmp_dir }}/ruleengine.zip"
 
     - name: Download RuleEngine
+      if: ${{ github.ref != "master" }}
       shell: bash
       # Downloads the RuleEngine with the same version that this action has
       # (not necessarily the most recent one!).
       run: |
-        curl -s https://api.github.com/repos/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/releases/tags/${{ env.action_version }} \
+        curl -s https://api.github.com/repos/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/releases/tags/${{ github.ref }} \
           | grep -E 'browser_download_url' \
           | grep linux \
           | grep x86_64 \
