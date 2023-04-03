@@ -84,8 +84,9 @@ runs:
       if: failure()
       with:
         name: eclipse-logs
-        path: ${{ env.tmp_dir }}/ruleengine/configuration/*.log
-          | ${{ env.tmp_dir }}/ruleengine/workspace/.metadata/.log
+        path: |
+          ${{ env.tmp_dir }}/ruleengine/configuration/*.log
+          ${{ env.tmp_dir }}/ruleengine/workspace/.metadata/.log
 
     - name: Delete temporary directory
       if: always()
