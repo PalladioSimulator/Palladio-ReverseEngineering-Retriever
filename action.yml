@@ -43,7 +43,7 @@ runs:
       if: env.action_version == 'master'
       shell: bash
       run: |
-        curl -s https://api.github.com/repos/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/releases/latest \
+        curl -s ${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/releases/latest \
           | grep -E 'browser_download_url' \
           | grep linux \
           | grep x86_64 \
@@ -56,7 +56,7 @@ runs:
       # Downloads the RuleEngine with the same version that this action has
       # (not necessarily the most recent one!).
       run: |
-        curl -s https://api.github.com/repos/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/releases/tags/${{ env.action_version }} \
+        curl -s ${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/releases/tags/${{ env.action_version }} \
           | grep -E 'browser_download_url' \
           | grep linux \
           | grep x86_64 \
@@ -81,7 +81,7 @@ runs:
 
     - name: Upload Eclipse logs
       uses: actions/upload-artifact@v3
-      if: always()
+      if: contains(glob('${{ env.tmp_dir }}/ruleengine/configuration/*.log'), true)
       with:
         name: eclipse-logs
         path: ${{ env.tmp_dir }}/ruleengine/configuration/*.log
