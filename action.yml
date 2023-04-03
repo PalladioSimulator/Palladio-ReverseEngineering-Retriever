@@ -71,7 +71,9 @@ runs:
     - name: Execute RuleEngine
       shell: bash
       working-directory: ${{ env.tmp_dir }}/ruleengine
-      run: ./eclipse -i "${{ github.workspace }}/${{ inputs.source_path }}" -o "${{ env.tmp_dir }}/ruleengine_out" -r "${{ inputs.rules }}"
+      run: |
+        ls "${{ github.workspace }}/${{ inputs.source_path }}"
+        ./eclipse -i "${{ github.workspace }}/${{ inputs.source_path }}" -o "${{ env.tmp_dir }}/ruleengine_out" -r "${{ inputs.rules }}"
 
     - name: Upload analysis results
       uses: actions/upload-artifact@v3
