@@ -39,7 +39,19 @@ runs:
         ACTION_VERSION=$(echo ${{ github.action_path }} | cut -d / -f 8- -)
         echo "action_version=$ACTION_VERSION" >>  $GITHUB_ENV
 
+    - name: Download latest RuleEngine
+      if: env.action_version == 'master'
+      shell: bash
+      run: |
+        curl -s https://api.github.com/repos/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/releases/latest \
+          | grep -E 'browser_download_url' \
+          | grep linux \
+          | grep x86_64 \
+          | grep -Eo 'https://[^\"]*' \
+          | xargs wget -O "${{ env.tmp_dir }}/ruleengine.zip"
+
     - name: Download RuleEngine
+      if: env.action_version != 'master'
       shell: bash
       # Downloads the RuleEngine with the same version that this action has
       # (not necessarily the most recent one!).
