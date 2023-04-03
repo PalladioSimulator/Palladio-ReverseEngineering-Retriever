@@ -83,7 +83,7 @@ runs:
 
     - name: Upload Eclipse logs
       uses: actions/upload-artifact@v3
-      if: contains(glob('${{ env.tmp_dir }}/ruleengine/configuration/*.log'), true)
+      if: join(glob('${{ env.tmp_dir }}/ruleengine/configuration/*.log'), '') != ''
       with:
         name: eclipse-logs
         path: ${{ env.tmp_dir }}/ruleengine/configuration/*.log
