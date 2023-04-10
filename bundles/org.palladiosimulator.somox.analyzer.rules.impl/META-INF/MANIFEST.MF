@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.palladiosimulator.somox.analyzer.rules.impl;singleton:=
 Bundle-Version: 5.1.0.qualifier
 Bundle-Vendor: palladiosimulator.org
 Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.jax_rs
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.palladiosimulator.somox.analyzer.rules.impl.eclipse,
  org.palladiosimulator.somox.analyzer.rules.impl.emftext
 Require-Bundle: org.eclipse.core.resources,

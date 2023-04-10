@@ -2,14 +2,19 @@
 name: Continuous Product Integration
 
 on:
+  # successful merge into master
   push:
-    tags:
-      - "v*.*.*" # Push events with tags, such as v1.0.0 or v22.07.05
-  workflow_dispatch: # manual trigger
+    branches:
+      - master
+  # manual trigger
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
-    name: Package Products
+    name: Release Products
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repository
@@ -21,18 +26,14 @@ jobs:
         java-version: '17'
     - name: Build with Maven Tycho
       run: mvn -B -U clean package
-    - name: Upload Linux Artifact
-      uses: actions/upload-artifact@v3
+    - name: Generate Release Tag
+      run: |
+        PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        # Replace SNAPSHOT with the current date and time: v5.1.0-SNAPSHOT -> v5.1.0.197001010000
+        RELEASE_TAG=v$(echo $PROJECT_VERSION | sed "s/-SNAPSHOT/.$(date +%Y%m%d%H%M)/")
+        echo "release_tag=$RELEASE_TAG" >> $GITHUB_ENV 
+    - name: Release Products
+      uses: softprops/action-gh-release@v1
       with:
-        name: org.palladiosimulator.somox.analyzer.rules.product-linux.gtk.x86_64.zip
-        path: products/org.palladiosimulator.somox.analyzer.rules.product/target/products/org.palladiosimulator.somox.analyzer.rules.product-linux.gtk.x86_64.zip
-    - name: Upload macOS Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: org.palladiosimulator.somox.analyzer.rules.product-macosx.cocoa.x86_64.zip
-        path: products/org.palladiosimulator.somox.analyzer.rules.product/target/products/org.palladiosimulator.somox.analyzer.rules.product-macosx.cocoa.x86_64.zip
-    - name: Upload Windows Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: org.palladiosimulator.somox.analyzer.rules.product-win32.win32.x86_64.zip
-        path: products/org.palladiosimulator.somox.analyzer.rules.product/target/products/org.palladiosimulator.somox.analyzer.rules.product-win32.win32.x86_64.zip
+        files: products/org.palladiosimulator.somox.analyzer.rules.product/target/products/*
+        tag_name: ${{ env.release_tag }}

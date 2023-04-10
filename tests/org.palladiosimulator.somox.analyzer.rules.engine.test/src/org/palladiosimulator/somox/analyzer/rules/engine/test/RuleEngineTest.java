@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.CommonPlugin;
@@ -33,7 +32,6 @@ import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfig
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineException;
 import org.palladiosimulator.somox.discoverer.Discoverer;
-import org.palladiosimulator.somox.discoverer.EmfTextDiscoverer;
 import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
 
 import com.google.common.collect.Sets;
@@ -42,255 +40,166 @@ import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
 import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 abstract class RuleEngineTest {
-    // Seperate instances for every child test
-    private final Logger logger = Logger.getLogger(this.getClass());
+	public static final URI TEST_DIR = CommonPlugin
+			.asLocalURI(URI.createFileURI(URI.decode(new File("res").getAbsolutePath())));
 
-    public static final URI TEST_DIR = CommonPlugin
-        .asLocalURI(URI.createFileURI(URI.decode(new File("res").getAbsolutePath())));
-    public static final URI OUT_DIR = TEST_DIR.appendSegment("out");
+	public static final URI OUT_DIR = TEST_DIR.appendSegment("out");
 
-    private final RuleEngineConfiguration jdtConfig = new RuleEngineConfiguration();
-    private final RuleEngineConfiguration emfTextConfig = new RuleEngineConfiguration();
-    private boolean isJDTCreated;
-    private boolean isEMFTextCreated;
-    private final Set<DefaultRule> rules;
-    private RepositoryImpl jdtRepo;
-    private RepositoryImpl emfTextRepo;
+	protected static URI getOutputDirectory() {
+		return OUT_DIR.appendSegment("jdt");
+	}
 
-    private List<RepositoryComponent> jdtComponents;
-    private List<DataType> jdtDatatypes;
-    private List<FailureType> jdtFailuretypes;
-    private List<Interface> jdtInterfaces;
+	public static RepositoryImpl loadRepository(URI repoXMI) {
+		final List<EObject> contents = new ResourceSetImpl().getResource(repoXMI, true).getContents();
 
-    private List<RepositoryComponent> emfTextComponents;
-    private List<DataType> emfTextDatatypes;
-    private List<FailureType> emfTextFailuretypes;
-    private List<Interface> emfTextInterfaces;
+		assertEquals(1, contents.size());
+		assertTrue(contents.get(0) instanceof RepositoryImpl);
 
-    /**
-     * Tests the basic functionality of the RuleEngineAnalyzer. Requires it to execute without an
-     * exception and produce an output file.
-     *
-     * @param projectDirectory
-     *            the name of the project directory that will be analyzed
-     */
-    protected RuleEngineTest(String projectDirectory, DefaultRule... rules) {
-        RuleEngineBlackboard jdtBlackboard = new RuleEngineBlackboard();
-        RuleEngineAnalyzer jdtAnalyzer = new RuleEngineAnalyzer(jdtBlackboard);
-        Discoverer jdtDiscoverer = new JavaDiscoverer();
+		// TODO activate this again when SEFF is included
+		// validate(contents.get(0));
 
-        RuleEngineBlackboard emfTextBlackboard = new RuleEngineBlackboard();
-        RuleEngineAnalyzer emfTextAnalyzer = new RuleEngineAnalyzer(emfTextBlackboard);
-        Discoverer emfTextDiscoverer = new EmfTextDiscoverer();
+		return (RepositoryImpl) contents.get(0);
+	}
 
-        this.rules = Set.of(rules);
+	public static void validate(EObject eObject) {
+		EcoreUtil.resolveAll(eObject);
+		assertEquals(Diagnostic.OK, Diagnostician.INSTANCE.validate(eObject).getSeverity());
+	}
 
-        jdtConfig.setInputFolder(TEST_DIR.appendSegments(projectDirectory.split("/")));
-        jdtConfig.setOutputFolder(getOutputDirectory(false));
-        jdtConfig.setUseEMFTextParser(false);
-        jdtConfig.setSelectedRules(this.rules);
+	// Seperate instances for every child test
+	private final Logger logger = Logger.getLogger(this.getClass());
 
-        emfTextConfig.setInputFolder(TEST_DIR.appendSegments(projectDirectory.split("/")));
-        emfTextConfig.setOutputFolder(getOutputDirectory(true));
-        emfTextConfig.setUseEMFTextParser(true);
-        emfTextConfig.setSelectedRules(this.rules);
+	private boolean isCreated;
+	private List<RepositoryComponent> components;
+	private final RuleEngineConfiguration config = new RuleEngineConfiguration();
+	private List<DataType> datatypes;
+	private List<FailureType> failuretypes;
+	private List<Interface> interfaces;
+	private RepositoryImpl repository;
+	private final Set<DefaultRule> rules;
 
-        try {
-            jdtDiscoverer.create(jdtConfig, jdtBlackboard)
-                .execute(null);
-            jdtAnalyzer.analyze(jdtConfig, null);
-            isJDTCreated = true;
-        } catch (RuleEngineException | JobFailedException | UserCanceledException e) {
-            isJDTCreated = false;
-        }
+	/**
+	 * Tests the basic functionality of the RuleEngineAnalyzer. Requires it to
+	 * execute without an exception and produce an output file.
+	 *
+	 * @param projectDirectory the name of the project directory that will be
+	 *                         analyzed
+	 */
+	protected RuleEngineTest(String projectDirectory, DefaultRule... rules) {
+		final RuleEngineBlackboard jdtBlackboard = new RuleEngineBlackboard();
+		final RuleEngineAnalyzer jdtAnalyzer = new RuleEngineAnalyzer(jdtBlackboard);
+		final Discoverer jdtDiscoverer = new JavaDiscoverer();
 
-        try {
-            emfTextDiscoverer.create(emfTextConfig, emfTextBlackboard)
-                .execute(null);
-            emfTextAnalyzer.analyze(emfTextConfig, null);
-            isEMFTextCreated = true;
-        } catch (RuleEngineException | JobFailedException | UserCanceledException e) {
-            isEMFTextCreated = false;
-        }
+		this.rules = Set.of(rules);
 
-        String jdtRepoPath = getOutputDirectory(false).appendSegment("pcm.repository")
-            .devicePath();
-        assertTrue(!isJDTCreated || new File(jdtRepoPath).exists());
+		config.setInputFolder(TEST_DIR.appendSegments(projectDirectory.split("/")));
+		config.setOutputFolder(getOutputDirectory());
+		config.setUseEMFTextParser(false);
+		config.setSelectedRules(this.rules);
 
-        String emfTextRepoPath = getOutputDirectory(true).appendSegment("pcm.repository")
-            .devicePath();
-        assertTrue(!isEMFTextCreated || new File(emfTextRepoPath).exists());
+		try {
+			jdtDiscoverer.create(config, jdtBlackboard).execute(null);
+			jdtAnalyzer.analyze(config, null);
+			isCreated = true;
+		} catch (RuleEngineException | JobFailedException | UserCanceledException e) {
+			isCreated = false;
+		}
 
-        if (isJDTCreated) {
-            jdtRepo = loadRepository(URI.createFileURI(jdtRepoPath));
-        }
-        if (isEMFTextCreated) {
-            emfTextRepo = loadRepository(URI.createFileURI(emfTextRepoPath));
-        }
+		final String jdtRepoPath = getOutputDirectory().appendSegment("pcm.repository").devicePath();
+		assertTrue(!isCreated || new File(jdtRepoPath).exists());
 
-        if (isJDTCreated) {
-            jdtComponents = jdtRepo.getComponents__Repository();
-            jdtDatatypes = jdtRepo.getDataTypes__Repository();
-            jdtFailuretypes = jdtRepo.getFailureTypes__Repository();
-            jdtInterfaces = jdtRepo.getInterfaces__Repository();
-        }
+		if (isCreated) {
+			repository = loadRepository(URI.createFileURI(jdtRepoPath));
+		}
+		if (isCreated) {
+			components = repository.getComponents__Repository();
+			datatypes = repository.getDataTypes__Repository();
+			failuretypes = repository.getFailureTypes__Repository();
+			interfaces = repository.getInterfaces__Repository();
+		}
+	}
 
-        if (isEMFTextCreated) {
-            emfTextComponents = emfTextRepo.getComponents__Repository();
-            emfTextDatatypes = emfTextRepo.getDataTypes__Repository();
-            emfTextFailuretypes = emfTextRepo.getFailureTypes__Repository();
-            emfTextInterfaces = emfTextRepo.getInterfaces__Repository();
-        }
-    }
+	private void assertCreated() {
+		assertTrue(isCreated, "Failed to create model using JavaDiscoverer!");
+	}
 
-    abstract void test(boolean emfText);
+	public void assertMaxParameterCount(int expectedMaxParameterCount, String interfaceName, String signatureName) {
+		assertTrue(containsOperationInterface(interfaceName));
+		assertTrue(containsOperationSignature(interfaceName, signatureName));
+		assertEquals(expectedMaxParameterCount, getSignatureMaxParameterCount(interfaceName, signatureName));
+	}
 
-    @AfterEach
-    void cleanUp() {
-        File target = new File(OUT_DIR.devicePath(), this.getClass()
-            .getSimpleName() + ".repository");
-        if (!target.delete()) {
-            logger.error("Could not save delete repository \"" + target.getAbsolutePath() + "\"!");
-        }
-        if (!new File(OUT_DIR.devicePath(), "pcm.repository").renameTo(target)) {
-            logger.error("Could not save created repository to \"" + target.getAbsolutePath() + "\"!");
-        }
-    }
+	@AfterEach
+	void cleanUp() {
+		final File target = new File(OUT_DIR.devicePath(), this.getClass().getSimpleName() + ".repository");
+		if (!target.delete()) {
+			logger.error("Could not save delete repository \"" + target.getAbsolutePath() + "\"!");
+		}
+		if (!new File(OUT_DIR.devicePath(), "pcm.repository").renameTo(target)) {
+			logger.error("Could not save created repository to \"" + target.getAbsolutePath() + "\"!");
+		}
+	}
 
-    public RuleEngineConfiguration getConfig(boolean emfText) {
-        assertCreated(emfText);
-        if (emfText) {
-            return emfTextConfig;
-        }
-        return jdtConfig;
-    }
+	public boolean containsComponent(String name) {
+		return getComponents().stream().anyMatch(x -> x.getEntityName().equals(name));
+	}
 
-    public RepositoryImpl getRepo(boolean emfText) {
-        assertCreated(emfText);
-        if (emfText) {
-            return emfTextRepo;
-        }
-        return jdtRepo;
-    }
+	public boolean containsOperationInterface(String name) {
+		return getInterfaces().stream().filter(OperationInterface.class::isInstance)
+				.anyMatch(x -> x.getEntityName().equals(name));
+	}
 
-    public Set<DefaultRule> getRules() {
-        return Collections.unmodifiableSet(rules);
-    }
+	public boolean containsOperationSignature(String interfaceName, String signatureName) {
+		return !getOperationSignature(interfaceName, signatureName).isEmpty();
+	}
 
-    public List<RepositoryComponent> getComponents(boolean emfText) {
-        assertCreated(emfText);
-        if (emfText) {
-            return Collections.unmodifiableList(emfTextComponents);
-        }
-        return Collections.unmodifiableList(jdtComponents);
-    }
+	public List<RepositoryComponent> getComponents() {
+		assertCreated();
+		return Collections.unmodifiableList(components);
+	}
 
-    public List<DataType> getDatatypes(boolean emfText) {
-        assertCreated(emfText);
-        if (emfText) {
-            return Collections.unmodifiableList(emfTextDatatypes);
-        }
-        return Collections.unmodifiableList(jdtDatatypes);
-    }
+	public RuleEngineConfiguration getConfig() {
+		assertCreated();
+		return config;
+	}
 
-    public List<FailureType> getFailuretypes(boolean emfText) {
-        assertCreated(emfText);
-        if (emfText) {
-            return Collections.unmodifiableList(emfTextFailuretypes);
-        }
-        return Collections.unmodifiableList(jdtFailuretypes);
-    }
+	public List<DataType> getDatatypes() {
+		assertCreated();
+		return Collections.unmodifiableList(datatypes);
+	}
 
-    public List<Interface> getInterfaces(boolean emfText) {
-        assertCreated(emfText);
-        if (emfText) {
-            return Collections.unmodifiableList(emfTextInterfaces);
-        }
-        return Collections.unmodifiableList(jdtInterfaces);
-    }
+	public List<FailureType> getFailuretypes() {
+		assertCreated();
+		return Collections.unmodifiableList(failuretypes);
+	}
 
-    public boolean containsComponent(String name, boolean emfText) {
-        return getComponents(emfText).stream()
-            .anyMatch(x -> x.getEntityName()
-                .equals(name));
-    }
+	public List<Interface> getInterfaces() {
+		assertCreated();
+		return Collections.unmodifiableList(interfaces);
+	}
 
-    public boolean containsOperationInterface(String name, boolean emfText) {
-        return getInterfaces(emfText).stream()
-            .filter(OperationInterface.class::isInstance)
-            .anyMatch(x -> x.getEntityName()
-                .equals(name));
-    }
+	private Set<OperationSignature> getOperationSignature(String interfaceName, String signatureName) {
+		return getInterfaces().stream().filter(OperationInterface.class::isInstance).map(OperationInterface.class::cast)
+				.filter(x -> x.getEntityName().equals(interfaceName))
+				.map(x -> x.getSignatures__OperationInterface().stream()
+						.filter(y -> y.getEntityName().equals(signatureName)).collect(Collectors.toSet()))
+				.reduce(new HashSet<>(), Sets::union);
+	}
 
-    public boolean containsOperationSignature(String interfaceName, String signatureName, boolean emfText) {
-        return !getOperationSignature(interfaceName, signatureName, emfText).isEmpty();
-    }
+	public RepositoryImpl getRepo() {
+		assertCreated();
+		return repository;
+	}
 
-    public int getSignatureMaxParameterCount(String interfaceName, String signatureName, boolean emfText) {
-        Set<OperationSignature> sigs = getOperationSignature(interfaceName, signatureName, emfText);
-        return sigs.stream()
-            .map(OperationSignature::getParameters__OperationSignature)
-            .map(List::size)
-            .reduce(0, Math::max);
-    }
+	public Set<DefaultRule> getRules() {
+		return Collections.unmodifiableSet(rules);
+	}
 
-    public void assertMaxParameterCount(int expectedMaxParameterCount, String interfaceName, String signatureName,
-            boolean emfText) {
-        assertTrue(containsOperationInterface(interfaceName, emfText));
-        assertTrue(containsOperationSignature(interfaceName, signatureName, emfText));
-        assertEquals(expectedMaxParameterCount, getSignatureMaxParameterCount(interfaceName, signatureName, emfText));
-    }
+	public int getSignatureMaxParameterCount(String interfaceName, String signatureName) {
+		final Set<OperationSignature> sigs = getOperationSignature(interfaceName, signatureName);
+		return sigs.stream().map(OperationSignature::getParameters__OperationSignature).map(List::size).reduce(0,
+				Math::max);
+	}
 
-    private Set<OperationSignature> getOperationSignature(String interfaceName, String signatureName, boolean emfText) {
-        return getInterfaces(emfText).stream()
-            .filter(OperationInterface.class::isInstance)
-            .map(OperationInterface.class::cast)
-            .filter(x -> x.getEntityName()
-                .equals(interfaceName))
-            .map(x -> x.getSignatures__OperationInterface()
-                .stream()
-                .filter(y -> y.getEntityName()
-                    .equals(signatureName))
-                .collect(Collectors.toSet()))
-            .reduce(new HashSet<>(), Sets::union);
-    }
-
-    private void assertCreated(boolean emfText) {
-        if (emfText) {
-            assertTrue(isEMFTextCreated, "Failed to create model using EMFTextDiscoverer!");
-        } else {
-            assertTrue(isJDTCreated, "Failed to create model using JavaDiscoverer!");
-        }
-    }
-
-    public static RepositoryImpl loadRepository(URI repoXMI) {
-        final List<EObject> contents = new ResourceSetImpl().getResource(repoXMI, true)
-            .getContents();
-
-        assertEquals(1, contents.size());
-        assertTrue(contents.get(0) instanceof RepositoryImpl);
-
-        // TODO activate this again when SEFF is included
-        // validate(contents.get(0));
-
-        return (RepositoryImpl) contents.get(0);
-    }
-
-    public static void validate(EObject eObject) {
-        EcoreUtil.resolveAll(eObject);
-        assertEquals(Diagnostic.OK, Diagnostician.INSTANCE.validate(eObject)
-            .getSeverity());
-    }
-
-    protected static Stream<Boolean> discovererProvider() {
-        // Only test JDT parser, the EMFText parser is broken
-        return Stream.of(false);
-    }
-
-    protected static URI getOutputDirectory(boolean emfText) {
-        if (emfText) {
-            return OUT_DIR.appendSegment("emfText");
-        }
-        return OUT_DIR.appendSegment("jdt");
-    }
+	abstract void test();
 }

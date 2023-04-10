@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="SoMoX Rule CLI" uid="org.palladiosimulator.somox.analyzer.rules.product" application="org.palladiosimulator.somox.analyzer.rules.main.application" version="5.1.0.qualifier" useFeatures="false" includeLaunchers="true">
+<product name="SoMoX Rule CLI" uid="org.palladiosimulator.somox.analyzer.rules.product" application="org.palladiosimulator.somox.analyzer.rules.main.application" version="5.1.0.qualifier" useFeatures="false" includeLaunchers="true" autoIncludeRequirements="true">
 
    <configIni use="default">
    </configIni>
@@ -20,7 +20,7 @@
    </launcher>
 
    <vm>
-      <windows include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11</windows>
+      <windows include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17</windows>
    </vm>
 
    <plugins>
@@ -29,6 +29,7 @@
       <plugin id="org.apache.felix.gogo.shell"/>
       <plugin id="org.apache.felix.scr"/>
       <plugin id="org.eclipse.equinox.console"/>
+      <plugin id="org.eclipse.jdt.core"/>
       <plugin id="org.eclipse.osgi"/>
       <plugin id="org.eclipse.osgi.services"/>
       <plugin id="org.eclipse.osgi.util"/>
@@ -43,6 +44,7 @@
       <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.event" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.jdt.core" autoStart="true" startLevel="2" />
       <property name="eclipse.noShutdown" value="false" />
       <property name="eclipse.ignoreApp" value="false" />
    </configurations>
