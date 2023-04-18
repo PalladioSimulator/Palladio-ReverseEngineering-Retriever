@@ -79,10 +79,11 @@ runs:
       
     - name: Prepare analysis results for upload
       shell: bash
-      working-directory: ${{ env.tmp_dir }}/ruleengine_out
+      working-directory: ${{ env.tmp_dir }}
       run: |
-        mkdir -p ./${{ inputs.source_path }}
-        mv * ./${{ inputs.source_path }}
+        mkdir -p tmp/${{ inputs.source_path }}
+        mv ruleengine_out/* tmp/${{ inputs.source_path }}
+        mv tmp/* ruleengine_out
 
     - name: Upload analysis results
       uses: actions/upload-artifact@v3
