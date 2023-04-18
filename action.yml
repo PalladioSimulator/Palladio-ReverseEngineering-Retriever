@@ -84,21 +84,28 @@ runs:
         mkdir -p tmp/${{ inputs.source_path }}
         mv ruleengine_out/* tmp/${{ inputs.source_path }}
         mv tmp/* ruleengine_out
+        rmdir tmp
 
     - name: Upload analysis results
       uses: actions/upload-artifact@v3
       with:
         name: ruleengine
         path: ${{ env.tmp_dir }}/ruleengine_out
+      
+    - name: Prepare Eclipse logs for upload
+      if: failure()
+      shell: bash
+      working-directory: ${{ env.tmp_dir }}
+      run: |
+        mkdir -p eclipse_logs/${{ inputs.source_path }}
+        mv ruleengine/configuration/*.log ruleengine/workspace/.metadata/.log eclipse_logs/${{ inputs.source_path }}
 
     - name: Upload Eclipse logs
-      uses: actions/upload-artifact@v3
       if: failure()
+      uses: actions/upload-artifact@v3
       with:
-        name: eclipse-logs
-        path: |
-          ${{ env.tmp_dir }}/ruleengine/configuration/*.log
-          ${{ env.tmp_dir }}/ruleengine/workspace/.metadata/.log
+        name: eclipse_logs
+        path: ${{ env.tmp_dir }}/eclipse_logs
 
     - name: Delete temporary directory
       if: always()
