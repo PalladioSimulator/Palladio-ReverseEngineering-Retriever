@@ -1,7 +1,11 @@
 # A GitHub Action that allows to run the RuleEngine on arbitrary GitHub repositories.
 
 name: 'Run RuleEngine'
-description: 'Reverse-engineers a project''s source into a Palladio Component Model'
+description: |
+  'Reverse-engineers a project''s source into a Palladio Component Model.
+  Uploads the PCM as an artifact called `ruleengine`.
+  Within that artifact, the PCM is located at the input `source_path`,
+  e.g. for `source_path=MyProject/Repository` the output is `[ruleengine]/MyProject/Repository/repository.pcm`.'
 
 inputs:
   source_path:
@@ -72,12 +76,19 @@ runs:
       shell: bash
       working-directory: ${{ env.tmp_dir }}/ruleengine
       run: ./eclipse -i "${{ github.workspace }}/${{ inputs.source_path }}" -o "${{ env.tmp_dir }}/ruleengine_out" -r "${{ inputs.rules }}"
+      
+    - name: Prepare analysis results for upload
+      shell: bash
+      working-directory: ${{ env.tmp_dir }}/ruleengine_out
+      run: |
+        mkdir -p ./${{ inputs.source_path }}
+        mv * ./${{ inputs.source_path }}
 
     - name: Upload analysis results
       uses: actions/upload-artifact@v3
       with:
-        name: result
-        path: ${{ env.tmp_dir }}/ruleengine_out/**
+        name: ruleengine
+        path: ${{ env.tmp_dir }}/ruleengine_out
 
     - name: Upload Eclipse logs
       uses: actions/upload-artifact@v3
