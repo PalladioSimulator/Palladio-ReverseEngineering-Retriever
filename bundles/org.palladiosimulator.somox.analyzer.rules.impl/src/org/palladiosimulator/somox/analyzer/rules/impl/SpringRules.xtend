@@ -1,6 +1,6 @@
-package org.palladiosimulator.somox.analyzer.rules.impl.eclipse
+package org.palladiosimulator.somox.analyzer.rules.impl
 
-import static org.palladiosimulator.somox.analyzer.rules.engine.EclipseRuleHelper.*
+import static org.palladiosimulator.somox.analyzer.rules.engine.RuleHelper.*
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard
 import java.nio.file.Path
@@ -41,10 +41,7 @@ class SpringRules extends IRule {
 
 		var containedSuccessful = false
 		for (unit : units) {
-			if (unit.isEclipseCompilationUnit) {
-				val eclipseUnit = unit.getEclipseCompilationUnit
-				containedSuccessful = processRuleForCompUnit(eclipseUnit, contextPath) || containedSuccessful
-			}
+			containedSuccessful = processRuleForCompUnit(unit, contextPath) || containedSuccessful
 		}
 
 		return containedSuccessful
@@ -185,7 +182,7 @@ class SpringRules extends IRule {
 	}
 
 	def boolean processRuleForCompUnit(CompilationUnit unit, String contextPath) {
-		val pcmDetector = blackboard.eclipsePCMDetector
+		val pcmDetector = blackboard.getPCMDetector
 		if (pcmDetector === null) {
 			return false
 		}

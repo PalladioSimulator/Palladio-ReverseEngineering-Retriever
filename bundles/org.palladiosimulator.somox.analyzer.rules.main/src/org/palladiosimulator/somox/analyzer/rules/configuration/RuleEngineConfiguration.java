@@ -33,14 +33,12 @@ public class RuleEngineConfiguration extends AbstractComposedJobConfiguration im
     public static final String RULE_ENGINE_SELECTED_DISCOVERERS = CONFIG_PREFIX + "discoverers";
     public static final String RULE_ENGINE_ANALYST_CONFIG_PREFIX = CONFIG_PREFIX + "analystconfig.";
     public static final String RULE_ENGINE_DISCOVERER_CONFIG_PREFIX = CONFIG_PREFIX + "discovererconfig.";
-    public static final String RULE_ENGINE_USE_EMFTEXT_PARSER = CONFIG_PREFIX + "use_emftext_parser";
     public static final String RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY = RuleEngineBlackboard.KEY_REPOSITORY;
     public static final String RULE_ENGINE_BLACKBOARD_KEY_SEFF_ASSOCIATIONS = RuleEngineBlackboard.KEY_SEFF_ASSOCIATIONS;
     public static final String RULE_LIST_SEPARATOR = ";";
 
     private /* not final */ URI inputFolder;
     private /* not final */ URI outputFolder;
-    private /* not final */ boolean useEMFTextParser;
     private final Set<DefaultRule> rules;
     private final ServiceConfiguration<Analyst> analystConfig;
     private final ServiceConfiguration<Discoverer> discovererConfig;
@@ -88,9 +86,6 @@ public class RuleEngineConfiguration extends AbstractComposedJobConfiguration im
         if (attributeMap.get(RULE_ENGINE_OUTPUT_PATH) != null) {
             setOutputFolder(URI.createURI((String) attributeMap.get(RULE_ENGINE_OUTPUT_PATH)));
         }
-        if (attributeMap.get(RULE_ENGINE_USE_EMFTEXT_PARSER) != null) {
-            setUseEMFTextParser((boolean) attributeMap.get(RULE_ENGINE_USE_EMFTEXT_PARSER));
-        }
         if (attributeMap.get(RULE_ENGINE_SELECTED_RULES) != null) {
             setSelectedRules(parseRules((Set<String>) attributeMap.get(RULE_ENGINE_SELECTED_RULES)));
         }
@@ -117,10 +112,6 @@ public class RuleEngineConfiguration extends AbstractComposedJobConfiguration im
         return outputFolder;
     }
 
-    public boolean useEmfTextParser() {
-        return useEMFTextParser;
-    }
-
     public ServiceConfiguration<Analyst> getAnalystConfig() {
         return analystConfig;
     }
@@ -137,16 +128,11 @@ public class RuleEngineConfiguration extends AbstractComposedJobConfiguration im
         this.outputFolder = outputFolder;
     }
 
-    public void setUseEMFTextParser(boolean value) {
-        useEMFTextParser = value;
-    }
-
     public Map<String, Object> toMap() {
         final Map<String, Object> result = new HashMap<>();
 
         result.put(RULE_ENGINE_INPUT_PATH, getInputFolder());
         result.put(RULE_ENGINE_OUTPUT_PATH, getOutputFolder());
-        result.put(RULE_ENGINE_USE_EMFTEXT_PARSER, useEmfTextParser());
         result.put(RULE_ENGINE_SELECTED_RULES, serializeRules(rules));
         result.putAll(analystConfig.toMap());
         result.putAll(discovererConfig.toMap());

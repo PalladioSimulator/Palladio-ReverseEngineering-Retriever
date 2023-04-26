@@ -46,7 +46,7 @@ abstract class RuleEngineTest {
     public static final URI OUT_DIR = TEST_DIR.appendSegment("out");
 
     protected static URI getOutputDirectory() {
-        return OUT_DIR.appendSegment("jdt");
+        return OUT_DIR;
     }
 
     public static RepositoryImpl loadRepository(URI repoXMI) {
@@ -90,31 +90,30 @@ abstract class RuleEngineTest {
      */
     protected RuleEngineTest(String projectDirectory, DefaultRule... rules) {
         blackboard = new RuleEngineBlackboard();
-        final RuleEngineAnalyzer jdtAnalyzer = new RuleEngineAnalyzer(blackboard);
-        final Discoverer jdtDiscoverer = new JavaDiscoverer();
+        final RuleEngineAnalyzer analyzer = new RuleEngineAnalyzer(blackboard);
+        final Discoverer discoverer = new JavaDiscoverer();
 
         this.rules = Set.of(rules);
 
         config.setInputFolder(TEST_DIR.appendSegments(projectDirectory.split("/")));
         config.setOutputFolder(getOutputDirectory());
-        config.setUseEMFTextParser(false);
         config.setSelectedRules(this.rules);
 
         try {
-            jdtDiscoverer.create(config, blackboard)
+            discoverer.create(config, blackboard)
                 .execute(null);
-            jdtAnalyzer.analyze(config, null);
+            analyzer.analyze(config, null);
             isCreated = true;
         } catch (RuleEngineException | JobFailedException | UserCanceledException e) {
             isCreated = false;
         }
 
-        final String jdtRepoPath = getOutputDirectory().appendSegment("pcm.repository")
+        final String repoPath = getOutputDirectory().appendSegment("pcm.repository")
             .devicePath();
-        assertTrue(!isCreated || new File(jdtRepoPath).exists());
+        assertTrue(!isCreated || new File(repoPath).exists());
 
         if (isCreated) {
-            repository = loadRepository(URI.createFileURI(jdtRepoPath));
+            repository = loadRepository(URI.createFileURI(repoPath));
         }
         if (isCreated) {
             components = repository.getComponents__Repository();

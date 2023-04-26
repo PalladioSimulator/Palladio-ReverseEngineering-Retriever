@@ -13,7 +13,6 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.pcm.seff.ServiceEffectSpecification;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
-import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 
 public class SeffAssociationTest extends RuleEngineTest {
@@ -49,8 +48,6 @@ public class SeffAssociationTest extends RuleEngineTest {
         @SuppressWarnings("unchecked")
         MethodDeclaration methodDeclaration = blackboard.getCompilationUnits()
             .stream()
-            .filter(CompilationUnitWrapper::isEclipseCompilationUnit)
-            .map(CompilationUnitWrapper::getEclipseCompilationUnit)
             .flatMap(unit -> ((List<ASTNode>) unit.types()).stream())
             .filter(TypeDeclaration.class::isInstance)
             .map(TypeDeclaration.class::cast)

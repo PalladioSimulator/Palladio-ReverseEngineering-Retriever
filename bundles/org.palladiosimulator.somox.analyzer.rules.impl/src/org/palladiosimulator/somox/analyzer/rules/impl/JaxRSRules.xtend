@@ -1,11 +1,11 @@
-package org.palladiosimulator.somox.analyzer.rules.impl.eclipse
+package org.palladiosimulator.somox.analyzer.rules.impl
 
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule
 
-import static org.palladiosimulator.somox.analyzer.rules.engine.EclipseRuleHelper.*
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard
 import java.nio.file.Path;
 import org.eclipse.jdt.core.dom.CompilationUnit
+import static org.palladiosimulator.somox.analyzer.rules.engine.RuleHelper.*
 
 class JaxRSRules extends IRule{
 	
@@ -18,17 +18,14 @@ class JaxRSRules extends IRule{
 		
 		var containedSuccessful = false
 		for (unit : units) {
-			if (unit.isEclipseCompilationUnit()) {
-				val eclipseUnit = unit.getEclipseCompilationUnit
-				containedSuccessful = processRuleForCompUnit(eclipseUnit) || containedSuccessful
-			}
+			containedSuccessful = processRuleForCompUnit(unit) || containedSuccessful
 		}
 		
 		return containedSuccessful
 	}
 	
 	def boolean processRuleForCompUnit(CompilationUnit unit) {
-		val pcmDetector = blackboard.getEclipsePCMDetector()
+		val pcmDetector = blackboard.getPCMDetector()
 		if (pcmDetector === null) {
 		return false
 		}
@@ -81,7 +78,7 @@ class JaxRSRules extends IRule{
 	}
 	
 	def detectDefault(CompilationUnit unit) {
-		val pcmDetector = blackboard.getEclipsePCMDetector()
+		val pcmDetector = blackboard.getPCMDetector()
 
 		pcmDetector.detectComponent(unit)
 		getAllPublicMethods(unit).forEach[m|pcmDetector.detectProvidedOperation(unit,m.resolveBinding)]

@@ -17,7 +17,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
-import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 import org.palladiosimulator.somox.analyzer.rules.model.Component;
 import org.palladiosimulator.somox.analyzer.rules.model.ComponentBuilder;
 import org.palladiosimulator.somox.analyzer.rules.model.Composite;
@@ -37,8 +36,8 @@ import org.palladiosimulator.somox.analyzer.rules.model.RequirementsBuilder;
  * holds the results as "simple" java objects not yet transformed to real PCM objects like PCM Basic
  * Components.
  */
-public class EclipsePCMDetector implements IPCMDetector {
-    private static final Logger LOG = Logger.getLogger(EclipsePCMDetector.class);
+public class PCMDetector {
+    private static final Logger LOG = Logger.getLogger(PCMDetector.class);
 
     private Map<CompilationUnit, ComponentBuilder> components = new HashMap<>();
     private Map<String, CompositeBuilder> composites = new HashMap<>();
@@ -235,9 +234,8 @@ public class EclipsePCMDetector implements IPCMDetector {
         return composites.get(name);
     }
 
-    @Override
-    public List<CompilationUnitWrapper> getWrappedComponents() {
-        return CompilationUnitWrapper.wrap(components.keySet());
+    public Set<CompilationUnit> getCompilationUnits() {
+        return components.keySet();
     }
 
     protected Set<Component> getComponents() {

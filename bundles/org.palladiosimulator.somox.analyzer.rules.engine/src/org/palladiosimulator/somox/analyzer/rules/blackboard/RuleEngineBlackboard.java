@@ -10,12 +10,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.palladiosimulator.pcm.core.entity.Entity;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.seff.ServiceEffectSpecification;
 import org.palladiosimulator.pcm.system.System;
-import org.palladiosimulator.somox.analyzer.rules.engine.EMFTextPCMDetector;
-import org.palladiosimulator.somox.analyzer.rules.engine.EclipsePCMDetector;
+import org.palladiosimulator.somox.analyzer.rules.engine.PCMDetector;
 
 import com.google.common.collect.Sets;
 
@@ -26,14 +26,13 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
     public static final String KEY_REPOSITORY = "org.palladiosimulator.somox.analyzer.repository";
     public static final String KEY_SEFF_ASSOCIATIONS = "org.palladiosimulator.somox.analyzer.seff_associations";
 
-    private final Set<CompilationUnitWrapper> compilationUnits;
-    private final Map<CompilationUnitWrapper, Path> compilationUnitLocations;
-    private final Map<RepositoryComponent, CompilationUnitWrapper> repositoryComponentLocations;
-    private final Map<Entity, CompilationUnitWrapper> entityLocations;
-    private final Map<Path, Set<CompilationUnitWrapper>> systemAssociations;
+    private final Set<CompilationUnit> compilationUnits;
+    private final Map<CompilationUnit, Path> compilationUnitLocations;
+    private final Map<RepositoryComponent, CompilationUnit> repositoryComponentLocations;
+    private final Map<Entity, CompilationUnit> entityLocations;
+    private final Map<Path, Set<CompilationUnit>> systemAssociations;
     private final Map<System, Path> systemPaths;
-    private EMFTextPCMDetector emfTextPcmDetector;
-    private EclipsePCMDetector eclipsePcmDetector;
+    private PCMDetector pcmDetector;
 
     public RuleEngineBlackboard() {
         compilationUnits = new HashSet<>();
@@ -45,21 +44,21 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
         addPartition(KEY_SEFF_ASSOCIATIONS, new HashMap<>());
     }
 
-    public Path putCompilationUnitLocation(CompilationUnitWrapper compilationUnit, Path path) {
+    public Path putCompilationUnitLocation(CompilationUnit compilationUnit, Path path) {
         return compilationUnitLocations.put(compilationUnit, path);
     }
 
-    public Path getCompilationUnitLocation(CompilationUnitWrapper compilationUnit) {
+    public Path getCompilationUnitLocation(CompilationUnit compilationUnit) {
         return compilationUnitLocations.get(compilationUnit);
     }
 
-    public CompilationUnitWrapper putRepositoryComponentLocation(RepositoryComponent repoComp,
-            CompilationUnitWrapper compilationUnit) {
+    public CompilationUnit putRepositoryComponentLocation(RepositoryComponent repoComp,
+            CompilationUnit compilationUnit) {
         entityLocations.put(repoComp, compilationUnit);
         return repositoryComponentLocations.put(repoComp, compilationUnit);
     }
 
-    public Map<RepositoryComponent, CompilationUnitWrapper> getRepositoryComponentLocations() {
+    public Map<RepositoryComponent, CompilationUnit> getRepositoryComponentLocations() {
         return Collections.unmodifiableMap(repositoryComponentLocations);
     }
 
@@ -67,7 +66,7 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
         final Map<Entity, Path> entityPaths = new HashMap<>();
 
         for (Entity entity : entityLocations.keySet()) {
-            CompilationUnitWrapper compilationUnit = entityLocations.get(entity);
+            CompilationUnit compilationUnit = entityLocations.get(entity);
             if (compilationUnit == null) {
                 continue;
             }
@@ -85,20 +84,12 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
         return Collections.unmodifiableMap(entityPaths);
     }
 
-    public void setEMFTextPCMDetector(EMFTextPCMDetector pcmDetector) {
-        emfTextPcmDetector = pcmDetector;
+    public void setPCMDetector(PCMDetector pcmDetector) {
+        this.pcmDetector = pcmDetector;
     }
 
-    public EMFTextPCMDetector getEMFTextPCMDetector() {
-        return emfTextPcmDetector;
-    }
-
-    public void setEclipsePCMDetector(EclipsePCMDetector pcmDetector) {
-        eclipsePcmDetector = pcmDetector;
-    }
-
-    public EclipsePCMDetector getEclipsePCMDetector() {
-        return eclipsePcmDetector;
+    public PCMDetector getPCMDetector() {
+        return pcmDetector;
     }
 
     /**
@@ -111,14 +102,14 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
      *            the path to look for registered CompilationUnits at
      * @return the CompilationUnits or {@code null} if there was none at the {@code path}
      */
-    public Set<CompilationUnitWrapper> getCompilationUnitAt(Path path) {
+    public Set<CompilationUnit> getCompilationUnitAt(Path path) {
         if (path == null) {
             // Return all registered CompilationUnits that are not associated with a path
             return Sets.difference(compilationUnits, compilationUnitLocations.keySet());
         }
 
-        Set<CompilationUnitWrapper> compUnit = new HashSet<>();
-        for (Entry<CompilationUnitWrapper, Path> entry : compilationUnitLocations.entrySet()) {
+        Set<CompilationUnit> compUnit = new HashSet<>();
+        for (Entry<CompilationUnit, Path> entry : compilationUnitLocations.entrySet()) {
             // Path::equals is enough because the working directory does not change
             if (entry.getValue()
                 .equals(path.normalize())) {
@@ -129,23 +120,23 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
         return compUnit;
     }
 
-    public void addCompilationUnit(CompilationUnitWrapper compilationUnit) {
+    public void addCompilationUnit(CompilationUnit compilationUnit) {
         compilationUnits.add(compilationUnit);
     }
 
-    public void addCompilationUnits(Collection<CompilationUnitWrapper> compilationUnits) {
+    public void addCompilationUnits(Collection<CompilationUnit> compilationUnits) {
         this.compilationUnits.addAll(compilationUnits);
     }
 
-    public Set<CompilationUnitWrapper> getCompilationUnits() {
+    public Set<CompilationUnit> getCompilationUnits() {
         return Collections.unmodifiableSet(compilationUnits);
     }
 
-    public void addSystemAssociations(Path path, Set<CompilationUnitWrapper> compilationUnits) {
+    public void addSystemAssociations(Path path, Set<CompilationUnit> compilationUnits) {
         systemAssociations.put(path, Collections.unmodifiableSet(compilationUnits));
     }
 
-    public Map<Path, Set<CompilationUnitWrapper>> getSystemAssociations() {
+    public Map<Path, Set<CompilationUnit>> getSystemAssociations() {
         return Collections.unmodifiableMap(systemAssociations);
     }
 

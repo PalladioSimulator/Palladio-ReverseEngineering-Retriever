@@ -40,9 +40,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
  *
  * @author Florian Bossert
  */
-public class EclipseRuleHelper {
+public class RuleHelper {
 
-    private static final Logger LOG = Logger.getLogger(EclipseRuleHelper.class);
+    private static final Logger LOG = Logger.getLogger(RuleHelper.class);
 
     public static String getUnitName(CompilationUnit unit) {
         List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);

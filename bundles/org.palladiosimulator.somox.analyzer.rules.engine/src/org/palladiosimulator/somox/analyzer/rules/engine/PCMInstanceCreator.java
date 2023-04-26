@@ -32,7 +32,6 @@ import org.palladiosimulator.pcm.repository.OperationRequiredRole;
 import org.palladiosimulator.pcm.repository.ParameterModifier;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.seff.ResourceDemandingSEFF;
-import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.model.Component;
 import org.palladiosimulator.somox.analyzer.rules.model.Composite;
@@ -42,8 +41,8 @@ import org.palladiosimulator.somox.analyzer.rules.model.OperationInterface;
 
 // TODO Bug-fix, probably
 // Class to create a pcm instance out of all results from the detector class
-public class EclipsePCMInstanceCreator {
-    private static final Logger LOG = Logger.getLogger(EclipsePCMInstanceCreator.class);
+public class PCMInstanceCreator {
+    private static final Logger LOG = Logger.getLogger(PCMInstanceCreator.class);
 
     private static final String REPO_NAME = "Software Architecture Repository";
     private final FluentRepositoryFactory create;
@@ -56,7 +55,7 @@ public class EclipsePCMInstanceCreator {
     private final Map<Composite, CompositeComponentCreator> compositeCreators;
     private final Map<String, org.palladiosimulator.pcm.repository.OperationInterface> pcmInterfaces;
 
-    public EclipsePCMInstanceCreator(RuleEngineBlackboard blackboard) {
+    public PCMInstanceCreator(RuleEngineBlackboard blackboard) {
         existingDataTypesMap = new HashMap<>();
         existingCollectionDataTypes = new HashMap<>();
         this.componentCompositeCreators = new HashMap<>();
@@ -102,12 +101,12 @@ public class EclipsePCMInstanceCreator {
      *            a mapping between microservice names and java model instances
      * @return the PCM repository model
      */
-    public Repository createPCM(Map<String, List<CompilationUnitWrapper>> mapping) {
-        final Set<Component> components = blackboard.getEclipsePCMDetector()
+    public Repository createPCM(Map<String, Set<CompilationUnit>> mapping) {
+        final Set<Component> components = blackboard.getPCMDetector()
             .getComponents();
-        final Map<String, List<Operation>> interfaces = blackboard.getEclipsePCMDetector()
+        final Map<String, List<Operation>> interfaces = blackboard.getPCMDetector()
             .getOperationInterfaces();
-        final Set<Composite> composites = blackboard.getEclipsePCMDetector()
+        final Set<Composite> composites = blackboard.getPCMDetector()
             .getCompositeComponents();
 
         createPCMInterfaces(interfaces);
@@ -278,8 +277,6 @@ public class EclipsePCMInstanceCreator {
     private Optional<ASTNode> getDeclaration(IMethodBinding binding) {
         return blackboard.getCompilationUnits()
             .stream()
-            .filter(CompilationUnitWrapper::isEclipseCompilationUnit)
-            .map(CompilationUnitWrapper::getEclipseCompilationUnit)
             .map(unit -> unit.findDeclaringNode(binding))
             .filter(node -> node != null)
             .findAny();
@@ -337,7 +334,7 @@ public class EclipsePCMInstanceCreator {
                 c.withAssemblyContext(builtComp);
             }
 
-            blackboard.putRepositoryComponentLocation(builtComp, new CompilationUnitWrapper(compUnit));
+            blackboard.putRepositoryComponentLocation(builtComp, compUnit);
             repository.addToRepository(builtComp);
         }
     }
