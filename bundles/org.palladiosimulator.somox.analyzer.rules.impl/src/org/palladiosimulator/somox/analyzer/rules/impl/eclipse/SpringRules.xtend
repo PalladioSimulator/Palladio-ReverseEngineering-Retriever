@@ -125,7 +125,13 @@ class SpringRules extends IRule {
 
 	def getApplicationName(Map<String, Object> bootstrapYaml) {
 		val spring = bootstrapYaml.get("spring") as Map<String, Object>
+		if (spring === null) {
+			return null
+		}
 		val application = spring.get("application") as Map<String, Object>
+		if (application === null) {
+			return null
+		}
 		val name = application.get("name") as String
 		return name
 	}
@@ -142,6 +148,9 @@ class SpringRules extends IRule {
 
 		if (projectYamls.size > 1) {
 			LOG.warn("Multiple " + projectName + ".y[a]mls in config server, choosing " + configRoot.relativize(projectYamls.get(0).key) + " arbitrarily")
+		}
+		if (projectYamls.empty) {
+			return null
 		}
 		return projectYamls.get(0).value
 	}
