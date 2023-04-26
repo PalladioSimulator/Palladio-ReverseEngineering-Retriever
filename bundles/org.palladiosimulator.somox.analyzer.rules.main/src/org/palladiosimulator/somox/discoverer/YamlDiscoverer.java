@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -17,6 +19,9 @@ import org.eclipse.emf.common.CommonPlugin;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.composer.ComposerException;
+import org.yaml.snakeyaml.parser.ParserException;
+import org.yaml.snakeyaml.scanner.ScannerException;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;
@@ -42,12 +47,15 @@ public class YamlDiscoverer implements Discoverer {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
-                final Map<String, Map<String, Object>> yamls = new HashMap<>();
+                final Map<String, Object> yamls = new HashMap<>();
                 Stream.concat(Discoverer.find(root, ".yml", logger), Discoverer.find(root, ".yaml", logger))
                     .forEach(p -> {
                         try (Reader reader = new FileReader(p)) {
-                            yamls.put(p, new Yaml().load(reader));
-                        } catch (final IOException e) {
+                            List<Object> yamlContents = new ArrayList<>();
+                            new Yaml().loadAll(reader)
+                                .forEach(yamlContents::add);
+                            yamls.put(p, yamlContents);
+                        } catch (final IOException | ComposerException | ScannerException | ParserException e) {
                             logger.error(String.format("%s could not be read correctly.", p), e);
                         }
                     });

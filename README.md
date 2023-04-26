@@ -43,7 +43,6 @@ The rules for the model-to-model transformations are implemented in [Xtend](http
 ### Installation
 #### For Development
 * Install the [Fluent Api Model Generator](https://github.com/PalladioSimulator/Palladio-Addons-FluentApiModelGenerator) from the [update site](https://updatesite.palladio-simulator.com/palladio-addons-fluentapimodelgenerator/nightly/)
-* Install the [JDT-Based Java Extractor](https://github.com/MDSD-Tools/JaMoPP) from the [update site](https://updatesite.mdsd.tools/jamopp/nightly/)
 * Install the [Xtend IDE](https://www.eclipse.org/xtend/download.html) from the [update site](https://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/)
 * Keep the current installation and, if necessary, change the items to be installed so that they are compatible
 * Check out [this repository](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine.git) and [import the existing projects](https://help.eclipse.org/latest/topic/org.eclipse.platform.doc.user/tasks/tasks-importproject.htm) into Eclipse
@@ -54,7 +53,6 @@ The rules for the model-to-model transformations are implemented in [Xtend](http
 #### For Direct Use
 * [Adding these update sites](https://help.eclipse.org/latest/topic/org.eclipse.platform.doc.user/tasks/tasks-127.htm), without any further installation:
   * The [update site](https://updatesite.palladio-simulator.com/palladio-addons-fluentapimodelgenerator/nightly/) for the [Fluent Api Model Generator](https://github.com/PalladioSimulator/Palladio-Addons-FluentApiModelGenerator)
-  * The [update site](https://updatesite.mdsd.tools/jamopp/nightly/) for the [JDT-Based Java Extractor](https://github.com/MDSD-Tools/JaMoPP)
 * Install this Rule Engine from the [update site](https://updatesite.palladio-simulator.com/palladio-reverseengineering-somox-ruleengine/nightly/)
   * This will automatically install all the required dependencies
 
