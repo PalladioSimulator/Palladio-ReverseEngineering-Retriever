@@ -1,6 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.gui;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.swt.events.ModifyListener;
@@ -19,7 +18,7 @@ public class RuleSelectionListener extends SelectionAdapter {
             DefaultRule rule) {
         this.selectionButton = selectionButton;
         this.modifyListener = modifyListener;
-        this.rules = new HashSet<>(rules);
+        this.rules = rules;
         this.rule = rule;
     }
 

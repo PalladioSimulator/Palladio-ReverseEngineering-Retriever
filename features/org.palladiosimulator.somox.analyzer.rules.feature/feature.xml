@@ -14,11 +14,7 @@
    <requires>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.xtend.lib"/>
-      <import plugin="org.emftext.language.java"/>
       <import plugin="org.palladiosimulator.pcm"/>
-      <import plugin="jamopp.parser"/>
-      <import plugin="jamopp.parser.jdt"/>
-      <import plugin="jamopp.resource"/>
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.palladiosimulator.generator.fluent"/>
       <import plugin="org.apache.log4j"/>

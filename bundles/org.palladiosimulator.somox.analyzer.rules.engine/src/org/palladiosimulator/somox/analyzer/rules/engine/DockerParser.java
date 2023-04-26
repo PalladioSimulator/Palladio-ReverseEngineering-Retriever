@@ -9,30 +9,32 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
-// import org.yaml.snakeyaml.Yaml;
-import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 /**
  * The DockerParser parses a docker-compose file to extract a mapping between service names
- * (microservices) and JaMoPP model instances. Later, this parser will be replaced with the project
+ * (microservices) and Java model instances. Later, this parser will be replaced with the project
  * in: https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Docker
  */
 public class DockerParser {
     private static final String FILE_NAME = "docker-compose";
 
     private final Path path;
-    private final IPCMDetector pcmDetector;
-    private final Map<String, List<CompilationUnitWrapper>> mapping;
+    private final PCMDetector pcmDetector;
+    private final Map<String, Set<CompilationUnit>> mapping;
 
     private static final Logger LOG = Logger.getLogger(DockerParser.class);
 
-    public DockerParser(Path path, IPCMDetector pcmDetector) {
+    public DockerParser(Path path, PCMDetector pcmDetector) {
 
         LOG.info("starting docker process");
 
@@ -97,24 +99,26 @@ public class DockerParser {
     }
 
     /**
-     * Creates a mapping between service names and JaMoPP model instances to know which component
+     * Creates a mapping between service names and Java model instances to know which component
      * belongs to which microservice
      *
      * @param serviceNames
      *            a list of all service names from a docker-compose file
-     * @return the mapping between service names and JaMoPP model instances
+     * @return the mapping between service names and Java model instances
      */
-    private Map<String, List<CompilationUnitWrapper>> createServiceComponentMapping(List<String> serviceNames) {
+    private Map<String, Set<CompilationUnit>> createServiceComponentMapping(List<String> serviceNames) {
 
-        final List<CompilationUnitWrapper> components = pcmDetector.getWrappedComponents();
+        final Set<CompilationUnit> components = pcmDetector.getCompilationUnits();
 
-        final Map<String, List<CompilationUnitWrapper>> serviceToCompMapping = new HashMap<>();
+        final Map<String, Set<CompilationUnit>> serviceToCompMapping = new HashMap<>();
 
         components.forEach(comp -> {
             try (Stream<Path> files = Files.walk(path)) {
                 // TODO try to find a more robust heuristic
                 final List<Path> foundPaths = files.filter(f -> f.toString()
-                    .contains(comp.getName()))
+                    .contains(((AbstractTypeDeclaration) comp.types()
+                        .get(0)).getName()
+                            .getIdentifier()))
                     .collect(Collectors.toList());
 
                 if (!foundPaths.isEmpty()) {
@@ -123,7 +127,7 @@ public class DockerParser {
                             .toString()
                             .contains(serviceName)) {
                             if (!serviceToCompMapping.containsKey(serviceName)) {
-                                serviceToCompMapping.put(serviceName, new ArrayList<>());
+                                serviceToCompMapping.put(serviceName, new HashSet<>());
                             }
                             serviceToCompMapping.get(serviceName)
                                 .add(comp);
@@ -138,7 +142,7 @@ public class DockerParser {
         return serviceToCompMapping;
     }
 
-    public Map<String, List<CompilationUnitWrapper>> getMapping() {
+    public Map<String, Set<CompilationUnit>> getMapping() {
         return mapping;
     }
 

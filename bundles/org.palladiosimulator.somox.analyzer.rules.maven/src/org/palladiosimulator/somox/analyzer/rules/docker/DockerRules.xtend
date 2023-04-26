@@ -5,7 +5,7 @@ import org.palladiosimulator.somox.analyzer.rules.engine.IRule
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard
 import java.nio.file.Path;
 import java.util.HashSet
-import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper
+import org.eclipse.jdt.core.dom.CompilationUnit
 
 class DockerRules extends IRule {
 	static final String DOCKER_FILE_NAME = "Dockerfile";
@@ -18,7 +18,7 @@ class DockerRules extends IRule {
 		if (path !== null && path.fileName.toString().equals(DOCKER_FILE_NAME)) {
 			
 			// Add all file system children as associated compilation units
-			var children = new HashSet<CompilationUnitWrapper>();
+			var children = new HashSet<CompilationUnit>();
 			var parentPath = path.parent;
 			for (unit : blackboard.compilationUnits) {
 				var isChild = false;
