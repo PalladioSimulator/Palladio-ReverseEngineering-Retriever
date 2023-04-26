@@ -8,7 +8,6 @@ import org.palladiosimulator.somox.analyzer.rules.docker.DockerRules;
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
 import org.palladiosimulator.somox.analyzer.rules.gradle.GradleRules;
 import org.palladiosimulator.somox.analyzer.rules.impl.eclipse.JaxRSRules;
-import org.palladiosimulator.somox.analyzer.rules.impl.eclipse.PiggymetricsRules;
 import org.palladiosimulator.somox.analyzer.rules.impl.eclipse.SpringRules;
 import org.palladiosimulator.somox.analyzer.rules.maven.MavenRules;
 
@@ -19,7 +18,6 @@ public enum DefaultRule {
 
     SPRING(SpringRules.class),
     JAX_RS(JaxRSRules.class),
-    PIGGYMETRICS(PiggymetricsRules.class),
     MAVEN(MavenRules.class),
     GRADLE(GradleRules.class),
     DOCKER(DockerRules.class),
