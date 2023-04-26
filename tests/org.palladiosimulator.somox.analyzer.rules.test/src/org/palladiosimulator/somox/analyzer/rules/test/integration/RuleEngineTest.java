@@ -196,8 +196,16 @@ abstract class RuleEngineTest {
                 .equals(interfaceName))
             .map(x -> x.getSignatures__OperationInterface()
                 .stream()
-                .filter(y -> y.getEntityName()
-                    .equals(signatureName))
+                .filter(y -> {
+                    // Ignore uniqueness postfix
+                    String name = y.getEntityName();
+                    int postfixStart = name.indexOf('$');
+                    if (postfixStart > -1) {
+                        return name.substring(0, postfixStart)
+                            .equals(signatureName);
+                    }
+                    return name.equals(signatureName);
+                })
                 .collect(Collectors.toSet()))
             .reduce(new HashSet<>(), Sets::union);
     }

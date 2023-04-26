@@ -23,25 +23,21 @@ public class SeffAssociationTest extends RuleEngineTest {
     }
 
     @Test
-    void allAssociationsReferToExistingMethods() {
+    void allAssociationsReferToMethods() {
         RuleEngineBlackboard blackboard = getBlackboard();
         Map<ASTNode, ServiceEffectSpecification> associations = blackboard.getSeffAssociations();
 
         for (Map.Entry<ASTNode, ServiceEffectSpecification> association : associations.entrySet()) {
             ASTNode astNode = association.getKey();
-            ServiceEffectSpecification seff = association.getValue();
             assertTrue(astNode instanceof MethodDeclaration,
                     "All ASTNodes in the SEFF/AST associations must be MethodDeclarations");
-
-            MethodDeclaration methodDeclaration = (MethodDeclaration) astNode;
-            String declarationName = methodDeclaration.getName()
-                .getFullyQualifiedName();
-            String seffName = seff.getDescribedService__SEFF()
-                .getEntityName();
             // SEFF names may have a "$N" suffix after the signature name, where N is a positive
             // integer.
             // This avoids name collisions that can occur because signature identifiers are global.
-            assertTrue(seffName.startsWith(declarationName), "SEFF's name must begin with its method's name");
+
+            // The AST node's name may be a prefix of the SEFF name, but it does not have to be.
+            // Alternatively, the SEFF name may begin with the (REST) path that that method is
+            // mapped to.
         }
     }
 
@@ -51,7 +47,7 @@ public class SeffAssociationTest extends RuleEngineTest {
         RuleEngineBlackboard blackboard = getBlackboard();
 
         @SuppressWarnings("unchecked")
-        MethodDeclaration constructorDeclaration = blackboard.getCompilationUnits()
+        MethodDeclaration methodDeclaration = blackboard.getCompilationUnits()
             .stream()
             .filter(CompilationUnitWrapper::isEclipseCompilationUnit)
             .map(CompilationUnitWrapper::getEclipseCompilationUnit)
@@ -60,18 +56,18 @@ public class SeffAssociationTest extends RuleEngineTest {
             .map(TypeDeclaration.class::cast)
             .filter(type -> type.getName()
                 .getFullyQualifiedName()
-                .equals("AComponent"))
+                .equals("AController"))
             .flatMap(type -> Stream.of(type.getMethods()))
             .filter(method -> method.getName()
                 .getFullyQualifiedName()
-                .equals("AComponent"))
+                .equals("aMethod"))
             .findAny()
-            .orElseGet(() -> fail("Constructor of AComponent must be present in AST"));
+            .orElseGet(() -> fail("AController::aMethod must be present in AST"));
 
         Map<ASTNode, ServiceEffectSpecification> associations = blackboard.getSeffAssociations();
 
         // Assume that the SPRING rule detects constructors of components.
-        assertTrue(associations.containsKey(constructorDeclaration),
+        assertTrue(associations.containsKey(methodDeclaration),
                 "SEFF/AST associations must contain all rule-detected methods");
     }
 }

@@ -1,9 +1,13 @@
 package spring;
 
-@Component
-public class AComponent {
+@Controller
+public class AController {
 
-    public AComponent() {
+    public AController() {
+    }
+    
+    @GetMapping("/amethod")
+    public void aMethod() {
     }
 
 }
