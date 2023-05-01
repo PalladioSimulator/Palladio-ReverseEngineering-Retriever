@@ -81,14 +81,6 @@
     </discoverer>
  </extension>
  <extension
-       id="org.palladiosimulator.somox.discoverer.emftext"
-       name="EMFText Discoverer"
-       point="org.palladiosimulator.somox.discoverer">
-    <discoverer
-          class="org.palladiosimulator.somox.discoverer.EmfTextDiscoverer">
-    </discoverer>
- </extension>
- <extension
        id="org.palladiosimulator.somox.analyzer.rules.service.performance_analyst"
        name="Performance Analyst"
        point="org.palladiosimulator.somox.analyzer.rules.analyst">
