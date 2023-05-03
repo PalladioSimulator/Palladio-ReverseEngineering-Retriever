@@ -1,10 +1,8 @@
 package org.palladiosimulator.somox.analyzer.rules.cli;
 
 import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,13 +12,16 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
-import org.emftext.language.java.containers.impl.CompilationUnitImpl;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
-import org.palladiosimulator.somox.analyzer.rules.blackboard.CompilationUnitWrapper;
-import org.palladiosimulator.somox.analyzer.rules.engine.ParserAdapter;
-import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
+import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.service.ServiceConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.workflow.RuleEngineJob;
+import org.palladiosimulator.somox.discoverer.Discoverer;
+import org.palladiosimulator.somox.discoverer.DiscovererCollection;
 
 public class RuleEngineApplication implements IApplication {
 
@@ -68,6 +69,8 @@ public class RuleEngineApplication implements IApplication {
             printHelp(options);
         }
 
+        RuleEngineConfiguration configuration = new RuleEngineConfiguration();
+
         // Extract and check rules
         final Set<DefaultRule> rules = Arrays.stream(cmd.getOptionValue("r")
             .split(","))
@@ -79,29 +82,35 @@ public class RuleEngineApplication implements IApplication {
             System.err.println("Invalid rules: " + cmd.getOptionValue("r"));
             return -1;
         }
+        configuration.setSelectedRules(rules);
 
-        final Path in;
         try {
-            in = Paths.get(cmd.getOptionValue("i"))
+            configuration.setInputFolder(URI.createFileURI(URI.decode(Paths.get(cmd.getOptionValue("i"))
                 .toAbsolutePath()
-                .normalize();
+                .normalize()
+                .toString())));
         } catch (final InvalidPathException e) {
             System.err.println("Invalid input path: " + e.getMessage());
             return -1;
         }
-        final Path out;
+
         try {
-            out = Paths.get(cmd.getOptionValue("o"))
+            configuration.setOutputFolder(URI.createFileURI(URI.decode(Paths.get(cmd.getOptionValue("o"))
                 .toAbsolutePath()
-                .normalize();
+                .normalize()
+                .toString())));
         } catch (final InvalidPathException e) {
             System.err.println("Invalid output path: " + e.getMessage());
             return -1;
         }
 
-        final List<CompilationUnitImpl> roots = ParserAdapter.generateModelForPath(in, out);
+        // Enable all discoverers, in case a selected rule depends on them.
+        ServiceConfiguration<Discoverer> discovererConfig = configuration.getDiscovererConfig();
+        for (Discoverer discoverer : new DiscovererCollection().getServices()) {
+            discovererConfig.setSelected(discoverer, true);
+        }
 
-        RuleEngineAnalyzer.executeWith(in, out, CompilationUnitWrapper.wrap(roots), rules);
+        new RuleEngineJob(configuration).execute(new NullProgressMonitor());
 
         return 0;
     }

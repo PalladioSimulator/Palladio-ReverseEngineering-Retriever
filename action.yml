@@ -1,7 +1,11 @@
 # A GitHub Action that allows to run the RuleEngine on arbitrary GitHub repositories.
 
 name: 'Run RuleEngine'
-description: 'Reverse-engineers a project''s source into a Palladio Component Model'
+description: |
+  'Reverse-engineers a project''s source into a Palladio Component Model.
+  Uploads the PCM as an artifact called `ruleengine`.
+  Within that artifact, the PCM is located at the input `source_path`,
+  e.g. for `source_path=MyProject/Repository` the output is `[ruleengine]/MyProject/Repository/repository.pcm`.'
 
 inputs:
   source_path:
@@ -43,7 +47,7 @@ runs:
       if: env.action_version == 'master'
       shell: bash
       run: |
-        curl -s https://api.github.com/repos/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/releases/latest \
+        curl -s ${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/releases/latest \
           | grep -E 'browser_download_url' \
           | grep linux \
           | grep x86_64 \
@@ -56,7 +60,7 @@ runs:
       # Downloads the RuleEngine with the same version that this action has
       # (not necessarily the most recent one!).
       run: |
-        curl -s https://api.github.com/repos/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/releases/tags/${{ env.action_version }} \
+        curl -s ${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/releases/tags/${{ env.action_version }} \
           | grep -E 'browser_download_url' \
           | grep linux \
           | grep x86_64 \
@@ -71,20 +75,37 @@ runs:
     - name: Execute RuleEngine
       shell: bash
       working-directory: ${{ env.tmp_dir }}/ruleengine
-      run: ./eclipse -i "~/${{ inputs.source_path }}" -o "${{ env.tmp_dir }}/ruleengine_out" -r "${{ inputs.rules }}"
+      run: ./eclipse -i "${{ github.workspace }}/${{ inputs.source_path }}" -o "${{ env.tmp_dir }}/ruleengine_out" -r "${{ inputs.rules }}"
+      
+    - name: Prepare analysis results for upload
+      shell: bash
+      working-directory: ${{ env.tmp_dir }}
+      run: |
+        mkdir -p tmp/${{ inputs.source_path }}
+        mv ruleengine_out/* tmp/${{ inputs.source_path }}
+        mv tmp/* ruleengine_out
+        rmdir tmp
 
     - name: Upload analysis results
       uses: actions/upload-artifact@v3
       with:
-        name: result
-        path: ${{ env.tmp_dir }}/ruleengine_out/**
+        name: ruleengine
+        path: ${{ env.tmp_dir }}/ruleengine_out
+      
+    - name: Prepare Eclipse logs for upload
+      if: failure()
+      shell: bash
+      working-directory: ${{ env.tmp_dir }}
+      run: |
+        mkdir -p eclipse_logs/${{ inputs.source_path }}
+        mv ruleengine/configuration/*.log ruleengine/workspace/.metadata/.log eclipse_logs/${{ inputs.source_path }}
 
     - name: Upload Eclipse logs
+      if: failure()
       uses: actions/upload-artifact@v3
-      if: always()
       with:
-        name: eclipse-logs
-        path: ${{ env.tmp_dir }}/ruleengine/configuration/*.log
+        name: eclipse_logs
+        path: ${{ env.tmp_dir }}/eclipse_logs
 
     - name: Delete temporary directory
       if: always()

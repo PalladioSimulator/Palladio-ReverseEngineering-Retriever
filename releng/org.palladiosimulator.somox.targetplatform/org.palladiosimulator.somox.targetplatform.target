@@ -32,10 +32,6 @@
 			<repository location="https://updatesite.palladio-simulator.com/palladio-reverseengineering-somox-seff/nightly/" />
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="false" refresh="true" type="InstallableUnit">
-			<unit id="org.emftext.language.java.feature.feature.group" version="5.1.0.202209051332" />
-			<repository location="https://updatesite.mdsd.tools/jamopp/nightly/" />
-		</location>
-		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="false" refresh="true" type="InstallableUnit">
 			<unit id="tools.mdsd.library.emfeditutils" version="5.0.0.202111291006" />
 			<repository location="https://updatesite.mdsd.tools/library-emfeditutils/nightly/" />
 		</location>

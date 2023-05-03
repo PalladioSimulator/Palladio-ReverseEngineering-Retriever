@@ -52,7 +52,7 @@ public class CsvDiscoverer implements Discoverer {
                         try (Reader reader = new FileReader(p)) {
                             DEFAULT.parse(reader)
                                 .forEach(records::add);
-                        } catch (final IOException e) {
+                        } catch (final IllegalStateException | IOException e) {
                             logger.error(String.format("%s could not be read correctly.", p), e);
                         }
                         csvs.put(p, records);
