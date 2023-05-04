@@ -4,11 +4,17 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.emf.common.util.EList;
 import org.palladiosimulator.pcm.repository.BasicComponent;
+import org.palladiosimulator.pcm.repository.OperationInterface;
 import org.palladiosimulator.pcm.repository.OperationProvidedRole;
+import org.palladiosimulator.pcm.repository.OperationRequiredRole;
 import org.palladiosimulator.pcm.repository.OperationSignature;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
+import org.palladiosimulator.pcm.seff.AbstractAction;
+import org.palladiosimulator.pcm.seff.ExternalCallAction;
+import org.palladiosimulator.pcm.seff.ResourceDemandingSEFF;
 import org.palladiosimulator.pcm.seff.ServiceEffectSpecification;
 
 import de.uka.ipd.sdq.workflow.blackboard.Blackboard;
@@ -73,6 +79,37 @@ public class SeffMergerJob implements IBlackboardInteractingJob<Blackboard<Objec
                 // Set component and signature of source seff to destination elements
                 sourceSeff.setBasicComponent_ServiceEffectSpecification(destinationComponent);
                 sourceSeff.setDescribedService__SEFF(destinationSignature);
+
+                // Adapt external call actions to new repository -> Swap signatures and required roles
+                EList<AbstractAction> behaviorSteps = ((ResourceDemandingSEFF) sourceSeff).getSteps_Behaviour();
+                for (AbstractAction action : behaviorSteps) {
+                    if (!(action instanceof ExternalCallAction)) {
+                        continue;
+                    }
+                    ExternalCallAction externalCallAction = (ExternalCallAction) action;
+                    String calledSignatureEntityName = externalCallAction.getCalledService_ExternalService()
+                            .getEntityName();
+
+                    // Fetch called signature from destination repository
+                    OperationSignature calledSignature = destinationRepository.getInterfaces__Repository().stream()
+                            .filter(interFace -> interFace instanceof OperationInterface)
+                            .flatMap(interFace -> ((OperationInterface) interFace).getSignatures__OperationInterface()
+                                    .stream())
+                            .filter(signature -> signature.getEntityName().equals(calledSignatureEntityName))
+                            .findFirst().orElseThrow();
+
+                    // Fetch required role from destination repository
+                    OperationRequiredRole requiredRole = destinationComponent
+                            .getRequiredRoles_InterfaceRequiringEntity().stream()
+                            .filter(role -> role instanceof OperationRequiredRole)
+                            .map(role -> (OperationRequiredRole) role)
+                            .filter(role -> role.getRequiredInterface__OperationRequiredRole()
+                                    .getSignatures__OperationInterface().contains(calledSignature))
+                            .findFirst().orElseThrow();
+
+                    externalCallAction.setCalledService_ExternalService(calledSignature);
+                    externalCallAction.setRole_ExternalService(requiredRole);
+                }
 
                 // Find optional already existing and conflicting seff in destination component
                 Optional<ServiceEffectSpecification> optionalDestinationSeff = destinationComponent
