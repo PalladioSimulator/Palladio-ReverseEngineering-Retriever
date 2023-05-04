@@ -24,7 +24,8 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
         super.add(createAnalystsJob(configuration));
 
         // Generate service effect specifications based on AST nodes and merge them into repository
-        super.add(new Ast2SeffJob(getBlackboard(), RuleEngineConfiguration.RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY));
+        super.add(new Ast2SeffJob(getBlackboard(), RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_SEFF_ASSOCIATIONS,
+                RuleEngineConfiguration.RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY));
         super.add(new SeffMergerJob(myBlackboard, RuleEngineConfiguration.RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY,
                 RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY));
 
