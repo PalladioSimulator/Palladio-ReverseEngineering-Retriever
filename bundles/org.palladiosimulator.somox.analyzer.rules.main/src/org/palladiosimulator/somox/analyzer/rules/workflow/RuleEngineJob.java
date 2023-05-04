@@ -23,15 +23,20 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
 
         super.add(createAnalystsJob(configuration));
 
+        // Generate service effect specifications based on AST nodes and merge them into repository
         super.add(new Ast2SeffJob(getBlackboard(), RuleEngineConfiguration.RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY));
+        super.add(new SeffMergerJob(myBlackboard, RuleEngineConfiguration.RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY,
+                RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY));
 
+        // Refine model and create final repository, system, allocation, & resource environment
         super.add(new MoCoReJob(getBlackboard(),
-                RuleEngineConfiguration.RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY,
+                RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY,
                 RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_REPOSITORY,
                 RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_SYSTEM,
                 RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_ALLOCATION,
                 RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_RESOURCE_ENVIRONMENT));
 
+        // Persist repository, system, allocation, & resource environment model from blackboard into file system
         super.add(new PersistenceJob(getBlackboard(), configuration.getInputFolder(), configuration.getOutputFolder(),
                 RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_REPOSITORY,
                 RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_SYSTEM,
