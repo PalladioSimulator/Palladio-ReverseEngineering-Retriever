@@ -21,6 +21,8 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
 
         super.add(new RuleEngineBlackboardInteractingJob(configuration, getBlackboard()));
 
+        super.add(createAnalystsJob(configuration));
+
         super.add(new Ast2SeffJob(getBlackboard(), RuleEngineConfiguration.RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY));
 
         super.add(new MoCoReJob(getBlackboard(),
@@ -35,8 +37,6 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
                 RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_SYSTEM,
                 RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_ALLOCATION,
                 RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_RESOURCE_ENVIRONMENT));
-
-        super.add(createAnalystsJob(configuration));
     }
 
     private ParallelJob createDiscoverersJob(RuleEngineConfiguration configuration) {
