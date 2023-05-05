@@ -12,4 +12,8 @@ public class RuleEngineException extends Exception {
     public RuleEngineException(String message) {
         super(message);
     }
+
+    public RuleEngineException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
