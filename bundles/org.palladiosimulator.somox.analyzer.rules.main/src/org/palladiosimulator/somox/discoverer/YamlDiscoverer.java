@@ -19,9 +19,7 @@ import org.eclipse.emf.common.CommonPlugin;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.composer.ComposerException;
-import org.yaml.snakeyaml.parser.ParserException;
-import org.yaml.snakeyaml.scanner.ScannerException;
+import org.yaml.snakeyaml.error.YAMLException;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;
@@ -55,7 +53,7 @@ public class YamlDiscoverer implements Discoverer {
                             new Yaml().loadAll(reader)
                                 .forEach(yamlContents::add);
                             yamls.put(p, yamlContents);
-                        } catch (final IOException | ComposerException | ScannerException | ParserException e) {
+                        } catch (final IOException | YAMLException e) {
                             logger.error(String.format("%s could not be read correctly.", p), e);
                         }
                     });
