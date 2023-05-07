@@ -360,6 +360,12 @@ public class RuleHelper {
     }
 
     public static boolean isImplementingOrExtending(ITypeBinding binding, String ifaceName) {
+        if (binding == null) {
+            LOG.warn(
+                    "binding is null => returning false for isImplementingOrExtending(binding, \"" + ifaceName + "\")");
+            return false;
+        }
+
         if (equalsWithGeneric(binding.getName(), ifaceName)) {
             return true;
         }
