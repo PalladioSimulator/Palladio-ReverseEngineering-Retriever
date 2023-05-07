@@ -236,6 +236,7 @@ public class PCMInstanceCreator {
                 String name = operation.getName()
                     .forInterface(inter)
                     .orElseThrow();
+                name = name.replace(".", "_");
                 Integer oldCount = signatureNameCount.getOrDefault(name, 0);
                 signatureNameCount.put(name, oldCount + 1);
                 // Omit suffix for first occurrence.
