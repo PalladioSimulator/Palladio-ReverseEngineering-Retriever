@@ -230,7 +230,7 @@ public class PCMInstanceCreator {
             LOG.info("Current PCM Interface: " + inter);
 
             OperationInterfaceCreator pcmInterface = create.newOperationInterface()
-                .withName(inter);
+                .withName(inter.replace(".", "_"));
 
             for (final Operation operation : operations) {
                 String name = operation.getName()
@@ -271,7 +271,7 @@ public class PCMInstanceCreator {
             }
 
             repository.addToRepository(pcmInterface);
-            this.pcmInterfaces.put(inter, create.fetchOfOperationInterface(inter));
+            this.pcmInterfaces.put(inter, create.fetchOfOperationInterface(inter.replace(".", "_")));
         });
     }
 
