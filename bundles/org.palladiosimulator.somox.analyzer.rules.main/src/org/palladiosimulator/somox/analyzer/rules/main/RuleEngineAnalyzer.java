@@ -87,7 +87,7 @@ public class RuleEngineAnalyzer {
 
             executeWith(inPath, outPath, roots, rules, blackboard);
         } catch (Exception e) {
-            throw new RuleEngineException(e.getMessage());
+            throw new RuleEngineException("Analysis did not complete successfully", e);
         }
     }
 
