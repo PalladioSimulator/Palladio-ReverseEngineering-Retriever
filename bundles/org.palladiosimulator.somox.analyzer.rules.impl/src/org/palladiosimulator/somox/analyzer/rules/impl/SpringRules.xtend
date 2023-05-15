@@ -1,5 +1,6 @@
 package org.palladiosimulator.somox.analyzer.rules.impl
 
+
 import static org.palladiosimulator.somox.analyzer.rules.engine.RuleHelper.*
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard
@@ -12,6 +13,8 @@ import org.apache.log4j.Logger
 import org.eclipse.jdt.core.dom.MethodDeclaration
 import org.eclipse.jdt.core.dom.ITypeBinding
 import org.palladiosimulator.somox.analyzer.rules.model.PathName
+import java.util.HashMap
+import java.util.List
 
 class SpringRules extends IRule {
     static final Logger LOG = Logger.getLogger(SpringRules)
@@ -36,12 +39,15 @@ class SpringRules extends IRule {
 		val applicationName = getApplicationName(bootstrapYaml)
 		val projectConfigYaml = getProjectConfigYaml(configRoot, yamls, applicationName)
 		val contextPath = getContextPath(projectConfigYaml)
+		
+		val applicationYaml = getApplicationYaml(projectRoot, yamls);
+		val contextVariables = getContextVariables(applicationYaml);
 
 		val units = blackboard.getCompilationUnitAt(path)
 
 		var containedSuccessful = false
 		for (unit : units) {
-			containedSuccessful = processRuleForCompUnit(unit, contextPath) || containedSuccessful
+			containedSuccessful = processRuleForCompUnit(unit, contextPath, contextVariables) || containedSuccessful
 		}
 
 		return containedSuccessful
@@ -180,8 +186,75 @@ class SpringRules extends IRule {
 		}
 		return contextPath
 	}
+	
+	def getApplicationYaml(Path projectRoot, Map<String, Iterable<Map<String, Object>>> yamls) {
+		if (projectRoot === null || yamls === null) {
+			return null
+		}
+		val applicationYamls =  yamls.entrySet.stream
+			.map[ entry | Path.of(entry.key) -> entry.value ]
+			.filter[ entry | entry.key.parent == projectRoot.resolve("src/main/resources") ]
+			.filter[ entry | val fileName = entry.key.fileName.toString; fileName == "application.yaml" || fileName == "application.yml" ]
+			.collect(Collectors.toList)
 
-	def boolean processRuleForCompUnit(CompilationUnit unit, String contextPath) {
+		if (applicationYamls.size > 1) {
+			LOG.warn("Multiple application.y[a]mls in " + projectRoot + ", choosing " + projectRoot.relativize(applicationYamls.get(0).key) + " arbitrarily")
+		} else if (applicationYamls.empty) {
+			return null
+		}
+		return applicationYamls.get(0).value
+	}
+
+	def Map<String, String> getContextVariables(Iterable<Map<String, Object>> applicationYaml) {
+		val result = new HashMap<String, String>();
+		if (applicationYaml === null || applicationYaml.empty) {
+			return result;
+		}
+		
+		return getContextVariables(applicationYaml.get(0));
+	}
+	
+	def Map<String, String> getContextVariables(Map<String, Object> applicationYaml) {
+		val result = new HashMap<String, String>();
+		if (applicationYaml === null) {
+			return result;
+		}
+
+		for (entry : applicationYaml.entrySet) {
+			if (entry.value instanceof Map) {
+				val mapValue = entry.value as Map<String, Object>;
+				for (mapEntry : getContextVariables(mapValue).entrySet) {
+					result.put(entry.key + "." + mapEntry.key, mapEntry.value);
+				}
+			} else if (entry.value instanceof List) {
+				val extendedMapValue = entry.value as List<Map<String, Object>>;
+				for (extendedEntry : extendedMapValue) {
+					val extendedKey = extendedEntry.get("key") as String;
+					var extendedValue = extendedEntry.get("value") as String;
+					if (extendedKey !== null && extendedValue !== null) {
+						if (extendedValue.startsWith("${")) {
+							val startIndex = extendedValue.indexOf(":");
+							val endIndex = extendedValue.indexOf("}", startIndex);
+							extendedValue = extendedValue.substring(startIndex + 1, endIndex);
+						}
+						result.put(entry.key + "." + extendedKey, extendedValue);
+					}
+				}
+			} else if (entry.value instanceof String) {
+				var stringValue = entry.value as String;
+				if (stringValue.startsWith("${")) {
+					val startIndex = stringValue.indexOf(":");
+					val endIndex = stringValue.indexOf("}", startIndex);
+					stringValue = stringValue.substring(startIndex + 1, endIndex);
+				}
+				result.put(entry.key, stringValue);
+			}
+		}
+
+		return result;
+	}
+
+	def boolean processRuleForCompUnit(CompilationUnit unit, String contextPath, Map<String, String> contextVariables) {
 		val pcmDetector = blackboard.getPCMDetector
 		if (pcmDetector === null) {
 			return false
@@ -243,6 +316,7 @@ class SpringRules extends IRule {
 				val annotated = hasMapping(m);
 				if (annotated) {
 					var requestedMapping = getMapping(m);
+					requestedMapping = substituteVariables(requestedMapping, contextVariables);
 					var methodName = ifaceName + "/" + requestedMapping;
 					val argumentIndex = requestedMapping.indexOf('{');
 					if (argumentIndex >= 0) {
@@ -275,6 +349,25 @@ class SpringRules extends IRule {
 		}
 
 		return true;
+	}
+	
+	def substituteVariables(String string, Map<String, String> contextVariables) {
+		var result = string;
+
+		while (result.contains("${")) {
+			val startIndex = result.indexOf("${");
+			val endIndex = result.indexOf("}", startIndex);
+			val key = result.substring(startIndex + 2, endIndex);
+			val value = contextVariables.get(key);
+			if (value !== null) {
+				result = result.substring(0, startIndex) + value + result.substring(endIndex + 1);
+			} else {
+				result = result.substring(0, startIndex) + "ERROR_COULD_NOT_RESOLVE" + result.substring(endIndex + 1);
+				LOG.error("Could not resolve key " + key);
+			}
+		}
+
+		return result;
 	}
 
 	def hasMapping(MethodDeclaration m) {
