@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.palladiosimulator.generator.fluent.repository.api.Repo;
 import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
 import org.palladiosimulator.generator.fluent.repository.structure.components.BasicComponentCreator;
@@ -230,12 +231,13 @@ public class PCMInstanceCreator {
             LOG.info("Current PCM Interface: " + inter);
 
             OperationInterfaceCreator pcmInterface = create.newOperationInterface()
-                .withName(inter);
+                .withName(inter.replace(".", "_"));
 
             for (final Operation operation : operations) {
                 String name = operation.getName()
                     .forInterface(inter)
                     .orElseThrow();
+                name = name.replace(".", "_");
                 Integer oldCount = signatureNameCount.getOrDefault(name, 0);
                 signatureNameCount.put(name, oldCount + 1);
                 // Omit suffix for first occurrence.
@@ -270,7 +272,7 @@ public class PCMInstanceCreator {
             }
 
             repository.addToRepository(pcmInterface);
-            this.pcmInterfaces.put(inter, create.fetchOfOperationInterface(inter));
+            this.pcmInterfaces.put(inter, create.fetchOfOperationInterface(inter.replace(".", "_")));
         });
     }
 
@@ -287,8 +289,9 @@ public class PCMInstanceCreator {
             final CompilationUnit compUnit = comp.compilationUnit();
             AbstractTypeDeclaration firstTypeDecl = (AbstractTypeDeclaration) compUnit.types()
                 .get(0);
+            ITypeBinding binding = firstTypeDecl.resolveBinding();
             BasicComponentCreator pcmComp = create.newBasicComponent()
-                .withName(wrapName(firstTypeDecl.resolveBinding()));
+                .withName(binding != null ? wrapName(binding) : wrapName(firstTypeDecl.getName()));
 
             Set<org.palladiosimulator.pcm.repository.OperationInterface> distinctInterfaces = new HashSet<>();
             for (OperationInterface provision : comp.provisions()) {
@@ -533,6 +536,17 @@ public class PCMInstanceCreator {
 
     private static String wrapName(ITypeBinding name) {
         String fullName = name.getQualifiedName()
+            .replace(".", "_");
+        // Erase type parameters in identifiers
+        // TODO is this the right solution?
+        if (fullName.contains("<")) {
+            return fullName.substring(0, fullName.indexOf('<'));
+        }
+        return fullName;
+    }
+
+    private static String wrapName(SimpleName name) {
+        String fullName = name.getFullyQualifiedName()
             .replace(".", "_");
         // Erase type parameters in identifiers
         // TODO is this the right solution?

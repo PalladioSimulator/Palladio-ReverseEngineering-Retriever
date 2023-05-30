@@ -234,17 +234,30 @@ class SpringRules extends IRule {
 		}
 
 		if (isClient) {
+			val requestedUnitMapping = getUnitAnnotationStringValue(unit, "RequestMapping");
+			var ifaceName = "";
+			if (requestedUnitMapping !== null) {
+				ifaceName += requestedUnitMapping;
+			}
 			for (m : getMethods(unit)) {
 				val annotated = hasMapping(m);
 				if (annotated) {
 					var requestedMapping = getMapping(m);
-					var ifaceName = requestedMapping;
+					var methodName = ifaceName + "/" + requestedMapping;
 					val argumentIndex = requestedMapping.indexOf('{');
 					if (argumentIndex >= 0) {
+						// Search backwards for the last '/' before the argument.
 						val lastSegmentStart = requestedMapping.lastIndexOf('/', argumentIndex)
-						ifaceName = requestedMapping.substring(0, lastSegmentStart);
+						if (lastSegmentStart >= 0) {
+							methodName = requestedMapping.substring(0, lastSegmentStart);
+						} else {
+							methodName = requestedMapping.substring(0, argumentIndex);
+						}
 					}
-					pcmDetector.detectCompositeRequiredInterface(unit, new PathName(ifaceName));
+					// Remove "//". This can occur if requestedUnitMapping
+					// has a leading "/" and the contextPath is "/" or analogous for method and unit mapping.
+					methodName = methodName.replaceAll("/+", "/");
+					pcmDetector.detectCompositeRequiredInterface(unit, new PathName(methodName));
 				}
 			}
 		}
