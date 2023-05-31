@@ -45,16 +45,16 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
         monitor.subTask("Retrieving job input from blackboard");
         Repository repository = (Repository) this.blackboard.getPartition(repositoryKey);
         System system = (System) this.blackboard.getPartition(systemKey);
-        Allocation allocation = (Allocation) this.blackboard.getPartition(allocationKey);
         ResourceEnvironment resourceEnvironment = (ResourceEnvironment) this.blackboard
                 .getPartition(resourceEnvironmentKey);
+        Allocation allocation = (Allocation) this.blackboard.getPartition(allocationKey);
 
         // Make blackboard models persistent by saving them as files
         monitor.subTask("Persisting models");
         ModelSaver.saveRepository(repository, outputFilePrefix.getPath(), false);
         ModelSaver.saveSystem(system, outputFilePrefix.getPath(), false);
-        ModelSaver.saveAllocation(allocation, outputFilePrefix.getPath(), false);
         ModelSaver.saveResourceEnvironment(resourceEnvironment, outputFilePrefix.getPath(), false);
+        ModelSaver.saveAllocation(allocation, outputFilePrefix.getPath(), false);
         monitor.done();
     }
 
