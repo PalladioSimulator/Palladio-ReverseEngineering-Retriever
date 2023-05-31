@@ -1,5 +1,6 @@
 package org.palladiosimulator.somox.analyzer.rules.workflow;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -61,8 +62,9 @@ public class SeffMergerJob implements IBlackboardInteractingJob<Blackboard<Objec
                     .findFirst().orElseThrow();
 
             // Overwrite seffs within destination component
-            for (ServiceEffectSpecification sourceSeff : sourceComponent
-                    .getServiceEffectSpecifications__BasicComponent()) {
+            List<ServiceEffectSpecification> sourceSeffs = List.copyOf(sourceComponent
+                    .getServiceEffectSpecifications__BasicComponent());
+            for (ServiceEffectSpecification sourceSeff : sourceSeffs) {
                 // Retrieve destination signature for seff, throw if signature is not provided by destination component
                 OperationSignature destinationSignature = destinationComponent
                         .getProvidedRoles_InterfaceProvidingEntity()
