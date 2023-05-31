@@ -20,6 +20,8 @@ Require-Bundle: com.google.guava,
  org.palladiosimulator.somox.analyzer.rules.engine,
  org.palladiosimulator.somox.analyzer.rules.impl,
  org.palladiosimulator.somox.analyzer.rules.main,
+ org.palladiosimulator.somox.analyzer.rules.mocore,
+ org.palladiosimulator.somox.ast2seff,
  org.apache.log4j,
  org.palladiosimulator.generator.fluent,
  junit-jupiter-api
