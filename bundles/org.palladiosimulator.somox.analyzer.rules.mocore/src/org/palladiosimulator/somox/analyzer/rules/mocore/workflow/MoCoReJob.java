@@ -63,9 +63,9 @@ public class MoCoReJob implements IBlackboardInteractingJob<Blackboard<Object>> 
         monitor.subTask("Transforming surrogate model into output models");
         PcmSurrogate surrogate = orchestrator.getModel();
         Repository repository = new RepositoryTransformer().transform(surrogate);
-        System system = new SystemTransformer().transform(surrogate);
-        Allocation allocation = new AllocationTransformer().transform(surrogate);
+        System system = new SystemTransformer().transform(surrogate, repository);
         ResourceEnvironment resourceEnvironment = new ResourceEnvironmentTransformer().transform(surrogate);
+        Allocation allocation = new AllocationTransformer().transform(surrogate, system, resourceEnvironment);
 
         // Add transformed models to blackboard
         monitor.subTask("Adding output models to blackboard");

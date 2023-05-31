@@ -19,8 +19,12 @@ public class SystemTransformer implements Transformer<PcmSurrogate, org.palladio
 
     @Override
     public System transform(PcmSurrogate model) {
-        FluentSystemFactory systemFactory = new FluentSystemFactory();
         Repository repository = new RepositoryTransformer().transform(model);
+        return this.transform(model, repository);
+    }
+
+    public System transform(PcmSurrogate model, Repository repository) {
+        FluentSystemFactory systemFactory = new FluentSystemFactory();
         ISystemAddition fluentSystem = systemFactory.newSystem().addRepository(repository);
 
         // Add repository components as assembly contexts to system

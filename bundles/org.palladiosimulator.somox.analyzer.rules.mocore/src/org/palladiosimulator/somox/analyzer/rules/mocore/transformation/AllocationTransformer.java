@@ -16,9 +16,13 @@ import tools.mdsd.mocore.framework.transformation.Transformer;
 public class AllocationTransformer implements Transformer<PcmSurrogate, Allocation> {
     @Override
     public Allocation transform(PcmSurrogate model) {
-        FluentAllocationFactory allocationFactory = new FluentAllocationFactory();
         System system = new SystemTransformer().transform(model);
         ResourceEnvironment resourceEnvironment = new ResourceEnvironmentTransformer().transform(model);
+        return this.transform(model, system, resourceEnvironment);
+    }
+
+    public Allocation transform(PcmSurrogate model, System system, ResourceEnvironment resourceEnvironment) {
+        FluentAllocationFactory allocationFactory = new FluentAllocationFactory();
         IAllocationAddition fluentAllocation = allocationFactory.newAllocation()
                 .withSystem(system)
                 .withResourceEnvironment(resourceEnvironment);
