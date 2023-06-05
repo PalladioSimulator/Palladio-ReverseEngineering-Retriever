@@ -21,6 +21,8 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
         // TODO Integrate SEFF extraction once it is done being developed.
 
         super.add(createAnalystsJob(configuration));
+
+        super.add(new PlantUmlJob(configuration, getBlackboard()));
     }
 
     private ParallelJob createDiscoverersJob(RuleEngineConfiguration configuration) {
