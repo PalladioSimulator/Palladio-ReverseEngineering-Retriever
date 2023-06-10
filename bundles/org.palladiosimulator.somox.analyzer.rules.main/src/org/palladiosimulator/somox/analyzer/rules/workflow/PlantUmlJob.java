@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Objects;
 
+import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -22,6 +23,8 @@ import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
 import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 public class PlantUmlJob extends AbstractBlackboardInteractingJob<RuleEngineBlackboard> {
+
+    private static final Logger LOG = Logger.getLogger(PlantUmlJob.class);
 
     private static final String NAME = "Rule Engine PlantUML Generation";
 
@@ -55,7 +58,7 @@ public class PlantUmlJob extends AbstractBlackboardInteractingJob<RuleEngineBlac
                 }
                 file.setContents(new ByteArrayInputStream(plantUmlSource.getBytes()), IFile.FORCE, null);
             } catch (CoreException e) {
-                e.printStackTrace();
+                LOG.error(e);
             }
 
         } else {
@@ -65,7 +68,7 @@ public class PlantUmlJob extends AbstractBlackboardInteractingJob<RuleEngineBlac
             try (FileWriter writer = new FileWriter(path)) {
                 writer.append(plantUmlSource);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.error(e);
             }
         }
     }
