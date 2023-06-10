@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.List;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.pcm.repository.CollectionDataType;
@@ -17,13 +18,11 @@ import org.palladiosimulator.pcm.repository.OperationSignature;
 import org.palladiosimulator.pcm.repository.Parameter;
 import org.palladiosimulator.pcm.repository.PrimitiveDataType;
 import org.palladiosimulator.pcm.repository.PrimitiveTypeEnum;
-import org.palladiosimulator.pcm.repository.impl.RepositoryImpl;
+import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
-import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
+import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineException;
-import org.palladiosimulator.somox.discoverer.Discoverer;
-import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
+import org.palladiosimulator.somox.analyzer.rules.workflow.RuleEngineJob;
 
 import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
 import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
@@ -101,15 +100,11 @@ public class BasicTest extends RuleEngineTest {
         }
 
         // Run the RuleEngine again on the same project
-        final RuleEngineBlackboard blackboard = new RuleEngineBlackboard();
-        final RuleEngineAnalyzer analyzer = new RuleEngineAnalyzer(blackboard);
-        final Discoverer discoverer = new JavaDiscoverer();
-        discoverer.create(getConfig(), blackboard)
-            .execute(null);
+        final RuleEngineJob ruleEngine = new RuleEngineJob(getConfig());
+        ruleEngine.execute(new NullProgressMonitor());
+        final Repository repo = (Repository) ruleEngine.getBlackboard()
+            .getPartition(RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY);
 
-        analyzer.analyze(getConfig(), null);
-
-        final RepositoryImpl repo = loadRepository(OUT_DIR.appendSegment("pcm.repository"));
         conflictingMethods = getConflictingMethods(repo.getInterfaces__Repository());
 
         int secondIntArgCount = 0;

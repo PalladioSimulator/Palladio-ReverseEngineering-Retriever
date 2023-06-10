@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.URI;
@@ -24,14 +25,12 @@ import org.palladiosimulator.pcm.repository.DataType;
 import org.palladiosimulator.pcm.repository.Interface;
 import org.palladiosimulator.pcm.repository.OperationInterface;
 import org.palladiosimulator.pcm.repository.OperationSignature;
+import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
-import org.palladiosimulator.pcm.repository.impl.RepositoryImpl;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
-import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
-import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineException;
-import org.palladiosimulator.somox.discoverer.Discoverer;
+import org.palladiosimulator.somox.analyzer.rules.workflow.RuleEngineJob;
 import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
 
 import com.google.common.collect.Sets;
@@ -49,17 +48,17 @@ abstract class RuleEngineTest {
         return OUT_DIR;
     }
 
-    public static RepositoryImpl loadRepository(URI repoXMI) {
+    public static Repository loadRepository(URI repoXMI) {
         final List<EObject> contents = new ResourceSetImpl().getResource(repoXMI, true)
             .getContents();
 
         assertEquals(1, contents.size());
-        assertTrue(contents.get(0) instanceof RepositoryImpl);
+        assertTrue(contents.get(0) instanceof Repository);
 
         // TODO activate this again when SEFF is included
         // validate(contents.get(0));
 
-        return (RepositoryImpl) contents.get(0);
+        return (Repository) contents.get(0);
     }
 
     public static void validate(EObject eObject) {
@@ -71,14 +70,14 @@ abstract class RuleEngineTest {
     // Seperate instances for every child test
     private final Logger logger = Logger.getLogger(this.getClass());
 
-    private boolean isCreated;
-    private List<RepositoryComponent> components;
     private final RuleEngineConfiguration config = new RuleEngineConfiguration();
+    private final RuleEngineJob ruleEngine;
+    private final boolean executedSuccessfully;
+    private Repository repository;
+    private List<RepositoryComponent> components;
     private List<DataType> datatypes;
     private List<FailureType> failuretypes;
     private List<Interface> interfaces;
-    private RepositoryImpl repository;
-    private RuleEngineBlackboard blackboard;
     private final Set<DefaultRule> rules;
 
     /**
@@ -89,33 +88,29 @@ abstract class RuleEngineTest {
      *            the name of the project directory that will be analyzed
      */
     protected RuleEngineTest(String projectDirectory, DefaultRule... rules) {
-        blackboard = new RuleEngineBlackboard();
-        final RuleEngineAnalyzer analyzer = new RuleEngineAnalyzer(blackboard);
-        final Discoverer discoverer = new JavaDiscoverer();
-
         this.rules = Set.of(rules);
 
         config.setInputFolder(TEST_DIR.appendSegments(projectDirectory.split("/")));
         config.setOutputFolder(getOutputDirectory());
         config.setSelectedRules(this.rules);
+        config.getDiscovererConfig()
+            .setSelected(new JavaDiscoverer(), true);
 
+        ruleEngine = new RuleEngineJob(config);
+
+        boolean executedSuccessfully;
         try {
-            discoverer.create(config, blackboard)
-                .execute(null);
-            analyzer.analyze(config, null);
-            isCreated = true;
-        } catch (RuleEngineException | JobFailedException | UserCanceledException e) {
-            isCreated = false;
+            ruleEngine.execute(new NullProgressMonitor());
+            executedSuccessfully = true;
+        } catch (JobFailedException | UserCanceledException e) {
+            logger.error(e);
+            executedSuccessfully = false;
         }
+        this.executedSuccessfully = executedSuccessfully;
 
-        final String repoPath = getOutputDirectory().appendSegment("pcm.repository")
-            .devicePath();
-        assertTrue(!isCreated || new File(repoPath).exists());
-
-        if (isCreated) {
-            repository = loadRepository(URI.createFileURI(repoPath));
-        }
-        if (isCreated) {
+        if (executedSuccessfully) {
+            repository = (Repository) ruleEngine.getBlackboard()
+                .getPartition(RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY);
             components = repository.getComponents__Repository();
             datatypes = repository.getDataTypes__Repository();
             failuretypes = repository.getFailureTypes__Repository();
@@ -123,8 +118,8 @@ abstract class RuleEngineTest {
         }
     }
 
-    private void assertCreated() {
-        assertTrue(isCreated, "Failed to create model using JavaDiscoverer!");
+    private void assertSuccessfulExecution() {
+        assertTrue(executedSuccessfully, "Failed to create model using JavaDiscoverer!");
     }
 
     public void assertMaxParameterCount(int expectedMaxParameterCount, String interfaceName, String signatureName) {
@@ -163,27 +158,27 @@ abstract class RuleEngineTest {
     }
 
     public List<RepositoryComponent> getComponents() {
-        assertCreated();
+        assertSuccessfulExecution();
         return Collections.unmodifiableList(components);
     }
 
     public RuleEngineConfiguration getConfig() {
-        assertCreated();
+        assertSuccessfulExecution();
         return config;
     }
 
     public List<DataType> getDatatypes() {
-        assertCreated();
+        assertSuccessfulExecution();
         return Collections.unmodifiableList(datatypes);
     }
 
     public List<FailureType> getFailuretypes() {
-        assertCreated();
+        assertSuccessfulExecution();
         return Collections.unmodifiableList(failuretypes);
     }
 
     public List<Interface> getInterfaces() {
-        assertCreated();
+        assertSuccessfulExecution();
         return Collections.unmodifiableList(interfaces);
     }
 
@@ -209,14 +204,14 @@ abstract class RuleEngineTest {
             .reduce(new HashSet<>(), Sets::union);
     }
 
-    public RepositoryImpl getRepo() {
-        assertCreated();
+    public Repository getRepo() {
+        assertSuccessfulExecution();
         return repository;
     }
 
     public RuleEngineBlackboard getBlackboard() {
-        assertCreated();
-        return blackboard;
+        assertSuccessfulExecution();
+        return ruleEngine.getBlackboard();
     }
 
     public Set<DefaultRule> getRules() {
