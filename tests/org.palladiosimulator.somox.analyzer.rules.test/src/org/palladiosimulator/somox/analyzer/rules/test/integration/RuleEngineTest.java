@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.common.util.Diagnostic;
@@ -30,8 +32,10 @@ import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.service.ServiceConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.workflow.RuleEngineJob;
-import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
+import org.palladiosimulator.somox.discoverer.Discoverer;
+import org.palladiosimulator.somox.discoverer.DiscovererCollection;
 
 import com.google.common.collect.Sets;
 
@@ -93,8 +97,16 @@ abstract class RuleEngineTest {
         config.setInputFolder(TEST_DIR.appendSegments(projectDirectory.split("/")));
         config.setOutputFolder(getOutputDirectory());
         config.setSelectedRules(this.rules);
-        config.getDiscovererConfig()
-            .setSelected(new JavaDiscoverer(), true);
+
+        // Enable all discoverers.
+        ServiceConfiguration<Discoverer> discovererConfig = config.getDiscovererConfig();
+        try {
+            for (Discoverer discoverer : new DiscovererCollection().getServices()) {
+                discovererConfig.setSelected(discoverer, true);
+            }
+        } catch (InvalidRegistryObjectException | CoreException e) {
+            logger.error(e);
+        }
 
         ruleEngine = new RuleEngineJob(config);
 
@@ -119,7 +131,7 @@ abstract class RuleEngineTest {
     }
 
     private void assertSuccessfulExecution() {
-        assertTrue(executedSuccessfully, "Failed to create model using JavaDiscoverer!");
+        assertTrue(executedSuccessfully, "Failed to run RuleEngine!");
     }
 
     public void assertMaxParameterCount(int expectedMaxParameterCount, String interfaceName, String signatureName) {
