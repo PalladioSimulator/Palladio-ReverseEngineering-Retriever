@@ -34,6 +34,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.palladiosimulator.generator.fluent.shared.util.ModelLoader;
 import org.palladiosimulator.pcm.allocation.Allocation;
 import org.palladiosimulator.pcm.repository.BasicComponent;
 import org.palladiosimulator.pcm.repository.OperationInterface;
@@ -304,14 +305,50 @@ public class PostAnalysisJobTest {
 
         // Check if model files were created successfully
         List<Path> paths = Files.walk(this.temporaryOutputDirectory).toList();
-        assertTrue(paths.stream().anyMatch(path -> com.google.common.io.Files.getFileExtension(path.toString())
-                .equals("repository")));
-        assertTrue(paths.stream().anyMatch(path -> com.google.common.io.Files.getFileExtension(path.toString())
-                .equals("system")));
-        assertTrue(paths.stream().anyMatch(path -> com.google.common.io.Files.getFileExtension(path.toString())
-                .equals("resourceenvironment")));
-        assertTrue(paths.stream().anyMatch(path -> com.google.common.io.Files.getFileExtension(path.toString())
-                .equals("allocation")));
+        Path repositoryPath = paths.stream().filter(path -> com.google.common.io.Files.getFileExtension(path.toString())
+                .equals("repository")).findFirst().orElseThrow();
+        Path systemPath = paths.stream().filter(path -> com.google.common.io.Files.getFileExtension(path.toString())
+                .equals("system")).findFirst().orElseThrow();
+        Path resourceEnvironmentPath = paths.stream()
+                .filter(path -> com.google.common.io.Files.getFileExtension(path.toString())
+                        .equals("resourceenvironment"))
+                .findFirst().orElseThrow();
+        Path allocationPath = paths.stream().filter(path -> com.google.common.io.Files.getFileExtension(path.toString())
+                .equals("allocation")).findFirst().orElseThrow();
+
+        // Load model files saved to disk
+        Repository persistedRepository = ModelLoader.loadRepository(repositoryPath.toString());
+        org.palladiosimulator.pcm.system.System persistedSystem = ModelLoader.loadSystem(systemPath.toString());
+        ResourceEnvironment persistedResourceEnvironment = ModelLoader
+                .loadResourceEnvironment(resourceEnvironmentPath.toString());
+        Allocation persistedAllocation = ModelLoader.loadAllocation(allocationPath.toString());
+
+        // Check loaded repository validity
+        assertEquals(3, persistedRepository.getComponents__Repository().size());
+        assertEquals(3, persistedRepository.getInterfaces__Repository().size());
+        persistedRepository.getInterfaces__Repository().forEach(interFace -> {
+            OperationInterface operationInterface = (OperationInterface) interFace;
+            assertFalse(operationInterface.getSignatures__OperationInterface().isEmpty());
+        });
+        persistedRepository.getComponents__Repository().forEach(component -> {
+            BasicComponent basicComponent = (BasicComponent) component;
+            assertFalse(basicComponent.getServiceEffectSpecifications__BasicComponent().isEmpty());
+            assertFalse(basicComponent.getProvidedRoles_InterfaceProvidingEntity().isEmpty());
+        });
+
+        // Check loaded system validity
+        assertEquals(3, persistedSystem.getAssemblyContexts__ComposedStructure().size());
+        assertEquals(3, persistedSystem.getConnectors__ComposedStructure().size());
+
+        // Check loaded resource environment validity
+        assertEquals(3, persistedResourceEnvironment.getResourceContainer_ResourceEnvironment().size());
+        assertEquals(3, persistedResourceEnvironment.getLinkingResources__ResourceEnvironment().size());
+
+        // Check loaded allocation validity
+        assertEquals(persistedSystem.getId(), persistedAllocation.getSystem_Allocation().getId());
+        assertEquals(persistedResourceEnvironment.getEntityName(),
+                persistedAllocation.getTargetResourceEnvironment_Allocation().getEntityName());
+        assertEquals(3, persistedAllocation.getAllocationContexts_Allocation().size());
     }
 
     protected Blackboard<Object> getBlackboard() {
