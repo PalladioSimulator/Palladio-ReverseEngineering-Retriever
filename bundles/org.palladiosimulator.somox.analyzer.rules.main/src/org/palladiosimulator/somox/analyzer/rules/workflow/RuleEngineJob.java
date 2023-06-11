@@ -43,6 +43,8 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
                 RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_SYSTEM,
                 RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_ALLOCATION,
                 RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_RESOURCE_ENVIRONMENT));
+
+        super.add(new PlantUmlJob(configuration, getBlackboard()));
     }
 
     private ParallelJob createDiscoverersJob(RuleEngineConfiguration configuration) {
