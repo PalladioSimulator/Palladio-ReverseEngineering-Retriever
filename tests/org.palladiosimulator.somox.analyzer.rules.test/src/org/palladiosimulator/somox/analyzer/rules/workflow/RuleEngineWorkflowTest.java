@@ -24,7 +24,7 @@ import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfig
 import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
 import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
-public abstract class RuleEngineJobTest {
+public abstract class RuleEngineWorkflowTest {
     protected static final URI DIRECTORY_CASESTUDY = CommonPlugin
             .asLocalURI(URI.createFileURI(URI.decode(new File("res").getAbsolutePath())));
     protected static final URI DIRECTORY_OUT = DIRECTORY_CASESTUDY.appendSegment("out_workflow");
@@ -34,7 +34,7 @@ public abstract class RuleEngineJobTest {
     private final ResourceEnvironment resourceEnvironment;
     private final Allocation allocation;
 
-    protected RuleEngineJobTest(String casestudyPath, DefaultRule... rules)
+    protected RuleEngineWorkflowTest(String casestudyPath, DefaultRule... rules)
             throws JobFailedException, UserCanceledException, IOException {
         // Create config instance for rule engine job
         RuleEngineConfiguration ruleEngineConfiguration = new RuleEngineConfiguration();
