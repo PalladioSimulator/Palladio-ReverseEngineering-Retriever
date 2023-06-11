@@ -43,7 +43,7 @@ public class PlantUmlJob extends AbstractBlackboardInteractingJob<RuleEngineBlac
     public void execute(IProgressMonitor arg0) throws JobFailedException, UserCanceledException {
         PcmComponentDiagramGenerator generator = new PcmComponentDiagramGenerator((Repository) getBlackboard()
             .getPartition(RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY));
-        String plantUmlSource = generator.getDiagramText();
+        String plantUmlSource = "@startuml\n" + generator.getDiagramText() + "\n@enduml\n";
 
         if (configuration.getOutputFolder()
             .isPlatformResource()) {
