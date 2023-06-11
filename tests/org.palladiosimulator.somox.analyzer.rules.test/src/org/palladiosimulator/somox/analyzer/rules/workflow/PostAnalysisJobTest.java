@@ -339,6 +339,13 @@ public class PostAnalysisJobTest {
         // Check loaded system validity
         assertEquals(3, persistedSystem.getAssemblyContexts__ComposedStructure().size());
         assertEquals(3, persistedSystem.getConnectors__ComposedStructure().size());
+        // Check repository information via assembly context to verify that references were resolved correctly
+        persistedSystem.getAssemblyContexts__ComposedStructure().forEach(assemblyContext -> {
+            BasicComponent basicComponent = (BasicComponent) assemblyContext
+                    .getEncapsulatedComponent__AssemblyContext();
+            assertFalse(basicComponent.getServiceEffectSpecifications__BasicComponent().isEmpty());
+            assertFalse(basicComponent.getProvidedRoles_InterfaceProvidingEntity().isEmpty());
+        });
 
         // Check loaded resource environment validity
         assertEquals(3, persistedResourceEnvironment.getResourceContainer_ResourceEnvironment().size());
@@ -349,6 +356,13 @@ public class PostAnalysisJobTest {
         assertEquals(persistedResourceEnvironment.getEntityName(),
                 persistedAllocation.getTargetResourceEnvironment_Allocation().getEntityName());
         assertEquals(3, persistedAllocation.getAllocationContexts_Allocation().size());
+        // Check repository information via allocation context to verify that references were resolved correctly
+        persistedAllocation.getAllocationContexts_Allocation().forEach(allocationContext -> {
+            BasicComponent basicComponent = (BasicComponent) allocationContext.getAssemblyContext_AllocationContext()
+                    .getEncapsulatedComponent__AssemblyContext();
+            assertFalse(basicComponent.getServiceEffectSpecifications__BasicComponent().isEmpty());
+            assertFalse(basicComponent.getProvidedRoles_InterfaceProvidingEntity().isEmpty());
+        });
     }
 
     protected Blackboard<Object> getBlackboard() {
