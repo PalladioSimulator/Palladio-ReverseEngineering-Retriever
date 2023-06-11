@@ -3,7 +3,9 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.transformation;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import org.eclipse.emf.common.util.EList;
 import org.palladiosimulator.generator.fluent.repository.api.Repo;
 import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
 import org.palladiosimulator.generator.fluent.repository.structure.components.BasicComponentCreator;
@@ -12,9 +14,13 @@ import org.palladiosimulator.generator.fluent.repository.structure.interfaces.Op
 import org.palladiosimulator.pcm.repository.BasicComponent;
 import org.palladiosimulator.pcm.repository.CompositeComponent;
 import org.palladiosimulator.pcm.repository.OperationInterface;
+import org.palladiosimulator.pcm.repository.OperationRequiredRole;
 import org.palladiosimulator.pcm.repository.OperationSignature;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
+import org.palladiosimulator.pcm.seff.AbstractAction;
+import org.palladiosimulator.pcm.seff.ExternalCallAction;
+import org.palladiosimulator.pcm.seff.ResourceDemandingSEFF;
 import org.palladiosimulator.pcm.seff.ServiceEffectSpecification;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.AtomicComponent;
@@ -116,6 +122,33 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
                         // Reset component and signature within seff because they may be out-dated
                         seff.setBasicComponent_ServiceEffectSpecification(repositoryComponent);
                         seff.setDescribedService__SEFF(signature);
+
+                        // Fix changed identifier of required roles in external call actions
+                        if (seff instanceof ResourceDemandingSEFF) {
+                            ResourceDemandingSEFF rdSeff = (ResourceDemandingSEFF) seff;
+                            EList<AbstractAction> behavior = rdSeff.getSteps_Behaviour();
+                            List<ExternalCallAction> externalCallActions = behavior.stream()
+                                    .filter(action -> action instanceof ExternalCallAction)
+                                    .map(action -> (ExternalCallAction) action)
+                                    .collect(Collectors.toList());
+
+                            for (ExternalCallAction externalCallAction : externalCallActions) {
+                                OperationSignature externalSignature = externalCallAction
+                                        .getCalledService_ExternalService();
+
+                                // Get required role containing called signature of externalCallAction from component
+                                OperationRequiredRole requiredRole = repositoryComponent
+                                        .getRequiredRoles_InterfaceRequiringEntity().stream()
+                                        .filter(role -> role instanceof OperationRequiredRole)
+                                        .map(role -> (OperationRequiredRole) role)
+                                        .filter(role -> role.getRequiredInterface__OperationRequiredRole()
+                                                .getSignatures__OperationInterface().contains(externalSignature))
+                                        .findFirst().orElseThrow();
+
+                                // Set role in external call action to fetched required role
+                                externalCallAction.setRole_ExternalService(requiredRole);
+                            }
+                        }
                     }
                 }
             }
