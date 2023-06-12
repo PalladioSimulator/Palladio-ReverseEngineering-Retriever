@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Objects;
 
+import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -23,6 +24,8 @@ import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 public class PlantUmlJob extends AbstractBlackboardInteractingJob<RuleEngineBlackboard> {
 
+    private static final Logger LOG = Logger.getLogger(PlantUmlJob.class);
+
     private static final String NAME = "Rule Engine PlantUML Generation";
 
     private final RuleEngineConfiguration configuration;
@@ -40,7 +43,7 @@ public class PlantUmlJob extends AbstractBlackboardInteractingJob<RuleEngineBlac
     public void execute(IProgressMonitor arg0) throws JobFailedException, UserCanceledException {
         PcmComponentDiagramGenerator generator = new PcmComponentDiagramGenerator((Repository) getBlackboard()
             .getPartition(RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY));
-        String plantUmlSource = generator.getDiagramText();
+        String plantUmlSource = "@startuml\n" + generator.getDiagramText() + "\n@enduml\n";
 
         if (configuration.getOutputFolder()
             .isPlatformResource()) {
@@ -55,7 +58,7 @@ public class PlantUmlJob extends AbstractBlackboardInteractingJob<RuleEngineBlac
                 }
                 file.setContents(new ByteArrayInputStream(plantUmlSource.getBytes()), IFile.FORCE, null);
             } catch (CoreException e) {
-                e.printStackTrace();
+                LOG.error(e);
             }
 
         } else {
@@ -65,7 +68,7 @@ public class PlantUmlJob extends AbstractBlackboardInteractingJob<RuleEngineBlac
             try (FileWriter writer = new FileWriter(path)) {
                 writer.append(plantUmlSource);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.error(e);
             }
         }
     }
