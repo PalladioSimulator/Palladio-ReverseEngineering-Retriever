@@ -1,12 +1,14 @@
 package org.palladiosimulator.somox.analyzer.rules.test.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -135,8 +137,8 @@ abstract class RuleEngineTest {
     }
 
     public void assertMaxParameterCount(int expectedMaxParameterCount, String interfaceName, String signatureName) {
-        assertTrue(containsOperationInterface(interfaceName));
-        assertTrue(containsOperationSignature(interfaceName, signatureName));
+        assertInterfaceExists(interfaceName);
+        assertOperationExists(interfaceName, signatureName);
         assertEquals(expectedMaxParameterCount, getSignatureMaxParameterCount(interfaceName, signatureName));
     }
 
@@ -152,21 +154,69 @@ abstract class RuleEngineTest {
         }
     }
 
-    public boolean containsComponent(String name) {
-        return getComponents().stream()
+    public void assertComponentExists(String name) {
+        assertTrue(getComponents().stream()
             .anyMatch(x -> x.getEntityName()
-                .equals(name));
+                .equals(name)), "component \"" + name + "\" must exist");
     }
 
-    public boolean containsOperationInterface(String name) {
-        return getInterfaces().stream()
+    public void assertInterfaceExists(String name) {
+        assertTrue(getInterfaces().stream()
             .filter(OperationInterface.class::isInstance)
             .anyMatch(x -> x.getEntityName()
-                .equals(name));
+                .equals(name)), "interface \"" + name + "\" must exist");
     }
 
-    public boolean containsOperationSignature(String interfaceName, String signatureName) {
-        return !getOperationSignature(interfaceName, signatureName).isEmpty();
+    public void assertOperationExists(String interfaceName, String signatureName) {
+        assertFalse(getOperationSignature(interfaceName, signatureName).isEmpty(),
+                "interface \"" + interfaceName + "\" must contain operation \"" + signatureName + "\"");
+    }
+
+    public void assertComponentRequiresComponent(String requiringName, String providingName) {
+        Optional<RepositoryComponent> requiringComponent = getComponents().stream()
+            .filter(x -> x.getEntityName()
+                .equals(requiringName))
+            .findFirst();
+        assertTrue(requiringComponent.isPresent(), "\"" + requiringName + "\" must exist");
+
+        Optional<RepositoryComponent> providingComponent = getComponents().stream()
+            .filter(x -> x.getEntityName()
+                .equals(providingName))
+            .findFirst();
+        assertTrue(providingComponent.isPresent(), "\"" + providingName + "\" must exist");
+
+        List<Interface> interfaces = getInterfaces();
+        assertFalse(interfaces.isEmpty(), "an interface must exist in order for a component to require another");
+
+        Set<EObject> requiredObjects = requiringComponent.get()
+            .getRequiredRoles_InterfaceRequiringEntity()
+            .stream()
+            .flatMap(x -> x.eCrossReferences()
+                .stream())
+            .collect(Collectors.toSet());
+        assertFalse(requiredObjects.isEmpty(), "\"" + requiringName + "\" must require something");
+
+        Set<Interface> requiredInterfaces = interfaces.stream()
+            .filter(requiredObjects::contains)
+            .collect(Collectors.toSet());
+        assertFalse(requiredInterfaces.isEmpty(), "\"" + requiringName + "\" must require an interface");
+
+        Set<EObject> providedObjects = providingComponent.get()
+            .getProvidedRoles_InterfaceProvidingEntity()
+            .stream()
+            .flatMap(x -> x.eCrossReferences()
+                .stream())
+            .collect(Collectors.toSet());
+        assertFalse(providedObjects.isEmpty(), "\"" + providingName + "\" must provide something");
+
+        Set<Interface> providedInterfaces = interfaces.stream()
+            .filter(providedObjects::contains)
+            .collect(Collectors.toSet());
+        assertFalse(providedInterfaces.isEmpty(), "\"" + providingName + "\" must provide an interface");
+
+        assertTrue(requiredInterfaces.stream()
+            .anyMatch(providedInterfaces::contains),
+                "\"" + requiringName + "\" must require an interface that \"" + providingName + "\" provides");
     }
 
     public List<RepositoryComponent> getComponents() {

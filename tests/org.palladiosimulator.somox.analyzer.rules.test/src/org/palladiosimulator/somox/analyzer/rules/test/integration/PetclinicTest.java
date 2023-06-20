@@ -1,7 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.test.integration;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 
@@ -19,8 +17,12 @@ public class PetclinicTest extends RuleEngineTest {
     @Override
     @Test
     void test() {
-        assertTrue(containsComponent("org_springframework_samples_petclinic_api_boundary_web_ApiGatewayController"));
+        assertComponentExists("org_springframework_samples_petclinic_api_boundary_web_ApiGatewayController");
         assertMaxParameterCount(2, "/owners", "");
         assertMaxParameterCount(1, "/api/gateway/owners", "");
+        assertComponentRequiresComponent("org_springframework_samples_petclinic_customers_web_PetResource",
+                "org_springframework_samples_petclinic_customers_model_PetRepository");
+        assertComponentRequiresComponent("org_springframework_samples_petclinic_customers_web_PetResource",
+                "org_springframework_samples_petclinic_customers_model_OwnerRepository");
     }
 }

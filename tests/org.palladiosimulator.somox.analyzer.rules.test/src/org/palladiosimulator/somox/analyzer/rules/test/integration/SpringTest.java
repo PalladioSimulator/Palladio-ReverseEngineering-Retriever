@@ -1,7 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.test.integration;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 
@@ -19,6 +17,6 @@ public class SpringTest extends RuleEngineTest {
     @Override
     @Test
     void test() {
-        assertTrue(containsComponent("spring_AController"));
+        assertComponentExists("spring_AController");
     }
 }
