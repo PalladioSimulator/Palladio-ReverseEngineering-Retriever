@@ -1,4 +1,4 @@
-package org.palladiosimulator.somox.analyzer.rules.mocore.workflow;
+package org.palladiosimulator.somox.analyzer.rules.workflow;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;

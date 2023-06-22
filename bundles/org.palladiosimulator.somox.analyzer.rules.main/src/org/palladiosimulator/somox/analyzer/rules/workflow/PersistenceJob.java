@@ -1,4 +1,4 @@
-package org.palladiosimulator.somox.analyzer.rules.mocore.workflow;
+package org.palladiosimulator.somox.analyzer.rules.workflow;
 
 import java.io.File;
 import java.util.Objects;

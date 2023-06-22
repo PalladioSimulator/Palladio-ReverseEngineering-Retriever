@@ -51,7 +51,6 @@ import org.palladiosimulator.pcm.seff.ServiceEffectSpecification;
 import org.palladiosimulator.pcm.seff.StartAction;
 import org.palladiosimulator.pcm.seff.StopAction;
 import org.palladiosimulator.somox.analyzer.rules.mocore.workflow.MoCoReJob;
-import org.palladiosimulator.somox.analyzer.rules.mocore.workflow.PersistenceJob;
 import org.palladiosimulator.somox.analyzer.rules.workflow.utility.MethodDeclarationVisitor;
 import org.palladiosimulator.somox.ast2seff.jobs.Ast2SeffJob;
 

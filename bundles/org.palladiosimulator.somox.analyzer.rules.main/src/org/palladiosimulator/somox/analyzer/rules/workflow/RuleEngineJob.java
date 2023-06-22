@@ -3,7 +3,6 @@ package org.palladiosimulator.somox.analyzer.rules.workflow;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.mocore.workflow.MoCoReJob;
-import org.palladiosimulator.somox.analyzer.rules.mocore.workflow.PersistenceJob;
 import org.palladiosimulator.somox.analyzer.rules.service.Analyst;
 import org.palladiosimulator.somox.ast2seff.jobs.Ast2SeffJob;
 import org.palladiosimulator.somox.discoverer.Discoverer;
