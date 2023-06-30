@@ -55,7 +55,8 @@ public class BasicTest extends RuleEngineTest {
      */
     @Test
     void testExecutesAndProducesFile() {
-        assertTrue(new File(getOutputDirectory().appendSegment("pcm.repository")
+        assertTrue(new File(getConfig().getOutputFolder()
+            .appendSegment("pcm.repository")
             .devicePath()).exists());
     }
 

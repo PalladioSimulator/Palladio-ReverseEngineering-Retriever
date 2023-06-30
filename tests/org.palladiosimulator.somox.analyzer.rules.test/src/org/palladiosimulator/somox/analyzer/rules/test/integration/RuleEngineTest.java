@@ -1,10 +1,17 @@
 package org.palladiosimulator.somox.analyzer.rules.test.integration;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +27,7 @@ import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -55,23 +63,6 @@ abstract class RuleEngineTest {
 
     public static final URI OUT_DIR = TEST_DIR.appendSegment("out");
 
-    protected static URI getOutputDirectory() {
-        return OUT_DIR;
-    }
-
-    public static Repository loadRepository(URI repoXMI) {
-        final List<EObject> contents = new ResourceSetImpl().getResource(repoXMI, true)
-            .getContents();
-
-        assertEquals(1, contents.size());
-        assertTrue(contents.get(0) instanceof Repository);
-
-        // TODO activate this again when SEFF is included
-        // validate(contents.get(0));
-
-        return (Repository) contents.get(0);
-    }
-
     public static void validate(EObject eObject) {
         EcoreUtil.resolveAll(eObject);
         assertEquals(Diagnostic.OK, Diagnostician.INSTANCE.validate(eObject)
@@ -96,12 +87,14 @@ abstract class RuleEngineTest {
      *
      * @param projectDirectory
      *            the name of the project directory that will be analyzed
+     * @param rules
+     *            the rules to execute
      */
     protected RuleEngineTest(String projectDirectory, DefaultRule... rules) {
         this.rules = Set.of(rules);
 
         config.setInputFolder(TEST_DIR.appendSegments(projectDirectory.split("/")));
-        config.setOutputFolder(getOutputDirectory());
+        config.setOutputFolder(OUT_DIR);
         config.setSelectedRules(this.rules);
 
         // Enable all discoverers.
@@ -127,6 +120,8 @@ abstract class RuleEngineTest {
         this.executedSuccessfully = executedSuccessfully;
     }
 
+    // Assertion utilities
+
     private void assertSuccessfulExecution() {
         assertTrue(executedSuccessfully, "Failed to run RuleEngine!");
     }
@@ -135,18 +130,6 @@ abstract class RuleEngineTest {
         assertInterfaceExists(interfaceName);
         assertOperationExists(interfaceName, signatureName);
         assertEquals(expectedMaxParameterCount, getSignatureMaxParameterCount(interfaceName, signatureName));
-    }
-
-    @AfterEach
-    void cleanUp() {
-        final File target = new File(OUT_DIR.devicePath(), this.getClass()
-            .getSimpleName() + ".repository");
-        if (!target.delete()) {
-            logger.error("Could not save delete repository \"" + target.getAbsolutePath() + "\"!");
-        }
-        if (!new File(OUT_DIR.devicePath(), "pcm.repository").renameTo(target)) {
-            logger.error("Could not save created repository to \"" + target.getAbsolutePath() + "\"!");
-        }
     }
 
     public void assertComponentExists(String name) {
@@ -215,6 +198,7 @@ abstract class RuleEngineTest {
     }
 
     // Getters
+
     public RuleEngineConfiguration getConfig() {
         assertSuccessfulExecution();
         return config;
@@ -242,21 +226,25 @@ abstract class RuleEngineTest {
 
     public Repository getRepository() {
         assertSuccessfulExecution();
+        assertNotNull(repository);
         return repository;
     }
 
     public System getSystem() {
         assertSuccessfulExecution();
+        assertNotNull(system);
         return system;
     }
 
     public ResourceEnvironment getResourceEnvironment() {
         assertSuccessfulExecution();
+        assertNotNull(resourceEnvironment);
         return resourceEnvironment;
     }
 
     public Allocation getAllocation() {
         assertSuccessfulExecution();
+        assertNotNull(allocation);
         return allocation;
     }
 
@@ -299,17 +287,37 @@ abstract class RuleEngineTest {
             .reduce(0, Math::max);
     }
 
+    // Resource loading
+
     protected enum Artifacts {
         RULEENGINE, MOCORE,
     }
 
-    void loadArtifacts(Artifacts artifacts) {
+    @SuppressWarnings("unchecked")
+    private static <T extends EObject> T loadResource(URI uri, Class<T> targetType) {
+        Resource resource = new ResourceSetImpl().getResource(uri, true);
+        if (resource == null) {
+            return null;
+        }
+
+        final List<EObject> contents = resource.getContents();
+
+        assertEquals(1, contents.size());
+        EObject content = contents.get(0);
+        assertTrue(targetType.isInstance(content));
+
+        // TODO activate this again when SEFF is included
+        // validate(contents.get(0));
+
+        return (T) content;
+    }
+
+    protected void loadArtifacts(Artifacts artifacts) {
         assertSuccessfulExecution();
-        // TODO: Load from file artifacts.
+
         switch (artifacts) {
         case RULEENGINE:
-            repository = (Repository) ruleEngine.getBlackboard()
-                .getPartition(RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY);
+            repository = loadResource(OUT_DIR.appendSegment("pcm.repository"), Repository.class);
             system = null;
             resourceEnvironment = null;
             allocation = null;
@@ -317,14 +325,12 @@ abstract class RuleEngineTest {
         case MOCORE:
             // TODO: Depends on MoCoRe merge.
             Assumptions.abort("Waiting for MoCoRe");
-            // repository = (Repository) ruleEngine.getBlackboard()
-            // .getPartition(RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_REPOSITORY);
-            // system = (System) ruleEngine.getBlackboard()
-            // .getPartition(RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_SYSTEM);
-            // resourceEnvironment = (ResourceEnvironment) ruleEngine.getBlackboard()
-            // .getPartition(RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_RESOURCE_ENVIRONMENT);
-            // allocation = (Allocation) ruleEngine.getBlackboard()
-            // .getPartition(RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_ALLOCATION);
+            URI mocoreBase = OUT_DIR.appendSegment("mocore");
+            repository = loadResource(mocoreBase.appendFileExtension("repository"), Repository.class);
+            system = loadResource(mocoreBase.appendFileExtension("system"), System.class);
+            resourceEnvironment = loadResource(mocoreBase.appendFileExtension("resourceenvironment"),
+                    ResourceEnvironment.class);
+            allocation = loadResource(mocoreBase.appendFileExtension("allocation"), Allocation.class);
             break;
         default:
             throw new IllegalArgumentException("Unhandled artifact type!");
@@ -332,6 +338,7 @@ abstract class RuleEngineTest {
     }
 
     // Template methods
+
     void testRuleEngineRepository() {
         Assumptions.abort();
     }
@@ -361,6 +368,7 @@ abstract class RuleEngineTest {
     }
 
     // Tests
+
     @Test
     void ruleEngineRepository() {
         loadArtifacts(Artifacts.RULEENGINE);
@@ -401,5 +409,33 @@ abstract class RuleEngineTest {
     void moCoReAllocation() {
         loadArtifacts(Artifacts.MOCORE);
         testMoCoReAllocation();
+    }
+
+    @AfterEach
+    void saveResults() {
+        final File target = new File(OUT_DIR.devicePath(), this.getClass()
+            .getSimpleName());
+
+        try {
+            Files.walkFileTree(target.toPath(), new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.delete(dir);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            logger.error("Could not delete \"" + target.getAbsolutePath() + "\"!", e);
+        }
+
+        if (!new File(OUT_DIR.devicePath()).renameTo(target)) {
+            logger.error("Could not save artifacts to \"" + target.getAbsolutePath() + "\"!");
+        }
     }
 }
