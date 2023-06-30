@@ -32,7 +32,6 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.pcm.allocation.Allocation;
 import org.palladiosimulator.pcm.reliability.FailureType;
@@ -312,6 +311,7 @@ abstract class RuleEngineTest {
         return (T) content;
     }
 
+    @SuppressWarnings("unused")
     protected void loadArtifacts(Artifacts artifacts) {
         assertSuccessfulExecution();
 
@@ -324,13 +324,14 @@ abstract class RuleEngineTest {
             break;
         case MOCORE:
             // TODO: Depends on MoCoRe merge.
-            Assumptions.abort("Waiting for MoCoRe");
-            URI mocoreBase = OUT_DIR.appendSegment("mocore");
-            repository = loadResource(mocoreBase.appendFileExtension("repository"), Repository.class);
-            system = loadResource(mocoreBase.appendFileExtension("system"), System.class);
-            resourceEnvironment = loadResource(mocoreBase.appendFileExtension("resourceenvironment"),
-                    ResourceEnvironment.class);
-            allocation = loadResource(mocoreBase.appendFileExtension("allocation"), Allocation.class);
+            if (false) {
+                URI mocoreBase = OUT_DIR.appendSegment("mocore");
+                repository = loadResource(mocoreBase.appendFileExtension("repository"), Repository.class);
+                system = loadResource(mocoreBase.appendFileExtension("system"), System.class);
+                resourceEnvironment = loadResource(mocoreBase.appendFileExtension("resourceenvironment"),
+                        ResourceEnvironment.class);
+                allocation = loadResource(mocoreBase.appendFileExtension("allocation"), Allocation.class);
+            }
             break;
         default:
             throw new IllegalArgumentException("Unhandled artifact type!");
@@ -340,31 +341,24 @@ abstract class RuleEngineTest {
     // Template methods
 
     void testRuleEngineRepository() {
-        Assumptions.abort();
     }
 
     void testRuleEngineSeff() {
-        Assumptions.abort();
     }
 
     void testMoCoReRepository() {
-        Assumptions.abort();
     }
 
     void testMoCoReSeff() {
-        Assumptions.abort();
     }
 
     void testMoCoReSystem() {
-        Assumptions.abort();
     }
 
     void testMoCoReResourceEnvironment() {
-        Assumptions.abort();
     }
 
     void testMoCoReAllocation() {
-        Assumptions.abort();
     }
 
     // Tests
