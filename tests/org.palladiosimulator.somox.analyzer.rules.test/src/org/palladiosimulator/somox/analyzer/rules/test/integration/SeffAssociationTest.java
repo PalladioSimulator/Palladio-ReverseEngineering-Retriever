@@ -21,6 +21,9 @@ public class SeffAssociationTest extends RuleEngineTest {
         super("SpringProject", DefaultRule.SPRING);
     }
 
+    /**
+     * Test a general invariant for SEFFs.
+     */
     @Test
     void allAssociationsReferToMethods() {
         RuleEngineBlackboard blackboard = getBlackboard();
@@ -41,8 +44,7 @@ public class SeffAssociationTest extends RuleEngineTest {
     }
 
     @Override
-    @Test
-    void test() {
+    void testRuleEngineSeff() {
         RuleEngineBlackboard blackboard = getBlackboard();
 
         @SuppressWarnings("unchecked")

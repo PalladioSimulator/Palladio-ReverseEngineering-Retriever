@@ -24,6 +24,9 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
+import org.palladiosimulator.pcm.allocation.Allocation;
 import org.palladiosimulator.pcm.reliability.FailureType;
 import org.palladiosimulator.pcm.repository.DataType;
 import org.palladiosimulator.pcm.repository.Interface;
@@ -31,6 +34,8 @@ import org.palladiosimulator.pcm.repository.OperationInterface;
 import org.palladiosimulator.pcm.repository.OperationSignature;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
+import org.palladiosimulator.pcm.resourceenvironment.ResourceEnvironment;
+import org.palladiosimulator.pcm.system.System;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
@@ -80,10 +85,9 @@ abstract class RuleEngineTest {
     private final RuleEngineJob ruleEngine;
     private final boolean executedSuccessfully;
     private Repository repository;
-    private List<RepositoryComponent> components;
-    private List<DataType> datatypes;
-    private List<FailureType> failuretypes;
-    private List<Interface> interfaces;
+    private System system;
+    private ResourceEnvironment resourceEnvironment;
+    private Allocation allocation;
     private final Set<DefaultRule> rules;
 
     /**
@@ -121,15 +125,6 @@ abstract class RuleEngineTest {
             executedSuccessfully = false;
         }
         this.executedSuccessfully = executedSuccessfully;
-
-        if (executedSuccessfully) {
-            repository = (Repository) ruleEngine.getBlackboard()
-                .getPartition(RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY);
-            components = repository.getComponents__Repository();
-            datatypes = repository.getDataTypes__Repository();
-            failuretypes = repository.getFailureTypes__Repository();
-            interfaces = repository.getInterfaces__Repository();
-        }
     }
 
     private void assertSuccessfulExecution() {
@@ -219,29 +214,50 @@ abstract class RuleEngineTest {
                 "\"" + requiringName + "\" must require an interface that \"" + providingName + "\" provides");
     }
 
-    public List<RepositoryComponent> getComponents() {
-        assertSuccessfulExecution();
-        return Collections.unmodifiableList(components);
-    }
-
+    // Getters
     public RuleEngineConfiguration getConfig() {
         assertSuccessfulExecution();
         return config;
     }
 
+    public List<RepositoryComponent> getComponents() {
+        assertSuccessfulExecution();
+        return Collections.unmodifiableList(repository.getComponents__Repository());
+    }
+
     public List<DataType> getDatatypes() {
         assertSuccessfulExecution();
-        return Collections.unmodifiableList(datatypes);
+        return Collections.unmodifiableList(repository.getDataTypes__Repository());
     }
 
     public List<FailureType> getFailuretypes() {
         assertSuccessfulExecution();
-        return Collections.unmodifiableList(failuretypes);
+        return Collections.unmodifiableList(repository.getFailureTypes__Repository());
     }
 
     public List<Interface> getInterfaces() {
         assertSuccessfulExecution();
-        return Collections.unmodifiableList(interfaces);
+        return Collections.unmodifiableList(repository.getInterfaces__Repository());
+    }
+
+    public Repository getRepository() {
+        assertSuccessfulExecution();
+        return repository;
+    }
+
+    public System getSystem() {
+        assertSuccessfulExecution();
+        return system;
+    }
+
+    public ResourceEnvironment getResourceEnvironment() {
+        assertSuccessfulExecution();
+        return resourceEnvironment;
+    }
+
+    public Allocation getAllocation() {
+        assertSuccessfulExecution();
+        return allocation;
     }
 
     private Set<OperationSignature> getOperationSignature(String interfaceName, String signatureName) {
@@ -266,11 +282,6 @@ abstract class RuleEngineTest {
             .reduce(new HashSet<>(), Sets::union);
     }
 
-    public Repository getRepo() {
-        assertSuccessfulExecution();
-        return repository;
-    }
-
     public RuleEngineBlackboard getBlackboard() {
         assertSuccessfulExecution();
         return ruleEngine.getBlackboard();
@@ -288,5 +299,107 @@ abstract class RuleEngineTest {
             .reduce(0, Math::max);
     }
 
-    abstract void test();
+    protected enum Artifacts {
+        RULEENGINE, MOCORE,
+    }
+
+    void loadArtifacts(Artifacts artifacts) {
+        assertSuccessfulExecution();
+        // TODO: Load from file artifacts.
+        switch (artifacts) {
+        case RULEENGINE:
+            repository = (Repository) ruleEngine.getBlackboard()
+                .getPartition(RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY);
+            system = null;
+            resourceEnvironment = null;
+            allocation = null;
+            break;
+        case MOCORE:
+            // TODO: Depends on MoCoRe merge.
+            Assumptions.abort("Waiting for MoCoRe");
+            // repository = (Repository) ruleEngine.getBlackboard()
+            // .getPartition(RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_REPOSITORY);
+            // system = (System) ruleEngine.getBlackboard()
+            // .getPartition(RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_SYSTEM);
+            // resourceEnvironment = (ResourceEnvironment) ruleEngine.getBlackboard()
+            // .getPartition(RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_RESOURCE_ENVIRONMENT);
+            // allocation = (Allocation) ruleEngine.getBlackboard()
+            // .getPartition(RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_ALLOCATION);
+            break;
+        default:
+            throw new IllegalArgumentException("Unhandled artifact type!");
+        }
+    }
+
+    // Template methods
+    void testRuleEngineRepository() {
+        Assumptions.abort();
+    }
+
+    void testRuleEngineSeff() {
+        Assumptions.abort();
+    }
+
+    void testMoCoReRepository() {
+        Assumptions.abort();
+    }
+
+    void testMoCoReSeff() {
+        Assumptions.abort();
+    }
+
+    void testMoCoReSystem() {
+        Assumptions.abort();
+    }
+
+    void testMoCoReResourceEnvironment() {
+        Assumptions.abort();
+    }
+
+    void testMoCoReAllocation() {
+        Assumptions.abort();
+    }
+
+    // Tests
+    @Test
+    void ruleEngineRepository() {
+        loadArtifacts(Artifacts.RULEENGINE);
+        testRuleEngineRepository();
+    }
+
+    @Test
+    void ruleEngineSeff() {
+        loadArtifacts(Artifacts.RULEENGINE);
+        testRuleEngineSeff();
+    }
+
+    @Test
+    void moCoReRepository() {
+        loadArtifacts(Artifacts.MOCORE);
+        testMoCoReRepository();
+    }
+
+    @Test
+    void moCoReSeff() {
+        loadArtifacts(Artifacts.MOCORE);
+        testMoCoReSeff();
+    }
+
+    @Test
+    void moCoReSystem() {
+        loadArtifacts(Artifacts.MOCORE);
+        testMoCoReSystem();
+    }
+
+    @Test
+    void moCoReResourceEnvironment() {
+        loadArtifacts(Artifacts.MOCORE);
+        testMoCoReResourceEnvironment();
+    }
+
+    @Test
+    void moCoReAllocation() {
+        loadArtifacts(Artifacts.MOCORE);
+        testMoCoReAllocation();
+    }
 }

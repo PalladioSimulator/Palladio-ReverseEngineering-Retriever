@@ -34,6 +34,7 @@ public class BasicTest extends RuleEngineTest {
 
     protected BasicTest() {
         super(PROJECT_NAME, RULES);
+        loadArtifacts(Artifacts.RULEENGINE);
     }
 
     private OperationInterface getConflictingMethods(List<Interface> interfaces) {
@@ -52,9 +53,8 @@ public class BasicTest extends RuleEngineTest {
      * Tests the basic functionality of the RuleEngineAnalyzer. Requires it to execute without an
      * exception and produce an output file.
      */
-    @Override
     @Test
-    void test() {
+    void testExecutesAndProducesFile() {
         assertTrue(new File(getOutputDirectory().appendSegment("pcm.repository")
             .devicePath()).exists());
     }
