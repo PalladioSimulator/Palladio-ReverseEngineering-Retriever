@@ -2,7 +2,9 @@ package org.palladiosimulator.somox.analyzer.rules.workflow;
 
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.mocore.workflow.MoCoReJob;
 import org.palladiosimulator.somox.analyzer.rules.service.Analyst;
+import org.palladiosimulator.somox.ast2seff.jobs.Ast2SeffJob;
 import org.palladiosimulator.somox.discoverer.Discoverer;
 
 import de.uka.ipd.sdq.workflow.extension.AbstractExtendableJob;
@@ -18,17 +20,35 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
 
         super.add(new RuleEngineBlackboardInteractingJob(configuration, getBlackboard()));
 
-        // TODO Integrate SEFF extraction once it is done being developed.
-
         super.add(createAnalystsJob(configuration));
+
+        // Generate service effect specifications based on AST nodes and merge them into repository
+        super.add(new Ast2SeffJob(getBlackboard(), RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_SEFF_ASSOCIATIONS,
+                RuleEngineConfiguration.RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY));
+        super.add(new SeffMergerJob(myBlackboard, RuleEngineConfiguration.RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY,
+                RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY));
+
+        // Refine model and create final repository, system, allocation, & resource environment
+        super.add(new MoCoReJob(getBlackboard(),
+                RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY,
+                RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_REPOSITORY,
+                RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_SYSTEM,
+                RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_ALLOCATION,
+                RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_RESOURCE_ENVIRONMENT));
+
+        // Persist repository, system, allocation, & resource environment model from blackboard into file system
+        super.add(new PersistenceJob(getBlackboard(), configuration.getInputFolder(), configuration.getOutputFolder(),
+                RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_REPOSITORY,
+                RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_SYSTEM,
+                RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_ALLOCATION,
+                RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_RESOURCE_ENVIRONMENT));
 
         super.add(new PlantUmlJob(configuration, getBlackboard()));
     }
 
     private ParallelJob createDiscoverersJob(RuleEngineConfiguration configuration) {
         ParallelJob parentJob = new ParallelJob();
-        for (Discoverer discoverer : configuration.getDiscovererConfig()
-            .getSelected()) {
+        for (Discoverer discoverer : configuration.getDiscovererConfig().getSelected()) {
             IBlackboardInteractingJob<RuleEngineBlackboard> discovererJob = discoverer.create(configuration,
                     myBlackboard);
             parentJob.add(discovererJob);
@@ -39,8 +59,7 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
 
     private ParallelJob createAnalystsJob(RuleEngineConfiguration configuration) {
         ParallelJob parentJob = new ParallelJob();
-        for (Analyst analyst : configuration.getAnalystConfig()
-            .getSelected()) {
+        for (Analyst analyst : configuration.getAnalystConfig().getSelected()) {
             IBlackboardInteractingJob<RuleEngineBlackboard> analystJob = analyst.create(configuration, myBlackboard);
             parentJob.add(analystJob);
             logger.info("Adding analyst job \"" + analystJob.getName() + "\"");

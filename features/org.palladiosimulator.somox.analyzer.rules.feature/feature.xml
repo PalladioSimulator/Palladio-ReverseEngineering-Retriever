@@ -24,6 +24,7 @@
       <import plugin="org.eclipse.equinox.app"/>
       <import plugin="org.eclipse.swt"/>
       <import plugin="org.palladiosimulator.commons"/>
+      <import plugin="tools.mdsd.mocore.framework"/>
    </requires>
 
    <plugin
@@ -60,5 +61,11 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+         
+   <plugin
+         id="org.palladiosimulator.somox.analyzer.rules.mocore"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
 </feature>
