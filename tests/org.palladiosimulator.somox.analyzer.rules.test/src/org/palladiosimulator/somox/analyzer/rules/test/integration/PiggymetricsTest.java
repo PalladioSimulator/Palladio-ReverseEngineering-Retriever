@@ -20,5 +20,15 @@ public class PiggymetricsTest extends RuleEngineTest {
         // "com_piggymetrics_auth_repository_UserRepository");
         // assertComponentRequiresComponent("com_piggymetrics_notification_controller_RecipientController",
         // "com_piggymetrics_notification_service_RecipientServiceImpl");
+        assertInSameCompositeComponent("com_piggymetrics_notification_controller_RecipientController",
+                "com_piggymetrics_notification_service_NotificationServiceImpl");
+        assertInSameCompositeComponent("com_piggymetrics_notification_controller_RecipientController",
+                "com_piggymetrics_notification_service_RecipientServiceImpl");
+        assertInSameCompositeComponent("com_piggymetrics_notification_service_NotificationServiceImpl",
+                "com_piggymetrics_notification_client_AccountServiceClient");
+        assertInSameCompositeComponent("com_piggymetrics_account_controller_AccountController",
+                "com_piggymetrics_account_client_AuthServiceClient");
+        assertInSameCompositeComponent("com_piggymetrics_account_controller_AccountController",
+                "com_piggymetrics_account_client_StatisticsServiceClient");
     }
 }

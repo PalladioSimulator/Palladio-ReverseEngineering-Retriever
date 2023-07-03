@@ -28,6 +28,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.pcm.allocation.Allocation;
 import org.palladiosimulator.pcm.reliability.FailureType;
+import org.palladiosimulator.pcm.repository.CompositeComponent;
 import org.palladiosimulator.pcm.repository.DataType;
 import org.palladiosimulator.pcm.repository.Interface;
 import org.palladiosimulator.pcm.repository.OperationInterface;
@@ -191,6 +192,46 @@ abstract class RuleEngineTest {
         assertTrue(requiredInterfaces.stream()
             .anyMatch(providedInterfaces::contains),
                 "\"" + requiringName + "\" must require an interface that \"" + providingName + "\" provides");
+    }
+
+    public void assertInSameCompositeComponent(String childComponentNameA, String childComponentNameB) {
+        Optional<RepositoryComponent> childComponentA = getComponents().stream()
+            .filter(x -> x.getEntityName()
+                .equals(childComponentNameA))
+            .findFirst();
+        assertTrue(childComponentA.isPresent(), "\"" + childComponentNameA + "\" must exist");
+
+        Optional<RepositoryComponent> childComponentB = getComponents().stream()
+            .filter(x -> x.getEntityName()
+                .equals(childComponentNameB))
+            .findFirst();
+        assertTrue(childComponentB.isPresent(), "\"" + childComponentNameB + "\" must exist");
+
+        List<CompositeComponent> allCompositeComponents = getComponents().stream()
+            .filter(CompositeComponent.class::isInstance)
+            .map(CompositeComponent.class::cast)
+            .collect(Collectors.toList());
+        assertFalse(allCompositeComponents.isEmpty(), "There must be a composite component");
+
+        Set<CompositeComponent> compositeComponentsA = allCompositeComponents.stream()
+            .filter(x -> x.getAssemblyContexts__ComposedStructure()
+                .stream()
+                .anyMatch(y -> y.getEncapsulatedComponent__AssemblyContext()
+                    .equals(childComponentA.get())))
+            .collect(Collectors.toSet());
+        assertFalse(compositeComponentsA.isEmpty(), childComponentNameA + " must be part of a composite component");
+
+        Set<CompositeComponent> compositeComponentsB = allCompositeComponents.stream()
+            .filter(x -> x.getAssemblyContexts__ComposedStructure()
+                .stream()
+                .anyMatch(y -> y.getEncapsulatedComponent__AssemblyContext()
+                    .equals(childComponentB.get())))
+            .collect(Collectors.toSet());
+        assertFalse(compositeComponentsB.isEmpty(), childComponentNameB + " must be part of a composite component");
+
+        assertTrue(compositeComponentsA.stream()
+            .anyMatch(compositeComponentsB::contains),
+                childComponentNameA + " and " + childComponentNameB + " must be part of the same composite component");
     }
 
     // Getters
