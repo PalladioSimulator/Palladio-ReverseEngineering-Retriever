@@ -308,27 +308,30 @@ abstract class RuleEngineTest {
         return (T) content;
     }
 
-    @SuppressWarnings("unused")
     protected void loadArtifacts(Artifacts artifacts) {
         assertSuccessfulExecution();
 
         switch (artifacts) {
         case RULEENGINE:
-            repository = loadResource(OUT_DIR.appendSegment("pcm.repository"), Repository.class);
+            repository = loadResource(outDir.appendSegment("pcm.repository"), Repository.class);
             system = null;
             resourceEnvironment = null;
             allocation = null;
             break;
         case MOCORE:
-            // TODO: Depends on MoCoRe merge.
-            if (false) {
-                URI mocoreBase = OUT_DIR.appendSegment("mocore");
-                repository = loadResource(mocoreBase.appendFileExtension("repository"), Repository.class);
-                system = loadResource(mocoreBase.appendFileExtension("system"), System.class);
-                resourceEnvironment = loadResource(mocoreBase.appendFileExtension("resourceenvironment"),
-                        ResourceEnvironment.class);
-                allocation = loadResource(mocoreBase.appendFileExtension("allocation"), Allocation.class);
+            String fileName = config.getInputFolder()
+                .lastSegment();
+            if (fileName.isEmpty()) {
+                fileName = config.getInputFolder()
+                    .trimSegments(1)
+                    .lastSegment();
             }
+            URI mocoreBase = outDir.appendSegment(fileName);
+            repository = loadResource(mocoreBase.appendFileExtension("repository"), Repository.class);
+            system = loadResource(mocoreBase.appendFileExtension("system"), System.class);
+            resourceEnvironment = loadResource(mocoreBase.appendFileExtension("resourceenvironment"),
+                    ResourceEnvironment.class);
+            allocation = loadResource(mocoreBase.appendFileExtension("allocation"), Allocation.class);
             break;
         default:
             throw new IllegalArgumentException("Unhandled artifact type!");
