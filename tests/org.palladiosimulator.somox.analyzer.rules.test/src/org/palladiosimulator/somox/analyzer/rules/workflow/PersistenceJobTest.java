@@ -39,9 +39,9 @@ public class PersistenceJobTest {
     @Test
     public void testConstructorWithValidInput() {
         Blackboard<Object> blackboard = new Blackboard<Object>();
-        assertDoesNotThrow(() -> new PersistenceJob(blackboard, INPUT_FOLDER, TEMPORARY_OUTPUT_FOLDER,
-                BLACKBOARD_INPUT_REPOSITORY, BLACKBOARD_INPUT_SYSTEM, BLACKBOARD_INPUT_ALLOCATION,
-                BLACKBOARD_INPUT_RESOURCEENVIRONMENT));
+        assertDoesNotThrow(
+                () -> new PersistenceJob(blackboard, INPUT_FOLDER, TEMPORARY_OUTPUT_FOLDER, BLACKBOARD_INPUT_REPOSITORY,
+                        BLACKBOARD_INPUT_SYSTEM, BLACKBOARD_INPUT_ALLOCATION, BLACKBOARD_INPUT_RESOURCEENVIRONMENT));
     }
 
     @Test
@@ -52,11 +52,15 @@ public class PersistenceJobTest {
                 BLACKBOARD_INPUT_RESOURCEENVIRONMENT);
 
         // Initialize models
-        Repository repository = new FluentRepositoryFactory().newRepository().createRepositoryNow();
-        System system = new FluentSystemFactory().newSystem().addRepository(repository).createSystemNow();
+        Repository repository = new FluentRepositoryFactory().newRepository()
+            .createRepositoryNow();
+        System system = new FluentSystemFactory().newSystem()
+            .addRepository(repository)
+            .createSystemNow();
         ResourceEnvironment resource = new FluentResourceEnvironmentFactory().newResourceEnvironment()
-                .createResourceEnvironmentNow();
-        Allocation allocation = new FluentAllocationFactory().newAllocation().createAllocationNow();
+            .createResourceEnvironmentNow();
+        Allocation allocation = new FluentAllocationFactory().newAllocation()
+            .createAllocationNow();
 
         // Add models to blackboard
         blackboard.addPartition(BLACKBOARD_INPUT_REPOSITORY, repository);
@@ -70,8 +74,7 @@ public class PersistenceJobTest {
         // Check files exist
         assertTrue(new File(EXPECTED_FILE_PATH_PREFIX + ".repository").exists());
         assertTrue(new File(EXPECTED_FILE_PATH_PREFIX + ".system").exists());
-        assertTrue(new File(EXPECTED_FILE_PATH_PREFIX + ".org.palladiosimulator.generator.fluent.resourceenvironment")
-                .exists());
-        assertTrue(new File(EXPECTED_FILE_PATH_PREFIX + ".org.palladiosimulator.generator.fluent.allocation").exists());
+        assertTrue(new File(EXPECTED_FILE_PATH_PREFIX + ".resourceenvironment").exists());
+        assertTrue(new File(EXPECTED_FILE_PATH_PREFIX + ".allocation").exists());
     }
 }
