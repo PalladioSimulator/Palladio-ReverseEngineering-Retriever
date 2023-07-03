@@ -6,12 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -31,7 +25,6 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.pcm.allocation.Allocation;
 import org.palladiosimulator.pcm.reliability.FailureType;
@@ -60,7 +53,7 @@ abstract class RuleEngineTest {
     public static final URI TEST_DIR = CommonPlugin
         .asLocalURI(URI.createFileURI(URI.decode(new File("res").getAbsolutePath())));
 
-    public static final URI OUT_DIR = TEST_DIR.appendSegment("out");
+    private URI outDir;
 
     public static void validate(EObject eObject) {
         EcoreUtil.resolveAll(eObject);
@@ -92,8 +85,12 @@ abstract class RuleEngineTest {
     protected RuleEngineTest(String projectDirectory, DefaultRule... rules) {
         this.rules = Set.of(rules);
 
+        outDir = TEST_DIR.appendSegment("out")
+            .appendSegment(this.getClass()
+                .getSimpleName());
+
         config.setInputFolder(TEST_DIR.appendSegments(projectDirectory.split("/")));
-        config.setOutputFolder(OUT_DIR);
+        config.setOutputFolder(outDir);
         config.setSelectedRules(this.rules);
 
         // Enable all discoverers.
@@ -403,33 +400,5 @@ abstract class RuleEngineTest {
     void moCoReAllocation() {
         loadArtifacts(Artifacts.MOCORE);
         testMoCoReAllocation();
-    }
-
-    @AfterEach
-    void saveResults() {
-        final File target = new File(OUT_DIR.devicePath(), this.getClass()
-            .getSimpleName());
-
-        try {
-            Files.walkFileTree(target.toPath(), new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    Files.delete(file);
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    Files.delete(dir);
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        } catch (IOException e) {
-            logger.error("Could not delete \"" + target.getAbsolutePath() + "\"!", e);
-        }
-
-        if (!new File(OUT_DIR.devicePath()).renameTo(target)) {
-            logger.error("Could not save artifacts to \"" + target.getAbsolutePath() + "\"!");
-        }
     }
 }
