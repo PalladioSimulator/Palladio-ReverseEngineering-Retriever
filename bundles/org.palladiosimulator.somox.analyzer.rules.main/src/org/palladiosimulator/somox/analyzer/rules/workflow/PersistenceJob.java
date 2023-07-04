@@ -1,6 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.workflow;
 
-import java.io.File;
 import java.util.Objects;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -25,18 +24,20 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
     private final String systemKey;
     private final String allocationKey;
     private final String resourceEnvironmentKey;
-    private final File outputFilePrefix;
+    private final String outputFolder;
+    private final String configuredInputProjectName;
 
     public PersistenceJob(Blackboard<Object> blackboard, URI inputFolder, URI outputFolder, String repositoryKey,
             String systemKey, String allocationKey, String resourceEnvironmentKey) {
         this.blackboard = Objects.requireNonNull(blackboard);
-        String configuredInputProjectName = inputFolder.lastSegment();
+
         this.repositoryKey = Objects.requireNonNull(repositoryKey);
         this.systemKey = Objects.requireNonNull(systemKey);
         this.allocationKey = Objects.requireNonNull(allocationKey);
         this.resourceEnvironmentKey = Objects.requireNonNull(resourceEnvironmentKey);
         // Set path to output folder and prefix of all output files to name of input project folder
-        this.outputFilePrefix = new File(outputFolder.toFileString(), configuredInputProjectName);
+        this.outputFolder = outputFolder.toFileString();
+        this.configuredInputProjectName = inputFolder.lastSegment();
     }
 
     @Override
@@ -46,15 +47,15 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
         Repository repository = (Repository) this.blackboard.getPartition(repositoryKey);
         System system = (System) this.blackboard.getPartition(systemKey);
         ResourceEnvironment resourceEnvironment = (ResourceEnvironment) this.blackboard
-                .getPartition(resourceEnvironmentKey);
+            .getPartition(resourceEnvironmentKey);
         Allocation allocation = (Allocation) this.blackboard.getPartition(allocationKey);
 
         // Make blackboard models persistent by saving them as files
         monitor.subTask("Persisting models");
-        ModelSaver.saveRepository(repository, outputFilePrefix.getPath(), false);
-        ModelSaver.saveSystem(system, outputFilePrefix.getPath(), false);
-        ModelSaver.saveResourceEnvironment(resourceEnvironment, outputFilePrefix.getPath(), false);
-        ModelSaver.saveAllocation(allocation, outputFilePrefix.getPath(), false);
+        ModelSaver.saveRepository(repository, outputFolder, configuredInputProjectName);
+        ModelSaver.saveSystem(system, outputFolder, configuredInputProjectName);
+        ModelSaver.saveResourceEnvironment(resourceEnvironment, outputFolder, configuredInputProjectName);
+        ModelSaver.saveAllocation(allocation, outputFolder, configuredInputProjectName);
         monitor.done();
     }
 
