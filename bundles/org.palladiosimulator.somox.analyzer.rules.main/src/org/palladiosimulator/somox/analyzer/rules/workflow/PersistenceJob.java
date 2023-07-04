@@ -51,10 +51,10 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
 
         // Make blackboard models persistent by saving them as files
         monitor.subTask("Persisting models");
-        ModelSaver.saveRepository(repository, outputFilePrefix.getPath(), false);
-        ModelSaver.saveSystem(system, outputFilePrefix.getPath(), false);
-        ModelSaver.saveResourceEnvironment(resourceEnvironment, outputFilePrefix.getPath(), false);
-        ModelSaver.saveAllocation(allocation, outputFilePrefix.getPath(), false);
+        ModelSaver.saveRepository(repository, outputFolder.toFileString(), configuredInputProjectName, false);
+        ModelSaver.saveSystem(system, outputFolder.toFileString(), configuredInputProjectName, false);
+        ModelSaver.saveResourceEnvironment(resourceEnvironment, outputFolder.toFileString(), configuredInputProjectName, false);
+        ModelSaver.saveAllocation(allocation, outputFolder.toFileString(), configuredInputProjectName, false);
         monitor.done();
     }
 
