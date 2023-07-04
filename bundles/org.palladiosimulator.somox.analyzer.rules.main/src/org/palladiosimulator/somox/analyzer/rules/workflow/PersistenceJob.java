@@ -1,6 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.workflow;
 
-import java.io.File;
 import java.util.Objects;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -31,7 +30,7 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
     public PersistenceJob(Blackboard<Object> blackboard, URI inputFolder, URI outputFolder, String repositoryKey,
             String systemKey, String allocationKey, String resourceEnvironmentKey) {
         this.blackboard = Objects.requireNonNull(blackboard);
-        
+
         this.repositoryKey = Objects.requireNonNull(repositoryKey);
         this.systemKey = Objects.requireNonNull(systemKey);
         this.allocationKey = Objects.requireNonNull(allocationKey);
@@ -48,15 +47,15 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
         Repository repository = (Repository) this.blackboard.getPartition(repositoryKey);
         System system = (System) this.blackboard.getPartition(systemKey);
         ResourceEnvironment resourceEnvironment = (ResourceEnvironment) this.blackboard
-                .getPartition(resourceEnvironmentKey);
+            .getPartition(resourceEnvironmentKey);
         Allocation allocation = (Allocation) this.blackboard.getPartition(allocationKey);
 
         // Make blackboard models persistent by saving them as files
         monitor.subTask("Persisting models");
-        ModelSaver.saveRepository(repository, outputFolder.toFileString(), configuredInputProjectName);
-        ModelSaver.saveSystem(system, outputFolder.toFileString(), configuredInputProjectName);
-        ModelSaver.saveResourceEnvironment(resourceEnvironment, outputFolder.toFileString(), configuredInputProjectName);
-        ModelSaver.saveAllocation(allocation, outputFolder.toFileString(), configuredInputProjectName);
+        ModelSaver.saveRepository(repository, outputFolder, configuredInputProjectName);
+        ModelSaver.saveSystem(system, outputFolder, configuredInputProjectName);
+        ModelSaver.saveResourceEnvironment(resourceEnvironment, outputFolder, configuredInputProjectName);
+        ModelSaver.saveAllocation(allocation, outputFolder, configuredInputProjectName);
         monitor.done();
     }
 
