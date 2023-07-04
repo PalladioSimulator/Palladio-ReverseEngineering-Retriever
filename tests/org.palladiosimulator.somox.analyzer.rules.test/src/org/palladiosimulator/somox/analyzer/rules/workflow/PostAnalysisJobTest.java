@@ -30,10 +30,10 @@ import org.eclipse.jdt.core.dom.FileASTRequestor;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.net4j.util.collection.Pair;
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.generator.fluent.shared.util.ModelLoader;
 import org.palladiosimulator.pcm.allocation.Allocation;
@@ -314,7 +314,7 @@ public class PostAnalysisJobTest {
             .size());
     }
 
-    @Ignore("Broke due to a change in the ModelSaver/Loader")
+    @Disabled("Broke due to a change in the ModelSaver/Loader")
     @Test
     public void persistModels() throws Exception {
         // Construct jobs
