@@ -25,18 +25,20 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
     private final String systemKey;
     private final String allocationKey;
     private final String resourceEnvironmentKey;
-    private final File outputFilePrefix;
+    private final String outputFolder;
+    private final String configuredInputProjectName;
 
     public PersistenceJob(Blackboard<Object> blackboard, URI inputFolder, URI outputFolder, String repositoryKey,
             String systemKey, String allocationKey, String resourceEnvironmentKey) {
         this.blackboard = Objects.requireNonNull(blackboard);
-        String configuredInputProjectName = inputFolder.lastSegment();
+        
         this.repositoryKey = Objects.requireNonNull(repositoryKey);
         this.systemKey = Objects.requireNonNull(systemKey);
         this.allocationKey = Objects.requireNonNull(allocationKey);
         this.resourceEnvironmentKey = Objects.requireNonNull(resourceEnvironmentKey);
         // Set path to output folder and prefix of all output files to name of input project folder
-        this.outputFilePrefix = new File(outputFolder.toFileString(), configuredInputProjectName);
+        this.outputFolder = outputFolder.toFileString();
+        this.configuredInputProjectName = inputFolder.lastSegment();
     }
 
     @Override
