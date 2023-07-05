@@ -28,6 +28,8 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Servi
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentAssemblyRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentSignatureProvisionRelation;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.CompositeProvisionDelegationRelation;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.CompositeRequirementDelegationRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.CompositionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceProvisionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceRequirementRelation;
@@ -51,6 +53,8 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
         Set<SignatureProvisionRelation> signatureProvisions = new HashSet<>();
         Set<ServiceEffectSpecificationRelation> seffProvisions = new HashSet<>();
         Set<ComponentAssemblyRelation> componentAssemblies = new HashSet<>();
+        Set<CompositeProvisionDelegationRelation> provisionDelegations = new HashSet<>();
+        Set<CompositeRequirementDelegationRelation> requirementDelegations = new HashSet<>();
 
         for (RepositoryComponent repositoryComponent : repository.getComponents__Repository()) {
             Component<?> component;
@@ -158,10 +162,11 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                                 connectorComponent, innerInterface, false);
                         InterfaceProvisionRelation outerInterfaceRelation = new InterfaceProvisionRelation(
                                 composite, outerInterface, false);
+                        CompositeProvisionDelegationRelation delegationRelation = new CompositeProvisionDelegationRelation(
+                                outerInterfaceRelation, innerInterfaceRelation, false);
 
-                        // Add interface provisions to discoverer
-                        interfaceProvisions.add(innerInterfaceRelation);
-                        interfaceProvisions.add(outerInterfaceRelation);
+                        // Add delegation relation to discoverer
+                        provisionDelegations.add(delegationRelation);
                     } else if (connector instanceof RequiredDelegationConnector) {
                         RequiredDelegationConnector requiredDelegationConnector = (RequiredDelegationConnector) connector;
 
@@ -178,15 +183,16 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                                         .getRequiredInterface__OperationRequiredRole(),
                                 false);
 
-                        // Create interface relations
+                        // Create interface relations & delegation relation
                         InterfaceRequirementRelation innerInterfaceRelation = new InterfaceRequirementRelation(
                                 connectorComponent, innerInterface, false);
                         InterfaceRequirementRelation outerInterfaceRelation = new InterfaceRequirementRelation(
                                 composite, outerInterface, false);
+                        CompositeRequirementDelegationRelation delegationRelation = new CompositeRequirementDelegationRelation(
+                                outerInterfaceRelation, innerInterfaceRelation, false);
 
-                        // Add interface requirements to discoverer
-                        interfaceRequirements.add(innerInterfaceRelation);
-                        interfaceRequirements.add(outerInterfaceRelation);
+                        // Add delegation relation to discoverer
+                        requirementDelegations.add(delegationRelation);
                     }
                 }
             } else {
@@ -247,9 +253,15 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                 seffProvisions, ServiceEffectSpecificationRelation.class);
         SimpleDiscoverer<ComponentAssemblyRelation> assemblyDiscoverer = new SimpleDiscoverer<>(componentAssemblies,
                 ComponentAssemblyRelation.class);
+        SimpleDiscoverer<CompositeProvisionDelegationRelation> provisionDelegationDiscoverer = new SimpleDiscoverer<>(
+                provisionDelegations, CompositeProvisionDelegationRelation.class);
+        SimpleDiscoverer<
+                CompositeRequirementDelegationRelation> requirementDelegationDiscoverer = new SimpleDiscoverer<>(
+                        requirementDelegations, CompositeRequirementDelegationRelation.class);
         return List.of(atomicComponentDiscoverer, compositeDiscoverer, compositionDiscoverer,
                 signatureProvisionDiscoverer, interfaceProvisionDiscoverer, interfaceRequirementDiscoverer,
-                seffProvisionDiscoverer, assemblyDiscoverer);
+                seffProvisionDiscoverer, assemblyDiscoverer, provisionDelegationDiscoverer,
+                requirementDelegationDiscoverer);
     }
 
     private Component<?> getGenericWrapperFor(RepositoryComponent repositoryComponent) {
