@@ -15,6 +15,8 @@ import org.palladiosimulator.generator.fluent.repository.structure.interfaces.Op
 import org.palladiosimulator.pcm.core.composition.AssemblyConnector;
 import org.palladiosimulator.pcm.core.composition.AssemblyContext;
 import org.palladiosimulator.pcm.core.composition.CompositionFactory;
+import org.palladiosimulator.pcm.core.composition.ProvidedDelegationConnector;
+import org.palladiosimulator.pcm.core.composition.RequiredDelegationConnector;
 import org.palladiosimulator.pcm.repository.BasicComponent;
 import org.palladiosimulator.pcm.repository.CompositeComponent;
 import org.palladiosimulator.pcm.repository.OperationInterface;
@@ -34,6 +36,8 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Compo
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentAssemblyRelation;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.CompositeProvisionDelegationRelation;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.CompositeRequirementDelegationRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.CompositionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceProvisionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceRequirementRelation;
@@ -218,8 +222,6 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
                     .addAll(temporaryComposite.getAssemblyContexts__ComposedStructure());
         }
 
-        // TODO Add composite delegations
-
         Repository repository = fluentRepository.createRepositoryNow();
 
         // Add assembly connectors for assembly relations of components within same composite
@@ -288,7 +290,94 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
             }
         }
 
+        // Add provided delegation connectors to composite
+        for (CompositeProvisionDelegationRelation delegationRelation : model
+                .getByType(CompositeProvisionDelegationRelation.class)) {
+            // Decompose delegation relation into components & interfaces
+            Composite compositeWrapper = (Composite) delegationRelation.getSource().getSource();
+            Component<?> childWrapper = delegationRelation.getDestination().getSource();
+            Interface outerInterfaceWrapper = delegationRelation.getSource().getDestination();
+            Interface innerInterfaceWrapper = delegationRelation.getDestination().getDestination();
+
+            // Fetch composite, assembly context, & roles from repository
+            CompositeComponent repositoryComposite = (CompositeComponent) repository.getComponents__Repository()
+                    .stream()
+                    .filter(component -> component.getEntityName().equals(compositeWrapper.getValue().getEntityName()))
+                    .findFirst().orElseThrow();
+            AssemblyContext childContext = repositoryComposite.getAssemblyContexts__ComposedStructure().stream()
+                    .filter(context -> context.getEncapsulatedComponent__AssemblyContext().getEntityName()
+                            .equals(childWrapper.getValue().getEntityName()))
+                    .findFirst().orElseThrow();
+            OperationProvidedRole innerRole = (OperationProvidedRole) childContext
+                    .getEncapsulatedComponent__AssemblyContext()
+                    .getProvidedRoles_InterfaceProvidingEntity().stream()
+                    .filter(role -> role instanceof OperationProvidedRole
+                            && ((OperationProvidedRole) role).getProvidedInterface__OperationProvidedRole()
+                                    .getEntityName().equals(innerInterfaceWrapper.getValue().getEntityName()))
+                    .findFirst().orElseThrow();
+            OperationProvidedRole outerRole = (OperationProvidedRole) repositoryComposite
+                    .getProvidedRoles_InterfaceProvidingEntity().stream()
+                    .filter(role -> role instanceof OperationProvidedRole
+                            && ((OperationProvidedRole) role).getProvidedInterface__OperationProvidedRole()
+                                    .getEntityName().equals(outerInterfaceWrapper.getValue().getEntityName()))
+                    .findFirst().orElseThrow();
+
+            // Create delegation connector
+            ProvidedDelegationConnector delegationConnector = CompositionFactory.eINSTANCE
+                    .createProvidedDelegationConnector();
+            delegationConnector.setAssemblyContext_ProvidedDelegationConnector(childContext);
+            delegationConnector.setInnerProvidedRole_ProvidedDelegationConnector(innerRole);
+            delegationConnector.setOuterProvidedRole_ProvidedDelegationConnector(outerRole);
+
+            // Add connector to composite component
+            repositoryComposite.getConnectors__ComposedStructure().add(delegationConnector);
+        }
+
+        // Add required delegation connectors to composite
+        for (CompositeRequirementDelegationRelation delegationRelation : model
+                .getByType(CompositeRequirementDelegationRelation.class)) {
+            // Decompose delegation relation into components & interfaces
+            Composite compositeWrapper = (Composite) delegationRelation.getSource().getSource();
+            Component<?> childWrapper = delegationRelation.getDestination().getSource();
+            Interface outerInterfaceWrapper = delegationRelation.getSource().getDestination();
+            Interface innerInterfaceWrapper = delegationRelation.getDestination().getDestination();
+
+            // Fetch composite, assembly context, & roles from repository
+            CompositeComponent repositoryComposite = (CompositeComponent) repository.getComponents__Repository()
+                    .stream()
+                    .filter(component -> component.getEntityName().equals(compositeWrapper.getValue().getEntityName()))
+                    .findFirst().orElseThrow();
+            AssemblyContext childContext = repositoryComposite.getAssemblyContexts__ComposedStructure().stream()
+                    .filter(context -> context.getEncapsulatedComponent__AssemblyContext().getEntityName()
+                            .equals(childWrapper.getValue().getEntityName()))
+                    .findFirst().orElseThrow();
+            OperationRequiredRole innerRole = (OperationRequiredRole) childContext
+                    .getEncapsulatedComponent__AssemblyContext()
+                    .getRequiredRoles_InterfaceRequiringEntity().stream()
+                    .filter(role -> role instanceof OperationRequiredRole
+                            && ((OperationRequiredRole) role).getRequiredInterface__OperationRequiredRole()
+                                    .getEntityName().equals(innerInterfaceWrapper.getValue().getEntityName()))
+                    .findFirst().orElseThrow();
+            OperationRequiredRole outerRole = (OperationRequiredRole) repositoryComposite
+                    .getRequiredRoles_InterfaceRequiringEntity().stream()
+                    .filter(role -> role instanceof OperationRequiredRole
+                            && ((OperationRequiredRole) role).getRequiredInterface__OperationRequiredRole()
+                                    .getEntityName().equals(outerInterfaceWrapper.getValue().getEntityName()))
+                    .findFirst().orElseThrow();
+
+            // Create delegation connector
+            RequiredDelegationConnector delegationConnector = CompositionFactory.eINSTANCE
+                    .createRequiredDelegationConnector();
+            delegationConnector.setAssemblyContext_RequiredDelegationConnector(childContext);
+            delegationConnector.setInnerRequiredRole_RequiredDelegationConnector(innerRole);
+            delegationConnector.setOuterRequiredRole_RequiredDelegationConnector(outerRole);
+
+            // Add connector to composite component
+            repositoryComposite.getConnectors__ComposedStructure().add(delegationConnector);
+        }
+
         return repository;
+
     }
 
     private BasicComponentCreator getCreator(FluentRepositoryFactory fluentFactory, AtomicComponent component) {
