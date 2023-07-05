@@ -8,6 +8,8 @@ import java.util.Set;
 import org.palladiosimulator.pcm.core.composition.AssemblyConnector;
 import org.palladiosimulator.pcm.core.composition.AssemblyContext;
 import org.palladiosimulator.pcm.core.composition.Connector;
+import org.palladiosimulator.pcm.core.composition.ProvidedDelegationConnector;
+import org.palladiosimulator.pcm.core.composition.RequiredDelegationConnector;
 import org.palladiosimulator.pcm.repository.BasicComponent;
 import org.palladiosimulator.pcm.repository.CompositeComponent;
 import org.palladiosimulator.pcm.repository.OperationProvidedRole;
@@ -104,6 +106,7 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                     compositions.add(composition);
                 }
 
+                // Process connectors of composite component
                 for (Connector connector : composite.getValue().getConnectors__ComposedStructure()) {
                     if (connector instanceof AssemblyConnector) {
                         AssemblyConnector assemblyConnector = (AssemblyConnector) connector;
@@ -131,9 +134,60 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                                 requiredInterface, false);
                         ComponentAssemblyRelation assemblyRelation = new ComponentAssemblyRelation(provisionRelation,
                                 requirementRelation, false);
+
+                        // Add assembly to discoverer
                         componentAssemblies.add(assemblyRelation);
+                    } else if (connector instanceof ProvidedDelegationConnector) {
+                        ProvidedDelegationConnector providedDelegationConnector = (ProvidedDelegationConnector) connector;
+
+                        // Wrap the providing component & the inner and outer role's interfaces
+                        Component<?> connectorComponent = getGenericWrapperFor(
+                                providedDelegationConnector.getAssemblyContext_ProvidedDelegationConnector()
+                                        .getEncapsulatedComponent__AssemblyContext());
+                        Interface innerInterface = new Interface(
+                                providedDelegationConnector.getInnerProvidedRole_ProvidedDelegationConnector()
+                                        .getProvidedInterface__OperationProvidedRole(),
+                                false);
+                        Interface outerInterface = new Interface(
+                                providedDelegationConnector.getOuterProvidedRole_ProvidedDelegationConnector()
+                                        .getProvidedInterface__OperationProvidedRole(),
+                                false);
+
+                        // Create interface relations
+                        InterfaceProvisionRelation innerInterfaceRelation = new InterfaceProvisionRelation(
+                                connectorComponent, innerInterface, false);
+                        InterfaceProvisionRelation outerInterfaceRelation = new InterfaceProvisionRelation(
+                                composite, outerInterface, false);
+
+                        // Add interface provisions to discoverer
+                        interfaceProvisions.add(innerInterfaceRelation);
+                        interfaceProvisions.add(outerInterfaceRelation);
+                    } else if (connector instanceof RequiredDelegationConnector) {
+                        RequiredDelegationConnector requiredDelegationConnector = (RequiredDelegationConnector) connector;
+
+                        // Wrap the requiring component & the inner and outer role's interfaces
+                        Component<?> connectorComponent = getGenericWrapperFor(
+                                requiredDelegationConnector.getAssemblyContext_RequiredDelegationConnector()
+                                        .getEncapsulatedComponent__AssemblyContext());
+                        Interface innerInterface = new Interface(
+                                requiredDelegationConnector.getInnerRequiredRole_RequiredDelegationConnector()
+                                        .getRequiredInterface__OperationRequiredRole(),
+                                false);
+                        Interface outerInterface = new Interface(
+                                requiredDelegationConnector.getOuterRequiredRole_RequiredDelegationConnector()
+                                        .getRequiredInterface__OperationRequiredRole(),
+                                false);
+
+                        // Create interface relations
+                        InterfaceRequirementRelation innerInterfaceRelation = new InterfaceRequirementRelation(
+                                connectorComponent, innerInterface, false);
+                        InterfaceRequirementRelation outerInterfaceRelation = new InterfaceRequirementRelation(
+                                composite, outerInterface, false);
+
+                        // Add interface requirements to discoverer
+                        interfaceRequirements.add(innerInterfaceRelation);
+                        interfaceRequirements.add(outerInterfaceRelation);
                     }
-                    // TODO Create delegations for composite
                 }
             } else {
                 // Ignore repository components that are neither basic nor composite
