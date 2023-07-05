@@ -5,7 +5,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.palladiosimulator.pcm.core.composition.AssemblyConnector;
 import org.palladiosimulator.pcm.core.composition.AssemblyContext;
+import org.palladiosimulator.pcm.core.composition.Connector;
 import org.palladiosimulator.pcm.repository.BasicComponent;
 import org.palladiosimulator.pcm.repository.CompositeComponent;
 import org.palladiosimulator.pcm.repository.OperationProvidedRole;
@@ -22,6 +24,7 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Compo
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.ServiceEffectSpecification;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentAssemblyRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentSignatureProvisionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.CompositionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceProvisionRelation;
@@ -45,6 +48,7 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
         Set<InterfaceRequirementRelation> interfaceRequirements = new HashSet<>();
         Set<SignatureProvisionRelation> signatureProvisions = new HashSet<>();
         Set<ServiceEffectSpecificationRelation> seffProvisions = new HashSet<>();
+        Set<ComponentAssemblyRelation> componentAssemblies = new HashSet<>();
 
         for (RepositoryComponent repositoryComponent : repository.getComponents__Repository()) {
             Component<?> component;
@@ -89,13 +93,9 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                             .getEncapsulatedComponent__AssemblyContext();
 
                     // Create appropriate wrapper for child component
-                    Component<?> childWrapper;
-                    if (encapsulatedComponent instanceof BasicComponent) {
-                        childWrapper = new AtomicComponent((BasicComponent) encapsulatedComponent, false);
-                    } else if (repositoryComponent instanceof CompositeComponent) {
-                        childWrapper = new Composite((CompositeComponent) encapsulatedComponent, false);
-                    } else {
-                        // Ignore child that is neither basic nor composite
+                    Component<?> childWrapper = getGenericWrapperFor(encapsulatedComponent);
+                    if (childWrapper == null) {
+                        // Ignore child that cannot be wrapped
                         continue;
                     }
 
@@ -104,7 +104,37 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                     compositions.add(composition);
                 }
 
-                // TODO Create delegations for composite
+                for (Connector connector : composite.getValue().getConnectors__ComposedStructure()) {
+                    if (connector instanceof AssemblyConnector) {
+                        AssemblyConnector assemblyConnector = (AssemblyConnector) connector;
+
+                        // Wrap provider and consumer component
+                        Component<?> provider = getGenericWrapperFor(
+                                assemblyConnector.getProvidingAssemblyContext_AssemblyConnector()
+                                        .getEncapsulatedComponent__AssemblyContext());
+                        Component<?> consumer = getGenericWrapperFor(
+                                assemblyConnector.getRequiringAssemblyContext_AssemblyConnector()
+                                        .getEncapsulatedComponent__AssemblyContext());
+
+                        // Wrap role interfaces
+                        Interface providedInterface = new Interface(assemblyConnector
+                                .getProvidedRole_AssemblyConnector().getProvidedInterface__OperationProvidedRole(),
+                                false);
+                        Interface requiredInterface = new Interface(assemblyConnector
+                                .getRequiredRole_AssemblyConnector().getRequiredInterface__OperationRequiredRole(),
+                                false);
+
+                        // Create interface relations & component assembly relation
+                        InterfaceProvisionRelation provisionRelation = new InterfaceProvisionRelation(provider,
+                                providedInterface, false);
+                        InterfaceRequirementRelation requirementRelation = new InterfaceRequirementRelation(consumer,
+                                requiredInterface, false);
+                        ComponentAssemblyRelation assemblyRelation = new ComponentAssemblyRelation(provisionRelation,
+                                requirementRelation, false);
+                        componentAssemblies.add(assemblyRelation);
+                    }
+                    // TODO Create delegations for composite
+                }
             } else {
                 // Ignore repository components that are neither basic nor composite
                 continue;
@@ -161,8 +191,21 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                 interfaceRequirements, InterfaceRequirementRelation.class);
         SimpleDiscoverer<ServiceEffectSpecificationRelation> seffProvisionDiscoverer = new SimpleDiscoverer<>(
                 seffProvisions, ServiceEffectSpecificationRelation.class);
+        SimpleDiscoverer<ComponentAssemblyRelation> assemblyDiscoverer = new SimpleDiscoverer<>(componentAssemblies,
+                ComponentAssemblyRelation.class);
         return List.of(atomicComponentDiscoverer, compositeDiscoverer, compositionDiscoverer,
                 signatureProvisionDiscoverer, interfaceProvisionDiscoverer, interfaceRequirementDiscoverer,
-                seffProvisionDiscoverer);
+                seffProvisionDiscoverer, assemblyDiscoverer);
+    }
+
+    private Component<?> getGenericWrapperFor(RepositoryComponent repositoryComponent) {
+        // Ignore components that are neither basic nor composite
+        Component<?> wrapper = null;
+        if (repositoryComponent instanceof BasicComponent) {
+            wrapper = new AtomicComponent((BasicComponent) repositoryComponent, false);
+        } else if (repositoryComponent instanceof CompositeComponent) {
+            wrapper = new Composite((CompositeComponent) repositoryComponent, false);
+        }
+        return wrapper;
     }
 }
