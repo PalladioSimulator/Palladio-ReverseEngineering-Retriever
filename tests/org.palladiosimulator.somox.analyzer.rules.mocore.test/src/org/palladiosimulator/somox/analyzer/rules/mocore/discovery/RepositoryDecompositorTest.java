@@ -23,7 +23,7 @@ public class RepositoryDecompositorTest extends DecompositorTest<RepositoryDecom
         Repository repository = createEmptyRepository();
 
         Collection<Discoverer<?>> discoverers = decompositor.decompose(repository);
-        assertEquals(7, discoverers.size());
+        assertEquals(10, discoverers.size());
         discoverers.forEach((discoverer) -> assertTrue(discoverer.getDiscoveries().isEmpty()));
     }
 
@@ -41,7 +41,6 @@ public class RepositoryDecompositorTest extends DecompositorTest<RepositoryDecom
 
         Collection<Discoverer<?>> discoverers = decompositor.decompose(repository);
         assertFalse(discoverers.isEmpty());
-        assertEquals(7, discoverers.size());
 
         // Remove all discoverers except component discoverer
         List<Discoverer<?>> modifiableDiscoverers = new ArrayList<>(discoverers);

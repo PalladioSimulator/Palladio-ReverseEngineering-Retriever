@@ -5,7 +5,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.palladiosimulator.pcm.core.composition.AssemblyConnector;
 import org.palladiosimulator.pcm.core.composition.AssemblyContext;
+import org.palladiosimulator.pcm.core.composition.Connector;
+import org.palladiosimulator.pcm.core.composition.ProvidedDelegationConnector;
+import org.palladiosimulator.pcm.core.composition.RequiredDelegationConnector;
 import org.palladiosimulator.pcm.repository.BasicComponent;
 import org.palladiosimulator.pcm.repository.CompositeComponent;
 import org.palladiosimulator.pcm.repository.OperationProvidedRole;
@@ -22,7 +26,10 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Compo
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Interface;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.ServiceEffectSpecification;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.Signature;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentAssemblyRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ComponentSignatureProvisionRelation;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.CompositeProvisionDelegationRelation;
+import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.CompositeRequirementDelegationRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.CompositionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceProvisionRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.InterfaceRequirementRelation;
@@ -45,6 +52,9 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
         Set<InterfaceRequirementRelation> interfaceRequirements = new HashSet<>();
         Set<SignatureProvisionRelation> signatureProvisions = new HashSet<>();
         Set<ServiceEffectSpecificationRelation> seffProvisions = new HashSet<>();
+        Set<ComponentAssemblyRelation> componentAssemblies = new HashSet<>();
+        Set<CompositeProvisionDelegationRelation> provisionDelegations = new HashSet<>();
+        Set<CompositeRequirementDelegationRelation> requirementDelegations = new HashSet<>();
 
         for (RepositoryComponent repositoryComponent : repository.getComponents__Repository()) {
             Component<?> component;
@@ -89,13 +99,9 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                             .getEncapsulatedComponent__AssemblyContext();
 
                     // Create appropriate wrapper for child component
-                    Component<?> childWrapper;
-                    if (encapsulatedComponent instanceof BasicComponent) {
-                        childWrapper = new AtomicComponent((BasicComponent) encapsulatedComponent, false);
-                    } else if (repositoryComponent instanceof CompositeComponent) {
-                        childWrapper = new Composite((CompositeComponent) encapsulatedComponent, false);
-                    } else {
-                        // Ignore child that is neither basic nor composite
+                    Component<?> childWrapper = getGenericWrapperFor(encapsulatedComponent);
+                    if (childWrapper == null) {
+                        // Ignore child that cannot be wrapped
                         continue;
                     }
 
@@ -104,7 +110,91 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                     compositions.add(composition);
                 }
 
-                // TODO Create delegations for composite
+                // Process connectors of composite component
+                for (Connector connector : composite.getValue().getConnectors__ComposedStructure()) {
+                    if (connector instanceof AssemblyConnector) {
+                        AssemblyConnector assemblyConnector = (AssemblyConnector) connector;
+
+                        // Wrap provider and consumer component
+                        Component<?> provider = getGenericWrapperFor(
+                                assemblyConnector.getProvidingAssemblyContext_AssemblyConnector()
+                                        .getEncapsulatedComponent__AssemblyContext());
+                        Component<?> consumer = getGenericWrapperFor(
+                                assemblyConnector.getRequiringAssemblyContext_AssemblyConnector()
+                                        .getEncapsulatedComponent__AssemblyContext());
+
+                        // Wrap role interfaces
+                        Interface providedInterface = new Interface(assemblyConnector
+                                .getProvidedRole_AssemblyConnector().getProvidedInterface__OperationProvidedRole(),
+                                false);
+                        Interface requiredInterface = new Interface(assemblyConnector
+                                .getRequiredRole_AssemblyConnector().getRequiredInterface__OperationRequiredRole(),
+                                false);
+
+                        // Create interface relations & component assembly relation
+                        InterfaceProvisionRelation provisionRelation = new InterfaceProvisionRelation(provider,
+                                providedInterface, false);
+                        InterfaceRequirementRelation requirementRelation = new InterfaceRequirementRelation(consumer,
+                                requiredInterface, false);
+                        ComponentAssemblyRelation assemblyRelation = new ComponentAssemblyRelation(provisionRelation,
+                                requirementRelation, false);
+
+                        // Add assembly to discoverer
+                        componentAssemblies.add(assemblyRelation);
+                    } else if (connector instanceof ProvidedDelegationConnector) {
+                        ProvidedDelegationConnector providedDelegationConnector = (ProvidedDelegationConnector) connector;
+
+                        // Wrap the providing component & the inner and outer role's interfaces
+                        Component<?> connectorComponent = getGenericWrapperFor(
+                                providedDelegationConnector.getAssemblyContext_ProvidedDelegationConnector()
+                                        .getEncapsulatedComponent__AssemblyContext());
+                        Interface innerInterface = new Interface(
+                                providedDelegationConnector.getInnerProvidedRole_ProvidedDelegationConnector()
+                                        .getProvidedInterface__OperationProvidedRole(),
+                                false);
+                        Interface outerInterface = new Interface(
+                                providedDelegationConnector.getOuterProvidedRole_ProvidedDelegationConnector()
+                                        .getProvidedInterface__OperationProvidedRole(),
+                                false);
+
+                        // Create interface relations
+                        InterfaceProvisionRelation innerInterfaceRelation = new InterfaceProvisionRelation(
+                                connectorComponent, innerInterface, false);
+                        InterfaceProvisionRelation outerInterfaceRelation = new InterfaceProvisionRelation(
+                                composite, outerInterface, false);
+                        CompositeProvisionDelegationRelation delegationRelation = new CompositeProvisionDelegationRelation(
+                                outerInterfaceRelation, innerInterfaceRelation, false);
+
+                        // Add delegation relation to discoverer
+                        provisionDelegations.add(delegationRelation);
+                    } else if (connector instanceof RequiredDelegationConnector) {
+                        RequiredDelegationConnector requiredDelegationConnector = (RequiredDelegationConnector) connector;
+
+                        // Wrap the requiring component & the inner and outer role's interfaces
+                        Component<?> connectorComponent = getGenericWrapperFor(
+                                requiredDelegationConnector.getAssemblyContext_RequiredDelegationConnector()
+                                        .getEncapsulatedComponent__AssemblyContext());
+                        Interface innerInterface = new Interface(
+                                requiredDelegationConnector.getInnerRequiredRole_RequiredDelegationConnector()
+                                        .getRequiredInterface__OperationRequiredRole(),
+                                false);
+                        Interface outerInterface = new Interface(
+                                requiredDelegationConnector.getOuterRequiredRole_RequiredDelegationConnector()
+                                        .getRequiredInterface__OperationRequiredRole(),
+                                false);
+
+                        // Create interface relations & delegation relation
+                        InterfaceRequirementRelation innerInterfaceRelation = new InterfaceRequirementRelation(
+                                connectorComponent, innerInterface, false);
+                        InterfaceRequirementRelation outerInterfaceRelation = new InterfaceRequirementRelation(
+                                composite, outerInterface, false);
+                        CompositeRequirementDelegationRelation delegationRelation = new CompositeRequirementDelegationRelation(
+                                outerInterfaceRelation, innerInterfaceRelation, false);
+
+                        // Add delegation relation to discoverer
+                        requirementDelegations.add(delegationRelation);
+                    }
+                }
             } else {
                 // Ignore repository components that are neither basic nor composite
                 continue;
@@ -161,8 +251,27 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                 interfaceRequirements, InterfaceRequirementRelation.class);
         SimpleDiscoverer<ServiceEffectSpecificationRelation> seffProvisionDiscoverer = new SimpleDiscoverer<>(
                 seffProvisions, ServiceEffectSpecificationRelation.class);
+        SimpleDiscoverer<ComponentAssemblyRelation> assemblyDiscoverer = new SimpleDiscoverer<>(componentAssemblies,
+                ComponentAssemblyRelation.class);
+        SimpleDiscoverer<CompositeProvisionDelegationRelation> provisionDelegationDiscoverer = new SimpleDiscoverer<>(
+                provisionDelegations, CompositeProvisionDelegationRelation.class);
+        SimpleDiscoverer<
+                CompositeRequirementDelegationRelation> requirementDelegationDiscoverer = new SimpleDiscoverer<>(
+                        requirementDelegations, CompositeRequirementDelegationRelation.class);
         return List.of(atomicComponentDiscoverer, compositeDiscoverer, compositionDiscoverer,
                 signatureProvisionDiscoverer, interfaceProvisionDiscoverer, interfaceRequirementDiscoverer,
-                seffProvisionDiscoverer);
+                seffProvisionDiscoverer, assemblyDiscoverer, provisionDelegationDiscoverer,
+                requirementDelegationDiscoverer);
+    }
+
+    private Component<?> getGenericWrapperFor(RepositoryComponent repositoryComponent) {
+        // Ignore components that are neither basic nor composite
+        Component<?> wrapper = null;
+        if (repositoryComponent instanceof BasicComponent) {
+            wrapper = new AtomicComponent((BasicComponent) repositoryComponent, false);
+        } else if (repositoryComponent instanceof CompositeComponent) {
+            wrapper = new Composite((CompositeComponent) repositoryComponent, false);
+        }
+        return wrapper;
     }
 }
