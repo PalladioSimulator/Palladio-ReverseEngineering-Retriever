@@ -123,10 +123,10 @@ abstract class RuleEngineTest {
         assertTrue(executedSuccessfully, "Failed to run RuleEngine!");
     }
 
-    public void assertMaxParameterCount(int expectedMaxParameterCount, String interfaceName, String signatureName) {
+    public void assertMaxParameterCount(int expectedMaxParameterCount, String interfaceName, String operationName) {
         assertInterfaceExists(interfaceName);
-        assertOperationExists(interfaceName, signatureName);
-        assertEquals(expectedMaxParameterCount, getSignatureMaxParameterCount(interfaceName, signatureName));
+        assertOperationExists(interfaceName, operationName);
+        assertEquals(expectedMaxParameterCount, getSignatureMaxParameterCount(interfaceName, operationName));
     }
 
     public void assertComponentExists(String name) {
@@ -142,9 +142,9 @@ abstract class RuleEngineTest {
                 .equals(name)), "interface \"" + name + "\" must exist");
     }
 
-    public void assertOperationExists(String interfaceName, String signatureName) {
-        assertFalse(getOperationSignature(interfaceName, signatureName).isEmpty(),
-                "interface \"" + interfaceName + "\" must contain operation \"" + signatureName + "\"");
+    public void assertOperationExists(String interfaceName, String operationName) {
+        assertFalse(getOperationSignature(interfaceName, operationName).isEmpty(),
+                "interface \"" + interfaceName + "\" must contain operation \"" + operationName + "\"");
     }
 
     public void assertComponentRequiresComponent(String requiringName, String providingName) {
@@ -232,6 +232,39 @@ abstract class RuleEngineTest {
         assertTrue(compositeComponentsA.stream()
             .anyMatch(compositeComponentsB::contains),
                 childComponentNameA + " and " + childComponentNameB + " must be part of the same composite component");
+    }
+
+    public void assertComponentProvidesOperation(String componentName, String interfaceName, String operationName) {
+        Optional<RepositoryComponent> component = getComponents().stream()
+            .filter(x -> x.getEntityName()
+                .equals(componentName))
+            .findFirst();
+        assertTrue(component.isPresent(), "Component \"" + componentName + "\" must exist");
+
+        List<Interface> interfaces = getInterfaces();
+        assertFalse(interfaces.isEmpty(), "an interface must exist in order for a component to provide an operation");
+
+        Set<EObject> providedObjects = component.get()
+            .getProvidedRoles_InterfaceProvidingEntity()
+            .stream()
+            .flatMap(x -> x.eCrossReferences()
+                .stream())
+            .collect(Collectors.toSet());
+        assertFalse(providedObjects.isEmpty(), "\"" + component + "\" must provide something");
+
+        Set<Interface> providedInterfaces = interfaces.stream()
+            .filter(providedObjects::contains)
+            .collect(Collectors.toSet());
+        assertFalse(providedInterfaces.isEmpty(), "\"" + component + "\" must provide an interface");
+
+        Set<Interface> specifiedInterfaces = providedInterfaces.stream()
+            .filter(x -> x.getEntityName()
+                .equals(interfaceName))
+            .collect(Collectors.toSet());
+        assertFalse(specifiedInterfaces.isEmpty(),
+                "\"" + component + "\" must provide interface \"" + interfaceName + "\"");
+
+        assertOperationExists(interfaceName, operationName);
     }
 
     // Getters

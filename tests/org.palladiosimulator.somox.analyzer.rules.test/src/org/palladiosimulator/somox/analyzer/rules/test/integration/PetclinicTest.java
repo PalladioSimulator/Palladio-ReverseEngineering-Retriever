@@ -11,13 +11,23 @@ public class PetclinicTest extends RuleEngineTest {
     @Override
     void testRuleEngineRepository() {
         assertComponentExists("org_springframework_samples_petclinic_api_boundary_web_ApiGatewayController");
+
+        assertComponentProvidesOperation("org_springframework_samples_petclinic_vets_web_VetResource", "/vets/[GET]",
+                "");
+        assertComponentProvidesOperation("org_springframework_samples_petclinic_visits_web_VisitResource", "/",
+                "pets/visits[GET]");
+        assertComponentProvidesOperation("org_springframework_samples_petclinic_customers_web_PetResource", "/",
+                "pets/visits[GET]");
+
         assertMaxParameterCount(2, "/owners", "");
         assertMaxParameterCount(1, "/api/gateway/owners", "");
+
         // FIXME: This fails, but is hard to reproduce outside of tests.
         // assertComponentRequiresComponent("org_springframework_samples_petclinic_customers_web_PetResource",
         // "org_springframework_samples_petclinic_customers_model_PetRepository");
         // assertComponentRequiresComponent("org_springframework_samples_petclinic_customers_web_PetResource",
         // "org_springframework_samples_petclinic_customers_model_OwnerRepository");
+
         assertInSameCompositeComponent("org_springframework_samples_petclinic_customers_web_PetResource",
                 "org_springframework_samples_petclinic_customers_model_PetRepository");
         assertInSameCompositeComponent("org_springframework_samples_petclinic_customers_web_PetResource",
