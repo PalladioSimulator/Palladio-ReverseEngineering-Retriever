@@ -247,8 +247,7 @@ public class RuleEngineAnalyzer {
 
         // Persist the repository at ./pcm.repository
         blackboard.addPartition(RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY, pcm);
-        ModelSaver.saveRepository(pcm, outPath.resolve("pcm")
-            .toString(), false);
+        ModelSaver.saveRepository(pcm, outPath.toString(), "pcm");
     }
 
     /**

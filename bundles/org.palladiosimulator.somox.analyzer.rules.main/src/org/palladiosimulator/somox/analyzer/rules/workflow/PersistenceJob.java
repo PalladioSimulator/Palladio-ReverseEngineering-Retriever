@@ -1,6 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.workflow;
 
-import java.nio.file.Paths;
 import java.util.Objects;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -26,26 +25,28 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
     private final String systemKey;
     private final String allocationKey;
     private final String resourceEnvironmentKey;
-    private final String outputPrefix;
+    private final String outputFolder;
+    private final String projectName;
 
     public PersistenceJob(Blackboard<Object> blackboard, URI inputFolder, URI outputFolder, String repositoryKey,
             String systemKey, String allocationKey, String resourceEnvironmentKey) {
         this.blackboard = Objects.requireNonNull(blackboard);
-        String configuredInputProjectName = inputFolder.lastSegment();
-        // Handle a trailing path separator ("example/path/").
-        if (configuredInputProjectName.isEmpty()) {
-            configuredInputProjectName = inputFolder.trimSegments(1)
-                .lastSegment();
-        }
+
         this.repositoryKey = Objects.requireNonNull(repositoryKey);
         this.systemKey = Objects.requireNonNull(systemKey);
         this.allocationKey = Objects.requireNonNull(allocationKey);
         this.resourceEnvironmentKey = Objects.requireNonNull(resourceEnvironmentKey);
-        // Set path to output folder and prefix of all output files to name of input project folder
-        this.outputPrefix = Paths.get(CommonPlugin.asLocalURI(outputFolder)
-            .devicePath())
-            .resolve(configuredInputProjectName)
-            .toString();
+
+        this.outputFolder = CommonPlugin.asLocalURI(outputFolder)
+            .devicePath();
+
+        String lastInputSegment = inputFolder.lastSegment();
+        // Handle a trailing path separator ("example/path/").
+        if (lastInputSegment.isEmpty()) {
+            lastInputSegment = inputFolder.trimSegments(1)
+                .lastSegment();
+        }
+        this.projectName = lastInputSegment;
     }
 
     @Override
@@ -60,10 +61,10 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
 
         // Make blackboard models persistent by saving them as files
         monitor.subTask("Persisting models");
-        ModelSaver.saveRepository(repository, outputPrefix, false);
-        ModelSaver.saveSystem(system, outputPrefix, false);
-        ModelSaver.saveResourceEnvironment(resourceEnvironment, outputPrefix, false);
-        ModelSaver.saveAllocation(allocation, outputPrefix, false);
+        ModelSaver.saveRepository(repository, outputFolder, projectName);
+        ModelSaver.saveSystem(system, outputFolder, projectName);
+        ModelSaver.saveResourceEnvironment(resourceEnvironment, outputFolder, projectName);
+        ModelSaver.saveAllocation(allocation, outputFolder, projectName);
         monitor.done();
     }
 
