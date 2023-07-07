@@ -101,7 +101,10 @@ public class BasicTest extends RuleEngineTest {
         }
 
         // Run the RuleEngine again on the same project
-        final RuleEngineJob ruleEngine = new RuleEngineJob(getConfig());
+        RuleEngineConfiguration ruleEngineConfig = getConfig();
+        ruleEngineConfig.setOutputFolder(ruleEngineConfig.getOutputFolder()
+            .appendSegment("repeated"));
+        final RuleEngineJob ruleEngine = new RuleEngineJob(ruleEngineConfig);
         ruleEngine.execute(new NullProgressMonitor());
         final Repository repo = (Repository) ruleEngine.getBlackboard()
             .getPartition(RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY);
