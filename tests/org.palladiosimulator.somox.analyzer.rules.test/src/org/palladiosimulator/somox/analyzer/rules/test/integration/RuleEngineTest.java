@@ -24,6 +24,8 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.palladiosimulator.generator.fluent.shared.util.ModelLoader;
 import org.palladiosimulator.pcm.allocation.Allocation;
 import org.palladiosimulator.pcm.reliability.FailureType;
@@ -49,6 +51,7 @@ import com.google.common.collect.Sets;
 import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
 import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
+@TestInstance(Lifecycle.PER_CLASS)
 abstract class RuleEngineTest {
     public static final URI TEST_DIR = CommonPlugin
         .asLocalURI(URI.createFileURI(URI.decode(new File("res").getAbsolutePath())));
