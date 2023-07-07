@@ -23,6 +23,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -434,30 +435,35 @@ abstract class RuleEngineTest {
     }
 
     @Test
+    @Disabled("There are no tests for MoCoRe yet")
     void moCoReRepository() {
         loadArtifacts(Artifacts.MOCORE);
         testMoCoReRepository();
     }
 
     @Test
+    @Disabled("There are no tests for MoCoRe yet")
     void moCoReSeff() {
         loadArtifacts(Artifacts.MOCORE);
         testMoCoReSeff();
     }
 
     @Test
+    @Disabled("There are no tests for MoCoRe yet")
     void moCoReSystem() {
         loadArtifacts(Artifacts.MOCORE);
         testMoCoReSystem();
     }
 
     @Test
+    @Disabled("There are no tests for MoCoRe yet")
     void moCoReResourceEnvironment() {
         loadArtifacts(Artifacts.MOCORE);
         testMoCoReResourceEnvironment();
     }
 
     @Test
+    @Disabled("There are no tests for MoCoRe yet")
     void moCoReAllocation() {
         loadArtifacts(Artifacts.MOCORE);
         testMoCoReAllocation();
