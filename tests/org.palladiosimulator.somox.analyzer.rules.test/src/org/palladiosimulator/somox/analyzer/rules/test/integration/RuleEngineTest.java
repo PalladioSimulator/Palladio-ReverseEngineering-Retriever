@@ -21,11 +21,10 @@ import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.jupiter.api.Test;
+import org.palladiosimulator.generator.fluent.shared.util.ModelLoader;
 import org.palladiosimulator.pcm.allocation.Allocation;
 import org.palladiosimulator.pcm.reliability.FailureType;
 import org.palladiosimulator.pcm.repository.CompositeComponent;
@@ -363,31 +362,13 @@ abstract class RuleEngineTest {
         RULEENGINE, MOCORE,
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T extends EObject> T loadResource(URI uri, Class<T> targetType) {
-        Resource resource = new ResourceSetImpl().getResource(uri, true);
-        if (resource == null) {
-            return null;
-        }
-
-        final List<EObject> contents = resource.getContents();
-
-        assertEquals(1, contents.size());
-        EObject content = contents.get(0);
-        assertTrue(targetType.isInstance(content));
-
-        // TODO activate this again when SEFF is included
-        // validate(contents.get(0));
-
-        return (T) content;
-    }
-
     protected void loadArtifacts(Artifacts artifacts) {
         assertSuccessfulExecution();
 
         switch (artifacts) {
         case RULEENGINE:
-            repository = loadResource(outDir.appendSegment("pcm.repository"), Repository.class);
+            repository = ModelLoader.loadRepository(outDir.appendSegment("pcm.repository")
+                .toString());
             system = null;
             resourceEnvironment = null;
             allocation = null;
@@ -400,12 +381,12 @@ abstract class RuleEngineTest {
                     .trimSegments(1)
                     .lastSegment();
             }
-            URI mocoreBase = outDir.appendSegment(fileName);
-            repository = loadResource(mocoreBase.appendFileExtension("repository"), Repository.class);
-            system = loadResource(mocoreBase.appendFileExtension("system"), System.class);
-            resourceEnvironment = loadResource(mocoreBase.appendFileExtension("resourceenvironment"),
-                    ResourceEnvironment.class);
-            allocation = loadResource(mocoreBase.appendFileExtension("allocation"), Allocation.class);
+            String mocoreBase = outDir.appendSegment(fileName)
+                .toString() + ".";
+            repository = ModelLoader.loadRepository(mocoreBase + "repository");
+            system = ModelLoader.loadSystem(mocoreBase + "system");
+            resourceEnvironment = ModelLoader.loadResourceEnvironment(mocoreBase + "resourceenvironment");
+            allocation = ModelLoader.loadAllocation(mocoreBase + "allocation");
             break;
         default:
             throw new IllegalArgumentException("Unhandled artifact type!");
