@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -109,8 +110,9 @@ public class PCMDetector {
         }
         @SuppressWarnings("unchecked")
         List<EntireInterface> ifaces = ((List<VariableDeclaration>) field.fragments()).stream()
-            .map(x -> x.resolveBinding()
-                .getType())
+            .map(x -> x.resolveBinding())
+            .filter(x -> x != null)
+            .map(x -> x.getType())
             .map(x -> new EntireInterface(x, new JavaInterfaceName(NameConverter.toPCMIdentifier(x))))
             .collect(Collectors.toList());
         components.get(unit)
@@ -130,10 +132,14 @@ public class PCMDetector {
         if (components.get(unit) == null) {
             components.put(unit, new ComponentBuilder(unit));
         }
-        ITypeBinding binding = parameter.resolveBinding()
-            .getType();
-        EntireInterface iface = new EntireInterface(binding,
-                new JavaInterfaceName(NameConverter.toPCMIdentifier(binding)));
+        IVariableBinding parameterBinding = parameter.resolveBinding();
+        if (parameterBinding == null) {
+            LOG.warn("Unresolved parameter binding " + parameter.getName() + " detected in " + getFullUnitName(unit)
+                    + "!");
+            return;
+        }
+        ITypeBinding type = parameterBinding.getType();
+        EntireInterface iface = new EntireInterface(type, new JavaInterfaceName(NameConverter.toPCMIdentifier(type)));
         components.get(unit)
             .requirements()
             .add(iface);
