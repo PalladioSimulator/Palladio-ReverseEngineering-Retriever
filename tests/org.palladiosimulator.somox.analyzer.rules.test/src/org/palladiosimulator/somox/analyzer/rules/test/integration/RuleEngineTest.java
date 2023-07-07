@@ -250,19 +250,19 @@ abstract class RuleEngineTest {
             .flatMap(x -> x.eCrossReferences()
                 .stream())
             .collect(Collectors.toSet());
-        assertFalse(providedObjects.isEmpty(), "\"" + component + "\" must provide something");
+        assertFalse(providedObjects.isEmpty(), "\"" + componentName + "\" must provide something");
 
         Set<Interface> providedInterfaces = interfaces.stream()
             .filter(providedObjects::contains)
             .collect(Collectors.toSet());
-        assertFalse(providedInterfaces.isEmpty(), "\"" + component + "\" must provide an interface");
+        assertFalse(providedInterfaces.isEmpty(), "\"" + componentName + "\" must provide an interface");
 
         Set<Interface> specifiedInterfaces = providedInterfaces.stream()
             .filter(x -> x.getEntityName()
                 .equals(interfaceName))
             .collect(Collectors.toSet());
         assertFalse(specifiedInterfaces.isEmpty(),
-                "\"" + component + "\" must provide interface \"" + interfaceName + "\"");
+                "\"" + componentName + "\" must provide interface \"" + interfaceName + "\"");
 
         assertOperationExists(interfaceName, operationName);
     }
