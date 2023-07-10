@@ -3,6 +3,7 @@ package org.palladiosimulator.somox.analyzer.rules.workflow;
 import java.util.Objects;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.common.util.URI;
 import org.palladiosimulator.generator.fluent.shared.util.ModelSaver;
 import org.palladiosimulator.pcm.allocation.Allocation;
@@ -25,7 +26,7 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
     private final String allocationKey;
     private final String resourceEnvironmentKey;
     private final String outputFolder;
-    private final String configuredInputProjectName;
+    private final String projectName;
 
     public PersistenceJob(Blackboard<Object> blackboard, URI inputFolder, URI outputFolder, String repositoryKey,
             String systemKey, String allocationKey, String resourceEnvironmentKey) {
@@ -35,9 +36,17 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
         this.systemKey = Objects.requireNonNull(systemKey);
         this.allocationKey = Objects.requireNonNull(allocationKey);
         this.resourceEnvironmentKey = Objects.requireNonNull(resourceEnvironmentKey);
-        // Set path to output folder and prefix of all output files to name of input project folder
-        this.outputFolder = outputFolder.toFileString();
-        this.configuredInputProjectName = inputFolder.lastSegment();
+
+        this.outputFolder = CommonPlugin.asLocalURI(outputFolder)
+            .devicePath();
+
+        String lastInputSegment = inputFolder.lastSegment();
+        // Handle a trailing path separator ("example/path/").
+        if (lastInputSegment.isEmpty()) {
+            lastInputSegment = inputFolder.trimSegments(1)
+                .lastSegment();
+        }
+        this.projectName = lastInputSegment;
     }
 
     @Override
@@ -52,10 +61,10 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
 
         // Make blackboard models persistent by saving them as files
         monitor.subTask("Persisting models");
-        ModelSaver.saveRepository(repository, outputFolder, configuredInputProjectName);
-        ModelSaver.saveSystem(system, outputFolder, configuredInputProjectName);
-        ModelSaver.saveResourceEnvironment(resourceEnvironment, outputFolder, configuredInputProjectName);
-        ModelSaver.saveAllocation(allocation, outputFolder, configuredInputProjectName);
+        ModelSaver.saveRepository(repository, outputFolder, projectName);
+        ModelSaver.saveSystem(system, outputFolder, projectName);
+        ModelSaver.saveResourceEnvironment(resourceEnvironment, outputFolder, projectName);
+        ModelSaver.saveAllocation(allocation, outputFolder, projectName);
         monitor.done();
     }
 
