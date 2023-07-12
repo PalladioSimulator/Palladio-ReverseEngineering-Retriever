@@ -18,10 +18,10 @@ public class InterfaceProcessor extends Processor<PcmSurrogate, Interface> {
     protected void refine(Interface discovery) {
         List<InterfaceProvisionRelation> providesRelations = getModel().getByType(InterfaceProvisionRelation.class);
         providesRelations.removeIf(relation -> !relation.getDestination().equals(discovery));
-        List<InterfaceProvisionRelation> requiresRelations = getModel().getByType(InterfaceProvisionRelation.class);
-        requiresRelations.removeIf(relation -> !relation.getDestination().equals(discovery));
 
-        if (providesRelations.isEmpty() && requiresRelations.isEmpty()) {
+        // Rule: Each interface has to be provided by a component.
+        // -> If no provision relation exists yet, add a placeholder provider and relation to the model.
+        if (providesRelations.isEmpty()) {
             Component<?> component = Component.getUniquePlaceholder();
             InterfaceProvisionRelation relation = new InterfaceProvisionRelation(component, discovery, true);
             addImplication(relation);
