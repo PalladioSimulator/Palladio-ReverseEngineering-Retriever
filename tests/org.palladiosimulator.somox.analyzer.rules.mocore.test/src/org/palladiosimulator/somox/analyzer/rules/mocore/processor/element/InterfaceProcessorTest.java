@@ -38,6 +38,7 @@ public class InterfaceProcessorTest extends ProcessorTest<InterfaceProcessor, Pc
         assertEquals(element, relation.getDestination());
         assertTrue(relation.isPlaceholder());
         assertTrue(relation.getSource().isPlaceholder());
+        assertEquals(element.getValue().getEntityName() + " Provider", relation.getSource().getValue().getEntityName());
     }
 
     @Override
