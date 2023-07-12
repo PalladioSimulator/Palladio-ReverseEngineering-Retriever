@@ -1,6 +1,7 @@
 package org.palladiosimulator.somox.analyzer.rules.mocore.transformation;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,6 +47,9 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.Inte
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.ServiceEffectSpecificationRelation;
 import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.SignatureProvisionRelation;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+
 import tools.mdsd.mocore.framework.transformation.Transformer;
 
 public class RepositoryTransformer implements Transformer<PcmSurrogate, Repository> {
@@ -60,7 +64,7 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
         Repo fluentRepository = repositoryFactory.newRepository();
 
         List<ServiceEffectSpecificationRelation> seffRelations = model
-            .getByType(ServiceEffectSpecificationRelation.class);
+                .getByType(ServiceEffectSpecificationRelation.class);
         List<InterfaceProvisionRelation> provisionRelations = model.getByType(InterfaceProvisionRelation.class);
         List<InterfaceRequirementRelation> requirementRelations = model.getByType(InterfaceRequirementRelation.class);
         List<SignatureProvisionRelation> signatureRelations = model.getByType(SignatureProvisionRelation.class);
@@ -73,17 +77,17 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
             // Add interface to repository and fetch built interface
             fluentRepository.addToRepository(interfaceCreator);
             OperationInterface repositoryInterface = repositoryFactory
-                .fetchOfOperationInterface(interfaceInstance.getValue()
-                    .getEntityName());
+                    .fetchOfOperationInterface(interfaceInstance.getValue()
+                            .getEntityName());
 
             // Add signatures to the added interface directly
             // Avoids the creation of signature creator and tight coupling to fluentApi
             for (SignatureProvisionRelation relation : signatureRelations) {
                 if (relation.getDestination()
-                    .equals(interfaceInstance)) {
+                        .equals(interfaceInstance)) {
                     Signature signature = relation.getSource();
                     signature.getValue()
-                        .setInterface__OperationSignature(repositoryInterface);
+                            .setInterface__OperationSignature(repositoryInterface);
                 }
             }
         }
@@ -96,9 +100,9 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
             for (InterfaceProvisionRelation relation : provisionRelations) {
                 Interface interfaceInstance = relation.getDestination();
                 if (relation.getSource()
-                    .equals(component)) {
+                        .equals(component)) {
                     String interfaceName = interfaceInstance.getValue()
-                        .getEntityName();
+                            .getEntityName();
                     OperationInterface operationInterface = repositoryFactory.fetchOfOperationInterface(interfaceName);
                     componentCreator.provides(operationInterface, getProvidedRoleName(interfaceInstance));
                 }
@@ -108,9 +112,9 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
             for (InterfaceRequirementRelation relation : requirementRelations) {
                 Interface interfaceInstance = relation.getDestination();
                 if (relation.getSource()
-                    .equals(component)) {
+                        .equals(component)) {
                     String interfaceName = interfaceInstance.getValue()
-                        .getEntityName();
+                            .getEntityName();
                     OperationInterface operationInterface = repositoryFactory.fetchOfOperationInterface(interfaceName);
                     componentCreator.requires(operationInterface, getRequiredRoleName(interfaceInstance));
                 }
@@ -124,35 +128,35 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
             // it exists
             for (InterfaceProvisionRelation interfaceProvision : provisionRelations) {
                 if (interfaceProvision.getSource()
-                    .equals(component)) {
+                        .equals(component)) {
                     OperationInterface operationInterface = repositoryFactory
-                        .fetchOfOperationInterface(interfaceProvision.getDestination()
-                            .getValue()
-                            .getEntityName());
+                            .fetchOfOperationInterface(interfaceProvision.getDestination()
+                                    .getValue()
+                                    .getEntityName());
                     for (OperationSignature signature : operationInterface.getSignatures__OperationInterface()) {
                         // Get seff entity for specific signature in interface
                         Predicate<ServiceEffectSpecificationRelation> filter = relation -> {
                             final Signature wrappedSignature = relation.getSource()
-                                .getDestination()
-                                .getSource();
+                                    .getDestination()
+                                    .getSource();
                             final Interface wrappedInterface = relation.getSource()
-                                .getSource()
-                                .getDestination();
+                                    .getSource()
+                                    .getDestination();
                             return representSameSignature(signature, wrappedSignature.getValue())
                                     && representSameInterface(operationInterface, wrappedInterface.getValue());
                         };
                         ServiceEffectSpecification seff = seffRelations.stream()
-                            .filter(relation -> relation.getSource()
-                                .getSource()
-                                .getSource()
-                                .equals(component))
-                            .filter(filter)
-                            .map(relation -> relation.getDestination()
-                                .getValue())
-                            .findFirst()
-                            .orElse(org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.ServiceEffectSpecification
-                                .getUniquePlaceholder()
-                                .getValue());
+                                .filter(relation -> relation.getSource()
+                                        .getSource()
+                                        .getSource()
+                                        .equals(component))
+                                .filter(filter)
+                                .map(relation -> relation.getDestination()
+                                        .getValue())
+                                .findFirst()
+                                .orElse(org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element.ServiceEffectSpecification
+                                        .getUniquePlaceholder()
+                                        .getValue());
 
                         // Reset component and signature within seff because they may be out-dated
                         seff.setBasicComponent_ServiceEffectSpecification(repositoryComponent);
@@ -163,30 +167,30 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
                             ResourceDemandingSEFF rdSeff = (ResourceDemandingSEFF) seff;
                             EList<AbstractAction> behavior = rdSeff.getSteps_Behaviour();
                             List<ExternalCallAction> externalCallActions = behavior.stream()
-                                .filter(action -> action instanceof ExternalCallAction)
-                                .map(action -> (ExternalCallAction) action)
-                                .collect(Collectors.toList());
+                                    .filter(action -> action instanceof ExternalCallAction)
+                                    .map(action -> (ExternalCallAction) action)
+                                    .collect(Collectors.toList());
 
                             for (ExternalCallAction externalCallAction : externalCallActions) {
                                 OperationSignature externalSignature = externalCallAction
-                                    .getCalledService_ExternalService();
+                                        .getCalledService_ExternalService();
 
                                 // Get required role containing called signature of
                                 // externalCallAction from component
                                 Optional<OperationRequiredRole> requiredRoleOption = repositoryComponent
-                                    .getRequiredRoles_InterfaceRequiringEntity()
-                                    .stream()
-                                    .filter(role -> role instanceof OperationRequiredRole)
-                                    .map(role -> (OperationRequiredRole) role)
-                                    .filter(role -> role.getRequiredInterface__OperationRequiredRole()
-                                        .getSignatures__OperationInterface()
-                                        .contains(externalSignature))
-                                    .findFirst();
+                                        .getRequiredRoles_InterfaceRequiringEntity()
+                                        .stream()
+                                        .filter(role -> role instanceof OperationRequiredRole)
+                                        .map(role -> (OperationRequiredRole) role)
+                                        .filter(role -> role.getRequiredInterface__OperationRequiredRole()
+                                                .getSignatures__OperationInterface()
+                                                .contains(externalSignature))
+                                        .findFirst();
                                 if (requiredRoleOption.isEmpty()) {
                                     LOG.warn(
                                             "Failed to find required role for external call to "
                                                     + externalSignature.getInterface__OperationSignature()
-                                                        .getEntityName()
+                                                            .getEntityName()
                                                     + "#" + externalSignature.getEntityName() + "!");
                                     continue;
                                 }
@@ -204,17 +208,85 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
             fluentRepository.addToRepository(repositoryComponent);
         }
 
+        // Add implicitly provided interfaces of composites to model (non-required interface of child).
+        // Problem: This has to happen from innermost to outermost component. -> Sorted by dependency.
+        // First step: Get children of each composite
+        List<CompositionRelation> compositionRelations = model.getByType(CompositionRelation.class);
+        List<Composite> composites = model.getByType(Composite.class);
+        Multimap<Composite, Component<?>> compositesChildren = HashMultimap.create();
+        for (Composite composite : composites) {
+            List<Component<?>> children = compositionRelations.stream()
+                    .filter(relation -> relation.getSource().equals(composite))
+                    .map(relation -> relation.getDestination())
+                    .collect(Collectors.toList());
+            compositesChildren.putAll(composite, children);
+        }
+        // Second step: Sort composites
+        List<Composite> sortedComposites = new LinkedList<>(composites);
+        sortedComposites.sort((a, b) -> compareComposites(a, b, compositesChildren));
+        // Third step: Get non-required interfaces & their providers
+        List<InterfaceProvisionRelation> nonRequiredProvisionRelations = new LinkedList<>(provisionRelations);
+        nonRequiredProvisionRelations.removeIf(
+                provisionRelation -> requirementRelations.stream().anyMatch(requirementRelation -> requirementRelation
+                        .getDestination().equals(provisionRelation.getDestination())));
+        // Fourth step: Provide non-required interface of children & add delegation
+        for (Composite composite : sortedComposites) {
+            for (InterfaceProvisionRelation nonRequiredProvision : nonRequiredProvisionRelations) {
+                Component<?> provider = nonRequiredProvision.getSource();
+                Interface providedInterface = nonRequiredProvision.getDestination();
+
+                // Only add if provider is direct child of composite
+                if (isDirectChild(provider, composite, compositesChildren)) {
+                    // Check whether delegation already exists in model
+                    boolean existsDelegation = false;
+                    for (CompositeProvisionDelegationRelation delegationRelation : model
+                            .getByType(CompositeProvisionDelegationRelation.class)) {
+                        if (delegationRelation.getDestination().equals(nonRequiredProvision)
+                                && delegationRelation.getSource().getSource().equals(composite)) {
+                            existsDelegation = true;
+                            break;
+                        }
+                    }
+
+                    if (!existsDelegation) {
+                        // Check whether interface provision already exists
+                        InterfaceProvisionRelation provisionRelation = null;
+                        for (InterfaceProvisionRelation provision : provisionRelations) {
+                            if (provision.getSource().equals(composite)
+                                    && provision.getDestination().equals(providedInterface)) {
+                                provisionRelation = provision;
+                            }
+                        }
+                        // Create new provision if it does not exist yet
+                        if (Objects.isNull(provisionRelation)) {
+                            provisionRelation = new InterfaceProvisionRelation(composite,
+                                    providedInterface, true);
+
+                            // Add to model and refresh already fetched relations
+                            model.add(provisionRelation);
+                            provisionRelations = model.getByType(InterfaceProvisionRelation.class);
+                        }
+
+                        // Add provided delegation connector
+                        CompositeProvisionDelegationRelation provisionDelegation = new CompositeProvisionDelegationRelation(
+                                provisionRelation, nonRequiredProvision, true);
+                        model.add(provisionDelegation);
+                    }
+                }
+            }
+        }
+
         // Add composite components with their roles to fluent repository
-        for (Composite composite : model.getByType(Composite.class)) {
+        for (Composite composite : composites) {
             CompositeComponentCreator compositeCreator = getCreator(repositoryFactory, composite);
 
-            // Add provided interfaces
+            // Add explicitly provided interfaces
             for (InterfaceProvisionRelation relation : provisionRelations) {
                 Interface interfaceInstance = relation.getDestination();
                 if (relation.getSource()
-                    .equals(composite)) {
+                        .equals(composite)) {
                     String interfaceName = interfaceInstance.getValue()
-                        .getEntityName();
+                            .getEntityName();
                     OperationInterface operationInterface = repositoryFactory.fetchOfOperationInterface(interfaceName);
                     compositeCreator.provides(operationInterface, getProvidedRoleName(interfaceInstance));
                 }
@@ -224,9 +296,9 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
             for (InterfaceRequirementRelation relation : requirementRelations) {
                 Interface interfaceInstance = relation.getDestination();
                 if (relation.getSource()
-                    .equals(composite)) {
+                        .equals(composite)) {
                     String interfaceName = interfaceInstance.getValue()
-                        .getEntityName();
+                            .getEntityName();
                     OperationInterface operationInterface = repositoryFactory.fetchOfOperationInterface(interfaceName);
                     compositeCreator.requires(operationInterface, getRequiredRoleName(interfaceInstance));
                 }
@@ -237,31 +309,30 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
         }
 
         // Add compositions to repository -> All composites & composites have to be added beforehand
-        List<CompositionRelation> compositionRelations = model.getByType(CompositionRelation.class);
         for (CompositionRelation relation : compositionRelations) {
             Composite composite = relation.getSource();
             Component<?> destination = relation.getDestination();
 
             // Fetch composite from repository
             CompositeComponent persistedCompositeComponent = repositoryFactory
-                .fetchOfCompositeComponent(composite.getValue()
-                    .getEntityName());
+                    .fetchOfCompositeComponent(composite.getValue()
+                            .getEntityName());
             persistedCompositeComponent.getAssemblyContexts__ComposedStructure();
 
             // Fetch composite child from repository & create temporary fluent creator
             CompositeComponentCreator temporaryCreator = repositoryFactory.newCompositeComponent();
             if (destination instanceof AtomicComponent) {
                 temporaryCreator.withAssemblyContext(repositoryFactory.fetchOfBasicComponent(destination.getValue()
-                    .getEntityName()));
+                        .getEntityName()));
             } else if (destination instanceof Composite) {
                 temporaryCreator.withAssemblyContext(repositoryFactory.fetchOfCompositeComponent(destination.getValue()
-                    .getEntityName()));
+                        .getEntityName()));
             }
 
             // Copy assembly contexts from temporary to persisted composite
             CompositeComponent temporaryComposite = (CompositeComponent) temporaryCreator.build();
             persistedCompositeComponent.getAssemblyContexts__ComposedStructure()
-                .addAll(temporaryComposite.getAssemblyContexts__ComposedStructure());
+                    .addAll(temporaryComposite.getAssemblyContexts__ComposedStructure());
         }
 
         Repository repository = fluentRepository.createRepositoryNow();
@@ -422,6 +493,38 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
 
     }
 
+    private boolean isDirectChild(Component<?> child, Composite parent,
+            Multimap<Composite, Component<?>> compositesChildren) {
+        return compositesChildren.get(parent).contains(child);
+    }
+
+    private boolean isRecursiveChild(Component<?> child, Composite parent,
+            Multimap<Composite, Component<?>> compositesChildren) {
+        // Case 1: Direct child
+        if (isDirectChild(child, parent, compositesChildren)) {
+            return true;
+        }
+
+        // Case 2: Indirect child
+        for (Component<?> childOfParent : compositesChildren.get(parent)) {
+            if (childOfParent instanceof Composite) {
+                return isRecursiveChild(child, (Composite) childOfParent, compositesChildren);
+            }
+        }
+
+        // Case 3: Not child of parent
+        return false;
+    }
+
+    private int compareComposites(Composite a, Composite b, Multimap<Composite, Component<?>> compositesChildren) {
+        if (isRecursiveChild(a, b, compositesChildren)) {
+            return -1;
+        } else if (isRecursiveChild(b, a, compositesChildren)) {
+            return 1;
+        }
+        return 0;
+    }
+
     private BasicComponentCreator getCreator(FluentRepositoryFactory fluentFactory, AtomicComponent component) {
         BasicComponentCreator componentCreator = fluentFactory.newBasicComponent();
 
@@ -457,13 +560,13 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
 
     protected static String getProvidedRoleName(Interface interfaceInstance) {
         String interfaceEntityName = interfaceInstance.getValue()
-            .getEntityName();
+                .getEntityName();
         return String.format(ROLE_PROVIDES_NAME_PATTERN, interfaceEntityName);
     }
 
     protected static String getRequiredRoleName(Interface interfaceInstance) {
         String interfaceEntityName = interfaceInstance.getValue()
-            .getEntityName();
+                .getEntityName();
         return String.format(ROLE_REQUIRES_NAME_PATTERN, interfaceEntityName);
     }
 
@@ -473,9 +576,9 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
         boolean equalReturn = Objects.equals(signature.getReturnType__OperationSignature(),
                 otherSignature.getReturnType__OperationSignature());
         boolean equalParameters = signature.getParameters__OperationSignature()
-            .containsAll(otherSignature.getParameters__OperationSignature())
+                .containsAll(otherSignature.getParameters__OperationSignature())
                 && otherSignature.getParameters__OperationSignature()
-                    .containsAll(signature.getParameters__OperationSignature());
+                        .containsAll(signature.getParameters__OperationSignature());
         return equalName && equalReturn && equalParameters;
     }
 
