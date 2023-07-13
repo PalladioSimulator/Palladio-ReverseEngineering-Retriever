@@ -231,7 +231,9 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
                         .getDestination().equals(provisionRelation.getDestination())));
         // Fourth step: Provide non-required interface of children & add delegation
         for (Composite composite : sortedComposites) {
-            for (InterfaceProvisionRelation nonRequiredProvision : nonRequiredProvisionRelations) {
+            for (int i = 0; i < nonRequiredProvisionRelations.size(); i++) {
+                // Access via index due to concurrent modification -> New last element might be added to list
+                InterfaceProvisionRelation nonRequiredProvision = nonRequiredProvisionRelations.get(i);
                 Component<?> provider = nonRequiredProvision.getSource();
                 Interface providedInterface = nonRequiredProvision.getDestination();
 
@@ -264,6 +266,7 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
 
                             // Add to model and refresh already fetched relations
                             model.add(provisionRelation);
+                            nonRequiredProvisionRelations.add(provisionRelation);
                             provisionRelations = model.getByType(InterfaceProvisionRelation.class);
                         }
 
