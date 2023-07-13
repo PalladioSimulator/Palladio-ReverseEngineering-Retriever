@@ -298,7 +298,8 @@ public class PostAnalysisJobTest {
         // Check system validity
         assertEquals(3, system.getAssemblyContexts__ComposedStructure()
                 .size());
-        assertEquals(3, system.getConnectors__ComposedStructure()
+        // 3 assembly connectors & 1 provision delegation expected
+        assertEquals(4, system.getConnectors__ComposedStructure()
                 .size());
 
         // Check resource environment validity
