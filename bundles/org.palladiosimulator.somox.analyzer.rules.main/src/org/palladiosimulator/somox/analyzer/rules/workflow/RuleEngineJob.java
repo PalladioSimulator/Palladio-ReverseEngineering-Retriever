@@ -36,6 +36,11 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
                 RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_ALLOCATION,
                 RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_RESOURCE_ENVIRONMENT));
 
+        // Merge data & failure types into output repository
+        super.add(new TypeMergerJob(getBlackboard(),
+                RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY,
+                RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_REPOSITORY));
+
         // Persist repository, system, allocation, & resource environment model from blackboard into file system
         super.add(new PersistenceJob(getBlackboard(), configuration.getInputFolder(), configuration.getOutputFolder(),
                 RuleEngineConfiguration.RULE_ENGINE_MOCORE_OUTPUT_REPOSITORY,
