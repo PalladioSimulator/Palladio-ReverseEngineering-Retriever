@@ -315,7 +315,7 @@ public class PostAnalysisJobTest {
                 .size());
     }
 
-    @Disabled("Broke due to a change in the ModelSaver/Loader")
+    @Disabled("Due to changes in ModelSaver the ModelLoader cannot dereference objects within models correctly")
     @Test
     public void persistModels() throws Exception {
         // Construct jobs
@@ -389,7 +389,8 @@ public class PostAnalysisJobTest {
         // Check loaded system validity
         assertEquals(3, persistedSystem.getAssemblyContexts__ComposedStructure()
                 .size());
-        assertEquals(3, persistedSystem.getConnectors__ComposedStructure()
+        // 3 assembly connectors & 1 provision delegation expected
+        assertEquals(4, persistedSystem.getConnectors__ComposedStructure()
                 .size());
         // Check repository information via assembly context to verify that references were resolved
         // correctly
