@@ -55,6 +55,7 @@ import tools.mdsd.mocore.framework.transformation.Transformer;
 public class RepositoryTransformer implements Transformer<PcmSurrogate, Repository> {
     private static final Logger LOG = Logger.getLogger(RepositoryTransformer.class);
 
+    private static final String DELEGATION_EXCLUSION_NAME_PATTERN = "I_%s";
     private static final String ROLE_PROVIDES_NAME_PATTERN = "%s Provider";
     private static final String ROLE_REQUIRES_NAME_PATTERN = "%s Consumer";
 
@@ -250,7 +251,10 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
                         }
                     }
 
-                    if (!existsDelegation) {
+                    // Check whether interface should be excluded from recursive delegation
+                    boolean excludeDelegation = isExcludedFromDelegation(provider, providedInterface);
+
+                    if (!existsDelegation && !excludeDelegation) {
                         // Check whether interface provision already exists
                         InterfaceProvisionRelation provisionRelation = null;
                         for (InterfaceProvisionRelation provision : provisionRelations) {
@@ -517,6 +521,12 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
 
         // Case 3: Not child of parent
         return false;
+    }
+
+    protected static boolean isExcludedFromDelegation(Component<?> provider, Interface providedInterface) {
+        String providerName = provider.getValue().getEntityName();
+        String providedInterfaceName = providedInterface.getValue().getEntityName();
+        return providedInterfaceName.equals(String.format(DELEGATION_EXCLUSION_NAME_PATTERN, providerName));
     }
 
     private int compareComposites(Composite a, Composite b, Multimap<Composite, Component<?>> compositesChildren) {

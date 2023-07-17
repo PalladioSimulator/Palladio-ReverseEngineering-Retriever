@@ -55,13 +55,15 @@ public class SystemTransformer implements Transformer<PcmSurrogate, org.palladio
                     .anyMatch(requirementRelation -> requirementRelation.getDestination().equals(providedInteface));
             boolean isCompositeChild = model.getByType(CompositionRelation.class).stream()
                     .anyMatch(composition -> composition.getDestination().equals(provider));
+            // Check whether interface should be excluded from delegation
+            boolean excludeDelegation = RepositoryTransformer.isExcludedFromDelegation(provider, providedInteface);
 
             // Only add delegation if no other component requires interface and only add for most outer provider in case
             // of composite structures
             //
             // Important: Asserts that repository transformer added provision delegation from innermost to outermost
             // component in case of a composite structure. If not, no delegation to system is added.
-            if (!existsRequirement && !isCompositeChild) {
+            if (!existsRequirement && !isCompositeChild && !excludeDelegation) {
                 // Create & add provided role to fluent system
                 String delegationRoleName = String.format(DELEGATION_ROLE_NAME_PATTERN, providedIntefaceName);
                 OperationProvidedRoleCreator systemProvidedRole = systemFactory.newOperationProvidedRole()
