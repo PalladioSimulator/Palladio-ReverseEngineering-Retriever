@@ -161,8 +161,13 @@ public class RuleHelper {
     }
 
     public static List<IMethodBinding> getMethods(Type type) {
-        return List.of(type.resolveBinding()
-            .getDeclaredMethods());
+        ITypeBinding binding = type.resolveBinding();
+        if (binding == null) {
+            LOG.warn("Could not resolve type binding for \"" + type + "\". Returning empty list for getMethods");
+            return List.of();
+        } else {
+            return List.of(binding.getDeclaredMethods());
+        }
     }
 
     public static List<FieldDeclaration> getFields(CompilationUnit unit) {
@@ -469,9 +474,14 @@ public class RuleHelper {
     }
 
     public static boolean isClassOfFieldAnnotatedWithName(FieldDeclaration field, String... names) {
-        IAnnotationBinding[] annotations = field.getType()
-            .resolveBinding()
-            .getAnnotations();
+        ITypeBinding binding = field.getType()
+            .resolveBinding();
+        if (binding == null) {
+            LOG.warn("field: could not resolve type binding for \"" + field.getType()
+                    + "\" => returning false from isClassOfFieldAnnotatedWithName");
+            return false;
+        }
+        IAnnotationBinding[] annotations = binding.getAnnotations();
         Set<String> uniqueNames = Set.of(names);
 
         return List.of(annotations)
