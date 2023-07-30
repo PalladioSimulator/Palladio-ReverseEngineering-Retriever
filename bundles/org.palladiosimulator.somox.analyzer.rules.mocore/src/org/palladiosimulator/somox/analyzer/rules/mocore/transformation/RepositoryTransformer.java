@@ -55,7 +55,7 @@ import tools.mdsd.mocore.framework.transformation.Transformer;
 public class RepositoryTransformer implements Transformer<PcmSurrogate, Repository> {
     private static final Logger LOG = Logger.getLogger(RepositoryTransformer.class);
 
-    private static final String DELEGATION_EXCLUSION_NAME_PATTERN = "I_%s";
+    private static final String DELEGATION_EXCLUSION_NAME_PATTERN = "%s";
     private static final String ROLE_PROVIDES_NAME_PATTERN = "%s Provider";
     private static final String ROLE_REQUIRES_NAME_PATTERN = "%s Consumer";
 
