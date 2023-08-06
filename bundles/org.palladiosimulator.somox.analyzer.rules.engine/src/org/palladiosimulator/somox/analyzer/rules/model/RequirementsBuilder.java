@@ -1,6 +1,7 @@
 package org.palladiosimulator.somox.analyzer.rules.model;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -18,6 +19,10 @@ public class RequirementsBuilder {
 
     public Requirements create() {
         return new Requirements(requirements);
+    }
+
+    public List<OperationInterface> toList() {
+        return Collections.unmodifiableList(requirements);
     }
 
     @Override

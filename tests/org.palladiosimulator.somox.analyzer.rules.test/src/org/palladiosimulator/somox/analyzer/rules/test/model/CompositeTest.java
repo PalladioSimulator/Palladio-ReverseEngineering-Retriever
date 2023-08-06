@@ -24,15 +24,13 @@ public class CompositeTest {
     void emptyComposite() {
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of()),
-                new Provisions(List.of()));
+                new Provisions(List.of(), List.of()));
 
         assertTrue(result.parts()
             .isEmpty(), "empty composite should have no parts");
         assertTrue(result.requirements()
-            .get()
             .isEmpty(), "empty composite should have no requirements");
         assertTrue(result.provisions()
-            .get()
             .isEmpty(), "empty composite should have no provisions");
     }
 
@@ -50,15 +48,13 @@ public class CompositeTest {
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
         Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of()),
-                new Provisions(List.of()));
+                new Provisions(List.of(), List.of(provision, requirement)));
 
         assertEquals(1, result.parts()
             .size(), "this composite should have exactly one part");
         assertTrue(result.requirements()
-            .get()
             .isEmpty(), "this composite should not have requirements");
         assertTrue(result.provisions()
-            .get()
             .isEmpty(), "this composite should not have provisions");
 
         Component component = result.parts()
@@ -87,22 +83,20 @@ public class CompositeTest {
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
         Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(requirement)),
-                new Provisions(List.of(provision)));
+                new Provisions(List.of(provision), List.of(provision, requirement)));
 
         assertEquals(1, result.parts()
             .size(), "this composite should have exactly one part");
         assertEquals(1, result.requirements()
-            .get()
             .size(), "this composite should have exactly one requirement");
         assertEquals(1, result.provisions()
-            .get()
             .size(), "this composite should have exactly one provision");
     }
 
     @Test
     void twoComponentComposite() {
-        OperationInterface provision1 = new Operation(null, new JavaOperationName("Interface", "providedMethodA"));
-        OperationInterface provision2 = new Operation(null, new JavaOperationName("Interface", "providedMethodB"));
+        OperationInterface provision1 = new Operation(null, new JavaOperationName("InterfaceA", "providedMethodA"));
+        OperationInterface provision2 = new Operation(null, new JavaOperationName("InterfaceB", "providedMethodB"));
         EntireInterface requirement1 = new EntireInterface(new JavaInterfaceName("RequiredInterfaceA"));
         EntireInterface requirement2 = new EntireInterface(new JavaInterfaceName("RequiredInterfaceB"));
 
@@ -122,15 +116,14 @@ public class CompositeTest {
         compositeBuilder.addPart(componentBuilder1);
         compositeBuilder.addPart(componentBuilder2);
         Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(requirement1, requirement2)),
-                new Provisions(List.of(provision1, provision2)));
+                new Provisions(List.of(provision1, provision2),
+                        List.of(provision1, provision2, requirement1, requirement2)));
 
         assertEquals(2, result.parts()
             .size(), "this composite should have exactly two parts");
         assertEquals(2, result.requirements()
-            .get()
             .size(), "this composite should have exactly two requirements");
         assertEquals(2, result.provisions()
-            .get()
             .size(), "this composite should have exactly two provisions");
     }
 
@@ -160,16 +153,14 @@ public class CompositeTest {
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder1);
         compositeBuilder.addPart(componentBuilder2);
-        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(requirement)),
-                new Provisions(List.of(provision)));
+        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(requirement)), new Provisions(
+                List.of(provision), List.of(provision, requirement, additionalRequirement1, additionalRequirement2)));
 
         assertEquals(2, result.parts()
             .size(), "this composite should have exactly two parts");
         assertEquals(1, result.requirements()
-            .get()
             .size(), "this composite should have exactly one requirement");
         assertEquals(1, result.provisions()
-            .get()
             .size(), "this composite should have exactly one provision");
     }
 
@@ -185,12 +176,11 @@ public class CompositeTest {
         compositeBuilder.addPart(componentBuilder);
         OperationInterface provisionInterface = new EntireInterface(new JavaInterfaceName("Interface"));
         Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of()),
-                new Provisions(List.of(provisionInterface)));
+                new Provisions(List.of(provisionInterface), List.of(provision)));
 
         assertEquals(1, result.parts()
             .size(), "this composite should have exactly one part");
         assertEquals(1, result.provisions()
-            .get()
             .size(), "this composite should have exactly one provision");
     }
 }

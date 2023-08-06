@@ -1,5 +1,6 @@
 package org.palladiosimulator.somox.analyzer.rules.model;
 
+import java.util.Collection;
 import java.util.Objects;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -29,8 +30,8 @@ public class ComponentBuilder {
         return provisions;
     }
 
-    public Component create() {
-        return new Component(compilationUnit, requirements.create(), provisions.create());
+    public Component create(Collection<OperationInterface> allDependencies) {
+        return new Component(compilationUnit, requirements.create(), provisions.create(allDependencies));
     }
 
     @Override

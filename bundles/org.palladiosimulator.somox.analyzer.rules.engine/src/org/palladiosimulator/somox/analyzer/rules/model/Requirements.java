@@ -23,9 +23,14 @@ public class Requirements implements Iterable<EntireInterface> {
         return Collections.unmodifiableSet(requirements);
     }
 
-    public boolean contains(OperationInterface iface) {
+    public boolean containsPartOf(OperationInterface iface) {
         return requirements.stream()
             .anyMatch(x -> x.isPartOf(iface));
+    }
+
+    public boolean containsEntire(OperationInterface iface) {
+        return requirements.stream()
+            .anyMatch(x -> iface.isPartOf(x));
     }
 
     @Override

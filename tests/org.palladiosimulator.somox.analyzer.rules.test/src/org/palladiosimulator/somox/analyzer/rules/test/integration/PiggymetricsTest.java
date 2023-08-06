@@ -14,21 +14,21 @@ public class PiggymetricsTest extends RuleEngineTest {
         assertComponentExists("com_piggymetrics_notification_service_NotificationServiceImpl");
 
         assertComponentProvidesOperation("com_piggymetrics_statistics_controller_StatisticsController", "/statistics",
-                "current");
-        assertComponentProvidesOperation("com_piggymetrics_account_controller_AccountController", "/accounts", "");
+                "/statistics/current");
+        assertComponentProvidesOperation("com_piggymetrics_account_controller_AccountController", "/accounts",
+                "/accounts");
         assertComponentProvidesOperation("com_piggymetrics_notification_controller_RecipientController",
-                "/notifications/recipients", "");
+                "/notifications/recipients", "/notifications/recipients");
 
         assertMaxParameterCount(2, "com_piggymetrics_notification_service_RecipientService", "markNotified");
 
         assertComponentRequiresComponent("com_piggymetrics_notification_client_AccountServiceClient",
                 "com_piggymetrics_account_controller_AccountController");
 
-        // FIXME: This fails, but is hard to reproduce outside of tests.
-        // assertComponentRequiresComponent("com_piggymetrics_auth_service_UserServiceImpl",
-        // "com_piggymetrics_auth_repository_UserRepository");
-        // assertComponentRequiresComponent("com_piggymetrics_notification_controller_RecipientController",
-        // "com_piggymetrics_notification_service_RecipientServiceImpl");
+        assertComponentRequiresComponent("com_piggymetrics_auth_service_UserServiceImpl",
+                "com_piggymetrics_auth_repository_UserRepository");
+        assertComponentRequiresComponent("com_piggymetrics_notification_controller_RecipientController",
+                "com_piggymetrics_notification_service_RecipientServiceImpl");
 
         assertInSameCompositeComponent("com_piggymetrics_notification_controller_RecipientController",
                 "com_piggymetrics_notification_service_NotificationServiceImpl");

@@ -1,6 +1,7 @@
 package org.palladiosimulator.somox.analyzer.rules.model;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -16,8 +17,12 @@ public class ProvisionsBuilder {
         this.provisions.addAll(provisions);
     }
 
-    public Provisions create() {
-        return new Provisions(provisions);
+    public Provisions create(Collection<OperationInterface> allDependencies) {
+        return new Provisions(provisions, allDependencies);
+    }
+
+    public List<OperationInterface> toList() {
+        return Collections.unmodifiableList(provisions);
     }
 
     @Override

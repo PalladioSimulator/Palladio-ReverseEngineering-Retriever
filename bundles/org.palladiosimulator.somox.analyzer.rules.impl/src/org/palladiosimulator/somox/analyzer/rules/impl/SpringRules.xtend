@@ -15,12 +15,14 @@ import org.eclipse.jdt.core.dom.ITypeBinding
 import org.palladiosimulator.somox.analyzer.rules.model.PathName
 import java.util.HashMap
 import java.util.List
+import java.util.Properties
 
 class SpringRules extends IRule {
     static final Logger LOG = Logger.getLogger(SpringRules)
 
     public static final String YAML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.yaml"
     public static final String XML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.xml"
+    public static final String PROPERTIES_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.properties"
 
 	new(RuleEngineBlackboard blackboard) {
 		super(blackboard)
@@ -33,14 +35,29 @@ class SpringRules extends IRule {
 		val pomObjects = blackboard.getPartition(XML_DISCOVERER_ID)
 		val poms = pomObjects as Map<String, Document>
 
+		val propertiesObjects = blackboard.getPartition(PROPERTIES_DISCOVERER_ID)
+		val properties = propertiesObjects as Map<String, Properties>
+
 		val projectRoot = getProjectRoot(path, poms)
 		val configRoot = getConfigRoot(poms)
 		val bootstrapYaml = getBootstrapYaml(projectRoot, yamls)
-		val applicationName = getApplicationName(bootstrapYaml)
+		val applicationProperties = getApplicationProperties(projectRoot, properties)
+
+		var applicationName = getApplicationName(bootstrapYaml)
+		if (applicationName === null) applicationName = getApplicationName(applicationProperties)
+
 		val projectConfigYaml = getProjectConfigYaml(configRoot, yamls, applicationName)
-		val contextPath = getContextPath(projectConfigYaml)
 		
 		val applicationYaml = getApplicationYaml(projectRoot, yamls);
+		var contextPath = getContextPath(projectConfigYaml)
+		
+		if (contextPath === null) {
+			contextPath = "/"
+			if (applicationName !== null) {
+				contextPath += applicationName + "/"
+			}
+		}
+
 		val contextVariables = getContextVariables(applicationYaml);
 
 		val units = blackboard.getCompilationUnitAt(path)
@@ -139,6 +156,13 @@ class SpringRules extends IRule {
 		return name
 	}
 
+	def getApplicationName(Properties applicationProperties) {
+		if (applicationProperties === null) {
+			return null
+		}
+		return applicationProperties.getProperty("spring.application.name")
+	}
+
 	def getProjectConfigYaml(Path configRoot, Map<String, Iterable<Map<String, Object>>> yamls, String projectName) {
 		if (configRoot === null || yamls === null || projectName === null) {
 			return null
@@ -160,7 +184,7 @@ class SpringRules extends IRule {
 
 	def getContextPath(Iterable<Map<String, Object>> projectConfigYaml) {
 		if (projectConfigYaml === null) {
-			return "/"
+			return null
 		}
 		for (yaml : projectConfigYaml) {
 			val contextPath = getContextPath(yaml)
@@ -168,25 +192,43 @@ class SpringRules extends IRule {
 				return contextPath
 			}
 		}
-		return "/"
+		return null
 	}
 
 	def getContextPath(Map<String, Object> projectConfigYaml) {
 		val server = projectConfigYaml.get("server") as Map<String, Object>
 		if (server === null) {
-			return "/"
+			return null
 		}
 		val servlet = server.get("servlet") as Map<String, Object>
 		if (servlet === null) {
-			return "/"
+			return null
 		}
 		val contextPath = servlet.get("context-path") as String
 		if (contextPath === null) {
-			return "/"
+			return null
 		}
 		return contextPath
 	}
 	
+	def getApplicationProperties(Path projectRoot, Map<String, Properties> properties) {
+		if (projectRoot === null || properties === null) {
+			return null
+		}
+		val applicationProperties =  properties.entrySet.stream
+			.map[ entry | Path.of(entry.key) -> entry.value ]
+			.filter[ entry | entry.key.parent == projectRoot.resolve("src/main/resources") ]
+			.filter[ entry | val fileName = entry.key.fileName.toString; fileName == "application.properties" ]
+			.collect(Collectors.toList)
+
+		if (applicationProperties.size > 1) {
+			LOG.warn("Multiple application.properties in " + projectRoot + ", choosing " + projectRoot.relativize(applicationProperties.get(0).key) + " arbitrarily")
+		} else if (applicationProperties.empty) {
+			return null
+		}
+		return applicationProperties.get(0).value
+	}
+
 	def getApplicationYaml(Path projectRoot, Map<String, Iterable<Map<String, Object>>> yamls) {
 		if (projectRoot === null || yamls === null) {
 			return null
@@ -269,7 +311,7 @@ class SpringRules extends IRule {
 		val isController = isUnitAnnotatedWithName(unit, "RestController") || isUnitAnnotatedWithName(unit, "Controller")
 		val isClient = isUnitAnnotatedWithName(unit, "FeignClient")
 		val isRepository = isRepository(unit)
-		val isComponent = isService || isController || isClient || isRepository
+		val isComponent = isService || isController || isClient || isRepository || isUnitAnnotatedWithName(unit, "Component")
 
 		if (isComponent) {
 			pcmDetector.detectComponent(unit)
@@ -297,10 +339,10 @@ class SpringRules extends IRule {
 			for (m : getMethods(unit)) {
 				val annotated = hasMapping(m);
 				if (annotated) {
-					var methodName = ifaceName + "/" + getMapping(m);
-					// Remove "//". This can occur if requestedUnitMapping
-					// has a leading "/" and the contextPath is "/" or analogous for method and unit mapping.
-					methodName = methodName.replaceAll("/+", "/");
+					var requestedMapping = getMapping(m);
+					requestedMapping = substituteVariables(requestedMapping, contextVariables);
+					var methodName = ifaceName + "/" + requestedMapping;
+					methodName = replaceArgumentsWithWildcards(methodName);
 					pcmDetector.detectCompositeProvidedOperation(unit, m.resolveBinding, new PathName(methodName));
 				}
 			}
@@ -308,6 +350,7 @@ class SpringRules extends IRule {
 
 		if (isClient) {
 			val requestedUnitMapping = getUnitAnnotationStringValue(unit, "RequestMapping");
+			// Do not include the context path since client requests are expressed as uniquely identifiable paths.
 			var ifaceName = "";
 			if (requestedUnitMapping !== null) {
 				ifaceName += requestedUnitMapping;
@@ -318,19 +361,7 @@ class SpringRules extends IRule {
 					var requestedMapping = getMapping(m);
 					requestedMapping = substituteVariables(requestedMapping, contextVariables);
 					var methodName = ifaceName + "/" + requestedMapping;
-					val argumentIndex = requestedMapping.indexOf('{');
-					if (argumentIndex >= 0) {
-						// Search backwards for the last '/' before the argument.
-						val lastSegmentStart = requestedMapping.lastIndexOf('/', argumentIndex)
-						if (lastSegmentStart >= 0) {
-							methodName = requestedMapping.substring(0, lastSegmentStart);
-						} else {
-							methodName = requestedMapping.substring(0, argumentIndex);
-						}
-					}
-					// Remove "//". This can occur if requestedUnitMapping
-					// has a leading "/" and the contextPath is "/" or analogous for method and unit mapping.
-					methodName = methodName.replaceAll("/+", "/");
+					methodName = replaceArgumentsWithWildcards(methodName);
 					pcmDetector.detectCompositeRequiredInterface(unit, new PathName(methodName));
 				}
 			}
@@ -368,6 +399,15 @@ class SpringRules extends IRule {
 		}
 
 		return result;
+	}
+	
+	def replaceArgumentsWithWildcards(String methodName) {
+		var newName = methodName.replaceAll("\\{.*\\}", "*")
+						 .replaceAll("[\\*\\/]*$", "")
+						 .replaceAll("[\\*\\/]*\\[", "[")
+		newName = "/" + newName
+		newName = newName.replaceAll("/+", "/")
+		return newName
 	}
 
 	def hasMapping(MethodDeclaration m) {

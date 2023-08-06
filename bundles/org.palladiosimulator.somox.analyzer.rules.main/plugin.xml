@@ -81,6 +81,14 @@
     </discoverer>
  </extension>
  <extension
+       id="org.palladiosimulator.somox.discoverer.properties"
+       name=".properties Discoverer"
+       point="org.palladiosimulator.somox.discoverer">
+    <discoverer
+          class="org.palladiosimulator.somox.discoverer.PropertiesDiscoverer">
+    </discoverer>
+ </extension>
+ <extension
        id="org.palladiosimulator.somox.analyzer.rules.service.performance_analyst"
        name="Performance Analyst"
        point="org.palladiosimulator.somox.analyzer.rules.analyst">

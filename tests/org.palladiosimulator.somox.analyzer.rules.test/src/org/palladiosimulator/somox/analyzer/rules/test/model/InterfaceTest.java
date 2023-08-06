@@ -28,9 +28,9 @@ public class InterfaceTest {
         builder.provisions()
             .add(expectedOperation);
 
-        Component builtComponent = builder.create();
+        Component builtComponent = builder.create(List.of(expectedOperation));
         assertTrue(builtComponent.provisions()
-            .contains(expectedOperation));
+            .containsPartOf(expectedOperation));
 
         Map<String, List<Operation>> simplifiedProvisions = builtComponent.provisions()
             .simplified();
@@ -64,9 +64,9 @@ public class InterfaceTest {
         builder.provisions()
             .add(expectedOperation);
 
-        Component builtComponent = builder.create();
+        Component builtComponent = builder.create(List.of(expectedOperation));
         assertTrue(builtComponent.provisions()
-            .contains(expectedOperation));
+            .containsPartOf(expectedOperation));
 
         Map<String, List<Operation>> simplifiedProvisions = builtComponent.provisions()
             .simplified();
@@ -83,7 +83,7 @@ public class InterfaceTest {
         assertEquals(1, operations.size(), "more than one operation in the interface");
 
         List<Operation> firstMethodCandidates = operations.stream()
-            .filter(x -> Optional.of("")
+            .filter(x -> Optional.of("/method")
                 .equals(x.getName()
                     .forInterface("/method")))
             .collect(Collectors.toList());
@@ -96,14 +96,16 @@ public class InterfaceTest {
     @Test
     void entireJavaInterface() {
         ComponentBuilder builder = new ComponentBuilder(null);
+        Operation firstMethod = new Operation(null, new JavaOperationName("CommonInterface", "firstMethod"));
+        Operation secondMethod = new Operation(null, new JavaOperationName("CommonInterface", "secondMethod"));
         builder.provisions()
-            .add(new Operation(null, new JavaOperationName("CommonInterface", "firstMethod")));
+            .add(firstMethod);
         builder.provisions()
-            .add(new Operation(null, new JavaOperationName("CommonInterface", "secondMethod")));
-        Component builtComponent = builder.create();
+            .add(secondMethod);
+        Component builtComponent = builder.create(List.of(firstMethod, secondMethod));
         EntireInterface expectedInterface = new EntireInterface(new JavaInterfaceName("CommonInterface"));
         assertTrue(builtComponent.provisions()
-            .contains(expectedInterface));
+            .containsPartOf(expectedInterface));
 
         Map<String, List<Operation>> simplifiedProvisions = builtComponent.provisions()
             .simplified();
@@ -143,14 +145,16 @@ public class InterfaceTest {
     @Test
     void entirePathInterface() {
         ComponentBuilder builder = new ComponentBuilder(null);
+        Operation firstMethod = new Operation(null, new PathName("/common_interface/first_method"));
+        Operation secondMethod = new Operation(null, new PathName("/common_interface/second_method"));
         builder.provisions()
-            .add(new Operation(null, new PathName("/common_interface/first_method")));
+            .add(firstMethod);
         builder.provisions()
-            .add(new Operation(null, new PathName("/common_interface/second_method")));
-        Component builtComponent = builder.create();
+            .add(secondMethod);
+        Component builtComponent = builder.create(List.of(firstMethod, secondMethod));
         EntireInterface expectedInterface = new EntireInterface(new PathName("/common_interface"));
         assertTrue(builtComponent.provisions()
-            .contains(expectedInterface));
+            .containsPartOf(expectedInterface));
 
         Map<String, List<Operation>> simplifiedProvisions = builtComponent.provisions()
             .simplified();
@@ -167,7 +171,7 @@ public class InterfaceTest {
         assertEquals(2, operations.size(), "wrong number of operations in the interface");
 
         List<Operation> firstMethodCandidates = operations.stream()
-            .filter(x -> Optional.of("first_method")
+            .filter(x -> Optional.of("/common_interface/first_method")
                 .equals(x.getName()
                     .forInterface("/common_interface")))
             .collect(Collectors.toList());
@@ -176,7 +180,7 @@ public class InterfaceTest {
         assertEquals(1, firstMethodCandidates.size(), "interface contains multiple instances of first method");
 
         List<Operation> secondMethodCandidates = operations.stream()
-            .filter(x -> Optional.of("second_method")
+            .filter(x -> Optional.of("/common_interface/second_method")
                 .equals(x.getName()
                     .forInterface("/common_interface")))
             .collect(Collectors.toList());
