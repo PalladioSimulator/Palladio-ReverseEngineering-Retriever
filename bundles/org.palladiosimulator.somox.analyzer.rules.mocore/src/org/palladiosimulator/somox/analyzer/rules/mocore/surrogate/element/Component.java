@@ -7,6 +7,10 @@ public class Component<T extends RepositoryComponent> extends PcmElement<T> {
         super(value, isPlaceholder);
     }
 
+    public static Component<?> getNamedPlaceholder(String name) {
+        return AtomicComponent.getNamedPlaceholder(name);
+    }
+
     public static Component<?> getUniquePlaceholder() {
         return AtomicComponent.getUniquePlaceholder();
     }

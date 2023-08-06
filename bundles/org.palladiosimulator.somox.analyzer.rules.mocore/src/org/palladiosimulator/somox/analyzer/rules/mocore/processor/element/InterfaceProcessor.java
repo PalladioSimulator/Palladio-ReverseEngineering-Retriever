@@ -10,6 +10,8 @@ import org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation.Inte
 import tools.mdsd.mocore.framework.processor.Processor;
 
 public class InterfaceProcessor extends Processor<PcmSurrogate, Interface> {
+    private static final String PLACEHOLDER_COMPONENT_NAME_PATTERN = "%s Provider";
+
     public InterfaceProcessor(PcmSurrogate model) {
         super(model, Interface.class);
     }
@@ -18,11 +20,13 @@ public class InterfaceProcessor extends Processor<PcmSurrogate, Interface> {
     protected void refine(Interface discovery) {
         List<InterfaceProvisionRelation> providesRelations = getModel().getByType(InterfaceProvisionRelation.class);
         providesRelations.removeIf(relation -> !relation.getDestination().equals(discovery));
-        List<InterfaceProvisionRelation> requiresRelations = getModel().getByType(InterfaceProvisionRelation.class);
-        requiresRelations.removeIf(relation -> !relation.getDestination().equals(discovery));
 
-        if (providesRelations.isEmpty() && requiresRelations.isEmpty()) {
-            Component<?> component = Component.getUniquePlaceholder();
+        // Rule: Each interface has to be provided by a component.
+        // -> If no provision relation exists yet, add a placeholder provider and relation to the model.
+        if (providesRelations.isEmpty()) {
+            String interfaceName = discovery.getValue().getEntityName();
+            String componentName = String.format(PLACEHOLDER_COMPONENT_NAME_PATTERN, interfaceName);
+            Component<?> component = Component.getNamedPlaceholder(componentName);
             InterfaceProvisionRelation relation = new InterfaceProvisionRelation(component, discovery, true);
             addImplication(relation);
         }

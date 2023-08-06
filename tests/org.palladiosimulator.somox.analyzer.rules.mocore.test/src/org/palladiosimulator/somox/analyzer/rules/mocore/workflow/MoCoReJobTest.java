@@ -2,6 +2,7 @@ package org.palladiosimulator.somox.analyzer.rules.mocore.workflow;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,11 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.palladiosimulator.generator.fluent.repository.api.Repo;
 import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
 import org.palladiosimulator.pcm.core.composition.AssemblyConnector;
+import org.palladiosimulator.pcm.core.composition.Connector;
 import org.palladiosimulator.pcm.core.composition.ProvidedDelegationConnector;
 import org.palladiosimulator.pcm.core.composition.RequiredDelegationConnector;
 import org.palladiosimulator.pcm.repository.CompositeComponent;
+import org.palladiosimulator.pcm.repository.OperationProvidedRole;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
+import org.palladiosimulator.pcm.system.System;
 
 import de.uka.ipd.sdq.workflow.blackboard.Blackboard;
 
@@ -153,5 +157,60 @@ public class MoCoReJobTest {
         assertEquals(interfaceNameExternalRequired,
                 requiredDelegationConnector.getOuterRequiredRole_RequiredDelegationConnector()
                         .getRequiredInterface__OperationRequiredRole().getEntityName());
+    }
+
+    @Test
+    public void testRecursiveProvisionLeadsToSystemDelegation() throws Exception {
+        // Create blackboard and fluent repository
+        Blackboard<Object> blackboard = new Blackboard<Object>();
+        FluentRepositoryFactory fluentFactory = new FluentRepositoryFactory();
+        Repo fluentRepository = fluentFactory.newRepository();
+
+        // Create composite component and add to fluent repository
+        fluentRepository
+                .addToRepository(fluentFactory.newOperationInterface().withName("Doable"))
+                .addToRepository(fluentFactory.newBasicComponent()
+                        .withName("Child")
+                        .provides(fluentFactory.fetchOfOperationInterface("Doable"), "Doable Role"))
+                .addToRepository(fluentFactory.newCompositeComponent()
+                        .withName("Inner Parent")
+                        .withAssemblyContext(fluentFactory.fetchOfComponent("Child")))
+                .addToRepository(fluentFactory.newCompositeComponent()
+                        .withName("Middle Parent")
+                        .withAssemblyContext(fluentFactory.fetchOfComponent("Inner Parent")))
+                .addToRepository(fluentFactory.newCompositeComponent()
+                        .withName("Outer Parent")
+                        .withAssemblyContext(fluentFactory.fetchOfComponent("Middle Parent")));
+
+        // Fill blackboard
+        blackboard.addPartition(BLACKBOARD_INPUT_REPOSITORY, fluentRepository.createRepositoryNow());
+
+        // Create and run job
+        MoCoReJob job = new MoCoReJob(blackboard, BLACKBOARD_INPUT_REPOSITORY,
+                BLACKBOARD_OUTPUT_REPOSITORY, BLACKBOARD_OUTPUT_SYSTEM, BLACKBOARD_OUTPUT_ALLOCATION,
+                BLACKBOARD_OUTPUT_RESOURCEENVIRONMENT);
+        job.execute(new NullProgressMonitor());
+
+        // Check inner provision was recursively
+        Repository outputRepository = (Repository) blackboard.getPartition(BLACKBOARD_OUTPUT_REPOSITORY);
+        EList<RepositoryComponent> components = outputRepository.getComponents__Repository();
+        List<CompositeComponent> composites = components.stream()
+                .filter(component -> component instanceof CompositeComponent)
+                .map(component -> (CompositeComponent) component).toList();
+        composites.forEach(composite -> assertTrue(composite.getProvidedRoles_InterfaceProvidingEntity().stream()
+                .anyMatch(role -> role instanceof OperationProvidedRole && ((OperationProvidedRole) role)
+                        .getProvidedInterface__OperationProvidedRole().getEntityName().equals("Doable"))));
+
+        // Check most outer provision was delegated by system
+        System outputSystem = (System) blackboard.getPartition(BLACKBOARD_OUTPUT_SYSTEM);
+        EList<Connector> connectors = outputSystem.getConnectors__ComposedStructure();
+        assertEquals(1, connectors.size());
+        ProvidedDelegationConnector delegationConnector = (ProvidedDelegationConnector) connectors.get(0);
+        assertEquals("Outer Parent", delegationConnector.getAssemblyContext_ProvidedDelegationConnector()
+                .getEncapsulatedComponent__AssemblyContext().getEntityName());
+        assertEquals("Doable", delegationConnector.getInnerProvidedRole_ProvidedDelegationConnector()
+                .getProvidedInterface__OperationProvidedRole().getEntityName());
+        assertEquals("Doable", delegationConnector.getOuterProvidedRole_ProvidedDelegationConnector()
+                .getProvidedInterface__OperationProvidedRole().getEntityName());
     }
 }
