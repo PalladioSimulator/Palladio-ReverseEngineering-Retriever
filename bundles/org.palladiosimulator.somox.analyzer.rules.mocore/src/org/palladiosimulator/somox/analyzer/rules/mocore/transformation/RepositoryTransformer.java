@@ -422,6 +422,7 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
             // Fetch composite, assembly context, & roles from repository
             CompositeComponent repositoryComposite = (CompositeComponent) repository.getComponents__Repository()
                     .stream()
+                    .filter(CompositeComponent.class::isInstance)
                     .filter(component -> component.getEntityName().equals(compositeWrapper.getValue().getEntityName()))
                     .findFirst().orElseThrow();
             AssemblyContext childContext = repositoryComposite.getAssemblyContexts__ComposedStructure().stream()

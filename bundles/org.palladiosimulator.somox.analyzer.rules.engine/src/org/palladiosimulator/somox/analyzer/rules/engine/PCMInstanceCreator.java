@@ -122,19 +122,22 @@ public class PCMInstanceCreator {
             compositeCreators.put(composite, c);
 
             Set<org.palladiosimulator.pcm.repository.OperationInterface> distinctInterfaces = new HashSet<>();
-            for (EntireInterface compRequirement : composite.requirements()) {
-                org.palladiosimulator.pcm.repository.OperationInterface requiredInterface = fetchInterface(
-                        compRequirement);
+            for (String compRequirement : composite.requirements()
+                .keySet()) {
+                org.palladiosimulator.pcm.repository.OperationInterface requiredInterface = pcmInterfaces
+                    .get(compRequirement);
                 if (distinctInterfaces.contains(requiredInterface)) {
                     continue;
                 }
+                distinctInterfaces.add(requiredInterface);
                 c.requires(requiredInterface);
             }
 
             distinctInterfaces.clear();
-            for (OperationInterface compProvision : composite.provisions()) {
-                org.palladiosimulator.pcm.repository.OperationInterface providedInterface = fetchInterface(
-                        compProvision);
+            for (String compProvision : composite.provisions()
+                .keySet()) {
+                org.palladiosimulator.pcm.repository.OperationInterface providedInterface = pcmInterfaces
+                    .get(compProvision);
                 if (distinctInterfaces.contains(providedInterface)) {
                     continue;
                 }
@@ -195,8 +198,9 @@ public class PCMInstanceCreator {
                 .forEach(x -> outerRequirements.put(x.getRequiredInterface__OperationRequiredRole()
                     .getEntityName(), x));
 
-            for (EntireInterface compRequirement : composite.requirements()) {
-                String requiredInterface = compRequirement.getInterface();
+            for (String requiredInterface : composite.requirements()
+                .keySet()) {
+                requiredInterface = requiredInterface.replace(".", "_");
                 for (Pair<OperationRequiredRole, AssemblyContext> r : innerRequirements.getOrDefault(requiredInterface,
                         List.of())) {
                     c.withRequiredDelegationConnection(r.getT2(), r.getT1(), outerRequirements.get(requiredInterface));
@@ -211,8 +215,8 @@ public class PCMInstanceCreator {
                     .getEntityName(), x));
 
             for (String providedInterface : composite.provisions()
-                .simplified()
                 .keySet()) {
+                providedInterface = providedInterface.replace(".", "_");
                 for (Pair<OperationProvidedRole, AssemblyContext> r : innerProvisions.getOrDefault(providedInterface,
                         List.of())) {
                     c.withProvidedDelegationConnection(r.getT2(), r.getT1(), outerProvisions.get(providedInterface));
@@ -230,8 +234,9 @@ public class PCMInstanceCreator {
         interfaces.forEach((inter, operations) -> {
             LOG.info("Current PCM Interface: " + inter);
 
+            String pcmInterfaceName = inter.replace(".", "_");
             OperationInterfaceCreator pcmInterface = create.newOperationInterface()
-                .withName(inter.replace(".", "_"));
+                .withName(pcmInterfaceName);
 
             for (final Operation operation : operations) {
                 String name = operation.getName()
@@ -249,16 +254,18 @@ public class PCMInstanceCreator {
 
                 IMethodBinding method = operation.getBinding();
 
-                // parameter type
-                for (final ITypeBinding parameter : method.getParameterTypes()) {
-                    signature = handleSignatureDataType(signature, parameter.getName(), parameter,
-                            parameter.getDimensions(), false);
-                }
+                if (method != null) {
+                    // parameter type
+                    for (final ITypeBinding parameter : method.getParameterTypes()) {
+                        signature = handleSignatureDataType(signature, parameter.getName(), parameter,
+                                parameter.getDimensions(), false);
+                    }
 
-                // Return type: Cast Method Return Type to Variable
-                // OrdinaryParameterImpl is sufficient since return types cannot be varargs.
-                ITypeBinding returned = method.getReturnType();
-                signature = handleSignatureDataType(signature, "", returned, returned.getDimensions(), true);
+                    // Return type: Cast Method Return Type to Variable
+                    // OrdinaryParameterImpl is sufficient since return types cannot be varargs.
+                    ITypeBinding returned = method.getReturnType();
+                    signature = handleSignatureDataType(signature, "", returned, returned.getDimensions(), true);
+                }
 
                 pcmInterface.withOperationSignature(signature);
 
@@ -272,7 +279,7 @@ public class PCMInstanceCreator {
             }
 
             repository.addToRepository(pcmInterface);
-            this.pcmInterfaces.put(inter, create.fetchOfOperationInterface(inter.replace(".", "_")));
+            pcmInterfaces.put(inter, create.fetchOfOperationInterface(pcmInterfaceName));
         });
     }
 
@@ -294,29 +301,30 @@ public class PCMInstanceCreator {
                 .withName(binding != null ? wrapName(binding) : wrapName(firstTypeDecl.getName()));
 
             Set<org.palladiosimulator.pcm.repository.OperationInterface> distinctInterfaces = new HashSet<>();
-            for (OperationInterface provision : comp.provisions()) {
-                org.palladiosimulator.pcm.repository.OperationInterface providedInterface = fetchInterface(provision);
+            for (String provision : comp.provisions()
+                .simplified()
+                .keySet()) {
+                org.palladiosimulator.pcm.repository.OperationInterface providedInterface = pcmInterfaces
+                    .get(provision);
                 if (distinctInterfaces.contains(providedInterface)) {
                     continue;
                 }
                 distinctInterfaces.add(providedInterface);
-                pcmComp.provides(providedInterface, provision.getName()
-                    .toString());
+                pcmComp.provides(providedInterface, provision.toString());
             }
 
-            for (OperationInterface provision : comp.provisions()) {
-                Map<String, List<Operation>> operations = provision.simplified();
-                // This is usually only a single interface per provision.
-                for (String iface : operations.keySet()) {
-                    for (Operation operation : operations.get(iface)) {
-                        IMethodBinding method = operation.getBinding();
-                        Optional<ASTNode> declaration = getDeclaration(method);
-                        if (declaration.isPresent()) {
-                            pcmComp.withServiceEffectSpecification(blackboard.getSeffAssociation(declaration.get()));
-                        }
+            comp.provisions()
+                .simplified()
+                .values()
+                .stream()
+                .flatMap(List::stream)
+                .forEach(operation -> {
+                    IMethodBinding method = operation.getBinding();
+                    Optional<ASTNode> declaration = getDeclaration(method);
+                    if (declaration.isPresent()) {
+                        pcmComp.withServiceEffectSpecification(blackboard.getSeffAssociation(declaration.get()));
                     }
-                }
-            }
+                });
 
             distinctInterfaces.clear();
             for (EntireInterface requirement : comp.requirements()) {
@@ -340,6 +348,7 @@ public class PCMInstanceCreator {
             blackboard.putRepositoryComponentLocation(builtComp, compUnit);
             repository.addToRepository(builtComp);
         }
+
     }
 
     private org.palladiosimulator.pcm.repository.OperationInterface fetchInterface(OperationInterface iface) {

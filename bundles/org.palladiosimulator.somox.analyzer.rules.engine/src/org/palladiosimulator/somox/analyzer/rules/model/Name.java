@@ -26,9 +26,6 @@ public interface Name {
         return Optional.empty();
     }
 
-    /**
-     * Equivalent to {@code getInterfaces().contains(iface)}.
-     */
     default boolean isPartOf(String iface) {
         return getInterfaces().contains(iface);
     }

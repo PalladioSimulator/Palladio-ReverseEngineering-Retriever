@@ -22,7 +22,7 @@ public class Provisions implements Iterable<OperationInterface> {
     private final Set<OperationInterface> provisions;
     private final Map<OperationInterface, List<OperationInterface>> groupedProvisions;
 
-    public Provisions(Collection<OperationInterface> provisions) {
+    public Provisions(Collection<OperationInterface> provisions, Collection<OperationInterface> allDependencies) {
         this.provisions = Collections.unmodifiableSet(new HashSet<>(provisions));
         this.groupedProvisions = new HashMap<>();
         if (provisions.isEmpty()) {
@@ -42,18 +42,37 @@ public class Provisions implements Iterable<OperationInterface> {
                     break;
                 }
             }
-            for (OperationInterface rootInterface : groupedProvisions.keySet()) {
-                Optional<String> commonInterface = provision.getName()
-                    .getCommonInterface(rootInterface.getName());
-                if (commonInterface.isPresent()) {
-                    // De-duplicate interfaces.
-                    Set<OperationInterface> interfaces = new HashSet<>(groupedProvisions.remove(rootInterface));
-                    interfaces.add(rootInterface);
-                    interfaces.add(provision);
-                    groupedProvisions.put(new EntireInterface(rootInterface.getName()
-                        .createInterface(commonInterface.get())), new ArrayList<>(interfaces));
-                    isRoot = false;
-                    break;
+            if (isRoot) {
+                for (OperationInterface rootInterface : groupedProvisions.keySet()) {
+                    Optional<String> commonInterfaceName = provision.getName()
+                        .getCommonInterface(rootInterface.getName());
+                    boolean containsOtherDependency = false;
+
+                    if (!commonInterfaceName.isPresent()) {
+                        continue;
+                    }
+
+                    EntireInterface commonInterface = new EntireInterface(rootInterface.getName()
+                        .createInterface(commonInterfaceName.get()));
+
+                    for (OperationInterface dependency : allDependencies) {
+                        // Check all foreign dependencies
+                        if (!provisions.contains(dependency)) {
+                            // If a foreign dependency is part of the new common interface, it must
+                            // not be created
+                            containsOtherDependency |= dependency.isPartOf(commonInterface);
+                        }
+                    }
+
+                    if (!containsOtherDependency) {
+                        // De-duplicate interfaces.
+                        Set<OperationInterface> interfaces = new HashSet<>(groupedProvisions.remove(rootInterface));
+                        interfaces.add(rootInterface);
+                        interfaces.add(provision);
+                        groupedProvisions.put(commonInterface, new ArrayList<>(interfaces));
+                        isRoot = false;
+                        break;
+                    }
                 }
             }
             if (isRoot) {
@@ -66,9 +85,14 @@ public class Provisions implements Iterable<OperationInterface> {
         return provisions;
     }
 
-    public boolean contains(OperationInterface iface) {
+    public boolean containsPartOf(OperationInterface iface) {
         return provisions.stream()
             .anyMatch(x -> x.isPartOf(iface));
+    }
+
+    public boolean containsEntire(OperationInterface iface) {
+        return provisions.stream()
+            .anyMatch(x -> iface.isPartOf(x));
     }
 
     @Override

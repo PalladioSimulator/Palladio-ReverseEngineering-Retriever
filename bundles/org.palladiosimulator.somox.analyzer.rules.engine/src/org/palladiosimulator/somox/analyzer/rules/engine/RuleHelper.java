@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
@@ -527,9 +528,8 @@ public class RuleHelper {
                 return "";
             }
 
-            Object value = expression.resolveConstantExpressionValue();
-            if (value instanceof String) {
-                return (String) value;
+            if (expression instanceof StringLiteral) {
+                return ((StringLiteral) expression).getLiteralValue();
             }
         }
 
@@ -574,9 +574,8 @@ public class RuleHelper {
                 continue;
             }
 
-            Object value = expression.resolveConstantExpressionValue();
-            if (value instanceof String) {
-                return (String) value;
+            if (expression instanceof StringLiteral) {
+                return ((StringLiteral) expression).getLiteralValue();
             }
         }
 

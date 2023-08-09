@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -13,6 +14,7 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
+import org.palladiosimulator.somox.analyzer.rules.engine.MapMerger;
 
 public class CompositeBuilder {
 
@@ -32,9 +34,17 @@ public class CompositeBuilder {
         Logger.getLogger(getClass())
             .warn("Constructing composite component " + name);
 
+        List<OperationInterface> allDependencies = new LinkedList<>();
+        for (OperationInterface requirement : compositeRequirements) {
+            allDependencies.add(requirement);
+        }
+        for (OperationInterface provision : compositeProvisions) {
+            allDependencies.add(provision);
+        }
+
         // Create and add all explicit parts.
         Set<Component> parts = explicitParts.stream()
-            .map(ComponentBuilder::create)
+            .map(x -> x.create(allDependencies))
             .collect(Collectors.toSet());
 
         Set<Component> remainingComponents = new HashSet<>(components);
@@ -53,24 +63,30 @@ public class CompositeBuilder {
                     internalInterfaces);
         } while (parts.size() > previousPartCount && internalInterfaces.size() > previousInternalInterfaceCount);
 
-        Set<EntireInterface> requirements = new HashSet<>();
-        Set<OperationInterface> provisions = new HashSet<>();
+        List<EntireInterface> requirements = new ArrayList<>();
+        List<Map<String, List<Operation>>> provisions = new ArrayList<>();
 
         for (Component part : parts) {
             requirements.addAll(part.requirements()
                 .get());
-            provisions.addAll(part.provisions()
-                .get());
+            provisions.add(part.provisions()
+                .simplified());
         }
-        requirements.removeIf(x -> !compositeRequirements.contains(x));
-        RequirementsBuilder requirementsBuilder = new RequirementsBuilder();
-        requirementsBuilder.add(requirements);
 
-        provisions.removeIf(x -> !compositeProvisions.contains(x));
-        ProvisionsBuilder provisionsBuilder = new ProvisionsBuilder();
-        provisionsBuilder.add(provisions);
+        Map<String, List<Operation>> simplifiedRequirements = MapMerger.merge(requirements.stream()
+            .filter(x -> compositeRequirements.containsEntire(x))
+            .map(EntireInterface::simplified)
+            .collect(Collectors.toList()));
 
-        return new Composite(name, parts, requirementsBuilder.create(), provisionsBuilder.create(), internalInterfaces);
+        Map<String, List<Operation>> simplifiedProvisions = MapMerger.merge(provisions)
+            .entrySet()
+            .stream()
+            .filter(entry -> entry.getValue()
+                .stream()
+                .anyMatch(operation -> compositeProvisions.containsEntire(operation)))
+            .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+
+        return new Composite(name, parts, simplifiedRequirements, simplifiedProvisions, internalInterfaces);
     }
 
     // Writes to remainingComopnents, parts, and internalInterfaces.
@@ -150,8 +166,8 @@ public class CompositeBuilder {
             .stream()
             // Do not include interfaces required or provided by composites.
             // This ensures that those composites do not become part of this composite.
-            .filter(x -> !compositeRequirements.contains(x))
-            .filter(x -> !compositeProvisions.contains(x))
+            .filter(x -> !compositeRequirements.containsEntire(x))
+            .filter(x -> !compositeProvisions.containsEntire(x))
             .forEach(provisions::add);
 
         List<OperationInterface> traversedOperations = new ArrayList<>();
@@ -159,7 +175,7 @@ public class CompositeBuilder {
             OperationInterface provision = provisions.pop();
             Set<Component> requiringComponents = remainingComponents.stream()
                 .filter(x -> x.requirements()
-                    .contains(provision))
+                    .containsPartOf(provision))
                 .filter(x -> !providingComponent.equals(x))
                 .collect(Collectors.toSet());
 
@@ -185,8 +201,8 @@ public class CompositeBuilder {
             .stream()
             // Do not include interfaces required or provided by composites.
             // This ensures that those composites do not become part of this composite.
-            .filter(x -> !compositeRequirements.contains(x))
-            .filter(x -> !compositeProvisions.contains(x))
+            .filter(x -> !compositeRequirements.containsEntire(x))
+            .filter(x -> !compositeProvisions.containsEntire(x))
             .forEach(requirements::add);
 
         List<OperationInterface> traversedOperations = new ArrayList<>();
@@ -194,7 +210,7 @@ public class CompositeBuilder {
             OperationInterface requirement = requirements.pop();
             Set<Component> providingComponents = remainingComponents.stream()
                 .filter(x -> x.provisions()
-                    .contains(requirement))
+                    .containsPartOf(requirement))
                 .filter(x -> !requiringComponent.equals(x))
                 .collect(Collectors.toSet());
 

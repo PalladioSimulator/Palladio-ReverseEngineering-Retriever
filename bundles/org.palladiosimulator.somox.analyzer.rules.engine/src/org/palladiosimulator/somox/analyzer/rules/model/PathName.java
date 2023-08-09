@@ -1,23 +1,26 @@
 package org.palladiosimulator.somox.analyzer.rules.model;
 
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 public class PathName implements InterfaceName, OperationName {
-    private final Path path;
+    private final List<String> path;
 
-    public PathName(String path) {
-        this.path = Path.of(cutOffWildcard(path));
+    public PathName(String path) throws IllegalArgumentException {
+        Optional<List<String>> parsedPath = parsePath(path);
+        if (parsedPath.isEmpty()) {
+            throw new IllegalArgumentException("Could not parse path due to illegal format: \"" + path + "\"");
+        }
+        this.path = parsedPath.get();
     }
 
     @Override
     public String getName() {
-        return toName(path);
+        return getInterface();
     }
 
     @Override
@@ -27,28 +30,24 @@ public class PathName implements InterfaceName, OperationName {
 
     @Override
     public Optional<String> forInterface(String baseInterface) {
-        Path interfacePath;
-        try {
-            interfacePath = Path.of(cutOffWildcard(baseInterface));
-        } catch (InvalidPathException e) {
+        if (!isPartOf(baseInterface)) {
             return Optional.empty();
         }
 
-        if (!path.startsWith(interfacePath)) {
-            return Optional.empty();
-        }
-
-        return Optional.of(toName(interfacePath.relativize(path)));
+        return Optional.of(getInterface());
     }
 
     @Override
     public List<String> getInterfaces() {
-        Stack<Path> prefixes = new Stack<>();
+        Stack<List<String>> prefixes = new Stack<>();
 
-        prefixes.push(path.getRoot());
-        for (Path segment : path) {
-            prefixes.push(prefixes.peek()
-                .resolve(segment));
+        if (path.size() > 0) {
+            prefixes.push(List.of(path.get(0)));
+            for (int i = 1; i < path.size(); i++) {
+                List<String> prefix = new ArrayList<>(prefixes.peek());
+                prefix.add(path.get(i));
+                prefixes.push(prefix);
+            }
         }
 
         List<String> interfaces = new ArrayList<>(prefixes.size());
@@ -66,29 +65,42 @@ public class PathName implements InterfaceName, OperationName {
         return new PathName(name);
     }
 
-    private static String toName(Path path) {
-        // Result in the same paths on Windows as on other operating systems.
-        return path.toString()
-            .replace('\\', '/');
-    }
-
-    private static String cutOffWildcard(String path) {
-        int wildcardIndex = -1;
-        if (path.contains("*")) {
-            wildcardIndex = path.indexOf('*');
-        }
-        if (path.contains("{")) {
-            if (wildcardIndex > -1) {
-                wildcardIndex = Math.min(wildcardIndex, path.indexOf('{'));
-            } else {
-                wildcardIndex = path.indexOf('{');
+    private static String toName(List<String> path) {
+        StringBuilder name = new StringBuilder();
+        name.append("/");
+        for (int i = 0; i < path.size(); i++) {
+            name.append(path.get(i));
+            if (i + 1 < path.size()) {
+                name.append("/");
             }
         }
-        if (wildcardIndex > -1) {
-            return path.substring(0, wildcardIndex);
-        } else {
-            return path;
+        return name.toString();
+    }
+
+    @Override
+    public String toString() {
+        return toName(path);
+    }
+
+    private Optional<List<String>> parsePath(String string) {
+        if (string.equals("/")) {
+            return Optional.of(List.of());
         }
+        String[] segments = string.split("/");
+        if (segments.length <= 1) {
+            return Optional.empty();
+        }
+
+        // Require an absolute path.
+        if (!segments[0].isEmpty()) {
+            return Optional.empty();
+        }
+
+        // Remove empty segments.
+        return Optional.of(List.of(segments)
+            .stream()
+            .filter(x -> !x.isEmpty())
+            .collect(Collectors.toList()));
     }
 
     @Override
@@ -112,7 +124,24 @@ public class PathName implements InterfaceName, OperationName {
     }
 
     @Override
-    public String toString() {
-        return path.toString();
+    public boolean isPartOf(String iface) {
+        Optional<List<String>> interfacePathOption = parsePath(iface);
+        if (interfacePathOption.isEmpty()) {
+            return false;
+        }
+        List<String> interfacePath = interfacePathOption.get();
+
+        if (interfacePath.size() > path.size()) {
+            return false;
+        }
+
+        for (int i = 0; i < interfacePath.size(); i++) {
+            if (!path.get(i)
+                .equals(interfacePath.get(i))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
