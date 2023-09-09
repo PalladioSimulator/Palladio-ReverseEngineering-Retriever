@@ -17,7 +17,7 @@ import org.palladiosimulator.somox.analyzer.rules.model.EntireInterface;
 import org.palladiosimulator.somox.analyzer.rules.model.JavaInterfaceName;
 import org.palladiosimulator.somox.analyzer.rules.model.JavaOperationName;
 import org.palladiosimulator.somox.analyzer.rules.model.Operation;
-import org.palladiosimulator.somox.analyzer.rules.model.PathName;
+import org.palladiosimulator.somox.analyzer.rules.model.RESTName;
 
 public class InterfaceTest {
 
@@ -60,7 +60,7 @@ public class InterfaceTest {
     @Test
     void singlePathOperation() {
         ComponentBuilder builder = new ComponentBuilder(null);
-        Operation expectedOperation = new Operation(null, new PathName("/method"));
+        Operation expectedOperation = new Operation(null, new RESTName("/method", Optional.empty()));
         builder.provisions()
             .add(expectedOperation);
 
@@ -145,14 +145,14 @@ public class InterfaceTest {
     @Test
     void entirePathInterface() {
         ComponentBuilder builder = new ComponentBuilder(null);
-        Operation firstMethod = new Operation(null, new PathName("/common_interface/first_method"));
-        Operation secondMethod = new Operation(null, new PathName("/common_interface/second_method"));
+        Operation firstMethod = new Operation(null, new RESTName("/common_interface/first_method", Optional.empty()));
+        Operation secondMethod = new Operation(null, new RESTName("/common_interface/second_method", Optional.empty()));
         builder.provisions()
             .add(firstMethod);
         builder.provisions()
             .add(secondMethod);
         Component builtComponent = builder.create(List.of(firstMethod, secondMethod));
-        EntireInterface expectedInterface = new EntireInterface(new PathName("/common_interface"));
+        EntireInterface expectedInterface = new EntireInterface(new RESTName("/common_interface", Optional.empty()));
         assertTrue(builtComponent.provisions()
             .containsPartOf(expectedInterface));
 

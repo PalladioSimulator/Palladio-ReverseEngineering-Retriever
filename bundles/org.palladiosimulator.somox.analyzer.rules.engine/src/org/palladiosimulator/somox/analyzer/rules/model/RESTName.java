@@ -7,10 +7,12 @@ import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-public class PathName implements InterfaceName, OperationName {
+public class RESTName implements InterfaceName, OperationName {
     private final List<String> path;
+    private final Optional<HTTPMethod> httpMethod;
 
-    public PathName(String path) throws IllegalArgumentException {
+    public RESTName(String path, Optional<HTTPMethod> httpMethod) throws IllegalArgumentException {
+        this.httpMethod = httpMethod;
         Optional<List<String>> parsedPath = parsePath(path);
         if (parsedPath.isEmpty()) {
             throw new IllegalArgumentException("Could not parse path due to illegal format: \"" + path + "\"");
@@ -25,7 +27,7 @@ public class PathName implements InterfaceName, OperationName {
 
     @Override
     public String getInterface() {
-        return toName(path);
+        return toString();
     }
 
     @Override
@@ -52,6 +54,10 @@ public class PathName implements InterfaceName, OperationName {
 
         List<String> interfaces = new ArrayList<>(prefixes.size());
 
+        if (httpMethod.isPresent()) {
+            interfaces.add(getInterface());
+        }
+
         // Insert the prefixes in reverse since the most specific element is at index 0 there.
         while (!prefixes.empty()) {
             interfaces.add(toName(prefixes.pop()));
@@ -62,7 +68,7 @@ public class PathName implements InterfaceName, OperationName {
 
     @Override
     public InterfaceName createInterface(String name) {
-        return new PathName(name);
+        return new RESTName(name, Optional.empty());
     }
 
     private static String toName(List<String> path) {
@@ -79,7 +85,12 @@ public class PathName implements InterfaceName, OperationName {
 
     @Override
     public String toString() {
-        return toName(path);
+        if (httpMethod.isPresent()) {
+            return toName(path) + "[" + httpMethod.get()
+                .toString() + "]";
+        } else {
+            return toName(path);
+        }
     }
 
     private Optional<List<String>> parsePath(String string) {
@@ -119,13 +130,14 @@ public class PathName implements InterfaceName, OperationName {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        PathName other = (PathName) obj;
+        RESTName other = (RESTName) obj;
         return Objects.equals(path, other.path);
     }
 
     @Override
     public boolean isPartOf(String iface) {
-        Optional<List<String>> interfacePathOption = parsePath(iface);
+        String[] parts = iface.split("\\[");
+        Optional<List<String>> interfacePathOption = parsePath(parts[0]);
         if (interfacePathOption.isEmpty()) {
             return false;
         }
@@ -140,6 +152,19 @@ public class PathName implements InterfaceName, OperationName {
                 .equals(interfacePath.get(i))) {
                 return false;
             }
+        }
+
+        Optional<HTTPMethod> ifaceHttpMethod = Optional.empty();
+        if (parts.length > 1) {
+            // Assume that a '[' implies a ']'.
+            int end = parts[1].lastIndexOf(']');
+            String httpMethodName = parts[1].substring(0, end);
+            ifaceHttpMethod = Optional.of(HTTPMethod.valueOf(httpMethodName));
+        }
+
+        if (interfacePath.size() == path.size() && ifaceHttpMethod.isPresent()
+                && !ifaceHttpMethod.equals(this.httpMethod)) {
+            return false;
         }
 
         return true;
