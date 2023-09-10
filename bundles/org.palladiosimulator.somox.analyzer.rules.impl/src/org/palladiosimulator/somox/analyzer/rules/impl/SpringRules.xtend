@@ -317,6 +317,13 @@ class SpringRules extends IRule {
 
 		if (isComponent) {
 			pcmDetector.detectComponent(unit)
+
+			getConstructors(unit)
+				.stream
+				.filter[c | isMethodAnnotatedWithName(c, "Autowired")]
+				.flatMap[c | getParameters(c).stream]
+				.filter[p | !isParameterAnnotatedWith(p, "Value")]
+				.forEach[p | pcmDetector.detectRequiredInterface(unit, p)]
 		}
 
 		if (isService || isController) {

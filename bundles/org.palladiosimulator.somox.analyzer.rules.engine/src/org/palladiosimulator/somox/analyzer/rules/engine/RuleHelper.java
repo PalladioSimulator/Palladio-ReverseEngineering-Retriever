@@ -208,6 +208,10 @@ public class RuleHelper {
         return fields;
     }
 
+    public static List<SingleVariableDeclaration> getParameters(MethodDeclaration method) {
+        return cast(method.parameters(), SingleVariableDeclaration.class);
+    }
+
     public static boolean isMethodAnnotatedWithName(MethodDeclaration method, String... names) {
         for (String name : names) {
             if (isObjectAnnotatedWithName(method, name)) {
