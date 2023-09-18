@@ -63,6 +63,9 @@ public class RESTName implements InterfaceName, OperationName {
             interfaces.add(toName(prefixes.pop()));
         }
 
+        // Always add root interface
+        interfaces.add(toName(List.of()));
+
         return interfaces;
     }
 
