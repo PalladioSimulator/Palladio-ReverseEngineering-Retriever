@@ -349,11 +349,13 @@ class SpringRules extends IRule {
 				val annotated = hasMapping(m);
 				if (annotated) {
 					var requestedMapping = getMapping(m);
-					requestedMapping = substituteVariables(requestedMapping, contextVariables);
-					var methodName = ifaceName + "/" + requestedMapping;
-					methodName = replaceArgumentsWithWildcards(methodName);
-					val httpMethod = getHTTPMethod(m);
-					pcmDetector.detectCompositeProvidedOperation(unit, m.resolveBinding, new RESTName(methodName, httpMethod));
+					if (requestedMapping !== null) {
+						requestedMapping = substituteVariables(requestedMapping, contextVariables);
+						var methodName = ifaceName + "/" + requestedMapping;
+						methodName = replaceArgumentsWithWildcards(methodName);
+						val httpMethod = getHTTPMethod(m);
+						pcmDetector.detectCompositeProvidedOperation(unit, m.resolveBinding, new RESTName(methodName, httpMethod));
+					}
 				}
 			}
 		}
@@ -369,11 +371,13 @@ class SpringRules extends IRule {
 				val annotated = hasMapping(m);
 				if (annotated) {
 					var requestedMapping = getMapping(m);
-					requestedMapping = substituteVariables(requestedMapping, contextVariables);
-					var methodName = ifaceName + "/" + requestedMapping;
-					methodName = replaceArgumentsWithWildcards(methodName);
-					val httpMethod = getHTTPMethod(m);
-					pcmDetector.detectCompositeRequiredInterface(unit, new RESTName(methodName, httpMethod));
+					if (requestedMapping !== null) {
+						requestedMapping = substituteVariables(requestedMapping, contextVariables);
+						var methodName = ifaceName + "/" + requestedMapping;
+						methodName = replaceArgumentsWithWildcards(methodName);
+						val httpMethod = getHTTPMethod(m);
+						pcmDetector.detectCompositeRequiredInterface(unit, new RESTName(methodName, httpMethod));
+					}
 				}
 			}
 		}

@@ -535,6 +535,12 @@ public class RuleHelper {
             if (expression instanceof StringLiteral) {
                 return ((StringLiteral) expression).getLiteralValue();
             }
+
+            Object compiledValue = expression.resolveConstantExpressionValue();
+            if (compiledValue != null) {
+                return compiledValue.toString();
+            }
+
         }
 
         return null;
