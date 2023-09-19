@@ -17,7 +17,7 @@ public class PetclinicTest extends RuleEngineTest {
         assertComponentProvidesOperation("org_springframework_samples_petclinic_visits_web_VisitResource",
                 "/visits-service", "/visits-service/pets/visits[GET]");
         assertComponentProvidesOperation("org_springframework_samples_petclinic_customers_web_PetResource",
-                "/customers-service/owners/*", "/customers-service/owners/*/pets[GET]");
+                "/customers-service/owners/*/pets", "/customers-service/owners/*/pets[GET]");
 
         assertMaxParameterCount(2, "/customers-service/owners[PUT]", "/customers-service/owners[PUT]");
         assertMaxParameterCount(1, "/api-gateway/api/gateway/owners[GET]", "/api-gateway/api/gateway/owners[GET]");

@@ -12,10 +12,12 @@ import java.util.stream.Collectors
 import org.apache.log4j.Logger
 import org.eclipse.jdt.core.dom.MethodDeclaration
 import org.eclipse.jdt.core.dom.ITypeBinding
-import org.palladiosimulator.somox.analyzer.rules.model.PathName
 import java.util.HashMap
 import java.util.List
 import java.util.Properties
+import org.palladiosimulator.somox.analyzer.rules.model.RESTName
+import org.palladiosimulator.somox.analyzer.rules.model.HTTPMethod
+import java.util.Optional
 
 class SpringRules extends IRule {
     static final Logger LOG = Logger.getLogger(SpringRules)
@@ -343,7 +345,8 @@ class SpringRules extends IRule {
 					requestedMapping = substituteVariables(requestedMapping, contextVariables);
 					var methodName = ifaceName + "/" + requestedMapping;
 					methodName = replaceArgumentsWithWildcards(methodName);
-					pcmDetector.detectCompositeProvidedOperation(unit, m.resolveBinding, new PathName(methodName));
+					val httpMethod = getHTTPMethod(m);
+					pcmDetector.detectCompositeProvidedOperation(unit, m.resolveBinding, new RESTName(methodName, httpMethod));
 				}
 			}
 		}
@@ -362,7 +365,8 @@ class SpringRules extends IRule {
 					requestedMapping = substituteVariables(requestedMapping, contextVariables);
 					var methodName = ifaceName + "/" + requestedMapping;
 					methodName = replaceArgumentsWithWildcards(methodName);
-					pcmDetector.detectCompositeRequiredInterface(unit, new PathName(methodName));
+					val httpMethod = getHTTPMethod(m);
+					pcmDetector.detectCompositeRequiredInterface(unit, new RESTName(methodName, httpMethod));
 				}
 			}
 		}
@@ -427,27 +431,61 @@ class SpringRules extends IRule {
 
 		val getMapping = getMappingString(m, "GetMapping");
 		if (getMapping !== null) {
-			return getMapping + "[GET]";
+			return getMapping;
 		}
 
 		val postMapping = getMappingString(m, "PostMapping");
 		if (postMapping !== null) {
-			return postMapping + "[POST]";
+			return postMapping;
 		}
 
 		val putMapping = getMappingString(m, "PutMapping");
 		if (putMapping !== null) {
-			return putMapping + "[PUT]";
+			return putMapping;
 		}
 
 		val deleteMapping = getMappingString(m, "DeleteMapping");
 		if (deleteMapping !== null) {
-			return deleteMapping + "[DELETE]";
+			return deleteMapping;
 		}
 
 		val patchMapping = getMappingString(m, "PatchMapping");
 		if (patchMapping !== null) {
-			return patchMapping + "[PATCH]";
+			return patchMapping;
+		}
+		
+		return null;
+	}
+
+	def getHTTPMethod(MethodDeclaration m) {
+		val requestMapping = getMappingString(m, "RequestMapping");
+		if (requestMapping !== null) {
+			return Optional.empty;
+		}
+
+		val getMapping = getMappingString(m, "GetMapping");
+		if (getMapping !== null) {
+			return Optional.of(HTTPMethod.GET);
+		}
+
+		val postMapping = getMappingString(m, "PostMapping");
+		if (postMapping !== null) {
+			return Optional.of(HTTPMethod.POST);
+		}
+
+		val putMapping = getMappingString(m, "PutMapping");
+		if (putMapping !== null) {
+			return Optional.of(HTTPMethod.PUT);
+		}
+
+		val deleteMapping = getMappingString(m, "DeleteMapping");
+		if (deleteMapping !== null) {
+			return Optional.of(HTTPMethod.DELETE);
+		}
+
+		val patchMapping = getMappingString(m, "PatchMapping");
+		if (patchMapping !== null) {
+			return Optional.of(HTTPMethod.PATCH);
 		}
 		
 		return null;
