@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: RuleEngineEcmaScript
+Bundle-SymbolicName: org.palladiosimulator.somox.analyzer.rules.ecma;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Export-Package: org.palladiosimulator.somox.analyzer.rules.ecma
+Require-Bundle: org.openjdk.nashorn.core;bundle-version="15.4.0",
+ org.objectweb.asm;bundle-version="9.5.0"
+Bundle-Vendor: palladiosimulator.org
+Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.ecma
+Bundle-RequiredExecutionEnvironment: JavaSE-17
