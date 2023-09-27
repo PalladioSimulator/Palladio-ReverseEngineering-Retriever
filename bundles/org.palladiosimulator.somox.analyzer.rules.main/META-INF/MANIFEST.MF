@@ -29,7 +29,8 @@ Require-Bundle: org.eclipse.core.resources,
  com.github.jsqlparser,
  org.palladiosimulator.somox.ast2seff,
  org.palladiosimulator.somox.analyzer.rules.mocore,
- org.palladiosimulator.view.plantuml.generator
+ org.palladiosimulator.view.plantuml.generator,
+ org.openjdk.nashorn.core
 Export-Package: org.palladiosimulator.somox.analyzer.rules.cli;uses:="org.eclipse.equinox.app",
  org.palladiosimulator.somox.analyzer.rules.configuration,
  org.palladiosimulator.somox.analyzer.rules.main,

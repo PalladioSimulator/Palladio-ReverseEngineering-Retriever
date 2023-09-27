@@ -9,6 +9,7 @@ import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
 import org.palladiosimulator.somox.analyzer.rules.gradle.GradleRules;
 import org.palladiosimulator.somox.analyzer.rules.impl.JaxRSRules;
 import org.palladiosimulator.somox.analyzer.rules.impl.SpringRules;
+import org.palladiosimulator.somox.analyzer.rules.impl.EcmaScriptRules;
 import org.palladiosimulator.somox.analyzer.rules.maven.MavenRules;
 
 /**
@@ -20,7 +21,8 @@ public enum DefaultRule {
     JAX_RS(JaxRSRules.class),
     MAVEN(MavenRules.class),
     GRADLE(GradleRules.class),
-    DOCKER(DockerRules.class);
+    DOCKER(DockerRules.class),
+    ECMASCRIPT(EcmaScriptRules.class);
 
     private final Class<? extends IRule> ruleClass;
 
