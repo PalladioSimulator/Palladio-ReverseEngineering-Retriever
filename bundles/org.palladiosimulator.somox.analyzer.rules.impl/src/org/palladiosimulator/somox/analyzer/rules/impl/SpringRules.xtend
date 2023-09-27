@@ -32,7 +32,7 @@ class SpringRules extends IRule {
 
 	override boolean processRules(Path path) {
 		val yamlObjects = blackboard.getPartition(YAML_DISCOVERER_ID)
-		val yamls = yamlObjects as Map<String, Iterable<Map<String, Object>>>
+		val yamls = yamlObjects as Map<Path, Iterable<Map<String, Object>>>
 		val poms = blackboard.getDiscoveredFiles(XML_DISCOVERER_ID, typeof(Document))
 		val properties = blackboard.getDiscoveredFiles(PROPERTIES_DISCOVERER_ID, typeof(Properties))
 
@@ -68,12 +68,12 @@ class SpringRules extends IRule {
 		return containedSuccessful
 	}
 
-	def getProjectRoot(Path currentPath, Map<String, Document> poms) {
+	def getProjectRoot(Path currentPath, Map<Path, Document> poms) {
 		if (currentPath === null || poms === null) {
 			return null
 		}
 		val closestPom = poms.entrySet.stream
-			.map([ entry | Path.of(entry.key) ])
+			.map([ entry | entry.key ])
 			// Only keep poms above the current compilation unit.
 			.filter([ path | currentPath.startsWith(path.parent) ])
 			// Take the longest path, which is the pom.xml closest to the compilation unit
@@ -86,12 +86,11 @@ class SpringRules extends IRule {
 		}
 	}
 
-	def getConfigRoot(Map<String, Document> poms) {
+	def getConfigRoot(Map<Path, Document> poms) {
 		if (poms === null) {
 			return null
 		}
 		val configRoots = poms.entrySet.stream
-			.map[ entry | Path.of(entry.key) -> entry.value ]
 			.map[ entry | entry.key -> entry.value.rootElement.getChild("dependencies", entry.value.rootElement.namespace) ]
 			.filter[ entry | entry.value !== null ]
 			.map[ entry | entry.key -> entry.value.getChildren("dependency", entry.value.namespace) ]
@@ -110,12 +109,11 @@ class SpringRules extends IRule {
 		return configRoots.get(0).key.parent
 	}
 
-	def getBootstrapYaml(Path projectRoot, Map<String, Iterable<Map<String, Object>>> yamls) {
+	def getBootstrapYaml(Path projectRoot, Map<Path, Iterable<Map<String, Object>>> yamls) {
 		if (projectRoot === null || yamls === null) {
 			return null
 		}
 		val bootstrapYamls =  yamls.entrySet.stream
-			.map[ entry | Path.of(entry.key) -> entry.value ]
 			.filter[ entry | entry.key.parent == projectRoot.resolve("src/main/resources") ]
 			.filter[ entry | val fileName = entry.key.fileName.toString; fileName == "bootstrap.yaml" || fileName == "bootstrap.yml" ]
 			.collect(Collectors.toList)
@@ -161,12 +159,11 @@ class SpringRules extends IRule {
 		return applicationProperties.getProperty("spring.application.name")
 	}
 
-	def getProjectConfigYaml(Path configRoot, Map<String, Iterable<Map<String, Object>>> yamls, String projectName) {
+	def getProjectConfigYaml(Path configRoot, Map<Path, Iterable<Map<String, Object>>> yamls, String projectName) {
 		if (configRoot === null || yamls === null || projectName === null) {
 			return null
 		}
 		val projectYamls = yamls.entrySet.stream
-			.map[ entry | Path.of(entry.key) -> entry.value ]
 			.filter[ entry | entry.key.startsWith(configRoot) ]
 			.filter[ entry | val fileName = entry.key.fileName.toString; fileName == projectName + ".yaml" || fileName == projectName + ".yml" ]
 			.collect(Collectors.toList)
@@ -209,12 +206,11 @@ class SpringRules extends IRule {
 		return contextPath
 	}
 	
-	def getApplicationProperties(Path projectRoot, Map<String, Properties> properties) {
+	def getApplicationProperties(Path projectRoot, Map<Path, Properties> properties) {
 		if (projectRoot === null || properties === null) {
 			return null
 		}
 		val applicationProperties =  properties.entrySet.stream
-			.map[ entry | Path.of(entry.key) -> entry.value ]
 			.filter[ entry | entry.key.parent == projectRoot.resolve("src/main/resources") ]
 			.filter[ entry | val fileName = entry.key.fileName.toString; fileName == "application.properties" ]
 			.collect(Collectors.toList)
@@ -227,12 +223,11 @@ class SpringRules extends IRule {
 		return applicationProperties.get(0).value
 	}
 
-	def getApplicationYaml(Path projectRoot, Map<String, Iterable<Map<String, Object>>> yamls) {
+	def getApplicationYaml(Path projectRoot, Map<Path, Iterable<Map<String, Object>>> yamls) {
 		if (projectRoot === null || yamls === null) {
 			return null
 		}
 		val applicationYamls =  yamls.entrySet.stream
-			.map[ entry | Path.of(entry.key) -> entry.value ]
 			.filter[ entry | entry.key.parent == projectRoot.resolve("src/main/resources") ]
 			.filter[ entry | val fileName = entry.key.fileName.toString; fileName == "application.yaml" || fileName == "application.yml" ]
 			.collect(Collectors.toList)

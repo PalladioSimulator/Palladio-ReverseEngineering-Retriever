@@ -41,10 +41,10 @@ public class PropertiesDiscoverer implements Discoverer {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
-                final Map<String, Object> propertyFiles = new HashMap<>();
+                final Map<Path, Object> propertyFiles = new HashMap<>();
                 Discoverer.find(root, ".properties", logger)
                     .forEach(p -> {
-                        try (Reader reader = new FileReader(p)) {
+                        try (Reader reader = new FileReader(p.toFile())) {
                             Properties properties = new Properties();
                             properties.load(reader);
                             propertyFiles.put(p, properties);

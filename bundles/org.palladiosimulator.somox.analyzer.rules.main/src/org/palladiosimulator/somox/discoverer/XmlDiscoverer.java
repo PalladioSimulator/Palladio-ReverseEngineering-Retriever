@@ -43,22 +43,23 @@ public class XmlDiscoverer implements Discoverer {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
-                final Map<String, Document> xmls = new HashMap<>();
+                final Map<Path, Document> xmls = new HashMap<>();
                 Discoverer.find(root, ".xml", logger)
                     .forEach(p -> {
-                        try (Reader reader = new FileReader(p)) {
+                        try (Reader reader = new FileReader(p.toFile())) {
                             xmls.put(p, new SAXBuilder().build(reader));
                         } catch (IOException | JDOMException e) {
                             logger.error(String.format("%s could not be read correctly.", p), e);
                         }
                     });
 
-                final Map<String, Document> poms = new HashMap<>();
+                final Map<Path, Document> poms = new HashMap<>();
                 xmls.keySet()
                     .stream()
-                    .filter(p -> p.toLowerCase()
-                        .endsWith("pom.xml"))
-                    .forEach(k -> poms.put(k, xmls.get(k)));
+                    .filter(p -> p.getFileName()
+                        .toString()
+                        .equalsIgnoreCase("pom.xml"))
+                    .forEach(p -> poms.put(p, xmls.get(p)));
                 getBlackboard().putDiscoveredFiles(DISCOVERER_ID, poms);
             }
 

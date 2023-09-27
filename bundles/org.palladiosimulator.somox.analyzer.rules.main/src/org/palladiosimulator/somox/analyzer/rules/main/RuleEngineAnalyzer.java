@@ -77,44 +77,19 @@ public class RuleEngineAnalyzer {
 
             final Set<DefaultRule> rules = ruleEngineConfiguration.getSelectedRules();
 
-            final Map<String, CompilationUnit> rootsWithPaths = fetchEclipseCompilationUnits();
+            final Map<Path, CompilationUnit> rootsWithPaths = blackboard
+                .getDiscoveredFiles(JavaDiscoverer.DISCOVERER_ID, CompilationUnit.class);
             final List<CompilationUnit> roots = new ArrayList<>();
-            for (String path : rootsWithPaths.keySet()) {
+            for (Path path : rootsWithPaths.keySet()) {
                 CompilationUnit unit = rootsWithPaths.get(path);
                 roots.add(unit);
-                blackboard.putCompilationUnitLocation(unit, Path.of(path));
+                blackboard.putCompilationUnitLocation(unit, path);
             }
 
             executeWith(inPath, outPath, roots, rules, blackboard);
         } catch (Exception e) {
             throw new RuleEngineException("Analysis did not complete successfully", e);
         }
-    }
-
-    private Map<String, CompilationUnit> fetchEclipseCompilationUnits() {
-        // TODO Select a partition name
-        if (!blackboard.hasPartition(JavaDiscoverer.DISCOVERER_ID)) {
-            return new HashMap<>();
-        }
-        Object compUnitPartition = blackboard.getPartition(JavaDiscoverer.DISCOVERER_ID);
-        if (!(compUnitPartition instanceof Map<?, ?>)) {
-            return new HashMap<>();
-        }
-        @SuppressWarnings("unchecked") // , since it is actually checked.
-        Map<Object, Object> compUnitObjs = (Map<Object, Object>) compUnitPartition;
-        if (compUnitObjs.isEmpty()) {
-            return new HashMap<>();
-        }
-        Entry<Object, Object> anEntry = null;
-        for (Entry<Object, Object> entry : compUnitObjs.entrySet()) {
-            anEntry = entry;
-        }
-        if (!(anEntry.getKey() instanceof String) || !(anEntry.getValue() instanceof CompilationUnit)) {
-            return new HashMap<>();
-        }
-        return compUnitObjs.entrySet()
-            .stream()
-            .collect(Collectors.toMap(x -> (String) x.getKey(), x -> (CompilationUnit) x.getValue()));
     }
 
     /**

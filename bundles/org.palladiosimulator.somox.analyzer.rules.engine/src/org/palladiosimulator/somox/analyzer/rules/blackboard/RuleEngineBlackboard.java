@@ -168,12 +168,12 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
         return Collections.unmodifiableMap(seffAssociations);
     }
 
-    public <T> void putDiscoveredFiles(String discovererID, Map<String, T> pathsToFiles) {
+    public <T> void putDiscoveredFiles(String discovererID, Map<Path, T> pathsToFiles) {
         discovererIDs.add(discovererID);
         addPartition(discovererID, pathsToFiles);
     }
 
-    public <T> Map<String, T> getDiscoveredFiles(String discovererID, Class<T> fileClass) {
+    public <T> Map<Path, T> getDiscoveredFiles(String discovererID, Class<T> fileClass) {
         Object partition = getPartition(discovererID);
         if (!(partition instanceof Map)) {
             return new HashMap<>();
@@ -185,20 +185,20 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
         }
         boolean allEntriesHaveCorrectType = map.entrySet()
             .stream()
-            .allMatch(entry -> entry.getKey() instanceof String && fileClass.isInstance(entry.getValue()));
+            .allMatch(entry -> entry.getKey() instanceof Path && fileClass.isInstance(entry.getValue()));
         if (!allEntriesHaveCorrectType) {
             return new HashMap<>();
         }
         return map.entrySet()
             .stream()
-            .collect(Collectors.toMap(entry -> (String) entry.getKey(), entry -> fileClass.cast(entry.getValue())));
+            .collect(Collectors.toMap(entry -> (Path) entry.getKey(), entry -> fileClass.cast(entry.getValue())));
     }
 
-    public Set<String> getDiscoveredPaths() {
-        Set<String> discoveredPaths = new HashSet<>();
+    public Set<Path> getDiscoveredPaths() {
+        Set<Path> discoveredPaths = new HashSet<>();
         for (String discovererID : discovererIDs) {
             @SuppressWarnings("unchecked") // Local data structure, this assumption is an invariant.
-            Map<String, Object> partition = (Map<String, Object>) getPartition(discovererID);
+            Map<Path, Object> partition = (Map<Path, Object>) getPartition(discovererID);
             discoveredPaths.addAll(partition.keySet());
         }
         return discoveredPaths;

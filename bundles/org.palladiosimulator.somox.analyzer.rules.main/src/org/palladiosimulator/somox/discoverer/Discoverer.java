@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -12,7 +11,7 @@ import org.apache.log4j.Logger;
 import org.palladiosimulator.somox.analyzer.rules.service.Service;
 
 public interface Discoverer extends Service {
-    static Stream<String> find(final Path root, final String suffix, final Logger logger) {
+    static Stream<Path> find(final Path root, final String suffix, final Logger logger) {
         final Path normalizedRoot = Objects.requireNonNull(root)
             .toAbsolutePath()
             .normalize();
@@ -20,15 +19,13 @@ public interface Discoverer extends Service {
             .toLowerCase()
             .strip();
         try (final Stream<Path> walk = Files.walk(normalizedRoot)) {
-            return walk
-                .filter(path -> Files.isRegularFile(path) && path.getFileName()
-                    .toString()
-                    .toLowerCase()
-                    .endsWith(normalizedSuffix))
+            return walk.filter(path -> Files.isRegularFile(path) && path.getFileName()
+                .toString()
+                .toLowerCase()
+                .endsWith(normalizedSuffix))
                 .map(Path::toAbsolutePath)
                 .map(Path::normalize)
                 .distinct()
-                .map(Path::toString)
                 .collect(Collectors.toSet())
                 .stream();
         } catch (SecurityException | IOException e) {

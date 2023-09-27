@@ -1,6 +1,5 @@
 package org.palladiosimulator.somox.discoverer;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,12 +42,12 @@ public class EcmaScriptDiscoverer implements Discoverer {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
-                final Map<String, CompilationUnitTree> compilationUnits = new HashMap<>();
+                final Map<Path, CompilationUnitTree> compilationUnits = new HashMap<>();
                 Stream.concat(Discoverer.find(root, ".js", logger), Discoverer.find(root, ".ts", logger))
                     .forEach(p -> {
                         try {
                             final CompilationUnitTree compilationUnit = Parser.create()
-                                .parse(new File(p), d -> {
+                                .parse(p.toFile(), d -> {
                                     System.out.println(d);
                                 });
                             compilationUnits.put(p, compilationUnit);

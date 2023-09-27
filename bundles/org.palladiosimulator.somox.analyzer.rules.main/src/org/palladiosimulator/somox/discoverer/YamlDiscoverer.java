@@ -45,10 +45,10 @@ public class YamlDiscoverer implements Discoverer {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
-                final Map<String, Object> yamls = new HashMap<>();
+                final Map<Path, Object> yamls = new HashMap<>();
                 Stream.concat(Discoverer.find(root, ".yml", logger), Discoverer.find(root, ".yaml", logger))
                     .forEach(p -> {
-                        try (Reader reader = new FileReader(p)) {
+                        try (Reader reader = new FileReader(p.toFile())) {
                             List<Object> yamlContents = new ArrayList<>();
                             new Yaml().loadAll(reader)
                                 .forEach(yamlContents::add);

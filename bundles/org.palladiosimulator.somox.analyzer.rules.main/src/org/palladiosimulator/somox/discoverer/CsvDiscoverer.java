@@ -45,11 +45,11 @@ public class CsvDiscoverer implements Discoverer {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
-                final Map<String, List<CSVRecord>> csvs = new HashMap<>();
+                final Map<Path, List<CSVRecord>> csvs = new HashMap<>();
                 Discoverer.find(root, ".csv", logger)
                     .forEach(p -> {
                         final List<CSVRecord> records = new LinkedList<>();
-                        try (Reader reader = new FileReader(p)) {
+                        try (Reader reader = new FileReader(p.toFile())) {
                             DEFAULT.parse(reader)
                                 .forEach(records::add);
                         } catch (final IllegalStateException | IOException e) {

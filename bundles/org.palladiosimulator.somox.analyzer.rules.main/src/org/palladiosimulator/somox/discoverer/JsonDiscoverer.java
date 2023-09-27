@@ -43,10 +43,10 @@ public class JsonDiscoverer implements Discoverer {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
-                final Map<String, JSONObject> jsons = new HashMap<>();
+                final Map<Path, JSONObject> jsons = new HashMap<>();
                 Discoverer.find(root, ".json", logger)
                     .forEach(p -> {
-                        try (BufferedReader reader = new BufferedReader(new FileReader(p))) {
+                        try (BufferedReader reader = new BufferedReader(new FileReader(p.toFile()))) {
                             String jsonSource = reader.lines()
                                 .collect(Collectors.joining(System.lineSeparator()));
                             jsons.put(p, new JSONObject(jsonSource));
