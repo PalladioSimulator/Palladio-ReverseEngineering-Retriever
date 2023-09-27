@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -32,6 +33,7 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
     private final Map<Entity, CompilationUnit> entityLocations;
     private final Map<Path, Set<CompilationUnit>> systemAssociations;
     private final Map<System, Path> systemPaths;
+    private final Set<String> discovererIDs;
     private PCMDetector pcmDetector;
 
     public RuleEngineBlackboard() {
@@ -41,6 +43,7 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
         entityLocations = new HashMap<>();
         systemAssociations = new HashMap<>();
         systemPaths = new HashMap<>();
+        discovererIDs = new HashSet<>();
         addPartition(KEY_SEFF_ASSOCIATIONS, new HashMap<>());
     }
 
@@ -163,5 +166,41 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
         Map<ASTNode, ServiceEffectSpecification> seffAssociations = (Map<ASTNode, ServiceEffectSpecification>) getPartition(
                 KEY_SEFF_ASSOCIATIONS);
         return Collections.unmodifiableMap(seffAssociations);
+    }
+
+    public <T> void putDiscoveredFiles(String discovererID, Map<String, T> pathsToFiles) {
+        discovererIDs.add(discovererID);
+        addPartition(discovererID, pathsToFiles);
+    }
+
+    public <T> Map<String, T> getDiscoveredFiles(String discovererID, Class<T> fileClass) {
+        Object partition = getPartition(discovererID);
+        if (!(partition instanceof Map)) {
+            return new HashMap<>();
+        }
+        @SuppressWarnings("unchecked") // Not unchecked.
+        Map<Object, Object> map = (Map<Object, Object>) partition;
+        if (map.isEmpty()) {
+            return new HashMap<>();
+        }
+        boolean allEntriesHaveCorrectType = map.entrySet()
+            .stream()
+            .allMatch(entry -> entry.getKey() instanceof String && fileClass.isInstance(entry.getValue()));
+        if (!allEntriesHaveCorrectType) {
+            return new HashMap<>();
+        }
+        return map.entrySet()
+            .stream()
+            .collect(Collectors.toMap(entry -> (String) entry.getKey(), entry -> fileClass.cast(entry.getValue())));
+    }
+
+    public Set<String> getDiscoveredPaths() {
+        Set<String> discoveredPaths = new HashSet<>();
+        for (String discovererID : discovererIDs) {
+            @SuppressWarnings("unchecked") // Local data structure, this assumption is an invariant.
+            Map<String, Object> partition = (Map<String, Object>) getPartition(discovererID);
+            discoveredPaths.addAll(partition.keySet());
+        }
+        return discoveredPaths;
     }
 }

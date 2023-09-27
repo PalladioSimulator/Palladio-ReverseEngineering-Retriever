@@ -57,7 +57,7 @@ public class CsvDiscoverer implements Discoverer {
                         }
                         csvs.put(p, records);
                     });
-                getBlackboard().addPartition(DISCOVERER_ID, csvs);
+                getBlackboard().putDiscoveredFiles(DISCOVERER_ID, csvs);
             }
 
             @Override

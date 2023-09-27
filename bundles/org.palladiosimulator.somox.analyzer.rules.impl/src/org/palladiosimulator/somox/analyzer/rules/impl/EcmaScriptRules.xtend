@@ -40,9 +40,7 @@ class EcmaScriptRules extends IRule {
 	}
 
 	override processRules(Path path) {
-		val compilationUnitObjects = blackboard.getPartition(ECMASCRIPT_DISCOVERER_ID)
-		val compilationUnits = compilationUnitObjects as Map<String, CompilationUnitTree>
-		if(compilationUnits === null) return false
+		val compilationUnits = blackboard.getDiscoveredFiles(ECMASCRIPT_DISCOVERER_ID, typeof(CompilationUnitTree))
 		val compilationUnit = compilationUnits.get(path)
 		if(compilationUnit === null) return false
 		val httpRequests = findAllHttpRequests(compilationUnit)

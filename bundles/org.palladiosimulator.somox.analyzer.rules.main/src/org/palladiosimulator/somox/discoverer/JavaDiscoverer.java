@@ -68,7 +68,7 @@ public class JavaDiscoverer implements Discoverer {
                 } catch (IllegalArgumentException | IllegalStateException e) {
                     logger.error(String.format("No Java files in %s could be transposed.", root), e);
                 }
-                getBlackboard().addPartition(DISCOVERER_ID, compilationUnits);
+                getBlackboard().putDiscoveredFiles(DISCOVERER_ID, compilationUnits);
             }
 
             @Override

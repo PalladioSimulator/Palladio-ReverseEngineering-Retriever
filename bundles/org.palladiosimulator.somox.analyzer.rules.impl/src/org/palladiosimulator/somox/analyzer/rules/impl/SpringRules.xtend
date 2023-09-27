@@ -33,12 +33,8 @@ class SpringRules extends IRule {
 	override boolean processRules(Path path) {
 		val yamlObjects = blackboard.getPartition(YAML_DISCOVERER_ID)
 		val yamls = yamlObjects as Map<String, Iterable<Map<String, Object>>>
-
-		val pomObjects = blackboard.getPartition(XML_DISCOVERER_ID)
-		val poms = pomObjects as Map<String, Document>
-
-		val propertiesObjects = blackboard.getPartition(PROPERTIES_DISCOVERER_ID)
-		val properties = propertiesObjects as Map<String, Properties>
+		val poms = blackboard.getDiscoveredFiles(XML_DISCOVERER_ID, typeof(Document))
+		val properties = blackboard.getDiscoveredFiles(PROPERTIES_DISCOVERER_ID, typeof(Properties))
 
 		val projectRoot = getProjectRoot(path, poms)
 		val configRoot = getConfigRoot(poms)
