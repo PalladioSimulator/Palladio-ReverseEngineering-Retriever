@@ -22,6 +22,7 @@ import java.util.Optional
 class SpringRules extends IRule {
     static final Logger LOG = Logger.getLogger(SpringRules)
 
+    public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java"
     public static final String YAML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.yaml"
     public static final String XML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.xml"
     public static final String PROPERTIES_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.properties"
@@ -58,14 +59,11 @@ class SpringRules extends IRule {
 
 		val contextVariables = getContextVariables(applicationYaml);
 
-		val units = blackboard.getCompilationUnitAt(path)
+		val unit = blackboard.getDiscoveredFiles(JAVA_DISCOVERER_ID, typeof(CompilationUnit)).get(path)
 
-		var containedSuccessful = false
-		for (unit : units) {
-			containedSuccessful = processRuleForCompUnit(unit, contextPath, contextVariables) || containedSuccessful
-		}
-
-		return containedSuccessful
+		if (unit === null) return false
+		
+		return processRuleForCompUnit(unit, contextPath, contextVariables)
 	}
 
 	def getProjectRoot(Path currentPath, Map<Path, Document> poms) {

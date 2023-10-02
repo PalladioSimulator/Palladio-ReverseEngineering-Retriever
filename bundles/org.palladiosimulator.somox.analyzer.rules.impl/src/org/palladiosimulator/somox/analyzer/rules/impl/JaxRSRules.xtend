@@ -8,20 +8,19 @@ import org.eclipse.jdt.core.dom.CompilationUnit
 import static org.palladiosimulator.somox.analyzer.rules.engine.RuleHelper.*
 
 class JaxRSRules extends IRule{
+
+    public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java"
 	
 	new(RuleEngineBlackboard blackboard) {
 		super(blackboard)
 	}
 	
 	override boolean processRules(Path path) {
-		val units = blackboard.getCompilationUnitAt(path)
+		val unit = blackboard.getDiscoveredFiles(JAVA_DISCOVERER_ID, typeof(CompilationUnit)).get(path)
 		
-		var containedSuccessful = false
-		for (unit : units) {
-			containedSuccessful = processRuleForCompUnit(unit) || containedSuccessful
-		}
+		if (unit === null) return false;
 		
-		return containedSuccessful
+		return processRuleForCompUnit(unit)
 	}
 	
 	def boolean processRuleForCompUnit(CompilationUnit unit) {

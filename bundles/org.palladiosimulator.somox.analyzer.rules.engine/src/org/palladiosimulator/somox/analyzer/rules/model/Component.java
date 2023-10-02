@@ -2,9 +2,11 @@ package org.palladiosimulator.somox.analyzer.rules.model;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 /**
  * Components are {@code CompilationUnits}. They provide and require interfaces.
@@ -13,12 +15,23 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
  * @author Florian Bossert
  */
 public class Component {
-    private final CompilationUnit compilationUnit;
+    private final Optional<CompilationUnit> compilationUnit;
+    private final String name;
     private final Requirements requirements;
     private final Provisions provisions;
 
+    public Component(String name, Requirements requirements, Provisions provisions) {
+        this(Optional.empty(), name, requirements, provisions);
+    }
+
     public Component(CompilationUnit compilationUnit, Requirements requirements, Provisions provisions) {
+        this(Optional.of(compilationUnit), toName(compilationUnit), requirements, provisions);
+    }
+
+    public Component(Optional<CompilationUnit> compilationUnit, String name, Requirements requirements,
+            Provisions provisions) {
         this.compilationUnit = compilationUnit;
+        this.name = name;
         this.requirements = requirements;
         this.provisions = provisions;
     }
@@ -31,8 +44,12 @@ public class Component {
         return provisions;
     }
 
-    public CompilationUnit compilationUnit() {
+    public Optional<CompilationUnit> compilationUnit() {
         return compilationUnit;
+    }
+
+    public String name() {
+        return name;
     }
 
     @Override
@@ -58,19 +75,6 @@ public class Component {
 
     @Override
     public String toString() {
-        String name = "null";
-        if (compilationUnit != null) {
-            @SuppressWarnings("unchecked")
-            List<AbstractTypeDeclaration> types = (List<AbstractTypeDeclaration>) compilationUnit.types();
-            if (types.isEmpty()) {
-                name = "void";
-            } else {
-                name = types.get(0)
-                    .getName()
-                    .getFullyQualifiedName();
-            }
-        }
-
         StringBuilder builder = new StringBuilder();
         builder.append("Name: ");
         builder.append(name);
@@ -82,5 +86,20 @@ public class Component {
             .replace("\n", "\n\t"));
 
         return builder.toString();
+    }
+
+    private static String toName(CompilationUnit compilationUnit) {
+        @SuppressWarnings("unchecked")
+        List<AbstractTypeDeclaration> types = (List<AbstractTypeDeclaration>) compilationUnit.types();
+        if (types.isEmpty()) {
+            return "void";
+        }
+        AbstractTypeDeclaration firstTypeDecl = types.get(0);
+        ITypeBinding binding = firstTypeDecl.resolveBinding();
+        if (binding == null) {
+            return firstTypeDecl.getName()
+                .getFullyQualifiedName();
+        }
+        return binding.getQualifiedName();
     }
 }

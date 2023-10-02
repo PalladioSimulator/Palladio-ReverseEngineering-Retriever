@@ -10,11 +10,9 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.palladiosimulator.generator.fluent.repository.api.Repo;
 import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
 import org.palladiosimulator.generator.fluent.repository.structure.components.BasicComponentCreator;
@@ -293,12 +291,8 @@ public class PCMInstanceCreator {
 
     private void createPCMComponents(Set<Component> components) {
         for (final Component comp : components) {
-            final CompilationUnit compUnit = comp.compilationUnit();
-            AbstractTypeDeclaration firstTypeDecl = (AbstractTypeDeclaration) compUnit.types()
-                .get(0);
-            ITypeBinding binding = firstTypeDecl.resolveBinding();
             BasicComponentCreator pcmComp = create.newBasicComponent()
-                .withName(binding != null ? wrapName(binding) : wrapName(firstTypeDecl.getName()));
+                .withName(wrapName(comp.name()));
 
             Set<org.palladiosimulator.pcm.repository.OperationInterface> distinctInterfaces = new HashSet<>();
             for (String provision : comp.provisions()
@@ -345,7 +339,11 @@ public class PCMInstanceCreator {
                 c.withAssemblyContext(builtComp);
             }
 
-            blackboard.putRepositoryComponentLocation(builtComp, compUnit);
+            if (!comp.compilationUnit()
+                .isEmpty()) {
+                blackboard.putRepositoryComponentLocation(builtComp, comp.compilationUnit()
+                    .get());
+            }
             repository.addToRepository(builtComp);
         }
 
@@ -544,19 +542,11 @@ public class PCMInstanceCreator {
     }
 
     private static String wrapName(ITypeBinding name) {
-        String fullName = name.getQualifiedName()
-            .replace(".", "_");
-        // Erase type parameters in identifiers
-        // TODO is this the right solution?
-        if (fullName.contains("<")) {
-            return fullName.substring(0, fullName.indexOf('<'));
-        }
-        return fullName;
+        return wrapName(name.getQualifiedName());
     }
 
-    private static String wrapName(SimpleName name) {
-        String fullName = name.getFullyQualifiedName()
-            .replace(".", "_");
+    private static String wrapName(String name) {
+        String fullName = name.replace(".", "_");
         // Erase type parameters in identifiers
         // TODO is this the right solution?
         if (fullName.contains("<")) {

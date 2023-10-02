@@ -17,17 +17,19 @@ import org.palladiosimulator.somox.analyzer.rules.maven.MavenRules;
  */
 public enum DefaultRule {
 
-    SPRING(SpringRules.class),
-    JAX_RS(JaxRSRules.class),
-    MAVEN(MavenRules.class),
-    GRADLE(GradleRules.class),
-    DOCKER(DockerRules.class),
-    ECMASCRIPT(EcmaScriptRules.class);
+    SPRING(SpringRules.class, false),
+    JAX_RS(JaxRSRules.class, false),
+    MAVEN(MavenRules.class, true),
+    GRADLE(GradleRules.class, true),
+    DOCKER(DockerRules.class, true),
+    ECMASCRIPT(EcmaScriptRules.class, false);
 
     private final Class<? extends IRule> ruleClass;
+    private final boolean isBuildRule;
 
-    DefaultRule(Class<? extends IRule> ruleClass) {
+    DefaultRule(Class<? extends IRule> ruleClass, boolean isBuildRule) {
         this.ruleClass = ruleClass;
+        this.isBuildRule = isBuildRule;
     }
 
     /**
@@ -55,6 +57,10 @@ public enum DefaultRule {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public boolean isBuildRule() {
+        return isBuildRule;
     }
 
 }

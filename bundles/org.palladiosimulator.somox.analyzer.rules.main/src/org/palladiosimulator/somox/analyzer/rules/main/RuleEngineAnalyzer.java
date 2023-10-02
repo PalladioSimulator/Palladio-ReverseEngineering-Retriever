@@ -1,21 +1,15 @@
 package org.palladiosimulator.somox.analyzer.rules.main;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -34,7 +28,6 @@ import org.palladiosimulator.somox.analyzer.rules.engine.DockerParser;
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
 import org.palladiosimulator.somox.analyzer.rules.engine.PCMDetector;
 import org.palladiosimulator.somox.analyzer.rules.engine.PCMInstanceCreator;
-import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
 
 /**
  * The rule engine identifies PCM elements like components and interfaces inside source code via
@@ -77,16 +70,7 @@ public class RuleEngineAnalyzer {
 
             final Set<DefaultRule> rules = ruleEngineConfiguration.getSelectedRules();
 
-            final Map<Path, CompilationUnit> rootsWithPaths = blackboard
-                .getDiscoveredFiles(JavaDiscoverer.DISCOVERER_ID, CompilationUnit.class);
-            final List<CompilationUnit> roots = new ArrayList<>();
-            for (Path path : rootsWithPaths.keySet()) {
-                CompilationUnit unit = rootsWithPaths.get(path);
-                roots.add(unit);
-                blackboard.putCompilationUnitLocation(unit, path);
-            }
-
-            executeWith(inPath, outPath, roots, rules, blackboard);
+            executeWith(inPath, outPath, rules, blackboard);
         } catch (Exception e) {
             throw new RuleEngineException("Analysis did not complete successfully", e);
         }
@@ -110,74 +94,46 @@ public class RuleEngineAnalyzer {
     }
 
     /**
-     * Extracts PCM elements out of an existing Eclipse JDT model using an IRule file.
+     * Extracts PCM elements out of discovered files using rules.
      *
      * @param projectPath
      *            the project directory
      * @param outPath
      *            the output directory
-     * @param model
-     *            the Java model
-     * @param ruleDoc
-     *            the object containing the rules
+     * @param rules
+     *            the rules
      * @param blackboard
-     *            the rule engine blackboard
+     *            the rule engine blackboard, containing (among other things) the discovered files
      */
-    private static void executeWith(Path projectPath, Path outPath, List<CompilationUnit> model, Set<DefaultRule> rules,
+    private static void executeWith(Path projectPath, Path outPath, Set<DefaultRule> rules,
             RuleEngineBlackboard blackboard) {
 
         // Set up blackboard
         blackboard.setPCMDetector(new PCMDetector());
-        blackboard.addCompilationUnits(model);
 
-        // Look for build files in projectPath
-        Set<Path> buildPaths;
-        try (final Stream<Path> walk = Files.walk(projectPath)) {
-            buildPaths = walk.filter(Files::isRegularFile)
-                .collect(Collectors.toSet());
-        } catch (final IOException e) {
-            buildPaths = new HashSet<>();
-            e.printStackTrace();
-        }
+        Set<Path> discoveredFiles = blackboard.getDiscoveredPaths();
 
-        boolean processedLocationless = false;
-        // For each unit, execute rules
-        for (final CompilationUnit u : model) {
-            Path unitPath = blackboard.getCompilationUnitLocation(u);
-            if (unitPath == null) {
-                if (processedLocationless) {
-                    continue;
-                }
-                // Execute rules for all CompilationUnits without associated files
-                for (final DefaultRule rule : rules) {
+        // For each discovered file, execute non-build rules
+        for (final Path discoveredFile : discoveredFiles) {
+            for (final DefaultRule rule : rules) {
+                if (!rule.isBuildRule()) {
                     rule.getRule(blackboard)
-                        .processRules(null);
+                        .processRules(discoveredFile);
                 }
-                processedLocationless = true;
-            }
-
-            // TODO It could *hypothetically* happen that a build file is a compilation unit as
-            // well. In that case, the build file rule could not assume that all
-            // compilation units have been found.
-
-            // It is assumed that files with compilation units cannot be build files
-            buildPaths.remove(unitPath);
-
-            for (final DefaultRule rule : rules) {
-                rule.getRule(blackboard)
-                    .processRules(unitPath);
             }
         }
-        LOG.info("Applied rules to the compilation units");
+        LOG.info("Applied non-build rules");
 
-        // For each potential build file, execute rules
-        for (final Path path : buildPaths) {
+        // Execute rules for build files (on all files, the rules filter themselves).
+        for (final Path discoveredFile : discoveredFiles) {
             for (final DefaultRule rule : rules) {
-                rule.getRule(blackboard)
-                    .processRules(path);
+                if (rule.isBuildRule()) {
+                    rule.getRule(blackboard)
+                        .processRules(discoveredFile);
+                }
             }
         }
-        LOG.info("Applied rules to the build files");
+        LOG.info("Applied build rules");
 
         // Creates a PCM repository with systems, components, interfaces and roles
 
