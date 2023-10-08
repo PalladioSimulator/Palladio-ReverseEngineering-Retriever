@@ -71,6 +71,7 @@ class EcmaScriptRules extends IRule {
 					resolvedUrls.add(url)
 				}
 			}
+			normalizedRequests.put(source + key.replaceAll(START_NONWORD_CHARS, BLANK), resolvedUrls)
 			for (url : resolvedUrls) {
 				val urlWithWildcards = url.replaceAll(VARIABLE_PREFIX + ".*\\/?", "*")
 				pcmDetector.detectRequiredInterface(new CompUnitOrName(source), new RESTName("/" + urlWithWildcards, Optional.empty()));
