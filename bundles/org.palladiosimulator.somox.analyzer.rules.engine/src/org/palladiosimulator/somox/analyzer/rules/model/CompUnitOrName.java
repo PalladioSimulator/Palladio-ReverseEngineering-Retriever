@@ -1,6 +1,7 @@
 package org.palladiosimulator.somox.analyzer.rules.model;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -8,6 +9,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 public class CompUnitOrName {
+
     private final Optional<CompilationUnit> compilationUnit;
     private final String name;
 
@@ -46,5 +48,25 @@ public class CompUnitOrName {
                 .getFullyQualifiedName();
         }
         return binding.getQualifiedName();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(compilationUnit, name);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        CompUnitOrName other = (CompUnitOrName) obj;
+        return Objects.equals(compilationUnit, other.compilationUnit) && Objects.equals(name, other.name);
     }
 }

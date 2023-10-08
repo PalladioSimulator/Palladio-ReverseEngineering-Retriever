@@ -56,7 +56,6 @@ class EcmaScriptRules extends IRule {
 	def findAllHttpRequests(CompilationUnitTree unit) {
 		val pcmDetector = blackboard.PCMDetector
 		val source = unit.getSourceName().substring(0, unit.getSourceName().lastIndexOf(SEPARATOR) + 1)
-		pcmDetector.detectComponent(new CompUnitOrName(source))
 		val assignments = findVariableAssignments(unit)
 		val requests = join(findFunctionCallsWithUrls(unit), findFunctionDeclarationsWithUrls(unit),
 			findDirectHttpRequest(unit))
@@ -73,7 +72,8 @@ class EcmaScriptRules extends IRule {
 				}
 			}
 			for (url : resolvedUrls) {
-				pcmDetector.detectRequiredInterface(new CompUnitOrName(source), new RESTName("/" + url, Optional.empty()));
+				val urlWithWildcards = url.replaceAll(VARIABLE_PREFIX + ".*\\/?", "*")
+				pcmDetector.detectRequiredInterface(new CompUnitOrName(source), new RESTName("/" + urlWithWildcards, Optional.empty()));
 			}
 		}
 
