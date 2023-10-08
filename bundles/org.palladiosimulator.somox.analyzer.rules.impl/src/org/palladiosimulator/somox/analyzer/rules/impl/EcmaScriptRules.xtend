@@ -29,6 +29,8 @@ class EcmaScriptRules extends IRule {
 
 	public static final String ECMASCRIPT_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.ecmascript"
 
+	static final String GATEWAY_PREFIX = "/gateway"
+	static final CompUnitOrName GATEWAY_NAME = new CompUnitOrName("Gateway")
 	static final String START_NONWORD_CHARS = "^[\\W]+"
 	static final String SEPARATOR = "."
 	static final String URL_KEYWORD = "url"
@@ -74,7 +76,8 @@ class EcmaScriptRules extends IRule {
 			normalizedRequests.put(source + key.replaceAll(START_NONWORD_CHARS, BLANK), resolvedUrls)
 			for (url : resolvedUrls) {
 				val urlWithWildcards = url.replaceAll(VARIABLE_PREFIX + ".*\\/?", "*")
-				pcmDetector.detectRequiredInterface(new CompUnitOrName(source), new RESTName("/" + urlWithWildcards, Optional.empty()));
+				pcmDetector.detectRequiredInterface(GATEWAY_NAME, new RESTName("/" + urlWithWildcards, Optional.empty()));
+				pcmDetector.detectProvidedOperation(GATEWAY_NAME, null, new RESTName(GATEWAY_PREFIX + "/" + urlWithWildcards, Optional.empty()));
 			}
 		}
 
