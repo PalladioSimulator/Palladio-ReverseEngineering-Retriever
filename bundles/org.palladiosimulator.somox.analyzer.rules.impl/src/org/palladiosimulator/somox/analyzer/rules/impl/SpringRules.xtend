@@ -18,6 +18,7 @@ import java.util.Properties
 import org.palladiosimulator.somox.analyzer.rules.model.RESTName
 import org.palladiosimulator.somox.analyzer.rules.model.HTTPMethod
 import java.util.Optional
+import org.palladiosimulator.somox.analyzer.rules.model.CompUnitOrName
 
 class SpringRules extends IRule {
     static final Logger LOG = Logger.getLogger(SpringRules)
@@ -303,29 +304,31 @@ class SpringRules extends IRule {
 		val isClient = isUnitAnnotatedWithName(unit, "FeignClient")
 		val isRepository = isRepository(unit)
 		val isComponent = isService || isController || isClient || isRepository || isUnitAnnotatedWithName(unit, "Component")
+		
+		val identifier = new CompUnitOrName(unit)
 
 		if (isComponent) {
-			pcmDetector.detectComponent(unit)
+			pcmDetector.detectComponent(identifier)
 
 			getConstructors(unit)
 				.stream
 				.filter[c | isMethodAnnotatedWithName(c, "Autowired")]
 				.flatMap[c | getParameters(c).stream]
 				.filter[p | !isParameterAnnotatedWith(p, "Value")]
-				.forEach[p | pcmDetector.detectRequiredInterface(unit, p)]
+				.forEach[p | pcmDetector.detectRequiredInterface(identifier, p)]
 		}
 
 		if (isService || isController) {
 			for (f : getFields(unit)) {
 				val annotated = isFieldAnnotatedWithName(f, "Autowired")
 				if (annotated || isRepository(f.type.resolveBinding)) {
-					pcmDetector.detectRequiredInterface(unit, f)
+					pcmDetector.detectRequiredInterface(identifier, f)
 				}
 			}
 		}
 
 		if (isService || isController) {
-			pcmDetector.detectPartOfComposite(unit, getUnitName(unit));
+			pcmDetector.detectPartOfComposite(identifier, getUnitName(unit));
 		}
 
 		if (isController) {
@@ -343,7 +346,7 @@ class SpringRules extends IRule {
 						var methodName = ifaceName + "/" + requestedMapping;
 						methodName = replaceArgumentsWithWildcards(methodName);
 						val httpMethod = getHTTPMethod(m);
-						pcmDetector.detectCompositeProvidedOperation(unit, m.resolveBinding, new RESTName(methodName, httpMethod));
+						pcmDetector.detectCompositeProvidedOperation(identifier, m.resolveBinding, new RESTName(methodName, httpMethod));
 					}
 				}
 			}
@@ -365,7 +368,7 @@ class SpringRules extends IRule {
 						var methodName = ifaceName + "/" + requestedMapping;
 						methodName = replaceArgumentsWithWildcards(methodName);
 						val httpMethod = getHTTPMethod(m);
-						pcmDetector.detectCompositeRequiredInterface(unit, new RESTName(methodName, httpMethod));
+						pcmDetector.detectCompositeRequiredInterface(identifier, new RESTName(methodName, httpMethod));
 					}
 				}
 			}
@@ -377,9 +380,9 @@ class SpringRules extends IRule {
 
 		if (isComponent && isImplementingOne) {
 			var firstIn = inFs.get(0)
-			pcmDetector.detectProvidedInterface(unit, firstIn.resolveBinding)
+			pcmDetector.detectProvidedInterface(identifier, firstIn.resolveBinding)
 			for (m : getMethods(firstIn)) {
-				pcmDetector.detectProvidedOperation(unit, firstIn.resolveBinding, m)
+				pcmDetector.detectProvidedOperation(identifier, firstIn.resolveBinding, m)
 			}
 		}
 

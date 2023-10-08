@@ -21,6 +21,9 @@ import org.openjdk.nashorn.api.tree.BinaryTree
 import org.openjdk.nashorn.api.tree.ObjectLiteralTree
 import java.util.List
 import org.openjdk.nashorn.api.tree.VariableTree
+import org.palladiosimulator.somox.analyzer.rules.model.RESTName
+import java.util.Optional
+import org.palladiosimulator.somox.analyzer.rules.model.CompUnitOrName
 
 class EcmaScriptRules extends IRule {
 
@@ -51,7 +54,9 @@ class EcmaScriptRules extends IRule {
 	}
 
 	def findAllHttpRequests(CompilationUnitTree unit) {
+		val pcmDetector = blackboard.PCMDetector
 		val source = unit.getSourceName().substring(0, unit.getSourceName().lastIndexOf(SEPARATOR) + 1)
+		pcmDetector.detectComponent(new CompUnitOrName(source))
 		val assignments = findVariableAssignments(unit)
 		val requests = join(findFunctionCallsWithUrls(unit), findFunctionDeclarationsWithUrls(unit),
 			findDirectHttpRequest(unit))
@@ -67,7 +72,9 @@ class EcmaScriptRules extends IRule {
 					resolvedUrls.add(url)
 				}
 			}
-			normalizedRequests.put(source + key.replaceAll(START_NONWORD_CHARS, BLANK), resolvedUrls)
+			for (url : resolvedUrls) {
+				pcmDetector.detectRequiredInterface(new CompUnitOrName(source), new RESTName("/" + url, Optional.empty()));
+			}
 		}
 
 		return normalizedRequests

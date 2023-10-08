@@ -6,6 +6,7 @@ import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboar
 import java.nio.file.Path;
 import org.eclipse.jdt.core.dom.CompilationUnit
 import static org.palladiosimulator.somox.analyzer.rules.engine.RuleHelper.*
+import org.palladiosimulator.somox.analyzer.rules.model.CompUnitOrName
 
 class JaxRSRules extends IRule{
 
@@ -28,6 +29,8 @@ class JaxRSRules extends IRule{
 		if (pcmDetector === null) {
 		return false
 		}
+		
+		val identifier = new CompUnitOrName(unit)
 
 		// technology based and general recognition
 		val isConverter = isUnitAnnotatedWithName(unit, "Converter")
@@ -39,36 +42,36 @@ class JaxRSRules extends IRule{
 		// detect controller component	
 		val isUnitController = isUnitAnnotatedWithName(unit, "Path")
 		if(isUnitController){
-			pcmDetector.detectComponent(unit) 
+			pcmDetector.detectComponent(identifier) 
 			getMethods(unit).forEach[m|
-			if(isMethodAnnotatedWithName(m,"DELETE","GET","HEAD","PUT","POST","OPTIONS")) pcmDetector.detectProvidedOperation(unit,m.resolveBinding)]
-			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
+			if(isMethodAnnotatedWithName(m,"DELETE","GET","HEAD","PUT","POST","OPTIONS")) pcmDetector.detectProvidedOperation(identifier,m.resolveBinding)]
+			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(identifier, f)]
 		return true
 		} 
 		
 		val isWebListener = isUnitAnnotatedWithName(unit, "WebListener","WebServlet")
 		if(isWebListener){
-			pcmDetector.detectComponent(unit)
+			pcmDetector.detectComponent(identifier)
 			getMethods(unit).forEach[m|
-			if(isMethodModifiedExactlyWith(m,"public") || isMethodModifiedExactlyWith(m,"protected")) pcmDetector.detectProvidedOperation(unit,m.resolveBinding)]
-			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
+			if(isMethodModifiedExactlyWith(m,"public") || isMethodModifiedExactlyWith(m,"protected")) pcmDetector.detectProvidedOperation(identifier,m.resolveBinding)]
+			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(identifier, f)]
 		return true
 		}
 		
 		// detect implementing component
 		val isUnit = isClassImplementing(unit)
 		if(isUnit && !isUnitController && !isWebListener && getAllInterfaces(unit).size() > 0){
-			pcmDetector.detectComponent(unit)
+			pcmDetector.detectComponent(identifier)
 			val firstIn = getAllInterfaces(unit).get(0)
-			getMethods(firstIn).forEach[m|pcmDetector.detectProvidedOperation(unit, firstIn.resolveBinding, m)]
-			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
+			getMethods(firstIn).forEach[m|pcmDetector.detectProvidedOperation(identifier, firstIn.resolveBinding, m)]
+			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(identifier, f)]
 			return true
 		}
 		
 		// detect normal components
 		val classModified = isClassModifiedExactlyWith(unit, "public","final");
 		if(!isUnit && !isUnitController && !isWebListener && classModified){
-			pcmDetector.detectComponent(unit)
+			pcmDetector.detectComponent(identifier)
 			detectDefault(unit)
 			return true
 		} 
@@ -78,10 +81,11 @@ class JaxRSRules extends IRule{
 	
 	def detectDefault(CompilationUnit unit) {
 		val pcmDetector = blackboard.getPCMDetector()
+		val identifier = new CompUnitOrName(unit)
 
-		pcmDetector.detectComponent(unit)
-		getAllPublicMethods(unit).forEach[m|pcmDetector.detectProvidedOperation(unit,m.resolveBinding)]
-		getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
+		pcmDetector.detectComponent(identifier)
+		getAllPublicMethods(unit).forEach[m|pcmDetector.detectProvidedOperation(identifier,m.resolveBinding)]
+		getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(identifier, f)]
 	}
 	
 }

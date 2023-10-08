@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.palladiosimulator.somox.analyzer.rules.model.CompUnitOrName;
 
 /**
  * The DockerParser parses a docker-compose file to extract a mapping between service names
@@ -108,11 +109,16 @@ public class DockerParser {
      */
     private Map<String, Set<CompilationUnit>> createServiceComponentMapping(List<String> serviceNames) {
 
-        final Set<CompilationUnit> components = pcmDetector.getCompilationUnits();
+        final Set<CompUnitOrName> components = pcmDetector.getCompilationUnits();
 
         final Map<String, Set<CompilationUnit>> serviceToCompMapping = new HashMap<>();
 
-        components.forEach(comp -> {
+        components.forEach(compUnitOrName -> {
+            if (!compUnitOrName.isUnit()) {
+                return;
+            }
+            CompilationUnit comp = compUnitOrName.compilationUnit()
+                .get();
             try (Stream<Path> files = Files.walk(path)) {
                 // TODO try to find a more robust heuristic
                 final List<Path> foundPaths = files.filter(f -> f.toString()
