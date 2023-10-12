@@ -8,12 +8,14 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.pcm.seff.ServiceEffectSpecification;
 import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
+import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
 
 public class SeffAssociationTest extends RuleEngineTest {
 
@@ -48,7 +50,9 @@ public class SeffAssociationTest extends RuleEngineTest {
         RuleEngineBlackboard blackboard = getBlackboard();
 
         @SuppressWarnings("unchecked")
-        MethodDeclaration methodDeclaration = blackboard.getCompilationUnits()
+        MethodDeclaration methodDeclaration = blackboard
+            .getDiscoveredFiles(JavaDiscoverer.DISCOVERER_ID, CompilationUnit.class)
+            .values()
             .stream()
             .flatMap(unit -> ((List<ASTNode>) unit.types()).stream())
             .filter(TypeDeclaration.class::isInstance)

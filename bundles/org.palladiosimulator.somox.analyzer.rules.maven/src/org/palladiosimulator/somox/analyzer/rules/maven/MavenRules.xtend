@@ -8,6 +8,8 @@ import java.util.HashSet
 import org.eclipse.jdt.core.dom.CompilationUnit
 
 class MavenRules extends IRule {
+
+	static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java";
 	static final String MAVEN_FILE_NAME = "pom.xml";
 
 	new(RuleEngineBlackboard blackboard) {
@@ -20,11 +22,10 @@ class MavenRules extends IRule {
 			// Add all file system children as associated compilation units
 			var children = new HashSet<CompilationUnit>();
 			var parentPath = path.parent;
-			for (unit : blackboard.compilationUnits) {
-				var unitPath = blackboard.getCompilationUnitLocation(unit);
-				if (unitPath !== null && unitPath.startsWith(parentPath)) {
+			for (entry : blackboard.getDiscoveredFiles(JAVA_DISCOVERER_ID, typeof(CompilationUnit)).entrySet) {
+				if (entry.key.startsWith(parentPath)) {
 					// The compilation unit is a child of this build file
-					children.add(unit);
+					children.add(entry.value);
 				}
 			}
 			blackboard.addSystemAssociations(path, children);

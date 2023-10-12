@@ -43,6 +43,8 @@ import org.palladiosimulator.somox.analyzer.rules.model.OperationInterface;
 public class PCMInstanceCreator {
     private static final Logger LOG = Logger.getLogger(PCMInstanceCreator.class);
 
+    private static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java";
+
     private static final String REPO_NAME = "Software Architecture Repository";
     private final FluentRepositoryFactory create;
     private final Repo repository;
@@ -282,7 +284,8 @@ public class PCMInstanceCreator {
     }
 
     private Optional<ASTNode> getDeclaration(IMethodBinding binding) {
-        return blackboard.getCompilationUnits()
+        return blackboard.getDiscoveredFiles(JAVA_DISCOVERER_ID, CompilationUnit.class)
+            .values()
             .stream()
             .map(unit -> unit.findDeclaringNode(binding))
             .filter(node -> node != null)
