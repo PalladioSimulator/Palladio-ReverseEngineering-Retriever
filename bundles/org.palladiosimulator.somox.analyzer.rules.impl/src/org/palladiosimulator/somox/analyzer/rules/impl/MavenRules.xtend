@@ -1,4 +1,4 @@
-package org.palladiosimulator.somox.analyzer.rules.docker
+package org.palladiosimulator.somox.analyzer.rules.impl
 
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule
 
@@ -7,28 +7,29 @@ import java.nio.file.Path;
 import java.util.HashSet
 import org.eclipse.jdt.core.dom.CompilationUnit
 
-class DockerRules extends IRule {
+class MavenRules extends IRule {
 
-    static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java"
-	static final String DOCKER_FILE_NAME = "Dockerfile";
-	
+	static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java";
+	static final String MAVEN_FILE_NAME = "pom.xml";
+
 	new(RuleEngineBlackboard blackboard) {
 		super(blackboard)
 	}
-	
+
 	override boolean processRules(Path path) {
-		if (path !== null && path.fileName.toString().equals(DOCKER_FILE_NAME)) {
-			
+		if (path !== null && path.fileName.toString().equals(MAVEN_FILE_NAME)) {
+
 			// Add all file system children as associated compilation units
 			var children = new HashSet<CompilationUnit>();
 			var parentPath = path.parent;
 			for (entry : blackboard.getDiscoveredFiles(JAVA_DISCOVERER_ID, typeof(CompilationUnit)).entrySet) {
 				if (entry.key.startsWith(parentPath)) {
+					// The compilation unit is a child of this build file
 					children.add(entry.value);
 				}
 			}
 			blackboard.addSystemAssociations(path, children);
-			
+
 			return true;
 		}
 		return false;

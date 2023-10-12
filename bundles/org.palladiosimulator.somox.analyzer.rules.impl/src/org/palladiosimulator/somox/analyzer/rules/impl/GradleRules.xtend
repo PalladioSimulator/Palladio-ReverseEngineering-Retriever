@@ -1,4 +1,4 @@
-package org.palladiosimulator.somox.analyzer.rules.gradle
+package org.palladiosimulator.somox.analyzer.rules.impl
 
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule
 

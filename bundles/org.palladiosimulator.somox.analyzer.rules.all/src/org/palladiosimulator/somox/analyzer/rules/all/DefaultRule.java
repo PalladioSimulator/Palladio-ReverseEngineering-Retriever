@@ -4,13 +4,13 @@ import java.awt.Image;
 import java.lang.reflect.InvocationTargetException;
 
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.docker.DockerRules;
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
-import org.palladiosimulator.somox.analyzer.rules.gradle.GradleRules;
-import org.palladiosimulator.somox.analyzer.rules.impl.JaxRSRules;
-import org.palladiosimulator.somox.analyzer.rules.impl.SpringRules;
+import org.palladiosimulator.somox.analyzer.rules.impl.DockerRules;
 import org.palladiosimulator.somox.analyzer.rules.impl.EcmaScriptRules;
-import org.palladiosimulator.somox.analyzer.rules.maven.MavenRules;
+import org.palladiosimulator.somox.analyzer.rules.impl.GradleRules;
+import org.palladiosimulator.somox.analyzer.rules.impl.JaxRSRules;
+import org.palladiosimulator.somox.analyzer.rules.impl.MavenRules;
+import org.palladiosimulator.somox.analyzer.rules.impl.SpringRules;
 
 /**
  * This enum contains all default rule technologies the rule engine provides
