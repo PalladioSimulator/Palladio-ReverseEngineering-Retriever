@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.palladiosimulator.somox.analyzer.rules.model.CompUnitOrName;
 import org.palladiosimulator.somox.analyzer.rules.model.Component;
 import org.palladiosimulator.somox.analyzer.rules.model.ComponentBuilder;
 import org.palladiosimulator.somox.analyzer.rules.model.Composite;
@@ -39,7 +40,7 @@ public class CompositeTest {
         OperationInterface provision = new Operation(null, new JavaOperationName("Interface", "providedMethod"));
         EntireInterface requirement = new EntireInterface(new JavaInterfaceName("RequiredInterface"));
 
-        ComponentBuilder componentBuilder = new ComponentBuilder(null);
+        ComponentBuilder componentBuilder = new ComponentBuilder(new CompUnitOrName("Component"));
         componentBuilder.provisions()
             .add(provision);
         componentBuilder.requirements()
@@ -74,7 +75,7 @@ public class CompositeTest {
         OperationInterface provision = new Operation(null, new JavaOperationName("Interface", "providedMethod"));
         EntireInterface requirement = new EntireInterface(new JavaInterfaceName("RequiredInterface"));
 
-        ComponentBuilder componentBuilder = new ComponentBuilder(null);
+        ComponentBuilder componentBuilder = new ComponentBuilder(new CompUnitOrName("Component"));
         componentBuilder.provisions()
             .add(provision);
         componentBuilder.requirements()
@@ -100,13 +101,13 @@ public class CompositeTest {
         EntireInterface requirement1 = new EntireInterface(new JavaInterfaceName("RequiredInterfaceA"));
         EntireInterface requirement2 = new EntireInterface(new JavaInterfaceName("RequiredInterfaceB"));
 
-        ComponentBuilder componentBuilder1 = new ComponentBuilder(null);
+        ComponentBuilder componentBuilder1 = new ComponentBuilder(new CompUnitOrName("Component 1"));
         componentBuilder1.provisions()
             .add(provision1);
         componentBuilder1.requirements()
             .add(requirement1);
 
-        ComponentBuilder componentBuilder2 = new ComponentBuilder(null);
+        ComponentBuilder componentBuilder2 = new ComponentBuilder(new CompUnitOrName("Component 2"));
         componentBuilder2.provisions()
             .add(provision2);
         componentBuilder2.requirements()
@@ -134,7 +135,7 @@ public class CompositeTest {
         EntireInterface additionalRequirement1 = new EntireInterface(new JavaInterfaceName("RequiredInterfaceA"));
         EntireInterface additionalRequirement2 = new EntireInterface(new JavaInterfaceName("RequiredInterfaceB"));
 
-        ComponentBuilder componentBuilder1 = new ComponentBuilder(null);
+        ComponentBuilder componentBuilder1 = new ComponentBuilder(new CompUnitOrName("Component 1"));
         componentBuilder1.provisions()
             .add(provision);
         componentBuilder1.requirements()
@@ -142,7 +143,7 @@ public class CompositeTest {
         componentBuilder1.requirements()
             .add(additionalRequirement1);
 
-        ComponentBuilder componentBuilder2 = new ComponentBuilder(null);
+        ComponentBuilder componentBuilder2 = new ComponentBuilder(new CompUnitOrName("Component 2"));
         componentBuilder2.provisions()
             .add(provision);
         componentBuilder2.requirements()
@@ -168,7 +169,7 @@ public class CompositeTest {
     void impreciseExposure() {
         OperationInterface provision = new Operation(null, new JavaOperationName("Interface", "providedMethod"));
 
-        ComponentBuilder componentBuilder = new ComponentBuilder(null);
+        ComponentBuilder componentBuilder = new ComponentBuilder(new CompUnitOrName("Component"));
         componentBuilder.provisions()
             .add(provision);
 
