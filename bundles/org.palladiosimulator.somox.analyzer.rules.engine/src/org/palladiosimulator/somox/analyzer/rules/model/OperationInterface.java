@@ -19,8 +19,8 @@ public interface OperationInterface extends Comparable<OperationInterface> {
 
     @Override
     default int compareTo(OperationInterface other) {
-        boolean isSubset = isPartOf(other);
-        boolean isSuperset = isPartOf(other);
+        boolean isSubset = this.isPartOf(other);
+        boolean isSuperset = other.isPartOf(this);
         if (isSubset && isSuperset) {
             return 0; // equal
         } else if (isSubset) {
@@ -29,6 +29,8 @@ public interface OperationInterface extends Comparable<OperationInterface> {
             return -1;
         }
 
-        return 0; // disjoint
+        return getName().toString()
+            .compareTo(other.getName()
+                .toString()); // disjoint
     }
 }

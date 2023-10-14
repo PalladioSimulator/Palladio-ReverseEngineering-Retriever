@@ -299,7 +299,7 @@ public class PCMDetector {
         if (constructedComposites.isEmpty()) {
             List<Composite> allComposites = composites.values()
                 .stream()
-                .map(x -> x.construct(getComponents(), compositeRequirements.create(),
+                .map(x -> x.construct(getComponents(), compositeRequirements.create(List.of()),
                         compositeProvisions.create(List.of())))
                 .collect(Collectors.toList());
 

@@ -1,9 +1,12 @@
 package org.palladiosimulator.somox.analyzer.rules.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -14,9 +17,12 @@ import org.palladiosimulator.somox.analyzer.rules.engine.MapMerger;
 
 public class Requirements implements Iterable<EntireInterface> {
     private final Set<EntireInterface> requirements;
+    private final Map<OperationInterface, List<OperationInterface>> groupedRequirements;
 
-    public Requirements(Collection<EntireInterface> requiredInterfaces) {
-        this.requirements = new HashSet<>(requiredInterfaces);
+    public Requirements(Collection<EntireInterface> requiredInterfaces,
+            Collection<OperationInterface> allDependencies) {
+        this.requirements = Collections.unmodifiableSet(new HashSet<>(requiredInterfaces));
+        this.groupedRequirements = DependencyUtils.groupDependencies(requiredInterfaces, allDependencies);
     }
 
     public Set<EntireInterface> get() {
@@ -40,10 +46,24 @@ public class Requirements implements Iterable<EntireInterface> {
     }
 
     public Map<String, List<Operation>> simplified() {
-        List<Map<String, List<Operation>>> simplifiedInterfaces = requirements.stream()
-            .map(OperationInterface::simplified)
-            .collect(Collectors.toList());
-
+        List<Map<String, List<Operation>>> simplifiedInterfaces = new LinkedList<>();
+        for (OperationInterface root : groupedRequirements.keySet()) {
+            Map<String, List<Operation>> simplifiedRoot = new HashMap<>();
+            simplifiedRoot.put(root.getInterface(), new ArrayList<>(root.simplified()
+                .values()
+                .stream()
+                .flatMap(x -> x.stream())
+                .collect(Collectors.toList())));
+            for (OperationInterface member : groupedRequirements.get(root)) {
+                simplifiedRoot.get(root.getInterface())
+                    .addAll(member.simplified()
+                        .values()
+                        .stream()
+                        .flatMap(x -> x.stream())
+                        .collect(Collectors.toList()));
+            }
+            simplifiedInterfaces.add(simplifiedRoot);
+        }
         return MapMerger.merge(simplifiedInterfaces);
     }
 

@@ -10,9 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.PriorityQueue;
-import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,61 +21,7 @@ public class Provisions implements Iterable<OperationInterface> {
 
     public Provisions(Collection<OperationInterface> provisions, Collection<OperationInterface> allDependencies) {
         this.provisions = Collections.unmodifiableSet(new HashSet<>(provisions));
-        this.groupedProvisions = new HashMap<>();
-        if (provisions.isEmpty()) {
-            return;
-        }
-
-        Queue<OperationInterface> sortedProvisions = new PriorityQueue<>(provisions);
-
-        while (!sortedProvisions.isEmpty()) {
-            OperationInterface provision = sortedProvisions.poll();
-            boolean isRoot = true;
-            for (OperationInterface rootInterface : groupedProvisions.keySet()) {
-                if (provision.isPartOf(rootInterface)) {
-                    groupedProvisions.get(rootInterface)
-                        .add(provision);
-                    isRoot = false;
-                    break;
-                }
-            }
-            if (isRoot) {
-                for (OperationInterface rootInterface : groupedProvisions.keySet()) {
-                    Optional<String> commonInterfaceName = provision.getName()
-                        .getCommonInterface(rootInterface.getName());
-                    boolean containsOtherDependency = false;
-
-                    if (!commonInterfaceName.isPresent()) {
-                        continue;
-                    }
-
-                    EntireInterface commonInterface = new EntireInterface(rootInterface.getName()
-                        .createInterface(commonInterfaceName.get()));
-
-                    for (OperationInterface dependency : allDependencies) {
-                        // Check all foreign dependencies
-                        if (!provisions.contains(dependency)) {
-                            // If a foreign dependency is part of the new common interface, it must
-                            // not be created
-                            containsOtherDependency |= dependency.isPartOf(commonInterface);
-                        }
-                    }
-
-                    if (!containsOtherDependency) {
-                        // De-duplicate interfaces.
-                        Set<OperationInterface> interfaces = new HashSet<>(groupedProvisions.remove(rootInterface));
-                        interfaces.add(rootInterface);
-                        interfaces.add(provision);
-                        groupedProvisions.put(commonInterface, new ArrayList<>(interfaces));
-                        isRoot = false;
-                        break;
-                    }
-                }
-            }
-            if (isRoot) {
-                groupedProvisions.put(provision, new LinkedList<>());
-            }
-        }
+        this.groupedProvisions = DependencyUtils.groupDependencies(provisions, allDependencies);
     }
 
     public Set<OperationInterface> get() {

@@ -29,7 +29,7 @@ public class ComponentBuilder {
     }
 
     public Component create(Collection<OperationInterface> allDependencies) {
-        return new Component(compUnitOrName, requirements.create(), provisions.create(allDependencies));
+        return new Component(compUnitOrName, requirements.create(allDependencies), provisions.create(allDependencies));
     }
 
     @Override

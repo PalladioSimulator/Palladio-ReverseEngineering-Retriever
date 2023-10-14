@@ -24,7 +24,7 @@ public class CompositeTest {
     @Test
     void emptyComposite() {
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
-        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of()),
+        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(), List.of()),
                 new Provisions(List.of(), List.of()));
 
         assertTrue(result.parts()
@@ -48,7 +48,7 @@ public class CompositeTest {
 
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
-        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of()),
+        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(), List.of()),
                 new Provisions(List.of(), List.of(provision, requirement)));
 
         assertEquals(1, result.parts()
@@ -83,7 +83,7 @@ public class CompositeTest {
 
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
-        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(requirement)),
+        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(requirement), List.of()),
                 new Provisions(List.of(provision), List.of(provision, requirement)));
 
         assertEquals(1, result.parts()
@@ -116,9 +116,11 @@ public class CompositeTest {
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder1);
         compositeBuilder.addPart(componentBuilder2);
-        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(requirement1, requirement2)),
-                new Provisions(List.of(provision1, provision2),
-                        List.of(provision1, provision2, requirement1, requirement2)));
+
+        List<OperationInterface> allDependencies = List.of(provision1, provision2, requirement1, requirement2);
+        Composite result = compositeBuilder.construct(List.of(),
+                new Requirements(List.of(requirement1, requirement2), allDependencies),
+                new Provisions(List.of(provision1, provision2), allDependencies));
 
         assertEquals(2, result.parts()
             .size(), "this composite should have exactly two parts");
@@ -154,8 +156,12 @@ public class CompositeTest {
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder1);
         compositeBuilder.addPart(componentBuilder2);
-        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(requirement)), new Provisions(
-                List.of(provision), List.of(provision, requirement, additionalRequirement1, additionalRequirement2)));
+
+        List<OperationInterface> allDependencies = List.of(provision, requirement, additionalRequirement1,
+                additionalRequirement2);
+        Composite result = compositeBuilder.construct(List.of(),
+                new Requirements(List.of(requirement), allDependencies),
+                new Provisions(List.of(provision), allDependencies));
 
         assertEquals(2, result.parts()
             .size(), "this composite should have exactly two parts");
@@ -176,7 +182,7 @@ public class CompositeTest {
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
         OperationInterface provisionInterface = new EntireInterface(new JavaInterfaceName("Interface"));
-        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of()),
+        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(), List.of(provision)),
                 new Provisions(List.of(provisionInterface), List.of(provision)));
 
         assertEquals(1, result.parts()

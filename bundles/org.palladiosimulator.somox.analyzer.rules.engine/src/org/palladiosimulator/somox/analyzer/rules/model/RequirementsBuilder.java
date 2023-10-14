@@ -17,8 +17,8 @@ public class RequirementsBuilder {
         requirements.addAll(interfaces);
     }
 
-    public Requirements create() {
-        return new Requirements(requirements);
+    public Requirements create(Collection<OperationInterface> allDependencies) {
+        return new Requirements(requirements, allDependencies);
     }
 
     public List<OperationInterface> toList() {
