@@ -2,8 +2,6 @@ package org.palladiosimulator.somox.analyzer.rules.engine;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,17 +17,15 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.palladiosimulator.somox.analyzer.rules.model.CompUnitOrName;
-import org.palladiosimulator.somox.analyzer.rules.model.Component;
 import org.palladiosimulator.somox.analyzer.rules.model.ComponentBuilder;
-import org.palladiosimulator.somox.analyzer.rules.model.Composite;
 import org.palladiosimulator.somox.analyzer.rules.model.CompositeBuilder;
 import org.palladiosimulator.somox.analyzer.rules.model.EntireInterface;
 import org.palladiosimulator.somox.analyzer.rules.model.InterfaceName;
 import org.palladiosimulator.somox.analyzer.rules.model.JavaInterfaceName;
 import org.palladiosimulator.somox.analyzer.rules.model.JavaOperationName;
 import org.palladiosimulator.somox.analyzer.rules.model.Operation;
-import org.palladiosimulator.somox.analyzer.rules.model.OperationInterface;
 import org.palladiosimulator.somox.analyzer.rules.model.OperationName;
+import org.palladiosimulator.somox.analyzer.rules.model.PCMDetectionResult;
 import org.palladiosimulator.somox.analyzer.rules.model.ProvisionsBuilder;
 import org.palladiosimulator.somox.analyzer.rules.model.RequirementsBuilder;
 
@@ -46,9 +42,6 @@ public class PCMDetector {
     private Map<String, CompositeBuilder> composites = new HashMap<>();
     private ProvisionsBuilder compositeProvisions = new ProvisionsBuilder();
     private RequirementsBuilder compositeRequirements = new RequirementsBuilder();
-
-    private Set<Component> constructedComponents = new HashSet<>();
-    private Set<Composite> constructedComposites = new HashSet<>();
 
     private static String getFullUnitName(CompUnitOrName unit) {
         // TODO this is potentially problematic, maybe restructure
@@ -261,79 +254,14 @@ public class PCMDetector {
         return components.keySet();
     }
 
-    protected Set<Component> getComponents() {
-        if (constructedComponents.isEmpty()) {
-            List<OperationInterface> allDependencies = new LinkedList<>();
-            allDependencies.addAll(compositeRequirements.toList());
-            allDependencies.addAll(compositeProvisions.toList());
-
-            constructedComponents = components.values()
-                .stream()
-                .map(x -> x.create(allDependencies))
-                .collect(Collectors.toSet());
-        }
-        return constructedComponents;
-    }
-
-    protected Map<String, List<Operation>> getOperationInterfaces() {
-        // TODO: This has to include composite interfaces as well
-        List<Map<String, List<Operation>>> operationInterfaces = getComponents().stream()
-            .map(x -> x.provisions()
-                .simplified())
-            .collect(Collectors.toList());
-        getComponents().stream()
-            .map(x -> x.requirements()
-                .simplified())
-            .forEach(x -> operationInterfaces.add(x));
-        getCompositeComponents().stream()
-            .map(x -> x.provisions())
-            .forEach(x -> operationInterfaces.add(x));
-        getCompositeComponents().stream()
-            .map(x -> x.requirements())
-            .forEach(x -> operationInterfaces.add(x));
-        return MapMerger.merge(operationInterfaces);
-    }
-
-    protected Set<Composite> getCompositeComponents() {
-        // Construct composites.
-        if (constructedComposites.isEmpty()) {
-            List<Composite> allComposites = composites.values()
-                .stream()
-                .map(x -> x.construct(getComponents(), compositeRequirements.create(List.of()),
-                        compositeProvisions.create(List.of())))
-                .collect(Collectors.toList());
-
-            // Remove redundant composites.
-            Set<Composite> redundantComposites = new HashSet<>();
-            for (int i = 0; i < allComposites.size(); ++i) {
-                Composite subject = allComposites.get(i);
-                long subsetCount = allComposites.subList(i + 1, allComposites.size())
-                    .stream()
-                    .filter(x -> subject.isSubsetOf(x) || x.isSubsetOf(subject))
-                    .count();
-
-                // Any composite is guaranteed to be the subset of at least one composite in the
-                // list,
-                // namely itself. If it is the subset of any composites other than itself, it is
-                // redundant.
-                if (subsetCount > 0) {
-                    redundantComposites.add(subject);
-                }
-
-                // TODO: Is there any merging necessary, like adapting the redundant composite's
-                // requirements to its peer?
-                constructedComposites = allComposites.stream()
-                    .filter(x -> !redundantComposites.contains(x))
-                    .collect(Collectors.toUnmodifiableSet());
-            }
-        }
-        return constructedComposites;
+    public PCMDetectionResult getResult() {
+        return new PCMDetectionResult(components, composites, compositeProvisions, compositeRequirements);
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(149);
-        sb.append("[EclipsePCMDetector] {\n\tcomponents: {\n");
+        StringBuilder sb = new StringBuilder(142);
+        sb.append("[PCMDetector] {\n\tcomponents: {\n");
         components.entrySet()
             .forEach(entry -> {
                 sb.append("\t\t\"");

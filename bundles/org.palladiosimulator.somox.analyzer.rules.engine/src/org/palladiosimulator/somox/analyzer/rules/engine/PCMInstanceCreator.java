@@ -37,6 +37,7 @@ import org.palladiosimulator.somox.analyzer.rules.model.Composite;
 import org.palladiosimulator.somox.analyzer.rules.model.EntireInterface;
 import org.palladiosimulator.somox.analyzer.rules.model.Operation;
 import org.palladiosimulator.somox.analyzer.rules.model.OperationInterface;
+import org.palladiosimulator.somox.analyzer.rules.model.PCMDetectionResult;
 
 // TODO Bug-fix, probably
 // Class to create a pcm instance out of all results from the detector class
@@ -103,12 +104,11 @@ public class PCMInstanceCreator {
      * @return the PCM repository model
      */
     public Repository createPCM(Map<String, Set<CompilationUnit>> mapping) {
-        final Set<Component> components = blackboard.getPCMDetector()
-            .getComponents();
-        final Map<String, List<Operation>> interfaces = blackboard.getPCMDetector()
-            .getOperationInterfaces();
-        final Set<Composite> composites = blackboard.getPCMDetector()
-            .getCompositeComponents();
+        PCMDetectionResult detectionResult = blackboard.getPCMDetector()
+            .getResult();
+        final Set<Component> components = detectionResult.getComponents();
+        final Map<String, List<Operation>> interfaces = detectionResult.getOperationInterfaces();
+        final Set<Composite> composites = detectionResult.getCompositeComponents();
 
         createPCMInterfaces(interfaces);
 
