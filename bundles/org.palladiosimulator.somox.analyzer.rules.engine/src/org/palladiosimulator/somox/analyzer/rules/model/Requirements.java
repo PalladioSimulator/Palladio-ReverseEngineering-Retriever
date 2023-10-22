@@ -45,17 +45,17 @@ public class Requirements implements Iterable<EntireInterface> {
             .iterator();
     }
 
-    public Map<String, List<Operation>> simplified() {
-        List<Map<String, List<Operation>>> simplifiedInterfaces = new LinkedList<>();
+    public Map<OperationInterface, List<Operation>> simplified() {
+        List<Map<OperationInterface, List<Operation>>> simplifiedInterfaces = new LinkedList<>();
         for (OperationInterface root : groupedRequirements.keySet()) {
-            Map<String, List<Operation>> simplifiedRoot = new HashMap<>();
-            simplifiedRoot.put(root.getInterface(), new ArrayList<>(root.simplified()
+            Map<OperationInterface, List<Operation>> simplifiedRoot = new HashMap<>();
+            simplifiedRoot.put(root, new ArrayList<>(root.simplified()
                 .values()
                 .stream()
                 .flatMap(x -> x.stream())
                 .collect(Collectors.toList())));
             for (OperationInterface member : groupedRequirements.get(root)) {
-                simplifiedRoot.get(root.getInterface())
+                simplifiedRoot.get(root)
                     .addAll(member.simplified()
                         .values()
                         .stream()
@@ -90,10 +90,10 @@ public class Requirements implements Iterable<EntireInterface> {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        Map<String, List<Operation>> simplified = simplified();
+        Map<OperationInterface, List<Operation>> simplified = simplified();
 
-        for (String iface : simplified.keySet()) {
-            builder.append(iface);
+        for (OperationInterface iface : simplified.keySet()) {
+            builder.append(iface.getName());
             simplified.get(iface)
                 .forEach(x -> builder.append("\n\t")
                     .append(x));

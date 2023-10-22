@@ -17,6 +17,7 @@ import org.palladiosimulator.somox.analyzer.rules.model.EntireInterface;
 import org.palladiosimulator.somox.analyzer.rules.model.JavaInterfaceName;
 import org.palladiosimulator.somox.analyzer.rules.model.JavaOperationName;
 import org.palladiosimulator.somox.analyzer.rules.model.Operation;
+import org.palladiosimulator.somox.analyzer.rules.model.OperationInterface;
 import org.palladiosimulator.somox.analyzer.rules.model.RESTName;
 
 public class InterfaceTest {
@@ -32,18 +33,18 @@ public class InterfaceTest {
         assertTrue(builtComponent.provisions()
             .containsPartOf(expectedOperation));
 
-        Map<String, List<Operation>> simplifiedProvisions = builtComponent.provisions()
+        Map<OperationInterface, List<Operation>> simplifiedProvisions = builtComponent.provisions()
             .simplified();
 
-        Set<String> interfaces = simplifiedProvisions.keySet();
+        Set<OperationInterface> interfaces = simplifiedProvisions.keySet();
         assertFalse(interfaces.isEmpty(), "empty result");
         assertEquals(1, interfaces.size(), "more than one interface");
-        String commonInterface = interfaces.stream()
+        OperationInterface commonInterface = interfaces.stream()
             .findFirst()
             .get();
-        assertEquals("Interface", commonInterface, "operation does not have the correct interface");
+        assertEquals(expectedOperation, commonInterface, "operation does not have the correct interface");
 
-        List<Operation> operations = simplifiedProvisions.get("Interface");
+        List<Operation> operations = simplifiedProvisions.get(expectedOperation);
         assertEquals(1, operations.size(), "more than one operation in the interface");
 
         List<Operation> firstMethodCandidates = operations.stream()
@@ -68,18 +69,18 @@ public class InterfaceTest {
         assertTrue(builtComponent.provisions()
             .containsPartOf(expectedOperation));
 
-        Map<String, List<Operation>> simplifiedProvisions = builtComponent.provisions()
+        Map<OperationInterface, List<Operation>> simplifiedProvisions = builtComponent.provisions()
             .simplified();
 
-        Set<String> interfaces = simplifiedProvisions.keySet();
+        Set<OperationInterface> interfaces = simplifiedProvisions.keySet();
         assertFalse(interfaces.isEmpty(), "empty result");
         assertEquals(1, interfaces.size(), "more than one interface");
-        String commonInterface = interfaces.stream()
+        OperationInterface commonInterface = interfaces.stream()
             .findFirst()
             .get();
-        assertEquals("/method", commonInterface, "operation does not have the correct interface");
+        assertEquals(expectedOperation, commonInterface, "operation does not have the correct interface");
 
-        List<Operation> operations = simplifiedProvisions.get("/method");
+        List<Operation> operations = simplifiedProvisions.get(commonInterface);
         assertEquals(1, operations.size(), "more than one operation in the interface");
 
         List<Operation> firstMethodCandidates = operations.stream()
@@ -107,18 +108,18 @@ public class InterfaceTest {
         assertTrue(builtComponent.provisions()
             .containsPartOf(expectedInterface));
 
-        Map<String, List<Operation>> simplifiedProvisions = builtComponent.provisions()
+        Map<OperationInterface, List<Operation>> simplifiedProvisions = builtComponent.provisions()
             .simplified();
 
-        Set<String> interfaces = simplifiedProvisions.keySet();
+        Set<OperationInterface> interfaces = simplifiedProvisions.keySet();
         assertFalse(interfaces.isEmpty(), "empty result");
         assertEquals(1, interfaces.size(), "more than one interface");
-        String commonInterface = interfaces.stream()
+        OperationInterface commonInterface = interfaces.stream()
             .findFirst()
             .get();
-        assertEquals("CommonInterface", commonInterface, "common interface does not have the correct name");
+        assertEquals(expectedInterface, commonInterface, "common interface is not correct");
 
-        List<Operation> operations = simplifiedProvisions.get("CommonInterface");
+        List<Operation> operations = simplifiedProvisions.get(commonInterface);
         assertEquals(2, operations.size(), "wrong number of operations in the interface");
 
         List<Operation> firstMethodCandidates = operations.stream()
@@ -156,18 +157,18 @@ public class InterfaceTest {
         assertTrue(builtComponent.provisions()
             .containsPartOf(expectedInterface));
 
-        Map<String, List<Operation>> simplifiedProvisions = builtComponent.provisions()
+        Map<OperationInterface, List<Operation>> simplifiedProvisions = builtComponent.provisions()
             .simplified();
 
-        Set<String> interfaces = simplifiedProvisions.keySet();
+        Set<OperationInterface> interfaces = simplifiedProvisions.keySet();
         assertFalse(interfaces.isEmpty(), "empty result");
         assertEquals(1, interfaces.size(), "more than one interface");
-        String commonInterface = interfaces.stream()
+        OperationInterface commonInterface = interfaces.stream()
             .findFirst()
             .get();
-        assertEquals("/common_interface", commonInterface, "common interface does not have the correct name");
+        assertEquals(expectedInterface, commonInterface, "common interface is not correct");
 
-        List<Operation> operations = simplifiedProvisions.get("/common_interface");
+        List<Operation> operations = simplifiedProvisions.get(commonInterface);
         assertEquals(2, operations.size(), "wrong number of operations in the interface");
 
         List<Operation> firstMethodCandidates = operations.stream()

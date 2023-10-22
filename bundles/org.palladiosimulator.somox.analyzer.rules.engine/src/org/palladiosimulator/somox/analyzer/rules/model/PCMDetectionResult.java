@@ -1,5 +1,6 @@
 package org.palladiosimulator.somox.analyzer.rules.model;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,13 +13,14 @@ import org.palladiosimulator.somox.analyzer.rules.engine.MapMerger;
 public class PCMDetectionResult {
     private final Set<Component> components;
     private final Set<Composite> composites;
-    private final Map<String, List<Operation>> operationInterfaces;
+    private final Map<OperationInterface, List<Operation>> operationInterfaces;
 
     public PCMDetectionResult(Map<CompUnitOrName, ComponentBuilder> components,
             Map<String, CompositeBuilder> composites, ProvisionsBuilder compositeProvisions,
             RequirementsBuilder compositeRequirements) {
         this.components = createComponents(components, compositeProvisions, compositeRequirements);
         this.composites = createCompositeComponents(composites, compositeProvisions, compositeRequirements);
+        simplifyDependencies();
         this.operationInterfaces = createOperationInterfaces();
     }
 
@@ -73,9 +75,19 @@ public class PCMDetectionResult {
         return constructedComposites;
     }
 
-    private Map<String, List<Operation>> createOperationInterfaces() {
+    private void simplifyDependencies() {
+        // TODO: Collect globally visible provisions
+        List<OperationInterface> provisions = new ArrayList<>();
+        // 1. Collect composite provisions
+        // 2. Collect bare components
+        // 3. Collect bare component provisions
+
+        // TODO: Generalize all requirements to the most specific provision
+    }
+
+    private Map<OperationInterface, List<Operation>> createOperationInterfaces() {
         // TODO: This has to include composite interfaces as well
-        List<Map<String, List<Operation>>> constructedOperationInterfaces = getComponents().stream()
+        List<Map<OperationInterface, List<Operation>>> constructedOperationInterfaces = getComponents().stream()
             .map(x -> x.provisions()
                 .simplified())
             .collect(Collectors.toList());
@@ -84,11 +96,13 @@ public class PCMDetectionResult {
                 .simplified())
             .forEach(x -> constructedOperationInterfaces.add(x));
         getCompositeComponents().stream()
-            .map(x -> x.provisions())
-            .forEach(x -> constructedOperationInterfaces.add(x));
+            .flatMap(x -> x.provisions()
+                .stream())
+            .forEach(x -> constructedOperationInterfaces.add(x.simplified()));
         getCompositeComponents().stream()
-            .map(x -> x.requirements())
-            .forEach(x -> constructedOperationInterfaces.add(x));
+            .flatMap(x -> x.requirements()
+                .stream())
+            .forEach(x -> constructedOperationInterfaces.add(x.simplified()));
         return MapMerger.merge(constructedOperationInterfaces);
     }
 
@@ -100,7 +114,7 @@ public class PCMDetectionResult {
         return composites;
     }
 
-    public Map<String, List<Operation>> getOperationInterfaces() {
+    public Map<OperationInterface, List<Operation>> getOperationInterfaces() {
         return operationInterfaces;
     }
 }

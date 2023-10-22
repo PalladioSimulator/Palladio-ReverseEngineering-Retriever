@@ -23,7 +23,7 @@ public class JavaOperationName implements OperationName {
 
     @Override
     public List<String> getInterfaces() {
-        return List.of(iface);
+        return List.of(toString(), iface);
     }
 
     @Override

@@ -28,6 +28,10 @@ public class Provisions implements Iterable<OperationInterface> {
         return provisions;
     }
 
+    public Map<OperationInterface, List<OperationInterface>> getGrouped() {
+        return groupedProvisions;
+    }
+
     public boolean containsPartOf(OperationInterface iface) {
         return provisions.stream()
             .anyMatch(x -> x.isPartOf(iface));
@@ -43,17 +47,17 @@ public class Provisions implements Iterable<OperationInterface> {
         return provisions.iterator();
     }
 
-    public Map<String, List<Operation>> simplified() {
-        List<Map<String, List<Operation>>> simplifiedInterfaces = new LinkedList<>();
+    public Map<OperationInterface, List<Operation>> simplified() {
+        List<Map<OperationInterface, List<Operation>>> simplifiedInterfaces = new LinkedList<>();
         for (OperationInterface root : groupedProvisions.keySet()) {
-            Map<String, List<Operation>> simplifiedRoot = new HashMap<>();
-            simplifiedRoot.put(root.getInterface(), new ArrayList<>(root.simplified()
+            Map<OperationInterface, List<Operation>> simplifiedRoot = new HashMap<>();
+            simplifiedRoot.put(root, new ArrayList<>(root.simplified()
                 .values()
                 .stream()
                 .flatMap(x -> x.stream())
                 .collect(Collectors.toList())));
             for (OperationInterface member : groupedProvisions.get(root)) {
-                simplifiedRoot.get(root.getInterface())
+                simplifiedRoot.get(root)
                     .addAll(member.simplified()
                         .values()
                         .stream()
@@ -88,10 +92,10 @@ public class Provisions implements Iterable<OperationInterface> {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        Map<String, List<Operation>> simplified = simplified();
+        Map<OperationInterface, List<Operation>> simplified = simplified();
 
-        for (String iface : simplified.keySet()) {
-            builder.append(iface);
+        for (OperationInterface iface : simplified.keySet()) {
+            builder.append(iface.getName());
             simplified.get(iface)
                 .forEach(x -> builder.append("\n\t")
                     .append(x));

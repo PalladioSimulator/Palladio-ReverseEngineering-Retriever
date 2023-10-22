@@ -55,7 +55,7 @@ public class PCMInstanceCreator {
     private final Map<Component, CompositeComponentCreator> componentCompositeCreators;
     private final Map<String, CompositeComponentCreator> ifaceCompositeCreators;
     private final Map<Composite, CompositeComponentCreator> compositeCreators;
-    private final Map<String, org.palladiosimulator.pcm.repository.OperationInterface> pcmInterfaces;
+    private final Map<OperationInterface, org.palladiosimulator.pcm.repository.OperationInterface> pcmInterfaces;
 
     public PCMInstanceCreator(RuleEngineBlackboard blackboard) {
         existingDataTypesMap = new HashMap<>();
@@ -107,7 +107,7 @@ public class PCMInstanceCreator {
         PCMDetectionResult detectionResult = blackboard.getPCMDetector()
             .getResult();
         final Set<Component> components = detectionResult.getComponents();
-        final Map<String, List<Operation>> interfaces = detectionResult.getOperationInterfaces();
+        final Map<OperationInterface, List<Operation>> interfaces = detectionResult.getOperationInterfaces();
         final Set<Composite> composites = detectionResult.getCompositeComponents();
 
         createPCMInterfaces(interfaces);
@@ -122,8 +122,7 @@ public class PCMInstanceCreator {
             compositeCreators.put(composite, c);
 
             Set<org.palladiosimulator.pcm.repository.OperationInterface> distinctInterfaces = new HashSet<>();
-            for (String compRequirement : composite.requirements()
-                .keySet()) {
+            for (EntireInterface compRequirement : composite.requirements()) {
                 org.palladiosimulator.pcm.repository.OperationInterface requiredInterface = pcmInterfaces
                     .get(compRequirement);
                 if (distinctInterfaces.contains(requiredInterface)) {
@@ -134,8 +133,7 @@ public class PCMInstanceCreator {
             }
 
             distinctInterfaces.clear();
-            for (String compProvision : composite.provisions()
-                .keySet()) {
+            for (OperationInterface compProvision : composite.provisions()) {
                 org.palladiosimulator.pcm.repository.OperationInterface providedInterface = pcmInterfaces
                     .get(compProvision);
                 if (distinctInterfaces.contains(providedInterface)) {
@@ -198,12 +196,14 @@ public class PCMInstanceCreator {
                 .forEach(x -> outerRequirements.put(x.getRequiredInterface__OperationRequiredRole()
                     .getEntityName(), x));
 
-            for (String requiredInterface : composite.requirements()
-                .keySet()) {
-                requiredInterface = requiredInterface.replace(".", "_");
-                for (Pair<OperationRequiredRole, AssemblyContext> r : innerRequirements.getOrDefault(requiredInterface,
-                        List.of())) {
-                    c.withRequiredDelegationConnection(r.getT2(), r.getT1(), outerRequirements.get(requiredInterface));
+            for (EntireInterface requiredInterface : composite.requirements()) {
+                String requiredInterfaceName = requiredInterface.getName()
+                    .toString()
+                    .replace(".", "_");
+                for (Pair<OperationRequiredRole, AssemblyContext> r : innerRequirements
+                    .getOrDefault(requiredInterfaceName, List.of())) {
+                    c.withRequiredDelegationConnection(r.getT2(), r.getT1(),
+                            outerRequirements.get(requiredInterfaceName));
                 }
             }
 
@@ -214,12 +214,14 @@ public class PCMInstanceCreator {
                 .forEach(x -> outerProvisions.put(x.getProvidedInterface__OperationProvidedRole()
                     .getEntityName(), x));
 
-            for (String providedInterface : composite.provisions()
-                .keySet()) {
-                providedInterface = providedInterface.replace(".", "_");
-                for (Pair<OperationProvidedRole, AssemblyContext> r : innerProvisions.getOrDefault(providedInterface,
-                        List.of())) {
-                    c.withProvidedDelegationConnection(r.getT2(), r.getT1(), outerProvisions.get(providedInterface));
+            for (OperationInterface providedInterface : composite.provisions()) {
+                String providedInterfaceName = providedInterface.getName()
+                    .toString()
+                    .replace(".", "_");
+                for (Pair<OperationProvidedRole, AssemblyContext> r : innerProvisions
+                    .getOrDefault(providedInterfaceName, List.of())) {
+                    c.withProvidedDelegationConnection(r.getT2(), r.getT1(),
+                            outerProvisions.get(providedInterfaceName));
                 }
             }
 
@@ -229,18 +231,20 @@ public class PCMInstanceCreator {
         return repository.createRepositoryNow();
     }
 
-    private void createPCMInterfaces(Map<String, List<Operation>> interfaces) {
+    private void createPCMInterfaces(Map<OperationInterface, List<Operation>> interfaces) {
         Map<String, Integer> signatureNameCount = new HashMap<>();
         interfaces.forEach((inter, operations) -> {
-            LOG.info("Current PCM Interface: " + inter);
+            String interName = inter.getName()
+                .toString();
+            LOG.info("Current PCM Interface: " + interName);
 
-            String pcmInterfaceName = inter.replace(".", "_");
+            String pcmInterfaceName = interName.replace(".", "_");
             OperationInterfaceCreator pcmInterface = create.newOperationInterface()
                 .withName(pcmInterfaceName);
 
             for (final Operation operation : operations) {
                 String name = operation.getName()
-                    .forInterface(inter)
+                    .forInterface(interName)
                     .orElseThrow();
                 name = name.replace(".", "_");
                 Integer oldCount = signatureNameCount.getOrDefault(name, 0);
@@ -298,8 +302,8 @@ public class PCMInstanceCreator {
                 .withName(wrapName(comp.name()));
 
             Set<org.palladiosimulator.pcm.repository.OperationInterface> distinctInterfaces = new HashSet<>();
-            for (String provision : comp.provisions()
-                .simplified()
+            for (OperationInterface provision : comp.provisions()
+                .getGrouped()
                 .keySet()) {
                 org.palladiosimulator.pcm.repository.OperationInterface providedInterface = pcmInterfaces
                     .get(provision);
@@ -353,13 +357,12 @@ public class PCMInstanceCreator {
     }
 
     private org.palladiosimulator.pcm.repository.OperationInterface fetchInterface(OperationInterface iface) {
-        if (pcmInterfaces.containsKey(iface.getInterface())) {
-            return pcmInterfaces.get(iface.getInterface());
+        if (pcmInterfaces.containsKey(iface)) {
+            return pcmInterfaces.get(iface);
         }
-        for (String registeredInterfaceName : pcmInterfaces.keySet()) {
-            if (iface.getName()
-                .isPartOf(registeredInterfaceName)) {
-                return pcmInterfaces.get(registeredInterfaceName);
+        for (OperationInterface registeredInterface : pcmInterfaces.keySet()) {
+            if (iface.isPartOf(registeredInterface)) {
+                return pcmInterfaces.get(registeredInterface);
             }
         }
         throw new IllegalArgumentException();

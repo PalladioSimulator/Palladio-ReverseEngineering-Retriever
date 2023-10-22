@@ -64,29 +64,29 @@ public class CompositeBuilder {
         } while (parts.size() > previousPartCount && internalInterfaces.size() > previousInternalInterfaceCount);
 
         List<EntireInterface> requirements = new ArrayList<>();
-        List<Map<String, List<Operation>>> provisions = new ArrayList<>();
+        List<Map<OperationInterface, List<OperationInterface>>> provisions = new ArrayList<>();
 
         for (Component part : parts) {
             requirements.addAll(part.requirements()
                 .get());
             provisions.add(part.provisions()
-                .simplified());
+                .getGrouped());
         }
 
-        Map<String, List<Operation>> simplifiedRequirements = MapMerger.merge(requirements.stream()
+        Set<EntireInterface> externalRequirements = requirements.stream()
             .filter(x -> compositeRequirements.containsEntire(x))
-            .map(EntireInterface::simplified)
-            .collect(Collectors.toList()));
+            .collect(Collectors.toSet());
 
-        Map<String, List<Operation>> simplifiedProvisions = MapMerger.merge(provisions)
+        Set<OperationInterface> externalProvisions = MapMerger.merge(provisions)
             .entrySet()
             .stream()
             .filter(entry -> entry.getValue()
                 .stream()
                 .anyMatch(operation -> compositeProvisions.containsEntire(operation)))
-            .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+            .map(entry -> entry.getKey())
+            .collect(Collectors.toSet());
 
-        return new Composite(name, parts, simplifiedRequirements, simplifiedProvisions, internalInterfaces);
+        return new Composite(name, parts, externalRequirements, externalProvisions, internalInterfaces);
     }
 
     // Writes to remainingComopnents, parts, and internalInterfaces.
