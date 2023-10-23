@@ -34,7 +34,6 @@ import org.palladiosimulator.pcm.seff.ResourceDemandingSEFF;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.model.Component;
 import org.palladiosimulator.somox.analyzer.rules.model.Composite;
-import org.palladiosimulator.somox.analyzer.rules.model.EntireInterface;
 import org.palladiosimulator.somox.analyzer.rules.model.Operation;
 import org.palladiosimulator.somox.analyzer.rules.model.OperationInterface;
 import org.palladiosimulator.somox.analyzer.rules.model.PCMDetectionResult;
@@ -122,7 +121,7 @@ public class PCMInstanceCreator {
             compositeCreators.put(composite, c);
 
             Set<org.palladiosimulator.pcm.repository.OperationInterface> distinctInterfaces = new HashSet<>();
-            for (EntireInterface compRequirement : composite.requirements()) {
+            for (OperationInterface compRequirement : composite.requirements()) {
                 org.palladiosimulator.pcm.repository.OperationInterface requiredInterface = pcmInterfaces
                     .get(compRequirement);
                 if (distinctInterfaces.contains(requiredInterface)) {
@@ -196,7 +195,7 @@ public class PCMInstanceCreator {
                 .forEach(x -> outerRequirements.put(x.getRequiredInterface__OperationRequiredRole()
                     .getEntityName(), x));
 
-            for (EntireInterface requiredInterface : composite.requirements()) {
+            for (OperationInterface requiredInterface : composite.requirements()) {
                 String requiredInterfaceName = requiredInterface.getName()
                     .toString()
                     .replace(".", "_");
@@ -328,7 +327,7 @@ public class PCMInstanceCreator {
                 });
 
             distinctInterfaces.clear();
-            for (EntireInterface requirement : comp.requirements()) {
+            for (OperationInterface requirement : comp.requirements()) {
                 org.palladiosimulator.pcm.repository.OperationInterface requiredInterface = fetchInterface(requirement);
                 if (distinctInterfaces.contains(requiredInterface)) {
                     continue;

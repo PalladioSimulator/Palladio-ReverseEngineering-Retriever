@@ -9,10 +9,10 @@ public class Composite {
     private final String name;
     private final Set<Component> parts;
     private final Set<OperationInterface> internalInterfaces;
-    private final Set<EntireInterface> requirements;
+    private final Set<OperationInterface> requirements;
     private final Set<OperationInterface> provisions;
 
-    public Composite(String name, Set<Component> parts, Set<EntireInterface> requirements,
+    public Composite(String name, Set<Component> parts, Set<OperationInterface> requirements,
             Set<OperationInterface> provisions, Set<OperationInterface> internalInterfaces) {
         this.name = name;
         this.parts = parts;
@@ -25,7 +25,7 @@ public class Composite {
         return name;
     }
 
-    public Set<EntireInterface> requirements() {
+    public Set<OperationInterface> requirements() {
         return requirements;
     }
 

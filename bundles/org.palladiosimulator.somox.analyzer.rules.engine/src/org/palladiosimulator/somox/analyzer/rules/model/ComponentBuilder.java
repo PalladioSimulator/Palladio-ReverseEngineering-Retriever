@@ -28,8 +28,10 @@ public class ComponentBuilder {
         return provisions;
     }
 
-    public Component create(Collection<OperationInterface> allDependencies) {
-        return new Component(compUnitOrName, requirements.create(allDependencies), provisions.create(allDependencies));
+    public Component create(Collection<OperationInterface> allDependencies,
+            Collection<OperationInterface> visibleProvisions) {
+        return new Component(compUnitOrName, requirements.create(allDependencies, visibleProvisions),
+                provisions.create(allDependencies));
     }
 
     @Override

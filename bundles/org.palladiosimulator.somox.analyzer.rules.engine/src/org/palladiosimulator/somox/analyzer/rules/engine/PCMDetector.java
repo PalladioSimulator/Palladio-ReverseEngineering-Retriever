@@ -24,6 +24,7 @@ import org.palladiosimulator.somox.analyzer.rules.model.InterfaceName;
 import org.palladiosimulator.somox.analyzer.rules.model.JavaInterfaceName;
 import org.palladiosimulator.somox.analyzer.rules.model.JavaOperationName;
 import org.palladiosimulator.somox.analyzer.rules.model.Operation;
+import org.palladiosimulator.somox.analyzer.rules.model.OperationInterface;
 import org.palladiosimulator.somox.analyzer.rules.model.OperationName;
 import org.palladiosimulator.somox.analyzer.rules.model.PCMDetectionResult;
 import org.palladiosimulator.somox.analyzer.rules.model.ProvisionsBuilder;
@@ -119,7 +120,7 @@ public class PCMDetector {
             components.put(unit, new ComponentBuilder(unit));
         }
         @SuppressWarnings("unchecked")
-        List<EntireInterface> ifaces = ((List<VariableDeclaration>) field.fragments()).stream()
+        List<OperationInterface> ifaces = ((List<VariableDeclaration>) field.fragments()).stream()
             .map(x -> x.resolveBinding())
             .filter(x -> x != null)
             .map(x -> x.getType())

@@ -7,18 +7,19 @@ import java.util.List;
 import java.util.Objects;
 
 public class RequirementsBuilder {
-    private final List<EntireInterface> requirements = new LinkedList<>();
+    private final List<OperationInterface> requirements = new LinkedList<>();
 
-    public void add(EntireInterface... interfaces) {
+    public void add(OperationInterface... interfaces) {
         this.add(List.of(interfaces));
     }
 
-    public void add(Collection<EntireInterface> interfaces) {
+    public void add(Collection<OperationInterface> interfaces) {
         requirements.addAll(interfaces);
     }
 
-    public Requirements create(Collection<OperationInterface> allDependencies) {
-        return new Requirements(requirements, allDependencies);
+    public Requirements create(Collection<OperationInterface> allDependencies,
+            Collection<OperationInterface> visibleProvisions) {
+        return new Requirements(requirements, allDependencies, visibleProvisions);
     }
 
     public List<OperationInterface> toList() {

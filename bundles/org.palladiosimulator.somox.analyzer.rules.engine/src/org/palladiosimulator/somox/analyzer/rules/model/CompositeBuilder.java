@@ -30,7 +30,7 @@ public class CompositeBuilder {
     }
 
     public Composite construct(Collection<Component> components, Requirements compositeRequirements,
-            Provisions compositeProvisions) {
+            Provisions compositeProvisions, Collection<OperationInterface> visibleProvisions) {
         Logger.getLogger(getClass())
             .warn("Constructing composite component " + name);
 
@@ -44,7 +44,7 @@ public class CompositeBuilder {
 
         // Create and add all explicit parts.
         Set<Component> parts = explicitParts.stream()
-            .map(x -> x.create(allDependencies))
+            .map(x -> x.create(allDependencies, visibleProvisions))
             .collect(Collectors.toSet());
 
         Set<Component> remainingComponents = new HashSet<>(components);
@@ -63,7 +63,7 @@ public class CompositeBuilder {
                     internalInterfaces);
         } while (parts.size() > previousPartCount && internalInterfaces.size() > previousInternalInterfaceCount);
 
-        List<EntireInterface> requirements = new ArrayList<>();
+        List<OperationInterface> requirements = new ArrayList<>();
         List<Map<OperationInterface, List<OperationInterface>>> provisions = new ArrayList<>();
 
         for (Component part : parts) {
@@ -73,7 +73,7 @@ public class CompositeBuilder {
                 .getGrouped());
         }
 
-        Set<EntireInterface> externalRequirements = requirements.stream()
+        Set<OperationInterface> externalRequirements = requirements.stream()
             .filter(x -> compositeRequirements.containsEntire(x))
             .collect(Collectors.toSet());
 

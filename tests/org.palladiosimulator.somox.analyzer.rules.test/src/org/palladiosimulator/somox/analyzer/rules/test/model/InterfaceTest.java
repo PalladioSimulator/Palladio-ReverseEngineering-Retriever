@@ -29,7 +29,7 @@ public class InterfaceTest {
         builder.provisions()
             .add(expectedOperation);
 
-        Component builtComponent = builder.create(List.of(expectedOperation));
+        Component builtComponent = builder.create(List.of(expectedOperation), List.of(expectedOperation));
         assertTrue(builtComponent.provisions()
             .containsPartOf(expectedOperation));
 
@@ -65,7 +65,7 @@ public class InterfaceTest {
         builder.provisions()
             .add(expectedOperation);
 
-        Component builtComponent = builder.create(List.of(expectedOperation));
+        Component builtComponent = builder.create(List.of(expectedOperation), List.of(expectedOperation));
         assertTrue(builtComponent.provisions()
             .containsPartOf(expectedOperation));
 
@@ -103,7 +103,8 @@ public class InterfaceTest {
             .add(firstMethod);
         builder.provisions()
             .add(secondMethod);
-        Component builtComponent = builder.create(List.of(firstMethod, secondMethod));
+        Component builtComponent = builder.create(List.of(firstMethod, secondMethod),
+                List.of(firstMethod, secondMethod));
         EntireInterface expectedInterface = new EntireInterface(new JavaInterfaceName("CommonInterface"));
         assertTrue(builtComponent.provisions()
             .containsPartOf(expectedInterface));
@@ -152,7 +153,8 @@ public class InterfaceTest {
             .add(firstMethod);
         builder.provisions()
             .add(secondMethod);
-        Component builtComponent = builder.create(List.of(firstMethod, secondMethod));
+        Component builtComponent = builder.create(List.of(firstMethod, secondMethod),
+                List.of(firstMethod, secondMethod));
         EntireInterface expectedInterface = new EntireInterface(new RESTName("/common_interface", Optional.empty()));
         assertTrue(builtComponent.provisions()
             .containsPartOf(expectedInterface));

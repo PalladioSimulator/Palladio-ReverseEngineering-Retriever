@@ -1,6 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.model;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,14 +17,29 @@ public class PCMDetectionResult {
     public PCMDetectionResult(Map<CompUnitOrName, ComponentBuilder> components,
             Map<String, CompositeBuilder> composites, ProvisionsBuilder compositeProvisions,
             RequirementsBuilder compositeRequirements) {
-        this.components = createComponents(components, compositeProvisions, compositeRequirements);
-        this.composites = createCompositeComponents(composites, compositeProvisions, compositeRequirements);
-        simplifyDependencies();
+
+        // Collect globally visible provisions
+        Set<Component> temporaryComponents = PCMDetectionResult.createComponents(components, compositeProvisions,
+                compositeRequirements, Set.of());
+        Set<Composite> temporaryComposites = PCMDetectionResult.createCompositeComponents(temporaryComponents,
+                composites, compositeProvisions, compositeRequirements, Set.of());
+        Set<OperationInterface> visibleProvisions = PCMDetectionResult.collectVisibleProvisions(temporaryComponents,
+                temporaryComposites);
+
+        // TODO: Do not rebuild everything, that is theoretically not necessary since provisions do
+        // not change.
+
+        // Construct final result
+        this.components = PCMDetectionResult.createComponents(components, compositeProvisions, compositeRequirements,
+                visibleProvisions);
+        this.composites = PCMDetectionResult.createCompositeComponents(this.components, composites, compositeProvisions,
+                compositeRequirements, visibleProvisions);
         this.operationInterfaces = createOperationInterfaces();
     }
 
-    private Set<Component> createComponents(Map<CompUnitOrName, ComponentBuilder> components,
-            ProvisionsBuilder compositeProvisions, RequirementsBuilder compositeRequirements) {
+    private static Set<Component> createComponents(Map<CompUnitOrName, ComponentBuilder> components,
+            ProvisionsBuilder compositeProvisions, RequirementsBuilder compositeRequirements,
+            Set<OperationInterface> visibleProvisions) {
         List<OperationInterface> allDependencies = new LinkedList<>();
         // TODO: Aren't the dependencies of bare components missing here? Is that alright?
         allDependencies.addAll(compositeRequirements.toList());
@@ -33,19 +47,20 @@ public class PCMDetectionResult {
 
         return components.values()
             .stream()
-            .map(x -> x.create(allDependencies))
+            .map(x -> x.create(allDependencies, visibleProvisions))
             .collect(Collectors.toSet());
     }
 
-    private Set<Composite> createCompositeComponents(Map<String, CompositeBuilder> composites,
-            ProvisionsBuilder compositeProvisions, RequirementsBuilder compositeRequirements) {
+    private static Set<Composite> createCompositeComponents(Set<Component> components,
+            Map<String, CompositeBuilder> composites, ProvisionsBuilder compositeProvisions,
+            RequirementsBuilder compositeRequirements, Set<OperationInterface> visibleProvisions) {
 
         // Construct composites.
         Set<Composite> constructedComposites = new HashSet<>();
         List<Composite> allComposites = composites.values()
             .stream()
-            .map(x -> x.construct(getComponents(), compositeRequirements.create(List.of()),
-                    compositeProvisions.create(List.of())))
+            .map(x -> x.construct(components, compositeRequirements.create(List.of(), visibleProvisions),
+                    compositeProvisions.create(List.of()), visibleProvisions))
             .collect(Collectors.toList());
 
         // Remove redundant composites.
@@ -75,14 +90,32 @@ public class PCMDetectionResult {
         return constructedComposites;
     }
 
-    private void simplifyDependencies() {
-        // TODO: Collect globally visible provisions
-        List<OperationInterface> provisions = new ArrayList<>();
+    private static Set<OperationInterface> collectVisibleProvisions(Set<Component> components,
+            Set<Composite> composites) {
+        // Collect globally visible provisions
+        Set<OperationInterface> provisions = new HashSet<>();
         // 1. Collect composite provisions
+        composites.stream()
+            .flatMap(x -> x.provisions()
+                .stream())
+            .forEach(provisions::add);
         // 2. Collect bare components
+        Set<Component> containedComponents = composites.stream()
+            .flatMap(x -> x.parts()
+                .stream())
+            .collect(Collectors.toSet());
+        Set<Component> bareComponents = components.stream()
+            .filter(x -> !containedComponents.contains(x))
+            .collect(Collectors.toSet());
         // 3. Collect bare component provisions
+        bareComponents.stream()
+            .flatMap(x -> x.provisions()
+                .getGrouped()
+                .keySet()
+                .stream())
+            .forEach(provisions::add);
 
-        // TODO: Generalize all requirements to the most specific provision
+        return provisions;
     }
 
     private Map<OperationInterface, List<Operation>> createOperationInterfaces() {

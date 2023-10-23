@@ -15,17 +15,32 @@ import java.util.stream.Collectors;
 
 import org.palladiosimulator.somox.analyzer.rules.engine.MapMerger;
 
-public class Requirements implements Iterable<EntireInterface> {
-    private final Set<EntireInterface> requirements;
+public class Requirements implements Iterable<OperationInterface> {
+    private final Set<OperationInterface> requirements;
     private final Map<OperationInterface, List<OperationInterface>> groupedRequirements;
 
-    public Requirements(Collection<EntireInterface> requiredInterfaces,
-            Collection<OperationInterface> allDependencies) {
-        this.requirements = Collections.unmodifiableSet(new HashSet<>(requiredInterfaces));
-        this.groupedRequirements = DependencyUtils.groupDependencies(requiredInterfaces, allDependencies);
+    public Requirements(Collection<OperationInterface> requiredInterfaces,
+            Collection<OperationInterface> allDependencies, Collection<OperationInterface> visibleProvisions) {
+        this.requirements = new HashSet<>();
+
+        List<OperationInterface> sortedProvisions = new ArrayList<>(visibleProvisions);
+        Collections.sort(sortedProvisions);
+        Collections.reverse(sortedProvisions);
+        for (OperationInterface requirement : requiredInterfaces) {
+            OperationInterface generalizedRequirement = requirement;
+            for (OperationInterface provision : sortedProvisions) {
+                if (requirement.isPartOf(provision)) {
+                    generalizedRequirement = provision;
+                    break;
+                }
+            }
+            requirements.add(generalizedRequirement);
+        }
+
+        this.groupedRequirements = DependencyUtils.groupDependencies(requirements, allDependencies);
     }
 
-    public Set<EntireInterface> get() {
+    public Set<OperationInterface> get() {
         return Collections.unmodifiableSet(requirements);
     }
 
@@ -40,7 +55,7 @@ public class Requirements implements Iterable<EntireInterface> {
     }
 
     @Override
-    public Iterator<EntireInterface> iterator() {
+    public Iterator<OperationInterface> iterator() {
         return Collections.unmodifiableCollection(requirements)
             .iterator();
     }
