@@ -19,12 +19,15 @@ import org.palladiosimulator.somox.analyzer.rules.model.RESTName
 import org.palladiosimulator.somox.analyzer.rules.model.HTTPMethod
 import java.util.Optional
 import org.palladiosimulator.somox.analyzer.rules.model.CompUnitOrName
+import java.util.function.Function
+import java.util.Set
 
 class SpringRules extends IRule {
     static final Logger LOG = Logger.getLogger(SpringRules)
 
     public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java"
     public static final String YAML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.yaml"
+    public static final String YAML_MAPPERS_KEY = YAML_DISCOVERER_ID + ".mappers"
     public static final String XML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.xml"
     public static final String PROPERTIES_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.properties"
 
@@ -33,41 +36,32 @@ class SpringRules extends IRule {
 	}
 
 	override boolean processRules(Path path) {
-		val yamlObjects = blackboard.getPartition(YAML_DISCOVERER_ID)
-		val yamls = yamlObjects as Map<Path, Iterable<Map<String, Object>>>
-		val poms = blackboard.getDiscoveredFiles(XML_DISCOVERER_ID, typeof(Document))
-		val properties = blackboard.getDiscoveredFiles(PROPERTIES_DISCOVERER_ID, typeof(Properties))
-
-		val projectRoot = getProjectRoot(path, poms)
-		val configRoot = getConfigRoot(poms)
-		val bootstrapYaml = getBootstrapYaml(projectRoot, yamls)
-		val applicationProperties = getApplicationProperties(projectRoot, properties)
-
-		var applicationName = getApplicationName(bootstrapYaml)
-		if (applicationName === null) applicationName = getApplicationName(applicationProperties)
-
-		val projectConfigYaml = getProjectConfigYaml(configRoot, yamls, applicationName)
-		
-		val applicationYaml = getApplicationYaml(projectRoot, yamls);
-		var contextPath = getContextPath(projectConfigYaml)
-		
-		if (contextPath === null) {
-			contextPath = "/"
-			if (applicationName !== null) {
-				contextPath += applicationName + "/"
-			}
-		}
-
-		val contextVariables = getContextVariables(applicationYaml);
-
 		val unit = blackboard.getDiscoveredFiles(JAVA_DISCOVERER_ID, typeof(CompilationUnit)).get(path)
-
 		if (unit === null) return false
+
+		val rawYamls = blackboard.getPartition(YAML_DISCOVERER_ID) as Map<Path, Iterable<Map<String, Object>>>
+		val yamlMappers = blackboard.getPartition(YAML_MAPPERS_KEY) as Map<Path, Function<String, Optional<String>>>
+		val poms = blackboard.getDiscoveredFiles(XML_DISCOVERER_ID, typeof(Document))
+		val propertyFiles = blackboard.getDiscoveredFiles(PROPERTIES_DISCOVERER_ID, typeof(Properties))
+
+		val projectRoot = findProjectRoot(path, poms)
+		val configRoot = findConfigRoot(poms)
+		val bootstrapYaml = findBootstrapYaml(projectRoot, yamlMappers)
+		val applicationProperties = propertyFiles.get(findApplicationProperties(projectRoot, propertyFiles.keySet))
+
+		val applicationName = getFromYamlOrProperties("spring.application.name", bootstrapYaml, applicationProperties)
+		val projectConfigYaml = yamlMappers.get(findProjectConfigYaml(configRoot, yamlMappers.keySet, applicationName))
+		val contextPathOption = Optional.ofNullable(projectConfigYaml).flatMap[x | x.apply("server.servlet.context-path")]
+		var contextPath = contextPathOption.orElse("/")
+		if (applicationName !== null) contextPath += applicationName + "/"
+		
+		val rawApplicationYaml = rawYamls.get(findApplicationYaml(projectRoot, yamlMappers.keySet))
+		val contextVariables = collectContextVariables(rawApplicationYaml)
 		
 		return processRuleForCompUnit(unit, contextPath, contextVariables)
 	}
 
-	def getProjectRoot(Path currentPath, Map<Path, Document> poms) {
+	def findProjectRoot(Path currentPath, Map<Path, Document> poms) {
 		if (currentPath === null || poms === null) {
 			return null
 		}
@@ -85,7 +79,7 @@ class SpringRules extends IRule {
 		}
 	}
 
-	def getConfigRoot(Map<Path, Document> poms) {
+	def findConfigRoot(Map<Path, Document> poms) {
 		if (poms === null) {
 			return null
 		}
@@ -108,7 +102,7 @@ class SpringRules extends IRule {
 		return configRoots.get(0).key.parent
 	}
 
-	def getBootstrapYaml(Path projectRoot, Map<Path, Iterable<Map<String, Object>>> yamls) {
+	def findBootstrapYaml(Path projectRoot, Map<Path, Function<String, Optional<String>>> yamls) {
 		if (projectRoot === null || yamls === null) {
 			return null
 		}
@@ -125,130 +119,83 @@ class SpringRules extends IRule {
 		return bootstrapYamls.get(0).value
 	}
 
-	def getApplicationName(Iterable<Map<String, Object>> bootstrapYaml) {
-		if (bootstrapYaml === null) {
-			return null
-		}
-		for (yaml : bootstrapYaml) {
-			val applicationName = getApplicationName(yaml)
-			if (applicationName != "/") {
-				return applicationName
-			}
-		}
-		return "/"
-	}
-
-	def getApplicationName(Map<String, Object> bootstrapYaml) {
-		val spring = bootstrapYaml.get("spring") as Map<String, Object>
-		if (spring === null) {
-			return null
-		}
-		val application = spring.get("application") as Map<String, Object>
-		if (application === null) {
-			return null
-		}
-		val name = application.get("name") as String
-		return name
-	}
-
-	def getApplicationName(Properties applicationProperties) {
-		if (applicationProperties === null) {
-			return null
-		}
-		return applicationProperties.getProperty("spring.application.name")
-	}
-
-	def getProjectConfigYaml(Path configRoot, Map<Path, Iterable<Map<String, Object>>> yamls, String projectName) {
+	def findProjectConfigYaml(Path configRoot, Set<Path> yamls, String projectName) {
 		if (configRoot === null || yamls === null || projectName === null) {
 			return null
 		}
-		val projectYamls = yamls.entrySet.stream
-			.filter[ entry | entry.key.startsWith(configRoot) ]
-			.filter[ entry | val fileName = entry.key.fileName.toString; fileName == projectName + ".yaml" || fileName == projectName + ".yml" ]
+		val projectYamls = yamls.stream
+			.filter[ entry | entry.startsWith(configRoot) ]
+			.filter[ entry | val fileName = entry.fileName.toString; fileName == projectName + ".yaml" || fileName == projectName + ".yml" ]
 			.collect(Collectors.toList)
 
 		if (projectYamls.size > 1) {
-			LOG.warn("Multiple " + projectName + ".y[a]mls in config server, choosing " + configRoot.relativize(projectYamls.get(0).key) + " arbitrarily")
+			LOG.warn("Multiple " + projectName + ".y[a]mls in config server, choosing " + configRoot.relativize(projectYamls.get(0)) + " arbitrarily")
 		}
 		if (projectYamls.empty) {
 			return null
 		}
-		return projectYamls.get(0).value
+		return projectYamls.get(0)
 	}
 
-	def getContextPath(Iterable<Map<String, Object>> projectConfigYaml) {
-		if (projectConfigYaml === null) {
-			return null
-		}
-		for (yaml : projectConfigYaml) {
-			val contextPath = getContextPath(yaml)
-			if (contextPath != "/") {
-				return contextPath
-			}
-		}
-		return null
-	}
-
-	def getContextPath(Map<String, Object> projectConfigYaml) {
-		val server = projectConfigYaml.get("server") as Map<String, Object>
-		if (server === null) {
-			return null
-		}
-		val servlet = server.get("servlet") as Map<String, Object>
-		if (servlet === null) {
-			return null
-		}
-		val contextPath = servlet.get("context-path") as String
-		if (contextPath === null) {
-			return null
-		}
-		return contextPath
-	}
-	
-	def getApplicationProperties(Path projectRoot, Map<Path, Properties> properties) {
+	def findApplicationProperties(Path projectRoot, Set<Path> properties) {
 		if (projectRoot === null || properties === null) {
 			return null
 		}
-		val applicationProperties =  properties.entrySet.stream
-			.filter[ entry | entry.key.parent == projectRoot.resolve("src/main/resources") ]
-			.filter[ entry | val fileName = entry.key.fileName.toString; fileName == "application.properties" ]
+		val applicationProperties =  properties.stream
+			.filter[ entry | entry.parent == projectRoot.resolve("src/main/resources") ]
+			.filter[ entry | val fileName = entry.fileName.toString; fileName == "application.properties" ]
 			.collect(Collectors.toList)
 
 		if (applicationProperties.size > 1) {
-			LOG.warn("Multiple application.properties in " + projectRoot + ", choosing " + projectRoot.relativize(applicationProperties.get(0).key) + " arbitrarily")
+			LOG.warn("Multiple application.properties in " + projectRoot + ", choosing " + projectRoot.relativize(applicationProperties.get(0)) + " arbitrarily")
 		} else if (applicationProperties.empty) {
 			return null
 		}
-		return applicationProperties.get(0).value
+		return applicationProperties.get(0)
 	}
 
-	def getApplicationYaml(Path projectRoot, Map<Path, Iterable<Map<String, Object>>> yamls) {
-		if (projectRoot === null || yamls === null) {
+	def findApplicationYaml(Path projectRoot, Set<Path> yamlPaths) {
+		if (projectRoot === null || yamlPaths === null) {
 			return null
 		}
-		val applicationYamls =  yamls.entrySet.stream
-			.filter[ entry | entry.key.parent == projectRoot.resolve("src/main/resources") ]
-			.filter[ entry | val fileName = entry.key.fileName.toString; fileName == "application.yaml" || fileName == "application.yml" ]
+		val applicationYamls =  yamlPaths.stream
+			.filter[ path | path.parent == projectRoot.resolve("src/main/resources") ]
+			.filter[ path | val fileName = path.fileName.toString; fileName == "application.yaml" || fileName == "application.yml" ]
 			.collect(Collectors.toList)
 
 		if (applicationYamls.size > 1) {
-			LOG.warn("Multiple application.y[a]mls in " + projectRoot + ", choosing " + projectRoot.relativize(applicationYamls.get(0).key) + " arbitrarily")
+			LOG.warn("Multiple application.y[a]mls in " + projectRoot + ", choosing " + projectRoot.relativize(applicationYamls.get(0)) + " arbitrarily")
 		} else if (applicationYamls.empty) {
 			return null
 		}
-		return applicationYamls.get(0).value
+		return applicationYamls.get(0)
+	}
+	
+	def getFromYamlOrProperties(String key, Function<String, Optional<String>> yamlMapper, Properties properties) {
+		if (yamlMapper !== null) {
+			val result = yamlMapper.apply(key)
+			if (result.present) {
+				return result.get()
+			}
+		}
+		
+		if (properties !== null) {
+			return properties.getProperty(key)
+		}
+		
+		return null
 	}
 
-	def Map<String, String> getContextVariables(Iterable<Map<String, Object>> applicationYaml) {
+	def Map<String, String> collectContextVariables(Iterable<Map<String, Object>> applicationYaml) {
 		val result = new HashMap<String, String>();
 		if (applicationYaml === null || applicationYaml.empty) {
 			return result;
 		}
 		
-		return getContextVariables(applicationYaml.get(0));
+		return collectContextVariables(applicationYaml.get(0));
 	}
 	
-	def Map<String, String> getContextVariables(Map<String, Object> applicationYaml) {
+	def Map<String, String> collectContextVariables(Map<String, Object> applicationYaml) {
 		val result = new HashMap<String, String>();
 		if (applicationYaml === null) {
 			return result;
@@ -257,7 +204,7 @@ class SpringRules extends IRule {
 		for (entry : applicationYaml.entrySet) {
 			if (entry.value instanceof Map) {
 				val mapValue = entry.value as Map<String, Object>;
-				for (mapEntry : getContextVariables(mapValue).entrySet) {
+				for (mapEntry : collectContextVariables(mapValue).entrySet) {
 					result.put(entry.key + "." + mapEntry.key, mapEntry.value);
 				}
 			} else if (entry.value instanceof List) {
