@@ -1,5 +1,7 @@
 package org.palladiosimulator.somox.analyzer.rules.configuration;
 
+import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
+
 import de.uka.ipd.sdq.workflow.launchconfig.AbstractWorkflowBasedRunConfiguration;
 
 /**
@@ -14,7 +16,7 @@ public class RuleEngineAnalyzerConfiguration extends AbstractWorkflowBasedRunCon
 
     @Override
     public void setDefaults() {
-        ruleEngineConfiguration = new RuleEngineConfiguration();
+        ruleEngineConfiguration = new RuleEngineConfigurationImpl();
     }
 
     public RuleEngineConfiguration getRuleEngineConfiguration() {

@@ -21,13 +21,12 @@ import org.palladiosimulator.generator.fluent.system.api.ISystem;
 import org.palladiosimulator.generator.fluent.system.factory.FluentSystemFactory;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
-import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.engine.DockerParser;
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
 import org.palladiosimulator.somox.analyzer.rules.engine.PCMDetector;
 import org.palladiosimulator.somox.analyzer.rules.engine.PCMInstanceCreator;
+import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
 
 /**
  * The rule engine identifies PCM elements like components and interfaces inside source code via
@@ -68,7 +67,8 @@ public class RuleEngineAnalyzer {
             final URI out = CommonPlugin.asLocalURI(ruleEngineConfiguration.getOutputFolder());
             final Path outPath = Paths.get(out.devicePath());
 
-            final Set<DefaultRule> rules = ruleEngineConfiguration.getSelectedRules();
+            final Set<IRule> rules = ruleEngineConfiguration.getConfig(IRule.class)
+                .getSelected();
 
             executeWith(inPath, outPath, rules, blackboard);
         } catch (Exception e) {
@@ -88,8 +88,7 @@ public class RuleEngineAnalyzer {
      * @param ruleDoc
      *            the object containing the rules
      */
-    public static void executeWith(Path projectPath, Path outPath, List<CompilationUnit> model,
-            Set<DefaultRule> rules) {
+    public static void executeWith(Path projectPath, Path outPath, List<CompilationUnit> model, Set<IRule> rules) {
         executeWith(projectPath, outPath, model, rules);
     }
 
@@ -105,8 +104,7 @@ public class RuleEngineAnalyzer {
      * @param blackboard
      *            the rule engine blackboard, containing (among other things) the discovered files
      */
-    private static void executeWith(Path projectPath, Path outPath, Set<DefaultRule> rules,
-            RuleEngineBlackboard blackboard) {
+    private static void executeWith(Path projectPath, Path outPath, Set<IRule> rules, RuleEngineBlackboard blackboard) {
 
         // Set up blackboard
         blackboard.setPCMDetector(new PCMDetector());
@@ -115,10 +113,9 @@ public class RuleEngineAnalyzer {
 
         // For each discovered file, execute non-build rules
         for (final Path discoveredFile : discoveredFiles) {
-            for (final DefaultRule rule : rules) {
+            for (final IRule rule : rules) {
                 if (!rule.isBuildRule()) {
-                    rule.getRule(blackboard)
-                        .processRules(discoveredFile);
+                    rule.processRules(blackboard, discoveredFile);
                 }
             }
         }
@@ -126,10 +123,9 @@ public class RuleEngineAnalyzer {
 
         // Execute rules for build files (on all files, the rules filter themselves).
         for (final Path discoveredFile : discoveredFiles) {
-            for (final DefaultRule rule : rules) {
+            for (final IRule rule : rules) {
                 if (rule.isBuildRule()) {
-                    rule.getRule(blackboard)
-                        .processRules(discoveredFile);
+                    rule.processRules(blackboard, discoveredFile);
                 }
             }
         }
@@ -177,7 +173,7 @@ public class RuleEngineAnalyzer {
         }
 
         // Persist the repository at ./pcm.repository
-        blackboard.addPartition(RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY, pcm);
+        blackboard.addPartition(RuleEngineBlackboard.KEY_REPOSITORY, pcm);
         ModelSaver.saveRepository(pcm, outPath.toString(), "pcm");
     }
 

@@ -19,8 +19,10 @@ import org.palladiosimulator.pcm.repository.Parameter;
 import org.palladiosimulator.pcm.repository.PrimitiveDataType;
 import org.palladiosimulator.pcm.repository.PrimitiveTypeEnum;
 import org.palladiosimulator.pcm.repository.Repository;
-import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
+import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
+import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.impl.JaxRSRules;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineException;
 import org.palladiosimulator.somox.analyzer.rules.workflow.RuleEngineJob;
 
@@ -30,7 +32,7 @@ import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 public class BasicTest extends RuleEngineTest {
 
     private static final String PROJECT_NAME = "BasicProject";
-    private static final DefaultRule[] RULES = { DefaultRule.JAX_RS };
+    private static final IRule[] RULES = { new JaxRSRules() };
 
     protected BasicTest() {
         super(PROJECT_NAME, RULES);
@@ -107,7 +109,7 @@ public class BasicTest extends RuleEngineTest {
         final RuleEngineJob ruleEngine = new RuleEngineJob(ruleEngineConfig);
         ruleEngine.execute(new NullProgressMonitor());
         final Repository repo = (Repository) ruleEngine.getBlackboard()
-            .getPartition(RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY);
+            .getPartition(RuleEngineBlackboard.KEY_REPOSITORY);
 
         conflictingMethods = getConflictingMethods(repo.getInterfaces__Repository());
 

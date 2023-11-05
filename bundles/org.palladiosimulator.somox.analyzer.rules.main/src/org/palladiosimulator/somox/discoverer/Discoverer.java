@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
-import org.palladiosimulator.somox.analyzer.rules.service.Service;
+import org.palladiosimulator.somox.analyzer.rules.engine.Service;
 
 public interface Discoverer extends Service {
     static Stream<Path> find(final Path root, final String suffix, final Logger logger) {

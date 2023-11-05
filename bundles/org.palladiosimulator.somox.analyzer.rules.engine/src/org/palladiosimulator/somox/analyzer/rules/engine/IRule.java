@@ -4,17 +4,21 @@ import java.nio.file.Path;
 
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 
+import de.uka.ipd.sdq.workflow.jobs.IBlackboardInteractingJob;
+
 /**
  * This interface has to be implemented in order to write rules. The method will be used by the
  * RuleEngine class to process all written rule lines which are inside the method.
  */
-public abstract class IRule {
+public interface IRule extends Service {
+    public abstract boolean processRules(RuleEngineBlackboard blackboard, Path path);
 
-    protected RuleEngineBlackboard blackboard;
+    public abstract boolean isBuildRule();
 
-    protected IRule(RuleEngineBlackboard blackboard) {
-        this.blackboard = blackboard;
+    @Override
+    default IBlackboardInteractingJob<RuleEngineBlackboard> create(RuleEngineConfiguration configuration,
+            RuleEngineBlackboard blackboard) {
+        // TODO!
+        throw new UnsupportedOperationException("TODO: Implement rules as jobs");
     }
-
-    public abstract boolean processRules(Path path);
 }

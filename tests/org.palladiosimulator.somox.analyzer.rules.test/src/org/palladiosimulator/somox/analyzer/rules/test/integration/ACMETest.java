@@ -1,11 +1,11 @@
 package org.palladiosimulator.somox.analyzer.rules.test.integration;
 
-import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
+import org.palladiosimulator.somox.analyzer.rules.impl.JaxRSRules;
 
 public class ACMETest extends RuleEngineTest {
 
     protected ACMETest() {
-        super("external/acmeair-1.2.0", DefaultRule.JAX_RS);
+        super("external/acmeair-1.2.0", new JaxRSRules());
     }
 
     @Override

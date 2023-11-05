@@ -23,9 +23,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
-import org.palladiosimulator.somox.analyzer.rules.service.Service;
-import org.palladiosimulator.somox.analyzer.rules.service.ServiceCollection;
-import org.palladiosimulator.somox.analyzer.rules.service.ServiceConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.engine.Service;
+import org.palladiosimulator.somox.analyzer.rules.engine.ServiceCollection;
+import org.palladiosimulator.somox.analyzer.rules.engine.ServiceConfiguration;
 
 import de.uka.ipd.sdq.workflow.launchconfig.LaunchConfigPlugin;
 

@@ -39,10 +39,11 @@ import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.resourceenvironment.ResourceEnvironment;
 import org.palladiosimulator.pcm.system.System;
-import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
-import org.palladiosimulator.somox.analyzer.rules.service.ServiceConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfigurationImpl;
+import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
+import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.engine.ServiceConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.workflow.RuleEngineJob;
 import org.palladiosimulator.somox.discoverer.Discoverer;
 import org.palladiosimulator.somox.discoverer.DiscovererCollection;
@@ -68,14 +69,14 @@ abstract class RuleEngineTest {
     // Seperate instances for every child test
     private final Logger logger = Logger.getLogger(this.getClass());
 
-    private final RuleEngineConfiguration config = new RuleEngineConfiguration();
+    private final RuleEngineConfiguration config = new RuleEngineConfigurationImpl();
     private final RuleEngineJob ruleEngine;
     private final boolean executedSuccessfully;
     private Repository repository;
     private System system;
     private ResourceEnvironment resourceEnvironment;
     private Allocation allocation;
-    private final Set<DefaultRule> rules;
+    private final Set<IRule> rules;
 
     /**
      * Tests the basic functionality of the RuleEngineAnalyzer. Requires it to execute without an
@@ -86,7 +87,7 @@ abstract class RuleEngineTest {
      * @param rules
      *            the rules to execute
      */
-    protected RuleEngineTest(String projectDirectory, DefaultRule... rules) {
+    protected RuleEngineTest(String projectDirectory, IRule... rules) {
         this.rules = Set.of(rules);
 
         outDir = TEST_DIR.appendSegment("out")
@@ -95,10 +96,14 @@ abstract class RuleEngineTest {
 
         config.setInputFolder(TEST_DIR.appendSegments(projectDirectory.split("/")));
         config.setOutputFolder(outDir);
-        config.setSelectedRules(this.rules);
+
+        ServiceConfiguration<IRule> ruleConfig = config.getConfig(IRule.class);
+        for (IRule rule : rules) {
+            ruleConfig.setSelected(rule, true);
+        }
 
         // Enable all discoverers.
-        ServiceConfiguration<Discoverer> discovererConfig = config.getDiscovererConfig();
+        ServiceConfiguration<Discoverer> discovererConfig = config.getConfig(Discoverer.class);
         try {
             for (Discoverer discoverer : new DiscovererCollection().getServices()) {
                 discovererConfig.setSelected(discoverer, true);
@@ -348,7 +353,7 @@ abstract class RuleEngineTest {
         return ruleEngine.getBlackboard();
     }
 
-    public Set<DefaultRule> getRules() {
+    public Set<IRule> getRules() {
         return Collections.unmodifiableSet(rules);
     }
 

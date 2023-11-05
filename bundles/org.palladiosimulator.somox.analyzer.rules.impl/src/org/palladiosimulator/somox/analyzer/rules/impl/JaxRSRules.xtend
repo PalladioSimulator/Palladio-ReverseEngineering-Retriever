@@ -7,24 +7,23 @@ import java.nio.file.Path;
 import org.eclipse.jdt.core.dom.CompilationUnit
 import static org.palladiosimulator.somox.analyzer.rules.engine.RuleHelper.*
 import org.palladiosimulator.somox.analyzer.rules.model.CompUnitOrName
+import java.util.Set
 
-class JaxRSRules extends IRule{
+class JaxRSRules implements IRule {
+	
+	public static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.jax_rs"
 
     public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java"
 	
-	new(RuleEngineBlackboard blackboard) {
-		super(blackboard)
-	}
-	
-	override boolean processRules(Path path) {
+	override boolean processRules(RuleEngineBlackboard blackboard, Path path) {
 		val unit = blackboard.getDiscoveredFiles(JAVA_DISCOVERER_ID, typeof(CompilationUnit)).get(path)
 		
 		if (unit === null) return false;
 		
-		return processRuleForCompUnit(unit)
+		return processRuleForCompUnit(blackboard, unit)
 	}
 	
-	def boolean processRuleForCompUnit(CompilationUnit unit) {
+	def boolean processRuleForCompUnit(RuleEngineBlackboard blackboard, CompilationUnit unit) {
 		val pcmDetector = blackboard.getPCMDetector()
 		if (pcmDetector === null) {
 		return false
@@ -35,7 +34,7 @@ class JaxRSRules extends IRule{
 		// technology based and general recognition
 		val isConverter = isUnitAnnotatedWithName(unit, "Converter")
 		if(isConverter){
-			detectDefault(unit)
+			detectDefault(blackboard, unit)
 		return true
 		}
 		
@@ -72,20 +71,36 @@ class JaxRSRules extends IRule{
 		val classModified = isClassModifiedExactlyWith(unit, "public","final");
 		if(!isUnit && !isUnitController && !isWebListener && classModified){
 			pcmDetector.detectComponent(identifier)
-			detectDefault(unit)
+			detectDefault(blackboard, unit)
 			return true
 		} 
 		return false
 		
 	}
 	
-	def detectDefault(CompilationUnit unit) {
+	def detectDefault(RuleEngineBlackboard blackboard, CompilationUnit unit) {
 		val pcmDetector = blackboard.getPCMDetector()
 		val identifier = new CompUnitOrName(unit)
 
 		pcmDetector.detectComponent(identifier)
 		getAllPublicMethods(unit).forEach[m|pcmDetector.detectProvidedOperation(identifier,m.resolveBinding)]
 		getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(identifier, f)]
+	}
+	
+	override isBuildRule() {
+		return false
+	}
+	
+	override getConfigurationKeys() {
+		return Set.of
+	}
+	
+	override getID() {
+		return RULE_ID
+	}
+	
+	override getName() {
+		return "JAX RS Rules"
 	}
 	
 }

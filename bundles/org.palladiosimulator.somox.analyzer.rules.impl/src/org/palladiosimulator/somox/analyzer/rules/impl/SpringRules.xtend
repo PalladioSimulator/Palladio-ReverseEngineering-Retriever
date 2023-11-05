@@ -22,20 +22,17 @@ import org.palladiosimulator.somox.analyzer.rules.model.CompUnitOrName
 import java.util.function.Function
 import java.util.Set
 
-class SpringRules extends IRule {
+class SpringRules implements IRule {
     static final Logger LOG = Logger.getLogger(SpringRules)
 
+    public static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.spring"
     public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java"
     public static final String YAML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.yaml"
     public static final String YAML_MAPPERS_KEY = YAML_DISCOVERER_ID + ".mappers"
     public static final String XML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.xml"
     public static final String PROPERTIES_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.properties"
 
-	new(RuleEngineBlackboard blackboard) {
-		super(blackboard)
-	}
-
-	override boolean processRules(Path path) {
+	override boolean processRules(RuleEngineBlackboard blackboard, Path path) {
 		val unit = blackboard.getDiscoveredFiles(JAVA_DISCOVERER_ID, typeof(CompilationUnit)).get(path)
 		if (unit === null) return false
 
@@ -58,7 +55,7 @@ class SpringRules extends IRule {
 		val rawApplicationYaml = rawYamls.get(findFile(yamlMappers.keySet, projectRoot.resolve("src/main/resources"), Set.of("application.yaml", "application.yml")))
 		val contextVariables = collectContextVariables(rawApplicationYaml)
 		
-		return processRuleForCompUnit(unit, contextPath, contextVariables)
+		return processRuleForCompUnit(blackboard, unit, contextPath, contextVariables)
 	}
 
 	def findProjectRoot(Path currentPath, Map<Path, Document> poms) {
@@ -185,7 +182,7 @@ class SpringRules extends IRule {
 		return result;
 	}
 
-	def boolean processRuleForCompUnit(CompilationUnit unit, String contextPath, Map<String, String> contextVariables) {
+	def boolean processRuleForCompUnit(RuleEngineBlackboard blackboard, CompilationUnit unit, String contextPath, Map<String, String> contextVariables) {
 		val pcmDetector = blackboard.getPCMDetector
 		if (pcmDetector === null) {
 			return false
@@ -417,4 +414,21 @@ class SpringRules extends IRule {
 			|| isImplementingOrExtending(unit, "PagingAndSortingRepository")
 			|| isImplementingOrExtending(unit, "MongoRepository")
 	}
+	
+	override isBuildRule() {
+		return false
+	}
+	
+	override getConfigurationKeys() {
+		return Set.of
+	}
+	
+	override getID() {
+		return RULE_ID
+	}
+	
+	override getName() {
+		return "Spring Rules"
+	}
+	
 }

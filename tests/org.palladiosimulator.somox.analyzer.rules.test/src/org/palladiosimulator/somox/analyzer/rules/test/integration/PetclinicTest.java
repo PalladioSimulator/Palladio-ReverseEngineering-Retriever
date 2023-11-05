@@ -1,11 +1,11 @@
 package org.palladiosimulator.somox.analyzer.rules.test.integration;
 
-import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
+import org.palladiosimulator.somox.analyzer.rules.impl.SpringRules;
 
 public class PetclinicTest extends RuleEngineTest {
 
     protected PetclinicTest() {
-        super("external/spring-petclinic-microservices-2.3.6", DefaultRule.SPRING);
+        super("external/spring-petclinic-microservices-2.3.6", new SpringRules());
     }
 
     @Override

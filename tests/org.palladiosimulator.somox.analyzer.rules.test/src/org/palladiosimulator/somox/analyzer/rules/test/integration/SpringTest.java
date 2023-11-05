@@ -1,11 +1,11 @@
 package org.palladiosimulator.somox.analyzer.rules.test.integration;
 
-import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
+import org.palladiosimulator.somox.analyzer.rules.impl.SpringRules;
 
 public class SpringTest extends RuleEngineTest {
 
     protected SpringTest() {
-        super("SpringProject", DefaultRule.SPRING);
+        super("SpringProject", new SpringRules());
     }
 
     @Override

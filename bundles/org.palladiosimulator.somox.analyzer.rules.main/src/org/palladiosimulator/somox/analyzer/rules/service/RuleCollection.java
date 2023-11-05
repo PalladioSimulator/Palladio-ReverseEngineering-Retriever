@@ -1,30 +1,30 @@
 package org.palladiosimulator.somox.analyzer.rules.service;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
 import org.palladiosimulator.somox.analyzer.rules.engine.ServiceCollection;
 
-public class AnalystCollection implements ServiceCollection<Analyst> {
-    public static final String EXTENSION_POINT = "org.palladiosimulator.somox.analyzer.rules.analyst";
-    private final Set<Analyst> analysts = new HashSet<>();
+public class RuleCollection implements ServiceCollection<IRule> {
+    public static final String EXTENSION_POINT = "org.palladiosimulator.somox.analyzer.rule";
+    private Set<IRule> rules = new HashSet<>();
 
-    public AnalystCollection() throws CoreException {
+    public RuleCollection() throws CoreException {
         for (IConfigurationElement extension : Platform.getExtensionRegistry()
             .getConfigurationElementsFor(EXTENSION_POINT)) {
             final Object o = extension.createExecutableExtension("class");
-            if (o instanceof Analyst) {
-                analysts.add((Analyst) o);
+            if (o instanceof IRule) {
+                rules.add((IRule) o);
             }
         }
     }
 
     @Override
-    public Set<Analyst> getServices() {
-        return Collections.unmodifiableSet(analysts);
+    public Set<IRule> getServices() {
+        return rules;
     }
 }

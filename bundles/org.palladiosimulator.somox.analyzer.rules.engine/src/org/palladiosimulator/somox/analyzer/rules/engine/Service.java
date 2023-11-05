@@ -1,9 +1,8 @@
-package org.palladiosimulator.somox.analyzer.rules.service;
+package org.palladiosimulator.somox.analyzer.rules.engine;
 
 import java.util.Set;
 
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 
 import de.uka.ipd.sdq.workflow.jobs.IBlackboardInteractingJob;
 

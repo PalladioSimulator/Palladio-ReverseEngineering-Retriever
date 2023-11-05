@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         id="org.palladiosimulator.somox.analyzer.rules.impl.docker"
+         name="Docker Rules"
+         point="org.palladiosimulator.somox.analyzer.rule">
+      <rule
+            class="org.palladiosimulator.somox.analyzer.rules.impl.DockerRules">
+      </rule>
+   </extension>
+   <extension
+         id="org.palladiosimulator.somox.analyzer.rules.impl.ecmascript"
+         name="ECMAScript Rules"
+         point="org.palladiosimulator.somox.analyzer.rule">
+      <rule
+            class="org.palladiosimulator.somox.analyzer.rules.impl.EcmaScriptRules">
+      </rule>
+   </extension>
+   <extension
+         id="org.palladiosimulator.somox.analyzer.rules.impl.ecmascript"
+         name="Gradle Rules"
+         point="org.palladiosimulator.somox.analyzer.rule">
+      <rule
+            class="org.palladiosimulator.somox.analyzer.rules.impl.GradleRules">
+      </rule>
+   </extension>
+   <extension
+         id="org.palladiosimulator.somox.analyzer.rules.impl.jax_rs"
+         name="Jax RS Rules"
+         point="org.palladiosimulator.somox.analyzer.rule">
+      <rule
+            class="org.palladiosimulator.somox.analyzer.rules.impl.JaxRSRules">
+      </rule>
+   </extension>
+   <extension
+         id="org.palladiosimulator.somox.analyzer.rules.impl.maven"
+         name="Maven Rules"
+         point="org.palladiosimulator.somox.analyzer.rule">
+      <rule
+            class="org.palladiosimulator.somox.analyzer.rules.impl.MavenRules">
+      </rule>
+   </extension>
+   <extension
+         id="org.palladiosimulator.somox.analyzer.rules.impl.spring"
+         name="Spring Rules"
+         point="org.palladiosimulator.somox.analyzer.rule">
+      <rule
+            class="org.palladiosimulator.somox.analyzer.rules.impl.SpringRules">
+      </rule>
+   </extension>
+
+</plugin>

@@ -6,17 +6,15 @@ import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboar
 import java.nio.file.Path;
 import java.util.HashSet
 import org.eclipse.jdt.core.dom.CompilationUnit
+import java.util.Set
 
-class GradleRules extends IRule {
+class GradleRules implements IRule {
 
+	static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.gradle";
 	static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java";
 	static final String GRADLE_FILE_NAME = "build.gradle";
 
-	new(RuleEngineBlackboard blackboard) {
-		super(blackboard)
-	}
-
-	override boolean processRules(Path path) {
+	override boolean processRules(RuleEngineBlackboard blackboard, Path path) {
 		if (path !== null && path.fileName.toString().equals(GRADLE_FILE_NAME)) {
 
 			// Add all file system children as associated compilation units
@@ -34,4 +32,21 @@ class GradleRules extends IRule {
 		}
 		return false;
 	}
+	
+	override isBuildRule() {
+		return true
+	}
+	
+	override getConfigurationKeys() {
+		return Set.of
+	}
+	
+	override getID() {
+		return RULE_ID
+	}
+	
+	override getName() {
+		return "Gradle Rules"
+	}
+	
 }

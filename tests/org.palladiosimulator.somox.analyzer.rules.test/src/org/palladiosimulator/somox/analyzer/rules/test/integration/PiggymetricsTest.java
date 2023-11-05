@@ -1,11 +1,11 @@
 package org.palladiosimulator.somox.analyzer.rules.test.integration;
 
-import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
+import org.palladiosimulator.somox.analyzer.rules.impl.SpringRules;
 
 public class PiggymetricsTest extends RuleEngineTest {
 
     protected PiggymetricsTest() {
-        super("external/piggymetrics-spring.version.2.0.3", DefaultRule.SPRING);
+        super("external/piggymetrics-spring.version.2.0.3", new SpringRules());
     }
 
     @Override

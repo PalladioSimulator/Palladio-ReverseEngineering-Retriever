@@ -16,23 +16,25 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
-import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
-import org.palladiosimulator.somox.analyzer.rules.service.ServiceConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfigurationImpl;
+import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
+import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.engine.ServiceConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.service.RuleCollection;
 import org.palladiosimulator.somox.analyzer.rules.workflow.RuleEngineJob;
 import org.palladiosimulator.somox.discoverer.Discoverer;
 import org.palladiosimulator.somox.discoverer.DiscovererCollection;
 
 public class RuleEngineApplication implements IApplication {
 
-    private static Options createOptions() {
+    private static Options createOptions(Set<String> availableRuleIDs) {
         final Options options = new Options();
         options
             .addRequiredOption("i", "input-directory", true,
                     "Path to the root directory of the project to be reverse engineered.")
             .addRequiredOption("o", "output-directory", true, "Path to the output directory for the generated models.")
             .addRequiredOption("r", "rules", true,
-                    "Supported rules for reverse engineering: " + String.join(", ", DefaultRule.valuesAsString()));
+                    "Supported rules for reverse engineering: " + String.join(", ", availableRuleIDs));
 
         options.addOption("h", "help", false, "Print this help message.");
 
@@ -53,7 +55,13 @@ public class RuleEngineApplication implements IApplication {
 
     @Override
     public Object start(IApplicationContext context) throws Exception {
-        final Options options = createOptions();
+
+        Set<IRule> availableRules = new RuleCollection().getServices();
+        Set<String> availableRuleIDs = availableRules.stream()
+            .map(IRule::getID)
+            .collect(Collectors.toSet());
+
+        final Options options = createOptions(availableRuleIDs);
         final CommandLineParser parser = new DefaultParser();
         final CommandLine cmd;
         try {
@@ -69,20 +77,7 @@ public class RuleEngineApplication implements IApplication {
             printHelp(options);
         }
 
-        RuleEngineConfiguration configuration = new RuleEngineConfiguration();
-
-        // Extract and check rules
-        final Set<DefaultRule> rules = Arrays.stream(cmd.getOptionValue("r")
-            .split(","))
-            .map(String::strip)
-            .map(String::toUpperCase)
-            .map(DefaultRule::valueOf)
-            .collect(Collectors.toSet());
-        if (rules.isEmpty()) {
-            System.err.println("Invalid rules: " + cmd.getOptionValue("r"));
-            return -1;
-        }
-        configuration.setSelectedRules(rules);
+        RuleEngineConfiguration configuration = new RuleEngineConfigurationImpl();
 
         try {
             configuration.setInputFolder(URI.createFileURI(URI.decode(Paths.get(cmd.getOptionValue("i"))
@@ -105,9 +100,27 @@ public class RuleEngineApplication implements IApplication {
         }
 
         // Enable all discoverers, in case a selected rule depends on them.
-        ServiceConfiguration<Discoverer> discovererConfig = configuration.getDiscovererConfig();
+        // TODO: This is unnecessary once rule dependencies are in place
+        ServiceConfiguration<Discoverer> discovererConfig = configuration.getConfig(Discoverer.class);
         for (Discoverer discoverer : new DiscovererCollection().getServices()) {
             discovererConfig.setSelected(discoverer, true);
+        }
+
+        ServiceConfiguration<IRule> ruleConfig = configuration.getConfig(IRule.class);
+        // Extract and check rules
+        Set<String> requestedRuleIDs = Arrays.stream(cmd.getOptionValue("r")
+            .split(","))
+            .map(String::strip)
+            .collect(Collectors.toSet());
+        Set<IRule> rules = availableRules.stream()
+            .filter(x -> requestedRuleIDs.contains(x.getID()))
+            .collect(Collectors.toSet());
+        if (rules.isEmpty()) {
+            System.err.println("Invalid rules: " + cmd.getOptionValue("r"));
+            return -1;
+        }
+        for (IRule rule : rules) {
+            ruleConfig.setSelected(rule, true);
         }
 
         new RuleEngineJob(configuration).execute(new NullProgressMonitor());

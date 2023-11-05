@@ -13,14 +13,14 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.pcm.seff.ServiceEffectSpecification;
-import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
+import org.palladiosimulator.somox.analyzer.rules.impl.SpringRules;
 import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
 
 public class SeffAssociationTest extends RuleEngineTest {
 
     SeffAssociationTest() {
-        super("SpringProject", DefaultRule.SPRING);
+        super("SpringProject", new SpringRules());
     }
 
     /**

@@ -25,7 +25,9 @@ import org.palladiosimulator.somox.analyzer.rules.model.RESTName
 import java.util.Optional
 import org.palladiosimulator.somox.analyzer.rules.model.CompUnitOrName
 
-class EcmaScriptRules extends IRule {
+class EcmaScriptRules implements IRule {
+
+	public static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.ecmascript"
 
 	public static final String ECMASCRIPT_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.ecmascript"
 
@@ -40,22 +42,18 @@ class EcmaScriptRules extends IRule {
 	static final String VARIABLE_PREFIX = ":"
 	static final String BLANK = ""
 
-	new(RuleEngineBlackboard blackboard) {
-		super(blackboard)
-	}
-
-	override processRules(Path path) {
+	override processRules(RuleEngineBlackboard blackboard, Path path) {
 		val compilationUnits = blackboard.getDiscoveredFiles(ECMASCRIPT_DISCOVERER_ID, typeof(CompilationUnitTree))
 		val compilationUnit = compilationUnits.get(path)
 		if(compilationUnit === null) return false
-		val httpRequests = findAllHttpRequests(compilationUnit)
+		val httpRequests = findAllHttpRequests(blackboard, compilationUnit)
 		for (key : httpRequests.keySet) {
 			System.out.println("\t" + key + " = " + httpRequests.get(key));
 		}
 		return true
 	}
 
-	def findAllHttpRequests(CompilationUnitTree unit) {
+	def findAllHttpRequests(RuleEngineBlackboard blackboard, CompilationUnitTree unit) {
 		val pcmDetector = blackboard.PCMDetector
 		val source = unit.getSourceName().substring(0, unit.getSourceName().lastIndexOf(SEPARATOR) + 1)
 		val assignments = findVariableAssignments(unit)
@@ -234,6 +232,22 @@ class EcmaScriptRules extends IRule {
 			}
 		}
 		return join
+	}
+	
+	override isBuildRule() {
+		return false
+	}
+	
+	override getConfigurationKeys() {
+		return Set.of
+	}
+	
+	override getID() {
+		return RULE_ID
+	}
+	
+	override getName() {
+		return "ECMAScript Rules"
 	}
 
 }

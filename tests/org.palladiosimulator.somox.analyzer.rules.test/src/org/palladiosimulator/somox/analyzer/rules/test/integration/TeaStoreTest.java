@@ -1,11 +1,11 @@
 package org.palladiosimulator.somox.analyzer.rules.test.integration;
 
-import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
+import org.palladiosimulator.somox.analyzer.rules.impl.SpringRules;
 
 public class TeaStoreTest extends RuleEngineTest {
 
     protected TeaStoreTest() {
-        super("external/TeaStore-1.4.1", DefaultRule.JAX_RS);
+        super("external/TeaStore-1.4.1", new SpringRules());
     }
 
     @Override

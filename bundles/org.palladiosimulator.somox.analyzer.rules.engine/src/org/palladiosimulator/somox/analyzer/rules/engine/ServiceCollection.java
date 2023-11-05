@@ -1,4 +1,4 @@
-package org.palladiosimulator.somox.analyzer.rules.service;
+package org.palladiosimulator.somox.analyzer.rules.engine;
 
 import java.util.Set;
 
