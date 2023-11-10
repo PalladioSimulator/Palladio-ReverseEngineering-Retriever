@@ -2,6 +2,7 @@ package org.palladiosimulator.somox.analyzer.rules.workflow;
 
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineBlackboardKeys;
+import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
 import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.mocore.workflow.MoCoReJob;
 import org.palladiosimulator.somox.analyzer.rules.service.Analyst;
@@ -18,6 +19,10 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
         super.setBlackboard(new RuleEngineBlackboard());
 
         super.add(createDiscoverersJob(configuration));
+
+        super.add(createRulesJob(configuration));
+
+        super.add(createBuildRulesJob(configuration));
 
         super.add(new RuleEngineBlackboardInteractingJob(configuration, getBlackboard()));
 
@@ -50,6 +55,36 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
                 RuleEngineBlackboardKeys.RULE_ENGINE_MOCORE_OUTPUT_RESOURCE_ENVIRONMENT));
 
         super.add(new PlantUmlJob(configuration, getBlackboard()));
+    }
+    
+    private ParallelJob createRulesJob(RuleEngineConfiguration configuration) {
+        ParallelJob parentJob = new ParallelJob();
+        
+        for (IRule rule : configuration.getConfig(IRule.class)
+            .getSelected()) {
+        	if (!rule.isBuildRule()) {
+        		IBlackboardInteractingJob<RuleEngineBlackboard> ruleJob = rule.create(configuration, myBlackboard);
+        		parentJob.add(ruleJob);
+            	logger.info("Adding rule job \"" + ruleJob.getName() + "\"");
+        	}
+        }
+        
+        return parentJob;
+    }
+
+    private ParallelJob createBuildRulesJob(RuleEngineConfiguration configuration) {
+        ParallelJob parentJob = new ParallelJob();
+        
+        for (IRule rule : configuration.getConfig(IRule.class)
+            .getSelected()) {
+        	if (rule.isBuildRule()) {
+        		IBlackboardInteractingJob<RuleEngineBlackboard> ruleJob = rule.create(configuration, myBlackboard);
+        		parentJob.add(ruleJob);
+        		logger.info("Adding build rule job \"" + ruleJob.getName() + "\"");
+        	}
+        }
+
+        return parentJob;
     }
 
     private ParallelJob createDiscoverersJob(RuleEngineConfiguration configuration) {

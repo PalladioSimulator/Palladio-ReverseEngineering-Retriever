@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.common.util.URI;
@@ -24,7 +23,6 @@ import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.engine.DockerParser;
 import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
-import org.palladiosimulator.somox.analyzer.rules.engine.PCMDetector;
 import org.palladiosimulator.somox.analyzer.rules.engine.PCMInstanceCreator;
 import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
 
@@ -38,8 +36,6 @@ import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration
  * the engine provides the public methods loadRules() and loadModel().
  */
 public class RuleEngineAnalyzer {
-    private static final Logger LOG = Logger.getLogger(RuleEngineAnalyzer.class);
-
     private final RuleEngineBlackboard blackboard;
 
     private static Repository pcm;
@@ -105,32 +101,6 @@ public class RuleEngineAnalyzer {
      *            the rule engine blackboard, containing (among other things) the discovered files
      */
     private static void executeWith(Path projectPath, Path outPath, Set<IRule> rules, RuleEngineBlackboard blackboard) {
-
-        // Set up blackboard
-        blackboard.setPCMDetector(new PCMDetector());
-
-        Set<Path> discoveredFiles = blackboard.getDiscoveredPaths();
-
-        // For each discovered file, execute non-build rules
-        for (final Path discoveredFile : discoveredFiles) {
-            for (final IRule rule : rules) {
-                if (!rule.isBuildRule()) {
-                    rule.processRules(blackboard, discoveredFile);
-                }
-            }
-        }
-        LOG.info("Applied non-build rules");
-
-        // Execute rules for build files (on all files, the rules filter themselves).
-        for (final Path discoveredFile : discoveredFiles) {
-            for (final IRule rule : rules) {
-                if (rule.isBuildRule()) {
-                    rule.processRules(blackboard, discoveredFile);
-                }
-            }
-        }
-        LOG.info("Applied build rules");
-
         // Creates a PCM repository with systems, components, interfaces and roles
 
         // Parses the docker-compose file to get a mapping between microservice names and

@@ -33,6 +33,7 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
         systemAssociations = new HashMap<>();
         systemPaths = new HashMap<>();
         discovererIDs = new HashSet<>();
+        pcmDetector = new PCMDetector();
         addPartition(KEY_SEFF_ASSOCIATIONS, new HashMap<>());
     }
 
