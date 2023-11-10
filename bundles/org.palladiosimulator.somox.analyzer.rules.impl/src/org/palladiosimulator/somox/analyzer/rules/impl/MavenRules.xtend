@@ -1,14 +1,14 @@
 package org.palladiosimulator.somox.analyzer.rules.impl
 
-import org.palladiosimulator.somox.analyzer.rules.engine.IRule
 
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard
 import java.nio.file.Path;
 import java.util.HashSet
 import org.eclipse.jdt.core.dom.CompilationUnit
 import java.util.Set
+import org.palladiosimulator.somox.analyzer.rules.engine.Rule
 
-class MavenRules implements IRule {
+class MavenRules implements Rule {
 	
 	static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.maven"
 	static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java";

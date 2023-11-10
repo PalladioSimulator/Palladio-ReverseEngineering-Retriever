@@ -15,7 +15,7 @@ import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
  * This interface has to be implemented in order to write rules. The method will be used by the
  * RuleEngine class to process all written rule lines which are inside the method.
  */
-public interface IRule extends Service {
+public interface Rule extends Service {
     public abstract void processRules(RuleEngineBlackboard blackboard, Path path);
 
     public abstract boolean isBuildRule();
@@ -23,7 +23,7 @@ public interface IRule extends Service {
     @Override
     default IBlackboardInteractingJob<RuleEngineBlackboard> create(RuleEngineConfiguration configuration,
             RuleEngineBlackboard blackboard) {
-        IRule rule = this;
+        Rule rule = this;
         return new AbstractBlackboardInteractingJob<RuleEngineBlackboard>() {
         	@Override
 			public void execute(IProgressMonitor monitor) throws JobFailedException, UserCanceledException {

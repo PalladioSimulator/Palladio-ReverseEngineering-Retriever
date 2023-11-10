@@ -2,7 +2,7 @@ package org.palladiosimulator.somox.analyzer.rules.workflow;
 
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineBlackboardKeys;
-import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
+import org.palladiosimulator.somox.analyzer.rules.engine.Rule;
 import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.mocore.workflow.MoCoReJob;
 import org.palladiosimulator.somox.analyzer.rules.service.Analyst;
@@ -60,7 +60,7 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
     private ParallelJob createRulesJob(RuleEngineConfiguration configuration) {
         ParallelJob parentJob = new ParallelJob();
         
-        for (IRule rule : configuration.getConfig(IRule.class)
+        for (Rule rule : configuration.getConfig(Rule.class)
             .getSelected()) {
         	if (!rule.isBuildRule()) {
         		IBlackboardInteractingJob<RuleEngineBlackboard> ruleJob = rule.create(configuration, myBlackboard);
@@ -75,7 +75,7 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
     private ParallelJob createBuildRulesJob(RuleEngineConfiguration configuration) {
         ParallelJob parentJob = new ParallelJob();
         
-        for (IRule rule : configuration.getConfig(IRule.class)
+        for (Rule rule : configuration.getConfig(Rule.class)
             .getSelected()) {
         	if (rule.isBuildRule()) {
         		IBlackboardInteractingJob<RuleEngineBlackboard> ruleJob = rule.create(configuration, myBlackboard);

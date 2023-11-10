@@ -1,6 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.impl
 
-import org.palladiosimulator.somox.analyzer.rules.engine.IRule
 import org.openjdk.nashorn.api.tree.CompilationUnitTree
 import java.nio.file.Path
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard
@@ -24,8 +23,9 @@ import org.openjdk.nashorn.api.tree.VariableTree
 import org.palladiosimulator.somox.analyzer.rules.model.RESTName
 import java.util.Optional
 import org.palladiosimulator.somox.analyzer.rules.model.CompUnitOrName
+import org.palladiosimulator.somox.analyzer.rules.engine.Rule
 
-class EcmaScriptRules implements IRule {
+class EcmaScriptRules implements Rule {
 
 	public static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.ecmascript"
 

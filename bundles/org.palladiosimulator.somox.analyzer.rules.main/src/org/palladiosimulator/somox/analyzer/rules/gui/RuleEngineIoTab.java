@@ -18,7 +18,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfigurationImpl;
-import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
+import org.palladiosimulator.somox.analyzer.rules.engine.Rule;
 import org.palladiosimulator.somox.analyzer.rules.engine.ServiceCollection;
 import org.palladiosimulator.somox.analyzer.rules.service.Analyst;
 import org.palladiosimulator.somox.analyzer.rules.service.AnalystCollection;
@@ -43,7 +43,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     private Text in;
     private Text out;
     private final ServiceConfigurationView<Discoverer> discovererConfigView;
-    private final ServiceConfigurationView<IRule> ruleConfigView;
+    private final ServiceConfigurationView<Rule> ruleConfigView;
     private final ServiceConfigurationView<Analyst> analystConfigView;
 
     public RuleEngineIoTab() {
@@ -72,7 +72,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
                 getName(), RuleEngineConfigurationImpl.RULE_ENGINE_DISCOVERER_CONFIG_PREFIX,
                 RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_DISCOVERERS);
 
-        ServiceCollection<IRule> ruleCollection = null;
+        ServiceCollection<Rule> ruleCollection = null;
         try {
             ruleCollection = new RuleCollection();
         } catch (CoreException e) {

@@ -22,7 +22,7 @@ import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.engine.DockerParser;
-import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
+import org.palladiosimulator.somox.analyzer.rules.engine.Rule;
 import org.palladiosimulator.somox.analyzer.rules.engine.PCMInstanceCreator;
 import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
 
@@ -63,7 +63,7 @@ public class RuleEngineAnalyzer {
             final URI out = CommonPlugin.asLocalURI(ruleEngineConfiguration.getOutputFolder());
             final Path outPath = Paths.get(out.devicePath());
 
-            final Set<IRule> rules = ruleEngineConfiguration.getConfig(IRule.class)
+            final Set<Rule> rules = ruleEngineConfiguration.getConfig(Rule.class)
                 .getSelected();
 
             executeWith(inPath, outPath, rules, blackboard);
@@ -84,7 +84,7 @@ public class RuleEngineAnalyzer {
      * @param ruleDoc
      *            the object containing the rules
      */
-    public static void executeWith(Path projectPath, Path outPath, List<CompilationUnit> model, Set<IRule> rules) {
+    public static void executeWith(Path projectPath, Path outPath, List<CompilationUnit> model, Set<Rule> rules) {
         executeWith(projectPath, outPath, model, rules);
     }
 
@@ -100,7 +100,7 @@ public class RuleEngineAnalyzer {
      * @param blackboard
      *            the rule engine blackboard, containing (among other things) the discovered files
      */
-    private static void executeWith(Path projectPath, Path outPath, Set<IRule> rules, RuleEngineBlackboard blackboard) {
+    private static void executeWith(Path projectPath, Path outPath, Set<Rule> rules, RuleEngineBlackboard blackboard) {
         // Creates a PCM repository with systems, components, interfaces and roles
 
         // Parses the docker-compose file to get a mapping between microservice names and
@@ -157,7 +157,7 @@ public class RuleEngineAnalyzer {
      *            the path to a .class file containing the rules
      * @return the rules from the specified (via gui) file system place
      */
-    public static IRule loadRules(String namespace, Path rulesFile) {
+    public static Rule loadRules(String namespace, Path rulesFile) {
 
         final File file = rulesFile.toFile();
 
@@ -167,8 +167,8 @@ public class RuleEngineAnalyzer {
                 .replace(".class", ""));
             final Object instance = c.getDeclaredConstructor()
                 .newInstance();
-            if (instance instanceof IRule) {
-                return (IRule) instance;
+            if (instance instanceof Rule) {
+                return (Rule) instance;
             }
         } catch (final Exception e) {
             e.printStackTrace();

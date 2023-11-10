@@ -7,7 +7,7 @@ import java.util.Objects;
 import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.common.util.URI;
-import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
+import org.palladiosimulator.somox.analyzer.rules.engine.Rule;
 import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.engine.Service;
 import org.palladiosimulator.somox.analyzer.rules.engine.ServiceCollection;
@@ -71,16 +71,16 @@ public class RuleEngineConfigurationImpl extends AbstractComposedJobConfiguratio
                 RULE_ENGINE_SELECTED_DISCOVERERS, RULE_ENGINE_DISCOVERER_CONFIG_PREFIX);
         serviceConfigs.put(Discoverer.class, discovererConfig);
 
-        ServiceCollection<IRule> ruleCollection = null;
+        ServiceCollection<Rule> ruleCollection = null;
         try {
             ruleCollection = new RuleCollection();
         } catch (CoreException e) {
             LOG.error("Exception occurred while discovering rules!");
             ruleCollection = new EmptyCollection<>();
         }
-        ServiceConfiguration<IRule> ruleConfig = new ServiceConfiguration<>(ruleCollection, RULE_ENGINE_SELECTED_RULES,
+        ServiceConfiguration<Rule> ruleConfig = new ServiceConfiguration<>(ruleCollection, RULE_ENGINE_SELECTED_RULES,
                 RULE_ENGINE_RULE_CONFIG_PREFIX);
-        serviceConfigs.put(IRule.class, ruleConfig);
+        serviceConfigs.put(Rule.class, ruleConfig);
 
         applyAttributeMap(attributes);
     }

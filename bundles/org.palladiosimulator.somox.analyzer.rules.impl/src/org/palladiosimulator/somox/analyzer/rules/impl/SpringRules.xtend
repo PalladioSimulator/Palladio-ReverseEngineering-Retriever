@@ -2,7 +2,6 @@ package org.palladiosimulator.somox.analyzer.rules.impl
 
 
 import static org.palladiosimulator.somox.analyzer.rules.engine.RuleHelper.*
-import org.palladiosimulator.somox.analyzer.rules.engine.IRule
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard
 import java.nio.file.Path
 import org.eclipse.jdt.core.dom.CompilationUnit
@@ -21,8 +20,9 @@ import java.util.Optional
 import org.palladiosimulator.somox.analyzer.rules.model.CompUnitOrName
 import java.util.function.Function
 import java.util.Set
+import org.palladiosimulator.somox.analyzer.rules.engine.Rule
 
-class SpringRules implements IRule {
+class SpringRules implements Rule {
     static final Logger LOG = Logger.getLogger(SpringRules)
 
     public static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.spring"

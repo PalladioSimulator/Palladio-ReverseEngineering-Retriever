@@ -17,7 +17,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfigurationImpl;
-import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
+import org.palladiosimulator.somox.analyzer.rules.engine.Rule;
 import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.engine.ServiceConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.service.RuleCollection;
@@ -56,9 +56,9 @@ public class RuleEngineApplication implements IApplication {
     @Override
     public Object start(IApplicationContext context) throws Exception {
 
-        Set<IRule> availableRules = new RuleCollection().getServices();
+        Set<Rule> availableRules = new RuleCollection().getServices();
         Set<String> availableRuleIDs = availableRules.stream()
-            .map(IRule::getID)
+            .map(Rule::getID)
             .collect(Collectors.toSet());
 
         final Options options = createOptions(availableRuleIDs);
@@ -106,20 +106,20 @@ public class RuleEngineApplication implements IApplication {
             discovererConfig.setSelected(discoverer, true);
         }
 
-        ServiceConfiguration<IRule> ruleConfig = configuration.getConfig(IRule.class);
+        ServiceConfiguration<Rule> ruleConfig = configuration.getConfig(Rule.class);
         // Extract and check rules
         Set<String> requestedRuleIDs = Arrays.stream(cmd.getOptionValue("r")
             .split(","))
             .map(String::strip)
             .collect(Collectors.toSet());
-        Set<IRule> rules = availableRules.stream()
+        Set<Rule> rules = availableRules.stream()
             .filter(x -> requestedRuleIDs.contains(x.getID()))
             .collect(Collectors.toSet());
         if (rules.isEmpty()) {
             System.err.println("Invalid rules: " + cmd.getOptionValue("r"));
             return -1;
         }
-        for (IRule rule : rules) {
+        for (Rule rule : rules) {
             ruleConfig.setSelected(rule, true);
         }
 
