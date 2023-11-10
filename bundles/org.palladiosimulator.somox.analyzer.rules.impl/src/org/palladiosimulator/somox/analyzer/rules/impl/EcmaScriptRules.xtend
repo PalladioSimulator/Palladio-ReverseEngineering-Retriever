@@ -45,12 +45,11 @@ class EcmaScriptRules implements IRule {
 	override processRules(RuleEngineBlackboard blackboard, Path path) {
 		val compilationUnits = blackboard.getDiscoveredFiles(ECMASCRIPT_DISCOVERER_ID, typeof(CompilationUnitTree))
 		val compilationUnit = compilationUnits.get(path)
-		if(compilationUnit === null) return false
+		if(compilationUnit === null) return
 		val httpRequests = findAllHttpRequests(blackboard, compilationUnit)
 		for (key : httpRequests.keySet) {
 			System.out.println("\t" + key + " = " + httpRequests.get(key));
 		}
-		return true
 	}
 
 	def findAllHttpRequests(RuleEngineBlackboard blackboard, CompilationUnitTree unit) {

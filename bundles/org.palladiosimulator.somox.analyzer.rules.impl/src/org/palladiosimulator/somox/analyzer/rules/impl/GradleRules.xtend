@@ -14,7 +14,7 @@ class GradleRules implements IRule {
 	static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java";
 	static final String GRADLE_FILE_NAME = "build.gradle";
 
-	override boolean processRules(RuleEngineBlackboard blackboard, Path path) {
+	override processRules(RuleEngineBlackboard blackboard, Path path) {
 		if (path !== null && path.fileName.toString().equals(GRADLE_FILE_NAME)) {
 
 			// Add all file system children as associated compilation units
@@ -27,10 +27,7 @@ class GradleRules implements IRule {
 				}
 			}
 			blackboard.addSystemAssociations(path, children);
-
-			return true;
 		}
-		return false;
 	}
 	
 	override isBuildRule() {

@@ -14,7 +14,7 @@ class MavenRules implements IRule {
 	static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java";
 	static final String MAVEN_FILE_NAME = "pom.xml";
 
-	override boolean processRules(RuleEngineBlackboard blackboard, Path path) {
+	override processRules(RuleEngineBlackboard blackboard, Path path) {
 		if (path !== null && path.fileName.toString().equals(MAVEN_FILE_NAME)) {
 
 			// Add all file system children as associated compilation units
@@ -27,10 +27,7 @@ class MavenRules implements IRule {
 				}
 			}
 			blackboard.addSystemAssociations(path, children);
-
-			return true;
 		}
-		return false;
 	}
 	
 	override isBuildRule() {

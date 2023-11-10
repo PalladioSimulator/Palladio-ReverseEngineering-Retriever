@@ -32,9 +32,9 @@ class SpringRules implements IRule {
     public static final String XML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.xml"
     public static final String PROPERTIES_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.properties"
 
-	override boolean processRules(RuleEngineBlackboard blackboard, Path path) {
+	override processRules(RuleEngineBlackboard blackboard, Path path) {
 		val unit = blackboard.getDiscoveredFiles(JAVA_DISCOVERER_ID, typeof(CompilationUnit)).get(path)
-		if (unit === null) return false
+		if (unit === null) return;
 
 		val rawYamls = blackboard.getPartition(YAML_DISCOVERER_ID) as Map<Path, Iterable<Map<String, Object>>>
 		val yamlMappers = blackboard.getPartition(YAML_MAPPERS_KEY) as Map<Path, Function<String, Optional<String>>>
@@ -55,7 +55,7 @@ class SpringRules implements IRule {
 		val rawApplicationYaml = rawYamls.get(findFile(yamlMappers.keySet, projectRoot.resolve("src/main/resources"), Set.of("application.yaml", "application.yml")))
 		val contextVariables = collectContextVariables(rawApplicationYaml)
 		
-		return processRuleForCompUnit(blackboard, unit, contextPath, contextVariables)
+		processRuleForCompUnit(blackboard, unit, contextPath, contextVariables)
 	}
 
 	def findProjectRoot(Path currentPath, Map<Path, Document> poms) {
@@ -182,16 +182,12 @@ class SpringRules implements IRule {
 		return result;
 	}
 
-	def boolean processRuleForCompUnit(RuleEngineBlackboard blackboard, CompilationUnit unit, String contextPath, Map<String, String> contextVariables) {
+	def processRuleForCompUnit(RuleEngineBlackboard blackboard, CompilationUnit unit, String contextPath, Map<String, String> contextVariables) {
 		val pcmDetector = blackboard.getPCMDetector
-		if (pcmDetector === null) {
-			return false
-		}
+		if (pcmDetector === null) return;
 
 		// Abort if there is no CompilationUnit at the specified path
-		if (unit === null) {
-			return false
-		}
+		if (unit === null) return;
 
 		val isService = isUnitAnnotatedWithName(unit, "Service")
 		val isController = isUnitAnnotatedWithName(unit, "RestController") || isUnitAnnotatedWithName(unit, "Controller")
@@ -279,8 +275,6 @@ class SpringRules implements IRule {
 				pcmDetector.detectProvidedOperation(identifier, firstIn.resolveBinding, m)
 			}
 		}
-
-		return true;
 	}
 	
 	def substituteVariables(String string, Map<String, String> contextVariables) {

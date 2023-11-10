@@ -15,18 +15,18 @@ class JaxRSRules implements IRule {
 
     public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java"
 	
-	override boolean processRules(RuleEngineBlackboard blackboard, Path path) {
+	override processRules(RuleEngineBlackboard blackboard, Path path) {
 		val unit = blackboard.getDiscoveredFiles(JAVA_DISCOVERER_ID, typeof(CompilationUnit)).get(path)
 		
-		if (unit === null) return false;
+		if (unit === null) return;
 		
-		return processRuleForCompUnit(blackboard, unit)
+		processRuleForCompUnit(blackboard, unit)
 	}
 	
-	def boolean processRuleForCompUnit(RuleEngineBlackboard blackboard, CompilationUnit unit) {
+	def processRuleForCompUnit(RuleEngineBlackboard blackboard, CompilationUnit unit) {
 		val pcmDetector = blackboard.getPCMDetector()
 		if (pcmDetector === null) {
-		return false
+			return
 		}
 		
 		val identifier = new CompUnitOrName(unit)
@@ -35,7 +35,7 @@ class JaxRSRules implements IRule {
 		val isConverter = isUnitAnnotatedWithName(unit, "Converter")
 		if(isConverter){
 			detectDefault(blackboard, unit)
-		return true
+			return
 		}
 		
 		// detect controller component	
@@ -45,7 +45,7 @@ class JaxRSRules implements IRule {
 			getMethods(unit).forEach[m|
 			if(isMethodAnnotatedWithName(m,"DELETE","GET","HEAD","PUT","POST","OPTIONS")) pcmDetector.detectProvidedOperation(identifier,m.resolveBinding)]
 			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(identifier, f)]
-		return true
+			return
 		} 
 		
 		val isWebListener = isUnitAnnotatedWithName(unit, "WebListener","WebServlet")
@@ -54,7 +54,7 @@ class JaxRSRules implements IRule {
 			getMethods(unit).forEach[m|
 			if(isMethodModifiedExactlyWith(m,"public") || isMethodModifiedExactlyWith(m,"protected")) pcmDetector.detectProvidedOperation(identifier,m.resolveBinding)]
 			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(identifier, f)]
-		return true
+			return
 		}
 		
 		// detect implementing component
@@ -64,7 +64,7 @@ class JaxRSRules implements IRule {
 			val firstIn = getAllInterfaces(unit).get(0)
 			getMethods(firstIn).forEach[m|pcmDetector.detectProvidedOperation(identifier, firstIn.resolveBinding, m)]
 			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(identifier, f)]
-			return true
+			return
 		}
 		
 		// detect normal components
@@ -72,10 +72,7 @@ class JaxRSRules implements IRule {
 		if(!isUnit && !isUnitController && !isWebListener && classModified){
 			pcmDetector.detectComponent(identifier)
 			detectDefault(blackboard, unit)
-			return true
 		} 
-		return false
-		
 	}
 	
 	def detectDefault(RuleEngineBlackboard blackboard, CompilationUnit unit) {

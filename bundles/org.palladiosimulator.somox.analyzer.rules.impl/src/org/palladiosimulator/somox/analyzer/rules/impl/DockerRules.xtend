@@ -6,7 +6,6 @@ import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboar
 import java.nio.file.Path;
 import java.util.HashSet
 import org.eclipse.jdt.core.dom.CompilationUnit
-import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration
 import java.util.Set
 
 class DockerRules implements IRule {
@@ -15,7 +14,7 @@ class DockerRules implements IRule {
     static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java"
 	static final String DOCKER_FILE_NAME = "Dockerfile";
 	
-	override boolean processRules(RuleEngineBlackboard blackboard, Path path) {
+	override processRules(RuleEngineBlackboard blackboard, Path path) {
 		if (path !== null && path.fileName.toString().equals(DOCKER_FILE_NAME)) {
 			
 			// Add all file system children as associated compilation units
@@ -27,10 +26,7 @@ class DockerRules implements IRule {
 				}
 			}
 			blackboard.addSystemAssociations(path, children);
-			
-			return true;
 		}
-		return false;
 	}
 	
 	override isBuildRule() {
