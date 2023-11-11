@@ -100,4 +100,8 @@ class JaxRSRules implements Rule {
 		return "JAX RS Rules"
 	}
 	
+	override getRequiredServices() {
+		return Set.of(JAVA_DISCOVERER_ID)
+	}
+	
 }

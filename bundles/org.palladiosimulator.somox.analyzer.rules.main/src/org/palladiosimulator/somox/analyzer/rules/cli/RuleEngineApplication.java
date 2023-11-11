@@ -103,7 +103,7 @@ public class RuleEngineApplication implements IApplication {
         // TODO: This is unnecessary once rule dependencies are in place
         ServiceConfiguration<Discoverer> discovererConfig = configuration.getConfig(Discoverer.class);
         for (Discoverer discoverer : new DiscovererCollection().getServices()) {
-            discovererConfig.setSelected(discoverer, true);
+            discovererConfig.select(discoverer);
         }
 
         ServiceConfiguration<Rule> ruleConfig = configuration.getConfig(Rule.class);
@@ -120,7 +120,7 @@ public class RuleEngineApplication implements IApplication {
             return -1;
         }
         for (Rule rule : rules) {
-            ruleConfig.setSelected(rule, true);
+            ruleConfig.select(rule);
         }
 
         new RuleEngineJob(configuration).execute(new NullProgressMonitor());

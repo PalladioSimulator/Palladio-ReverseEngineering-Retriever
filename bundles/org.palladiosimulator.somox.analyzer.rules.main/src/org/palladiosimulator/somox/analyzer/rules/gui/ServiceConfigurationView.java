@@ -86,8 +86,11 @@ public class ServiceConfigurationView<T extends Service> {
         checkbox.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-            	boolean selected = ((Button) e.getSource()).getSelection();
-                serviceConfiguration.setSelected(service, selected);
+            	if (((Button) e.getSource()).getSelection()) {
+            		serviceConfiguration.select(service);
+            	} else {
+            		serviceConfiguration.deselect(service);
+            	}
                 modifyListener.modifyText(null);
             }
 
@@ -117,7 +120,7 @@ public class ServiceConfigurationView<T extends Service> {
     }
 
     private void initializeCheckbox(T service, Button checkbox) {
-        boolean selected = serviceConfiguration.isSelected(service);
+        boolean selected = serviceConfiguration.isManuallySelected(service);
         checkbox.setSelection(selected);
     }
 

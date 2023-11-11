@@ -45,4 +45,8 @@ class DockerRules implements Rule {
 		"Docker Rules"
 	}
 	
+	override getRequiredServices() {
+		return Set.of(JAVA_DISCOVERER_ID)
+	}
+	
 }

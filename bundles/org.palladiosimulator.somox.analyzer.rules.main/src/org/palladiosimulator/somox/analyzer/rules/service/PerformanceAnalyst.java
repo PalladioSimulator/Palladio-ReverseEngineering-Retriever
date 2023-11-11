@@ -56,4 +56,9 @@ public class PerformanceAnalyst implements Analyst {
         return ANALYST_ID;
     }
 
+	@Override
+	public Set<String> getRequiredServices() {
+		return Set.of();
+	}
+
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,5 +33,10 @@ public interface Discoverer extends Service {
             logger.error(String.format("No %s files could be found in %s", normalizedSuffix, normalizedRoot), e);
         }
         return Stream.empty();
+    }
+    
+    @Override
+    default Set<String> getRequiredServices() {
+    	return Set.of();
     }
 }

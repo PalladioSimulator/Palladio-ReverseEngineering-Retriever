@@ -49,17 +49,6 @@ public class RuleEngineConfigurationImpl extends AbstractComposedJobConfiguratio
         this.attributes = Objects.requireNonNull(attributes);
         this.serviceConfigs = new HashMap<>();
 
-        ServiceCollection<Analyst> analystCollection = null;
-        try {
-            analystCollection = new AnalystCollection();
-        } catch (CoreException e) {
-            LOG.error("Exception occurred while discovering analysts!");
-            analystCollection = new EmptyCollection<>();
-        }
-        ServiceConfiguration<Analyst> analystConfig = new ServiceConfiguration<>(analystCollection,
-                RULE_ENGINE_SELECTED_ANALYSTS, RULE_ENGINE_ANALYST_CONFIG_PREFIX);
-        serviceConfigs.put(Analyst.class, analystConfig);
-
         ServiceCollection<Discoverer> discovererCollection = null;
         try {
             discovererCollection = new DiscovererCollection();
@@ -80,7 +69,21 @@ public class RuleEngineConfigurationImpl extends AbstractComposedJobConfiguratio
         }
         ServiceConfiguration<Rule> ruleConfig = new ServiceConfiguration<>(ruleCollection, RULE_ENGINE_SELECTED_RULES,
                 RULE_ENGINE_RULE_CONFIG_PREFIX);
+        ruleConfig.addDependencyProvider(discovererConfig);
         serviceConfigs.put(Rule.class, ruleConfig);
+
+        ServiceCollection<Analyst> analystCollection = null;
+        try {
+            analystCollection = new AnalystCollection();
+        } catch (CoreException e) {
+            LOG.error("Exception occurred while discovering analysts!");
+            analystCollection = new EmptyCollection<>();
+        }
+        ServiceConfiguration<Analyst> analystConfig = new ServiceConfiguration<>(analystCollection,
+                RULE_ENGINE_SELECTED_ANALYSTS, RULE_ENGINE_ANALYST_CONFIG_PREFIX);
+        analystConfig.addDependencyProvider(discovererConfig);
+        analystConfig.addDependencyProvider(ruleConfig);
+        serviceConfigs.put(Analyst.class, analystConfig);
 
         applyAttributeMap(attributes);
     }

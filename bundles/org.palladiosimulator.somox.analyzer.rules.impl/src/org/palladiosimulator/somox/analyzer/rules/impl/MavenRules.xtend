@@ -46,4 +46,8 @@ class MavenRules implements Rule {
 		return "Maven Rules"
 	}
 	
+	override getRequiredServices() {
+		return Set.of(JAVA_DISCOVERER_ID )
+	}
+	
 }

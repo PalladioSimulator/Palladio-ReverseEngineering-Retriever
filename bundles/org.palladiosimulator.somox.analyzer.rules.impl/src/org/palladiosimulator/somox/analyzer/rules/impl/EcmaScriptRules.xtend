@@ -248,5 +248,9 @@ class EcmaScriptRules implements Rule {
 	override getName() {
 		return "ECMAScript Rules"
 	}
+	
+	override getRequiredServices() {
+		return Set.of(ECMASCRIPT_DISCOVERER_ID)
+	}
 
 }

@@ -85,6 +85,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         ServiceConfiguration<Rule> ruleConfig = new ServiceConfiguration<>(
         		ruleCollection, RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_RULES,
                 RuleEngineConfigurationImpl.RULE_ENGINE_RULE_CONFIG_PREFIX);
+        ruleConfig.addDependencyProvider(discovererConfig);
         ruleConfigView = new ServiceConfigurationView<>(ruleConfig, modifyListener, this::error);
 
         ServiceCollection<Analyst> analystCollection = null;
@@ -98,6 +99,8 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         ServiceConfiguration<Analyst> analystConfig = new ServiceConfiguration<>(
         		analystCollection, RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_ANALYSTS,
                 RuleEngineConfigurationImpl.RULE_ENGINE_ANALYST_CONFIG_PREFIX);
+        analystConfig.addDependencyProvider(discovererConfig);
+        analystConfig.addDependencyProvider(ruleConfig);
         analystConfigView = new ServiceConfigurationView<>(analystConfig, modifyListener, this::error);
 
     }

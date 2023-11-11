@@ -425,4 +425,8 @@ class SpringRules implements Rule {
 		return "Spring Rules"
 	}
 	
+	override getRequiredServices() {
+		return Set.of(JAVA_DISCOVERER_ID, YAML_DISCOVERER_ID, XML_DISCOVERER_ID, PROPERTIES_DISCOVERER_ID)
+	}
+	
 }

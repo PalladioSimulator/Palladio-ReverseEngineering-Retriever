@@ -20,4 +20,6 @@ public interface Service {
     String getName();
 
     String getID();
+
+	Set<String> getRequiredServices();
 }

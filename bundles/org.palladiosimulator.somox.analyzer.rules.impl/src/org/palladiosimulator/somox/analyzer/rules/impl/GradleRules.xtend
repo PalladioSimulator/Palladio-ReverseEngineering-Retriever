@@ -46,4 +46,8 @@ class GradleRules implements Rule {
 		return "Gradle Rules"
 	}
 	
+	override getRequiredServices() {
+		return Set.of(JAVA_DISCOVERER_ID)
+	}
+	
 }
