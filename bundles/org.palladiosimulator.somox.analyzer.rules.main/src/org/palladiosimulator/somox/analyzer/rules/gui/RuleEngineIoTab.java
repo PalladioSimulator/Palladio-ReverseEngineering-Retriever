@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Text;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfigurationImpl;
 import org.palladiosimulator.somox.analyzer.rules.engine.Rule;
 import org.palladiosimulator.somox.analyzer.rules.engine.ServiceCollection;
+import org.palladiosimulator.somox.analyzer.rules.engine.ServiceConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.service.Analyst;
 import org.palladiosimulator.somox.analyzer.rules.service.AnalystCollection;
 import org.palladiosimulator.somox.analyzer.rules.service.EmptyCollection;
@@ -68,9 +69,10 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
                 .error("Exception occurred while discovering discoverers!");
             discovererCollection = new EmptyCollection<>();
         }
-        discovererConfigView = new ServiceConfigurationView<>(discovererCollection, modifyListener, this::error,
-                getName(), RuleEngineConfigurationImpl.RULE_ENGINE_DISCOVERER_CONFIG_PREFIX,
-                RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_DISCOVERERS);
+        ServiceConfiguration<Discoverer> discovererConfig = new ServiceConfiguration<>(
+        		discovererCollection, RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_DISCOVERERS,
+        		RuleEngineConfigurationImpl.RULE_ENGINE_DISCOVERER_CONFIG_PREFIX);
+        discovererConfigView = new ServiceConfigurationView<>(discovererConfig, modifyListener, this::error);
 
         ServiceCollection<Rule> ruleCollection = null;
         try {
@@ -80,9 +82,10 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
                 .error("Exception occurred while discovering rules!");
             ruleCollection = new EmptyCollection<>();
         }
-        ruleConfigView = new ServiceConfigurationView<>(ruleCollection, modifyListener, this::error, getName(),
-                RuleEngineConfigurationImpl.RULE_ENGINE_RULE_CONFIG_PREFIX,
-                RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_RULES);
+        ServiceConfiguration<Rule> ruleConfig = new ServiceConfiguration<>(
+        		ruleCollection, RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_RULES,
+                RuleEngineConfigurationImpl.RULE_ENGINE_RULE_CONFIG_PREFIX);
+        ruleConfigView = new ServiceConfigurationView<>(ruleConfig, modifyListener, this::error);
 
         ServiceCollection<Analyst> analystCollection = null;
         try {
@@ -92,9 +95,10 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
                 .error("Exception occurred while discovering analysts!");
             analystCollection = new EmptyCollection<>();
         }
-        analystConfigView = new ServiceConfigurationView<>(analystCollection, modifyListener, this::error, getName(),
-                RuleEngineConfigurationImpl.RULE_ENGINE_ANALYST_CONFIG_PREFIX,
-                RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_ANALYSTS);
+        ServiceConfiguration<Analyst> analystConfig = new ServiceConfiguration<>(
+        		analystCollection, RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_ANALYSTS,
+                RuleEngineConfigurationImpl.RULE_ENGINE_ANALYST_CONFIG_PREFIX);
+        analystConfigView = new ServiceConfigurationView<>(analystConfig, modifyListener, this::error);
 
     }
 

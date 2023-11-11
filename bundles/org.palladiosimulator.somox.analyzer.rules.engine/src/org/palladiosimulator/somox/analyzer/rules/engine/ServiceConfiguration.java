@@ -1,10 +1,8 @@
 package org.palladiosimulator.somox.analyzer.rules.engine;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,16 +10,23 @@ public class ServiceConfiguration<T extends Service> {
     private final String selectedServicesKey;
     private final String serviceConfigKeyPrefix;
     private final Map<String, Map<String, String>> serviceConfigs;
-    private final List<T> services;
+    private final Set<T> services;
     private final Set<T> selectedServices;
 
     public ServiceConfiguration(ServiceCollection<T> serviceCollection, String selectedServicesKey,
             String serviceConfigKeyPrefix) {
         this.selectedServicesKey = selectedServicesKey;
         this.serviceConfigKeyPrefix = serviceConfigKeyPrefix;
-        this.serviceConfigs = new HashMap<>();
         this.selectedServices = new HashSet<>();
-        this.services = new ArrayList<>(serviceCollection.getServices());
+        this.services = new HashSet<>(serviceCollection.getServices());
+        this.serviceConfigs = new HashMap<>();
+        for (Service service : this.services) {
+        	Map<String, String> initializedConfig = new HashMap<>();
+        	for (String key : service.getConfigurationKeys()) {
+        		initializedConfig.put(key, "");
+        	}
+        	this.serviceConfigs.put(service.getID(), initializedConfig);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -75,6 +80,10 @@ public class ServiceConfiguration<T extends Service> {
 
     public Set<T> getSelected() {
         return Collections.unmodifiableSet(selectedServices);
+    }
+    
+    public Set<T> getAvailable() {
+    	return Collections.unmodifiableSet(services);
     }
 
     public Map<String, Object> toMap() {
