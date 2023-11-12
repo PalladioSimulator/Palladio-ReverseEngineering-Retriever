@@ -1,10 +1,14 @@
 package org.palladiosimulator.somox.analyzer.rules.engine;
 
+import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 public class ServiceConfiguration<T extends Service> {
@@ -102,7 +106,33 @@ public class ServiceConfiguration<T extends Service> {
         return Collections.unmodifiableSet(selectedServices);
     }
     
-    public Collection<T> getAvailable() {
+    public List<T> getSelectedOrdered() {
+    	List<T> orderedServices = new LinkedList<>();
+    	Queue<T> selectedServices = new ArrayDeque<>(getSelected());
+    	List<T> dependingServices = new LinkedList<>();
+    	while (!selectedServices.isEmpty()) {
+    		T candidate = selectedServices.poll();
+    		if (isNotDependingOnAny(candidate, selectedServices) && isNotDependingOnAny(candidate, dependingServices)) {
+    			orderedServices.add(candidate);
+
+    			selectedServices.addAll(dependingServices);
+    			dependingServices.clear();
+    		} else {
+    			dependingServices.add(candidate);
+    		}
+    	}
+    	if (!dependingServices.isEmpty()) {
+    		throw new IllegalStateException("Dependency cycle in services, no possible execution order.");
+    	}
+    	return orderedServices;
+    }
+    
+    private boolean isNotDependingOnAny(T service, Collection<T> services) {
+    	Set<String> dependencies = service.getRequiredServices();
+		return !services.stream().map(Service::getID).anyMatch(dependencies::contains);
+	}
+
+	public Collection<T> getAvailable() {
     	return Collections.unmodifiableCollection(services.values());
     }
     

@@ -61,11 +61,12 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
         ParallelJob parentJob = new ParallelJob();
         
         for (Rule rule : configuration.getConfig(Rule.class)
-            .getSelected()) {
+            .getSelectedOrdered()) {
+        	// Assume only build rules depend on build rules.
         	if (!rule.isBuildRule()) {
         		IBlackboardInteractingJob<RuleEngineBlackboard> ruleJob = rule.create(configuration, myBlackboard);
         		parentJob.add(ruleJob);
-            	logger.info("Adding rule job \"" + ruleJob.getName() + "\"");
+        		logger.info("Adding rule job \"" + ruleJob.getName() + "\"");
         	}
         }
         
@@ -76,7 +77,7 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
         ParallelJob parentJob = new ParallelJob();
         
         for (Rule rule : configuration.getConfig(Rule.class)
-            .getSelected()) {
+            .getSelectedOrdered()) {
         	if (rule.isBuildRule()) {
         		IBlackboardInteractingJob<RuleEngineBlackboard> ruleJob = rule.create(configuration, myBlackboard);
         		parentJob.add(ruleJob);
