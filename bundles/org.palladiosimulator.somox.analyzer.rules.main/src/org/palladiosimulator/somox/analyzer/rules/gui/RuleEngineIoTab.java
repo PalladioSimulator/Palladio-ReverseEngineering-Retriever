@@ -43,7 +43,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
     private Text in;
     private Text out;
-    private final ServiceConfigurationView<Discoverer> discovererConfigView;
+    private final ServiceConfigurationManager<Discoverer> discovererConfigManager;
     private final ServiceConfigurationView<Rule> ruleConfigView;
     private final ServiceConfigurationView<Analyst> analystConfigView;
 
@@ -72,7 +72,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         ServiceConfiguration<Discoverer> discovererConfig = new ServiceConfiguration<>(
         		discovererCollection, RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_DISCOVERERS,
         		RuleEngineConfigurationImpl.RULE_ENGINE_DISCOVERER_CONFIG_PREFIX);
-        discovererConfigView = new ServiceConfigurationView<>(discovererConfig, modifyListener, this::error);
+        discovererConfigManager = new ServiceConfigurationManager<>(discovererConfig);
 
         ServiceCollection<Rule> ruleCollection = null;
         try {
@@ -86,7 +86,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         		ruleCollection, RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_RULES,
                 RuleEngineConfigurationImpl.RULE_ENGINE_RULE_CONFIG_PREFIX);
         ruleConfig.addDependencyProvider(discovererConfig);
-        ruleConfigView = new ServiceConfigurationView<>(ruleConfig, modifyListener, this::error);
+        ruleConfigView = new ServiceConfigurationView<>(ruleConfig, modifyListener);
 
         ServiceCollection<Analyst> analystCollection = null;
         try {
@@ -101,7 +101,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
                 RuleEngineConfigurationImpl.RULE_ENGINE_ANALYST_CONFIG_PREFIX);
         analystConfig.addDependencyProvider(discovererConfig);
         analystConfig.addDependencyProvider(ruleConfig);
-        analystConfigView = new ServiceConfigurationView<>(analystConfig, modifyListener, this::error);
+        analystConfigView = new ServiceConfigurationView<>(analystConfig, modifyListener);
 
     }
 
@@ -128,10 +128,11 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         TabHelper.createFolderInputSection(container, modifyListener, "File Out", out, "File Out", getShell(),
                 defaultPath);
 
-        // Create tree view for analyst and discoverer configuration
-        analystConfigView.createControl(container);
-        discovererConfigView.createControl(container);
+        // Create tree view for rule and analyst configuration
+        // Do not create a view for discoverers, they can always be selected automatically.
+        // If a discoverer is added that requires configuration, this view has to be added back.
         ruleConfigView.createControl(container);
+        analystConfigView.createControl(container);
     }
 
     private boolean validateFolderInput(Text widget) {
@@ -180,9 +181,9 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         setText(configuration, in, RuleEngineConfigurationImpl.RULE_ENGINE_INPUT_PATH);
         setText(configuration, out, RuleEngineConfigurationImpl.RULE_ENGINE_OUTPUT_PATH);
 
-        analystConfigView.initializeFrom(configuration);
-        discovererConfigView.initializeFrom(configuration);
+        discovererConfigManager.initializeFrom(configuration);
         ruleConfigView.initializeFrom(configuration);
+        analystConfigView.initializeFrom(configuration);
     }
 
     private void setText(ILaunchConfiguration configuration, Text textWidget, String attributeName) {
@@ -198,7 +199,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     public void performApply(ILaunchConfigurationWorkingCopy configuration) {
         setAttribute(configuration, RuleEngineConfigurationImpl.RULE_ENGINE_INPUT_PATH, in);
         setAttribute(configuration, RuleEngineConfigurationImpl.RULE_ENGINE_OUTPUT_PATH, out);
-        discovererConfigView.performApply(configuration);
+        discovererConfigManager.performApply(configuration);
         ruleConfigView.performApply(configuration);
         analystConfigView.performApply(configuration);
     }
@@ -224,7 +225,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         setText(out, defaultPath);
         setAttribute(configuration, RuleEngineConfigurationImpl.RULE_ENGINE_OUTPUT_PATH, out);
 
-        discovererConfigView.setDefaults(configuration);
+        discovererConfigManager.setDefaults(configuration);
         ruleConfigView.setDefaults(configuration);
         analystConfigView.setDefaults(configuration);
     }
