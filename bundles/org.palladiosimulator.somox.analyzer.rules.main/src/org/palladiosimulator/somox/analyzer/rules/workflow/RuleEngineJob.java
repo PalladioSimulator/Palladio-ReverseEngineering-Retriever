@@ -1,5 +1,9 @@
 package org.palladiosimulator.somox.analyzer.rules.workflow;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineBlackboardKeys;
 import org.palladiosimulator.somox.analyzer.rules.engine.Rule;
@@ -18,15 +22,15 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
     public RuleEngineJob(RuleEngineConfiguration configuration) {
         super.setBlackboard(new RuleEngineBlackboard());
 
-        super.add(createDiscoverersJob(configuration));
+        super.addAll(createDiscovererJobs(configuration));
 
-        super.add(createRulesJob(configuration));
+        super.addAll(createRuleJobs(configuration));
 
-        super.add(createBuildRulesJob(configuration));
+        super.addAll(createBuildRulesJob(configuration));
 
         super.add(new RuleEngineBlackboardInteractingJob(configuration, getBlackboard()));
 
-        super.add(createAnalystsJob(configuration));
+        super.addAll(createAnalystJobs(configuration));
 
         // Generate service effect specifications based on AST nodes and merge them into repository
         super.add(
@@ -57,57 +61,75 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
         super.add(new PlantUmlJob(configuration, getBlackboard()));
     }
     
-    private ParallelJob createRulesJob(RuleEngineConfiguration configuration) {
-        ParallelJob parentJob = new ParallelJob();
-        
-        for (Rule rule : configuration.getConfig(Rule.class)
-            .getSelectedOrdered()) {
-        	// Assume only build rules depend on build rules.
-        	if (!rule.isBuildRule()) {
+    private List<ParallelJob> createRuleJobs(RuleEngineConfiguration configuration) {
+    	List<ParallelJob> jobs = new ArrayList<>();
+
+        for (Collection<Rule> step : configuration.getConfig(Rule.class).getExecutionOrder()) {
+        	ParallelJob parentJob = new ParallelJob();
+        	for (Rule rule : step) {
+        		// Assume only build rules depend on build rules.
+        		if (rule.isBuildRule()) {
+        			continue;
+        		}
         		IBlackboardInteractingJob<RuleEngineBlackboard> ruleJob = rule.create(configuration, myBlackboard);
         		parentJob.add(ruleJob);
         		logger.info("Adding rule job \"" + ruleJob.getName() + "\"");
         	}
+        	jobs.add(parentJob);
         }
         
-        return parentJob;
+        return jobs;
     }
 
-    private ParallelJob createBuildRulesJob(RuleEngineConfiguration configuration) {
-        ParallelJob parentJob = new ParallelJob();
-        
-        for (Rule rule : configuration.getConfig(Rule.class)
-            .getSelectedOrdered()) {
-        	if (rule.isBuildRule()) {
+    private List<ParallelJob> createBuildRulesJob(RuleEngineConfiguration configuration) {
+    	List<ParallelJob> jobs = new ArrayList<>();
+
+        for (Collection<Rule> step : configuration.getConfig(Rule.class).getExecutionOrder()) {
+        	ParallelJob parentJob = new ParallelJob();
+        	for (Rule rule : step) {
+        		// Assume only build rules depend on build rules.
+        		if (!rule.isBuildRule()) {
+        			continue;
+        		}
         		IBlackboardInteractingJob<RuleEngineBlackboard> ruleJob = rule.create(configuration, myBlackboard);
         		parentJob.add(ruleJob);
         		logger.info("Adding build rule job \"" + ruleJob.getName() + "\"");
         	}
+        	jobs.add(parentJob);
         }
-
-        return parentJob;
+        
+        return jobs;
     }
 
-    private ParallelJob createDiscoverersJob(RuleEngineConfiguration configuration) {
-        ParallelJob parentJob = new ParallelJob();
-        for (Discoverer discoverer : configuration.getConfig(Discoverer.class)
-            .getSelected()) {
-            IBlackboardInteractingJob<RuleEngineBlackboard> discovererJob = discoverer.create(configuration,
-                    myBlackboard);
-            parentJob.add(discovererJob);
-            logger.info("Adding discoverer job \"" + discovererJob.getName() + "\"");
+    private List<ParallelJob> createDiscovererJobs(RuleEngineConfiguration configuration) {
+    	List<ParallelJob> jobs = new ArrayList<>();
+
+        for (Collection<Discoverer> step : configuration.getConfig(Discoverer.class).getExecutionOrder()) {
+        	ParallelJob parentJob = new ParallelJob();
+        	for (Discoverer discoverer : step) {
+        		IBlackboardInteractingJob<RuleEngineBlackboard> discovererJob = discoverer.create(configuration, myBlackboard);
+        		parentJob.add(discovererJob);
+        		logger.info("Adding discoverer job \"" + discovererJob.getName() + "\"");
+        	}
+        	jobs.add(parentJob);
         }
-        return parentJob;
+        
+        return jobs;
     }
 
-    private ParallelJob createAnalystsJob(RuleEngineConfiguration configuration) {
-        ParallelJob parentJob = new ParallelJob();
-        for (Analyst analyst : configuration.getConfig(Analyst.class)
-            .getSelected()) {
-            IBlackboardInteractingJob<RuleEngineBlackboard> analystJob = analyst.create(configuration, myBlackboard);
-            parentJob.add(analystJob);
-            logger.info("Adding analyst job \"" + analystJob.getName() + "\"");
+    private List<ParallelJob> createAnalystJobs(RuleEngineConfiguration configuration) {
+    	List<ParallelJob> jobs = new ArrayList<>();
+
+        for (Collection<Analyst> step : configuration.getConfig(Analyst.class).getExecutionOrder()) {
+        	ParallelJob parentJob = new ParallelJob();
+        	for (Analyst analyst : step) {
+        		IBlackboardInteractingJob<RuleEngineBlackboard> analystJob = analyst.create(configuration, myBlackboard);
+        		parentJob.add(analystJob);
+        		logger.info("Adding analyst job \"" + analystJob.getName() + "\"");
+        	}
+        	jobs.add(parentJob);
         }
-        return parentJob;
+        
+        return jobs;
     }
 }

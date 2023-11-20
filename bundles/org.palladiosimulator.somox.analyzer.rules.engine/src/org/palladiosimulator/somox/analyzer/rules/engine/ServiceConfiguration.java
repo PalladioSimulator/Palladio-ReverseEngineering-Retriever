@@ -1,8 +1,10 @@
 package org.palladiosimulator.somox.analyzer.rules.engine;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -106,30 +108,49 @@ public class ServiceConfiguration<T extends Service> {
         return Collections.unmodifiableSet(selectedServices);
     }
     
-    public List<T> getSelectedOrdered() {
-    	List<T> orderedServices = new LinkedList<>();
-    	Queue<T> selectedServices = new ArrayDeque<>(getSelected());
-    	List<T> dependingServices = new LinkedList<>();
-    	while (!selectedServices.isEmpty()) {
-    		T candidate = selectedServices.poll();
-    		if (isNotDependingOnAny(candidate, selectedServices) && isNotDependingOnAny(candidate, dependingServices)) {
-    			orderedServices.add(candidate);
-
-    			selectedServices.addAll(dependingServices);
-    			dependingServices.clear();
+    public Queue<Collection<T>> getExecutionOrder() {
+    	List<Collection<T>> executionOrder = new ArrayList<>();
+    	Queue<T> remainingServices = new ArrayDeque<>(getSelected());
+    	List<T> requiringServices = new LinkedList<>();
+    	while (!remainingServices.isEmpty()) {
+    		T candidate = remainingServices.poll();
+    		if (isRequiringAny(candidate, remainingServices) || isRequiringAny(candidate, requiringServices)) {
+    			requiringServices.add(candidate);
     		} else {
-    			dependingServices.add(candidate);
+    			addAfterRequirements(candidate, executionOrder);
+
+    			remainingServices.addAll(requiringServices);
+    			requiringServices.clear();
     		}
     	}
-    	if (!dependingServices.isEmpty()) {
+    	if (!requiringServices.isEmpty()) {
     		throw new IllegalStateException("Dependency cycle in services, no possible execution order.");
     	}
-    	return orderedServices;
+    	return new ArrayDeque<>(executionOrder);
     }
     
-    private boolean isNotDependingOnAny(T service, Collection<T> services) {
+    private void addAfterRequirements(T service, List<Collection<T>> executionOrder) {
+    	if (executionOrder.isEmpty() || isRequiringAny(service, executionOrder.get(executionOrder.size() - 1))) {
+    		Collection<T> newStep = new ArrayList<>();
+    		newStep.add(service);
+    		executionOrder.add(newStep);
+    		return;
+    	}
+
+    	Collection<T> earliestCandidate = executionOrder.get(executionOrder.size() - 1);
+    	for (int i = executionOrder.size() - 2; i >= 0; i--) {
+    		Collection<T> currentStep = executionOrder.get(i);
+    		if (isRequiringAny(service, currentStep)) {
+    			break;
+    		}
+    		earliestCandidate = currentStep;
+    	}
+    	earliestCandidate.add(service);
+    }
+
+    private boolean isRequiringAny(T service, Collection<T> services) {
     	Set<String> dependencies = service.getRequiredServices();
-		return !services.stream().map(Service::getID).anyMatch(dependencies::contains);
+		return services.stream().map(Service::getID).anyMatch(dependencies::contains);
 	}
 
 	public Collection<T> getAvailable() {
