@@ -1,4 +1,4 @@
-package org.palladiosimulator.somox.analyzer.rules.workflow;
+package org.palladiosimulator.somox.analyzer.rules.test.workflow;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -52,7 +52,9 @@ import org.palladiosimulator.pcm.seff.ServiceEffectSpecification;
 import org.palladiosimulator.pcm.seff.StartAction;
 import org.palladiosimulator.pcm.seff.StopAction;
 import org.palladiosimulator.somox.analyzer.rules.mocore.workflow.MoCoReJob;
-import org.palladiosimulator.somox.analyzer.rules.workflow.utility.MethodDeclarationVisitor;
+import org.palladiosimulator.somox.analyzer.rules.test.workflow.utility.MethodDeclarationVisitor;
+import org.palladiosimulator.somox.analyzer.rules.workflow.PersistenceJob;
+import org.palladiosimulator.somox.analyzer.rules.workflow.SeffMergerJob;
 import org.palladiosimulator.somox.ast2seff.jobs.Ast2SeffJob;
 
 import com.google.common.collect.HashMultimap;

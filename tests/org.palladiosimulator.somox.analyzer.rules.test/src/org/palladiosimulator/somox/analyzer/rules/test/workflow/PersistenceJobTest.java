@@ -1,4 +1,4 @@
-package org.palladiosimulator.somox.analyzer.rules.workflow;
+package org.palladiosimulator.somox.analyzer.rules.test.workflow;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -19,6 +19,7 @@ import org.palladiosimulator.pcm.allocation.Allocation;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.resourceenvironment.ResourceEnvironment;
 import org.palladiosimulator.pcm.system.System;
+import org.palladiosimulator.somox.analyzer.rules.workflow.PersistenceJob;
 
 import de.uka.ipd.sdq.workflow.blackboard.Blackboard;
 

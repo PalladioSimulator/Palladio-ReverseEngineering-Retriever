@@ -1,4 +1,4 @@
-package org.palladiosimulator.somox.analyzer.rules.workflow.casestudy;
+package org.palladiosimulator.somox.analyzer.rules.test.workflow.casestudy;
 
 public class EntityService {
     private final EntityRepository entityRepository;

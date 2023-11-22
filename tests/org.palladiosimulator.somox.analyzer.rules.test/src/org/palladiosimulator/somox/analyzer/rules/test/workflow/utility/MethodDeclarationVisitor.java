@@ -1,4 +1,4 @@
-package org.palladiosimulator.somox.analyzer.rules.workflow.utility;
+package org.palladiosimulator.somox.analyzer.rules.test.workflow.utility;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -1,4 +1,4 @@
-package org.palladiosimulator.somox.analyzer.rules.workflow.casestudy;
+package org.palladiosimulator.somox.analyzer.rules.test.workflow.casestudy;
 
 public class EntityRepository {
     private static int identifierCounter = Integer.MIN_VALUE;
