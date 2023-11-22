@@ -8,7 +8,7 @@
       license-feature-version="1.0.0">
 
    <license url="">
-
+      
    </license>
 
    <requires>
@@ -26,13 +26,6 @@
       <import plugin="org.palladiosimulator.commons"/>
       <import plugin="tools.mdsd.mocore.framework"/>
    </requires>
-
-   <plugin
-         id="org.palladiosimulator.somox.analyzer.rules.all"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
 
    <plugin
          id="org.palladiosimulator.somox.analyzer.rules.engine"
@@ -54,7 +47,7 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="org.palladiosimulator.somox.analyzer.rules.mocore"
          download-size="0"
