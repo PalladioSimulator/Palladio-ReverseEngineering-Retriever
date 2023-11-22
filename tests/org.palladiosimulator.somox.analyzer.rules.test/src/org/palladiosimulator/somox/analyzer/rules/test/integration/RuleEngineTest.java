@@ -14,8 +14,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.common.util.Diagnostic;
@@ -41,12 +39,10 @@ import org.palladiosimulator.pcm.resourceenvironment.ResourceEnvironment;
 import org.palladiosimulator.pcm.system.System;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
 import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfigurationImpl;
-import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
+import org.palladiosimulator.somox.analyzer.rules.engine.Rule;
 import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.engine.ServiceConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.workflow.RuleEngineJob;
-import org.palladiosimulator.somox.discoverer.Discoverer;
-import org.palladiosimulator.somox.discoverer.DiscovererCollection;
 
 import com.google.common.collect.Sets;
 
@@ -76,7 +72,7 @@ abstract class RuleEngineTest {
     private System system;
     private ResourceEnvironment resourceEnvironment;
     private Allocation allocation;
-    private final Set<IRule> rules;
+    private final Set<Rule> rules;
 
     /**
      * Tests the basic functionality of the RuleEngineAnalyzer. Requires it to execute without an
@@ -87,7 +83,7 @@ abstract class RuleEngineTest {
      * @param rules
      *            the rules to execute
      */
-    protected RuleEngineTest(String projectDirectory, IRule... rules) {
+    protected RuleEngineTest(String projectDirectory, Rule... rules) {
         this.rules = Set.of(rules);
 
         outDir = TEST_DIR.appendSegment("out")
@@ -97,19 +93,9 @@ abstract class RuleEngineTest {
         config.setInputFolder(TEST_DIR.appendSegments(projectDirectory.split("/")));
         config.setOutputFolder(outDir);
 
-        ServiceConfiguration<IRule> ruleConfig = config.getConfig(IRule.class);
-        for (IRule rule : rules) {
-            ruleConfig.setSelected(rule, true);
-        }
-
-        // Enable all discoverers.
-        ServiceConfiguration<Discoverer> discovererConfig = config.getConfig(Discoverer.class);
-        try {
-            for (Discoverer discoverer : new DiscovererCollection().getServices()) {
-                discovererConfig.setSelected(discoverer, true);
-            }
-        } catch (InvalidRegistryObjectException | CoreException e) {
-            logger.error(e);
+        ServiceConfiguration<Rule> ruleConfig = config.getConfig(Rule.class);
+        for (Rule rule : rules) {
+            ruleConfig.select(rule);
         }
 
         ruleEngine = new RuleEngineJob(config);
@@ -353,7 +339,7 @@ abstract class RuleEngineTest {
         return ruleEngine.getBlackboard();
     }
 
-    public Set<IRule> getRules() {
+    public Set<Rule> getRules() {
         return Collections.unmodifiableSet(rules);
     }
 

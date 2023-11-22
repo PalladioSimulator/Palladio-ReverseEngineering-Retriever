@@ -20,7 +20,7 @@ import org.palladiosimulator.pcm.repository.PrimitiveDataType;
 import org.palladiosimulator.pcm.repository.PrimitiveTypeEnum;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
+import org.palladiosimulator.somox.analyzer.rules.engine.Rule;
 import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.impl.JaxRSRules;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineException;
@@ -32,7 +32,7 @@ import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 public class BasicTest extends RuleEngineTest {
 
     private static final String PROJECT_NAME = "BasicProject";
-    private static final IRule[] RULES = { new JaxRSRules() };
+    private static final Rule[] RULES = { new JaxRSRules() };
 
     protected BasicTest() {
         super(PROJECT_NAME, RULES);
