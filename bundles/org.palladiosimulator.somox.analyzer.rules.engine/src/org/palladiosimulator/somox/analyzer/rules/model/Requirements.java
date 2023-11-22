@@ -63,21 +63,23 @@ public class Requirements implements Iterable<OperationInterface> {
     public Map<OperationInterface, List<Operation>> simplified() {
         List<Map<OperationInterface, List<Operation>>> simplifiedInterfaces = new LinkedList<>();
         for (OperationInterface root : groupedRequirements.keySet()) {
-            Map<OperationInterface, List<Operation>> simplifiedRoot = new HashMap<>();
-            simplifiedRoot.put(root, new ArrayList<>(root.simplified()
+            List<Operation> simplifiedRoot = new ArrayList<>(root.simplified()
                 .values()
                 .stream()
                 .flatMap(x -> x.stream())
-                .collect(Collectors.toList())));
+                .collect(Collectors.toList()));
             for (OperationInterface member : groupedRequirements.get(root)) {
-                simplifiedRoot.get(root)
-                    .addAll(member.simplified()
+                    simplifiedRoot.addAll(member.simplified()
                         .values()
                         .stream()
                         .flatMap(x -> x.stream())
                         .collect(Collectors.toList()));
             }
-            simplifiedInterfaces.add(simplifiedRoot);
+            simplifiedInterfaces.add(Map.of(
+            		root,
+            		simplifiedRoot.stream()
+            			.distinct()
+            			.collect(Collectors.toList())));
         }
         return MapMerger.merge(simplifiedInterfaces);
     }

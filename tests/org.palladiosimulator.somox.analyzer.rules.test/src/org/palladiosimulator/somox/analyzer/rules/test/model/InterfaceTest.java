@@ -29,7 +29,10 @@ public class InterfaceTest {
         builder.provisions()
             .add(expectedOperation);
 
-        Component builtComponent = builder.create(List.of(expectedOperation), List.of(expectedOperation));
+        List<OperationInterface> allDependencies = List.of(expectedOperation);
+        List<OperationInterface> visibleProvisions = List.of(expectedOperation);
+
+        Component builtComponent = builder.create(allDependencies, visibleProvisions);
         assertTrue(builtComponent.provisions()
             .containsPartOf(expectedOperation));
 
@@ -64,8 +67,11 @@ public class InterfaceTest {
         Operation expectedOperation = new Operation(null, new RESTName("/method", Optional.empty()));
         builder.provisions()
             .add(expectedOperation);
+        
+        List<OperationInterface> allDependencies = List.of(expectedOperation);
+        List<OperationInterface> visibleProvisions = List.of(expectedOperation);
 
-        Component builtComponent = builder.create(List.of(expectedOperation), List.of(expectedOperation));
+        Component builtComponent = builder.create(allDependencies, visibleProvisions);
         assertTrue(builtComponent.provisions()
             .containsPartOf(expectedOperation));
 
@@ -103,8 +109,11 @@ public class InterfaceTest {
             .add(firstMethod);
         builder.provisions()
             .add(secondMethod);
-        Component builtComponent = builder.create(List.of(firstMethod, secondMethod),
-                List.of(firstMethod, secondMethod));
+
+        List<OperationInterface> allDependencies = List.of(firstMethod, secondMethod);
+        List<OperationInterface> visibleProvisions = List.of(firstMethod, secondMethod);
+
+        Component builtComponent = builder.create(allDependencies, visibleProvisions);
         EntireInterface expectedInterface = new EntireInterface(new JavaInterfaceName("CommonInterface"));
         assertTrue(builtComponent.provisions()
             .containsPartOf(expectedInterface));
@@ -153,8 +162,11 @@ public class InterfaceTest {
             .add(firstMethod);
         builder.provisions()
             .add(secondMethod);
-        Component builtComponent = builder.create(List.of(firstMethod, secondMethod),
-                List.of(firstMethod, secondMethod));
+
+        List<OperationInterface> allDependencies = List.of(firstMethod, secondMethod);
+        List<OperationInterface> visibleProvisions = List.of(firstMethod, secondMethod);
+
+        Component builtComponent = builder.create(allDependencies, visibleProvisions);
         EntireInterface expectedInterface = new EntireInterface(new RESTName("/common_interface", Optional.empty()));
         assertTrue(builtComponent.provisions()
             .containsPartOf(expectedInterface));

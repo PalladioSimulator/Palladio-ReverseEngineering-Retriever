@@ -3,7 +3,6 @@ package org.palladiosimulator.somox.analyzer.rules.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -50,21 +49,23 @@ public class Provisions implements Iterable<OperationInterface> {
     public Map<OperationInterface, List<Operation>> simplified() {
         List<Map<OperationInterface, List<Operation>>> simplifiedInterfaces = new LinkedList<>();
         for (OperationInterface root : groupedProvisions.keySet()) {
-            Map<OperationInterface, List<Operation>> simplifiedRoot = new HashMap<>();
-            simplifiedRoot.put(root, new ArrayList<>(root.simplified()
+            List<Operation> simplifiedRoot = new ArrayList<>(root.simplified()
                 .values()
                 .stream()
                 .flatMap(x -> x.stream())
-                .collect(Collectors.toList())));
+                .collect(Collectors.toList()));
             for (OperationInterface member : groupedProvisions.get(root)) {
-                simplifiedRoot.get(root)
-                    .addAll(member.simplified()
+                simplifiedRoot.addAll(member.simplified()
                         .values()
                         .stream()
                         .flatMap(x -> x.stream())
                         .collect(Collectors.toList()));
             }
-            simplifiedInterfaces.add(simplifiedRoot);
+            simplifiedInterfaces.add(Map.of(
+            		root,
+            		simplifiedRoot.stream()
+            			.distinct()
+            			.collect(Collectors.toList())));
         }
         return MapMerger.merge(simplifiedInterfaces);
     }
