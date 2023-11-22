@@ -28,8 +28,12 @@ public class CompositeBuilder {
     public void addPart(ComponentBuilder componentBuilder) {
         explicitParts.add(componentBuilder);
     }
+    
+    public boolean hasPart(CompUnitOrName identifier) {
+    	return explicitParts.stream().anyMatch(part -> part.identifier().equals(identifier));
+    }
 
-    public Composite construct(Collection<Component> components, Requirements compositeRequirements,
+    public Composite construct(Collection<Component> freeComponents, Requirements compositeRequirements,
             Provisions compositeProvisions, Collection<OperationInterface> visibleProvisions) {
         Logger.getLogger(getClass())
             .warn("Constructing composite component " + name);
@@ -47,7 +51,7 @@ public class CompositeBuilder {
             .map(x -> x.create(allDependencies, visibleProvisions))
             .collect(Collectors.toSet());
 
-        Set<Component> remainingComponents = new HashSet<>(components);
+        Set<Component> remainingComponents = new HashSet<>(freeComponents);
         remainingComponents.removeAll(parts);
         Set<OperationInterface> internalInterfaces = new HashSet<>();
 

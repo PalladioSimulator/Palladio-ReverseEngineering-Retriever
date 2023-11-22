@@ -18,25 +18,31 @@ public final class DependencyUtils {
         throw new IllegalAccessException();
     }
 
+    /**
+     * Group all dependencies in {@code dependencies} by finding their common ancestors.
+     * Ensure that no other dependency (not in {@code dependencies}, but in {@code allDependencies}) is included into a group by accident.
+     * 
+     * @param <T> only for ease of calling
+     */
     public static <T extends OperationInterface> Map<OperationInterface, List<OperationInterface>> groupDependencies(
             Collection<T> dependencies, Collection<OperationInterface> allDependencies) {
         Map<OperationInterface, List<OperationInterface>> groupedDependencies = new HashMap<>();
         Queue<OperationInterface> sortedDependencies = new PriorityQueue<>(dependencies);
 
         while (!sortedDependencies.isEmpty()) {
-            OperationInterface requirement = sortedDependencies.poll();
+            OperationInterface grouplessDependency = sortedDependencies.poll();
             boolean isRoot = true;
             for (OperationInterface rootInterface : groupedDependencies.keySet()) {
-                if (requirement.isPartOf(rootInterface)) {
+                if (grouplessDependency.isPartOf(rootInterface)) {
                     groupedDependencies.get(rootInterface)
-                        .add(requirement);
+                        .add(grouplessDependency);
                     isRoot = false;
                     break;
                 }
             }
             if (isRoot) {
                 for (OperationInterface rootInterface : groupedDependencies.keySet()) {
-                    Optional<String> commonInterfaceName = requirement.getName()
+                    Optional<String> commonInterfaceName = grouplessDependency.getName()
                         .getCommonInterface(rootInterface.getName());
                     boolean containsOtherDependency = false;
 
@@ -59,8 +65,9 @@ public final class DependencyUtils {
                     if (!containsOtherDependency) {
                         // De-duplicate interfaces.
                         Set<OperationInterface> interfaces = new HashSet<>(groupedDependencies.remove(rootInterface));
+                        interfaces.add(commonInterface);
                         interfaces.add(rootInterface);
-                        interfaces.add(requirement);
+                        interfaces.add(grouplessDependency);
                         groupedDependencies.put(commonInterface, new ArrayList<>(interfaces));
                         isRoot = false;
                         break;
@@ -68,7 +75,8 @@ public final class DependencyUtils {
                 }
             }
             if (isRoot) {
-                groupedDependencies.put(requirement, new LinkedList<>());
+                groupedDependencies.put(grouplessDependency, new LinkedList<>());
+                groupedDependencies.get(grouplessDependency).add(grouplessDependency);
             }
         }
         return groupedDependencies;

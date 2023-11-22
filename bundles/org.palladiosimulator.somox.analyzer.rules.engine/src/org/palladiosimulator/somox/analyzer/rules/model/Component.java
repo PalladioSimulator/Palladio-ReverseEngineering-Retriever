@@ -37,6 +37,10 @@ public class Component {
     public String name() {
         return compUnitOrName.name();
     }
+    
+    public CompUnitOrName identifier() {
+    	return compUnitOrName;
+    }
 
     @Override
     public int hashCode() {

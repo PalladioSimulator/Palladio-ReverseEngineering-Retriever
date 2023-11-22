@@ -48,8 +48,12 @@ public class CompositeTest {
 
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
-        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(), List.of(), List.of()),
-                new Provisions(List.of(), List.of(provision, requirement)), List.of(provision));
+        
+        List<OperationInterface> allDependencies = List.of(provision, requirement);
+        List<OperationInterface> visibleProvisions = List.of(provision);
+
+        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(), allDependencies, visibleProvisions),
+                new Provisions(List.of(), allDependencies), visibleProvisions);
 
         assertEquals(1, result.parts()
             .size(), "this composite should have exactly one part");
@@ -83,9 +87,13 @@ public class CompositeTest {
 
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
+
+        List<OperationInterface> allDependencies = List.of(provision, requirement);
+        List<OperationInterface> visibleProvisions = List.of(provision);
+
         Composite result = compositeBuilder.construct(List.of(),
-                new Requirements(List.of(requirement), List.of(), List.of(provision)),
-                new Provisions(List.of(provision), List.of(provision, requirement)), List.of(provision));
+                new Requirements(List.of(requirement), allDependencies, visibleProvisions),
+                new Provisions(List.of(provision), allDependencies), visibleProvisions);
 
         assertEquals(1, result.parts()
             .size(), "this composite should have exactly one part");
@@ -119,9 +127,11 @@ public class CompositeTest {
         compositeBuilder.addPart(componentBuilder2);
 
         List<OperationInterface> allDependencies = List.of(provision1, provision2, requirement1, requirement2);
+        List<OperationInterface> visibleProvisions = List.of(provision1, provision2);
+        
         Composite result = compositeBuilder.construct(List.of(),
-                new Requirements(List.of(requirement1, requirement2), allDependencies, List.of(provision1, provision2)),
-                new Provisions(List.of(provision1, provision2), allDependencies), List.of(provision1, provision2));
+                new Requirements(List.of(requirement1, requirement2), allDependencies, visibleProvisions),
+                new Provisions(List.of(provision1, provision2), allDependencies), visibleProvisions);
 
         assertEquals(2, result.parts()
             .size(), "this composite should have exactly two parts");
@@ -160,9 +170,11 @@ public class CompositeTest {
 
         List<OperationInterface> allDependencies = List.of(provision, requirement, additionalRequirement1,
                 additionalRequirement2);
+        List<OperationInterface> visibleProvisions = List.of(provision);
+
         Composite result = compositeBuilder.construct(List.of(),
-                new Requirements(List.of(requirement), allDependencies, List.of(provision)),
-                new Provisions(List.of(provision), allDependencies), List.of(provision));
+                new Requirements(List.of(requirement), allDependencies, visibleProvisions),
+                new Provisions(List.of(provision), allDependencies), visibleProvisions); 
 
         assertEquals(2, result.parts()
             .size(), "this composite should have exactly two parts");
@@ -174,7 +186,9 @@ public class CompositeTest {
 
     @Test
     void impreciseExposure() {
+    	// TODO: Re-think this test.
         OperationInterface provision = new Operation(null, new JavaOperationName("Interface", "providedMethod"));
+        OperationInterface impreciseProvision = new EntireInterface(new JavaInterfaceName("Interface"));
 
         ComponentBuilder componentBuilder = new ComponentBuilder(new CompUnitOrName("Component"));
         componentBuilder.provisions()
@@ -182,10 +196,13 @@ public class CompositeTest {
 
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
-        OperationInterface provisionInterface = new EntireInterface(new JavaInterfaceName("Interface"));
+        
+        List<OperationInterface> allDependencies = List.of(provision);
+        List<OperationInterface> visibleProvisions = List.of(provision);
+
         Composite result = compositeBuilder.construct(List.of(),
-                new Requirements(List.of(), List.of(provision), List.of(provision)),
-                new Provisions(List.of(provisionInterface), List.of(provision)), List.of(provision));
+                new Requirements(List.of(), allDependencies, visibleProvisions),
+                new Provisions(List.of(impreciseProvision), allDependencies), visibleProvisions);
 
         assertEquals(1, result.parts()
             .size(), "this composite should have exactly one part");
