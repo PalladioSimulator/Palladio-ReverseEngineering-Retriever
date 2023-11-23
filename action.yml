@@ -84,7 +84,6 @@ runs:
         mkdir -p tmp/${{ inputs.source_path }}
         mv ruleengine_out/* tmp/${{ inputs.source_path }}
         mv tmp/* ruleengine_out
-        cloc tmp
         rmdir tmp
 
     - name: Upload analysis results
