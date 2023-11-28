@@ -33,6 +33,14 @@ runs:
         echo "tmp_dir=$TMP_DIR" >> $GITHUB_ENV
         mkdir $TMP_DIR/ruleengine_out
 
+    - name: Install cloc
+      run: |
+        sudo apt install cloc
+
+    - name: Run cloc analysis
+      run: |
+        cloc --out=${{ env.tmp_dir }}/cloc.txt ${{ inputs.source_path }}
+        
     - name: Get action version
       shell: bash
       # Assuming a format like in the GitHub Actions documentation:
