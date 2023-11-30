@@ -27,11 +27,11 @@ public class ServiceConfigurationView<T extends Service> extends ServiceConfigur
 
     private final Map<String, Map<String, TreeItem>> configTreeItems;
     private final Map<String, Button> serviceCheckboxes;
-    
+
     private final ModifyListener modifyListener;
 
     public ServiceConfigurationView(ServiceConfiguration<T> serviceConfiguration, ModifyListener modifyListener) {
-    	super(serviceConfiguration);
+        super(serviceConfiguration);
 
         configTreeItems = new HashMap<>();
         serviceCheckboxes = new HashMap<>();
@@ -48,9 +48,8 @@ public class ServiceConfigurationView<T extends Service> extends ServiceConfigur
 
         tree.addListener(SWT.Selection, new TreeEditListener(tree, modifyListener, SERVICE_CONFIGURATION_VALUE_COLUMN));
 
-        List<T> sortedServices = getServiceConfiguration()
-        	.getAvailable()
-        	.stream()
+        List<T> sortedServices = getServiceConfiguration().getAvailable()
+            .stream()
             .sorted(Comparator.comparing(T::getName))
             .collect(Collectors.toList());
         for (T service : sortedServices) {
@@ -78,11 +77,11 @@ public class ServiceConfigurationView<T extends Service> extends ServiceConfigur
         checkbox.addSelectionListener(new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-            	if (((Button) e.getSource()).getSelection()) {
-            		getServiceConfiguration().select(service);
-            	} else {
-            		getServiceConfiguration().deselect(service);
-            	}
+                if (((Button) e.getSource()).getSelection()) {
+                    getServiceConfiguration().select(service);
+                } else {
+                    getServiceConfiguration().deselect(service);
+                }
                 modifyListener.modifyText(null);
             }
 
@@ -99,7 +98,7 @@ public class ServiceConfigurationView<T extends Service> extends ServiceConfigur
 
     @Override
     public void initializeFrom(ILaunchConfiguration configuration) {
-    	super.initializeFrom(configuration);
+        super.initializeFrom(configuration);
         for (T service : getServiceConfiguration().getAvailable()) {
             String id = service.getID();
             initializeCheckbox(service, serviceCheckboxes.get(id));
@@ -113,12 +112,11 @@ public class ServiceConfigurationView<T extends Service> extends ServiceConfigur
     }
 
     private void initializeTreeItems(T service, Map<String, TreeItem> treeItems) {
-        Map<String, String> strings = getServiceConfiguration()
-        		.getWholeConfig(service.getID());
+        Map<String, String> strings = getServiceConfiguration().getWholeConfig(service.getID());
         for (Entry<String, TreeItem> entry : treeItems.entrySet()) {
             String value = strings.get(entry.getKey());
             if (value == null) {
-            	value = "";
+                value = "";
             }
             entry.getValue()
                 .setText(SERVICE_CONFIGURATION_VALUE_COLUMN, value);
@@ -127,30 +125,33 @@ public class ServiceConfigurationView<T extends Service> extends ServiceConfigur
 
     @Override
     public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-    	// Update the ServiceConfiguration with the values from the tree items
+        // Update the ServiceConfiguration with the values from the tree items
         for (T service : getServiceConfiguration().getAvailable()) {
-        	for (Entry<String, TreeItem> entry : configTreeItems.get(service.getID()).entrySet()) {
-        		TreeItem treeItem = entry.getValue();
-        		String configurationValue = treeItem.getText(SERVICE_CONFIGURATION_VALUE_COLUMN);
-        		getServiceConfiguration().setConfig(service.getID(), entry.getKey(), configurationValue);
-        	}
+            for (Entry<String, TreeItem> entry : configTreeItems.get(service.getID())
+                .entrySet()) {
+                TreeItem treeItem = entry.getValue();
+                String configurationValue = treeItem.getText(SERVICE_CONFIGURATION_VALUE_COLUMN);
+                getServiceConfiguration().setConfig(service.getID(), entry.getKey(), configurationValue);
+            }
         }
-        
+
         super.performApply(configuration);
     }
 
     /**
      * Called when a new launch configuration is created, to set the values to sensible defaults.
-     * @param configuration the new launch configuration
+     * 
+     * @param configuration
+     *            the new launch configuration
      */
     public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
         writeServiceConfigAttributes(configuration);
     }
-    
+
     private void writeServiceConfigAttributes(ILaunchConfigurationWorkingCopy configuration) {
-    	Map<String, Object> attributes = getServiceConfiguration().toMap();
-    	for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
-    		configuration.setAttribute(attribute.getKey(), attribute.getValue());
-    	}
+        Map<String, Object> attributes = getServiceConfiguration().toMap();
+        for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
+            configuration.setAttribute(attribute.getKey(), attribute.getValue());
+        }
     }
 }

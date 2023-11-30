@@ -73,8 +73,10 @@ class EcmaScriptRules implements Rule {
 			normalizedRequests.put(source + key.replaceAll(START_NONWORD_CHARS, BLANK), resolvedUrls)
 			for (url : resolvedUrls) {
 				val urlWithWildcards = url.replaceAll(VARIABLE_PREFIX + ".*\\/?", "*")
-				pcmDetector.detectRequiredInterface(GATEWAY_NAME, new RESTName("/" + urlWithWildcards, Optional.empty()));
-				pcmDetector.detectProvidedOperation(GATEWAY_NAME, null, new RESTName(GATEWAY_PREFIX + "/" + urlWithWildcards, Optional.empty()));
+				pcmDetector.detectRequiredInterface(GATEWAY_NAME,
+					new RESTName("/" + urlWithWildcards, Optional.empty()));
+				pcmDetector.detectProvidedOperation(GATEWAY_NAME, null,
+					new RESTName(GATEWAY_PREFIX + "/" + urlWithWildcards, Optional.empty()));
 			}
 		}
 
@@ -232,23 +234,23 @@ class EcmaScriptRules implements Rule {
 		}
 		return join
 	}
-	
+
 	override isBuildRule() {
 		return false
 	}
-	
+
 	override getConfigurationKeys() {
 		return Set.of
 	}
-	
+
 	override getID() {
 		return RULE_ID
 	}
-	
+
 	override getName() {
 		return "ECMAScript Rules"
 	}
-	
+
 	override getRequiredServices() {
 		return Set.of(ECMASCRIPT_DISCOVERER_ID)
 	}

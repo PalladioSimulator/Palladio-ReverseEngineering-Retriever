@@ -69,9 +69,9 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
                 .error("Exception occurred while discovering discoverers!");
             discovererCollection = new EmptyCollection<>();
         }
-        ServiceConfiguration<Discoverer> discovererConfig = new ServiceConfiguration<>(
-        		discovererCollection, RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_DISCOVERERS,
-        		RuleEngineConfigurationImpl.RULE_ENGINE_DISCOVERER_CONFIG_PREFIX);
+        ServiceConfiguration<Discoverer> discovererConfig = new ServiceConfiguration<>(discovererCollection,
+                RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_DISCOVERERS,
+                RuleEngineConfigurationImpl.RULE_ENGINE_DISCOVERER_CONFIG_PREFIX);
         discovererConfigManager = new ServiceConfigurationManager<>(discovererConfig);
 
         ServiceCollection<Rule> ruleCollection = null;
@@ -82,8 +82,8 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
                 .error("Exception occurred while discovering rules!");
             ruleCollection = new EmptyCollection<>();
         }
-        ServiceConfiguration<Rule> ruleConfig = new ServiceConfiguration<>(
-        		ruleCollection, RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_RULES,
+        ServiceConfiguration<Rule> ruleConfig = new ServiceConfiguration<>(ruleCollection,
+                RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_RULES,
                 RuleEngineConfigurationImpl.RULE_ENGINE_RULE_CONFIG_PREFIX);
         ruleConfig.addDependencyProvider(discovererConfig);
         ruleConfigView = new ServiceConfigurationView<>(ruleConfig, modifyListener);
@@ -96,8 +96,8 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
                 .error("Exception occurred while discovering analysts!");
             analystCollection = new EmptyCollection<>();
         }
-        ServiceConfiguration<Analyst> analystConfig = new ServiceConfiguration<>(
-        		analystCollection, RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_ANALYSTS,
+        ServiceConfiguration<Analyst> analystConfig = new ServiceConfiguration<>(analystCollection,
+                RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_ANALYSTS,
                 RuleEngineConfigurationImpl.RULE_ENGINE_ANALYST_CONFIG_PREFIX);
         analystConfig.addDependencyProvider(discovererConfig);
         analystConfig.addDependencyProvider(ruleConfig);

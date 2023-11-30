@@ -19,9 +19,9 @@ public class ComponentBuilder {
         this.requirements = new RequirementsBuilder();
         this.provisions = new ProvisionsBuilder();
     }
-    
+
     public CompUnitOrName identifier() {
-    	return compUnitOrName;
+        return compUnitOrName;
     }
 
     public RequirementsBuilder requirements() {

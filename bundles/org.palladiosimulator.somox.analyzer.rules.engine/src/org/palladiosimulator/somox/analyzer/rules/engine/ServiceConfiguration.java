@@ -4,7 +4,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -29,21 +28,21 @@ public class ServiceConfiguration<T extends Service> {
         this.serviceConfigs = new HashMap<>();
         this.services = new HashMap<>();
         for (T service : serviceCollection.getServices()) {
-        	this.services.put(service.getID(), service);
-        	Map<String, String> initializedConfig = new HashMap<>();
-        	for (String key : service.getConfigurationKeys()) {
-        		initializedConfig.put(key, "");
-        	}
-        	this.serviceConfigs.put(service.getID(), initializedConfig);
+            this.services.put(service.getID(), service);
+            Map<String, String> initializedConfig = new HashMap<>();
+            for (String key : service.getConfigurationKeys()) {
+                initializedConfig.put(key, "");
+            }
+            this.serviceConfigs.put(service.getID(), initializedConfig);
         }
         this.manuallySelectedServices = new HashSet<>();
         this.selectedDependencies = new HashMap<>();
         this.dependencyProviders = new HashSet<>();
         this.dependencyProviders.add(this);
     }
-    
+
     public void addDependencyProvider(ServiceConfiguration<? extends Service> dependencyProvider) {
-    	dependencyProviders.add(dependencyProvider);
+        dependencyProviders.add(dependencyProvider);
     }
 
     @SuppressWarnings("unchecked")
@@ -103,104 +102,106 @@ public class ServiceConfiguration<T extends Service> {
     }
 
     public Set<T> getSelected() {
-    	Set<T> selectedServices = new HashSet<>(manuallySelectedServices);
-    	selectedServices.addAll(selectedDependencies.keySet());
+        Set<T> selectedServices = new HashSet<>(manuallySelectedServices);
+        selectedServices.addAll(selectedDependencies.keySet());
         return Collections.unmodifiableSet(selectedServices);
     }
-    
+
     public Queue<Collection<T>> getExecutionOrder() {
-    	List<Collection<T>> executionOrder = new ArrayList<>();
-    	Queue<T> remainingServices = new ArrayDeque<>(getSelected());
-    	List<T> requiringServices = new LinkedList<>();
-    	while (!remainingServices.isEmpty()) {
-    		T candidate = remainingServices.poll();
-    		if (isRequiringAny(candidate, remainingServices) || isRequiringAny(candidate, requiringServices)) {
-    			requiringServices.add(candidate);
-    		} else {
-    			addAfterRequirements(candidate, executionOrder);
+        List<Collection<T>> executionOrder = new ArrayList<>();
+        Queue<T> remainingServices = new ArrayDeque<>(getSelected());
+        List<T> requiringServices = new LinkedList<>();
+        while (!remainingServices.isEmpty()) {
+            T candidate = remainingServices.poll();
+            if (isRequiringAny(candidate, remainingServices) || isRequiringAny(candidate, requiringServices)) {
+                requiringServices.add(candidate);
+            } else {
+                addAfterRequirements(candidate, executionOrder);
 
-    			remainingServices.addAll(requiringServices);
-    			requiringServices.clear();
-    		}
-    	}
-    	if (!requiringServices.isEmpty()) {
-    		throw new IllegalStateException("Dependency cycle in services, no possible execution order.");
-    	}
-    	return new ArrayDeque<>(executionOrder);
+                remainingServices.addAll(requiringServices);
+                requiringServices.clear();
+            }
+        }
+        if (!requiringServices.isEmpty()) {
+            throw new IllegalStateException("Dependency cycle in services, no possible execution order.");
+        }
+        return new ArrayDeque<>(executionOrder);
     }
-    
-    private void addAfterRequirements(T service, List<Collection<T>> executionOrder) {
-    	if (executionOrder.isEmpty() || isRequiringAny(service, executionOrder.get(executionOrder.size() - 1))) {
-    		Collection<T> newStep = new ArrayList<>();
-    		newStep.add(service);
-    		executionOrder.add(newStep);
-    		return;
-    	}
 
-    	Collection<T> earliestCandidate = executionOrder.get(executionOrder.size() - 1);
-    	for (int i = executionOrder.size() - 2; i >= 0; i--) {
-    		Collection<T> currentStep = executionOrder.get(i);
-    		if (isRequiringAny(service, currentStep)) {
-    			break;
-    		}
-    		earliestCandidate = currentStep;
-    	}
-    	earliestCandidate.add(service);
+    private void addAfterRequirements(T service, List<Collection<T>> executionOrder) {
+        if (executionOrder.isEmpty() || isRequiringAny(service, executionOrder.get(executionOrder.size() - 1))) {
+            Collection<T> newStep = new ArrayList<>();
+            newStep.add(service);
+            executionOrder.add(newStep);
+            return;
+        }
+
+        Collection<T> earliestCandidate = executionOrder.get(executionOrder.size() - 1);
+        for (int i = executionOrder.size() - 2; i >= 0; i--) {
+            Collection<T> currentStep = executionOrder.get(i);
+            if (isRequiringAny(service, currentStep)) {
+                break;
+            }
+            earliestCandidate = currentStep;
+        }
+        earliestCandidate.add(service);
     }
 
     private boolean isRequiringAny(T service, Collection<T> services) {
-    	Set<String> dependencies = service.getRequiredServices();
-		return services.stream().map(Service::getID).anyMatch(dependencies::contains);
-	}
+        Set<String> dependencies = service.getRequiredServices();
+        return services.stream()
+            .map(Service::getID)
+            .anyMatch(dependencies::contains);
+    }
 
-	public Collection<T> getAvailable() {
-    	return Collections.unmodifiableCollection(services.values());
+    public Collection<T> getAvailable() {
+        return Collections.unmodifiableCollection(services.values());
     }
-    
+
     public void selectDependenciesOf(Service service) {
-    	for (String dependencyID : service.getRequiredServices()) {
-    		if (!services.containsKey(dependencyID)) {
-    			continue;
-    		}
-    		T dependency = services.get(dependencyID);
-    		addDependingService(dependency, service);
-    	}
+        for (String dependencyID : service.getRequiredServices()) {
+            if (!services.containsKey(dependencyID)) {
+                continue;
+            }
+            T dependency = services.get(dependencyID);
+            addDependingService(dependency, service);
+        }
     }
-    
+
     private void addDependingService(T dependency, Service service) {
-    	if (selectedDependencies.containsKey(dependency)) {
-    		Set<Service> dependingServices = selectedDependencies.get(dependency);
-    		dependingServices.add(service);
-    	} else {
-    		Set<Service> dependingServices = new HashSet<>();
-    		dependingServices.add(service);
-    		selectedDependencies.put(dependency, dependingServices);
-    		for (ServiceConfiguration<? extends Service> dependencyProvider : dependencyProviders) {
-    			dependencyProvider.selectDependenciesOf(dependency);
-    		}
-    	}
+        if (selectedDependencies.containsKey(dependency)) {
+            Set<Service> dependingServices = selectedDependencies.get(dependency);
+            dependingServices.add(service);
+        } else {
+            Set<Service> dependingServices = new HashSet<>();
+            dependingServices.add(service);
+            selectedDependencies.put(dependency, dependingServices);
+            for (ServiceConfiguration<? extends Service> dependencyProvider : dependencyProviders) {
+                dependencyProvider.selectDependenciesOf(dependency);
+            }
+        }
     }
-    
+
     public void deselectDependenciesOf(Service service) {
-    	for (String dependencyID : service.getRequiredServices()) {
-    		if (!services.containsKey(dependencyID)) {
-    			continue;
-    		}
-    		T dependency = services.get(dependencyID);
-    		removeDependingService(dependency, service);
-    	}
+        for (String dependencyID : service.getRequiredServices()) {
+            if (!services.containsKey(dependencyID)) {
+                continue;
+            }
+            T dependency = services.get(dependencyID);
+            removeDependingService(dependency, service);
+        }
     }
-    
+
     private void removeDependingService(T dependency, Service service) {
-    	if (!selectedDependencies.containsKey(dependency)) {
-    		return;
-    	}
-    	Set<Service> dependingServices = selectedDependencies.get(dependency);
-    	dependingServices.remove(service);
-    	// Remove not needed dependencies.
-    	if (dependingServices.isEmpty()) {
-    		selectedDependencies.remove(dependency);
-    	}
+        if (!selectedDependencies.containsKey(dependency)) {
+            return;
+        }
+        Set<Service> dependingServices = selectedDependencies.get(dependency);
+        dependingServices.remove(service);
+        // Remove not needed dependencies.
+        if (dependingServices.isEmpty()) {
+            selectedDependencies.remove(dependency);
+        }
     }
 
     public Map<String, Object> toMap() {

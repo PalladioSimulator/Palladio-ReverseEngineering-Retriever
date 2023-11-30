@@ -18,8 +18,9 @@ public class PCMDetectionResult {
     public PCMDetectionResult(Map<CompUnitOrName, ComponentBuilder> components,
             Map<String, CompositeBuilder> composites, ProvisionsBuilder compositeProvisions,
             RequirementsBuilder compositeRequirements) {
-    	
-    	Map<CompUnitOrName, ComponentBuilder> freeComponents = PCMDetectionResult.filterFreeComponents(components, composites.values());
+
+        Map<CompUnitOrName, ComponentBuilder> freeComponents = PCMDetectionResult.filterFreeComponents(components,
+                composites.values());
 
         // Collect globally visible provisions
         Set<Component> temporaryComponents = PCMDetectionResult.createComponents(components, compositeProvisions,
@@ -28,33 +29,33 @@ public class PCMDetectionResult {
                 composites, compositeProvisions, compositeRequirements, Set.of());
         Set<OperationInterface> visibleProvisions = PCMDetectionResult.collectVisibleProvisions(temporaryComponents,
                 temporaryComposites);
-        
+
         PCMDetectionResult.removeBoundComponents(components, temporaryComposites);
 
         // TODO: Do not rebuild everything, that is theoretically not necessary since provisions do
         // not change.
 
         // Construct final result
-        this.components = PCMDetectionResult.createComponents(freeComponents, compositeProvisions, compositeRequirements,
-                visibleProvisions);
+        this.components = PCMDetectionResult.createComponents(freeComponents, compositeProvisions,
+                compositeRequirements, visibleProvisions);
         this.composites = PCMDetectionResult.createCompositeComponents(this.components, composites, compositeProvisions,
                 compositeRequirements, visibleProvisions);
         this.operationInterfaces = createOperationInterfaces();
     }
-    
-    private static Map<CompUnitOrName, ComponentBuilder> filterFreeComponents(Map<CompUnitOrName, ComponentBuilder> components, Collection<CompositeBuilder> composites) {
-    	Set<CompUnitOrName> boundComponents = new HashSet<>();
-    	for (CompUnitOrName identifier : components.keySet()) {
-    		if (composites
-        		.stream()
-        		.anyMatch(composite -> composite.hasPart(identifier))) {
-    			boundComponents.add(identifier);
-    		}
-    	}
-    	return components.entrySet()
-    			.stream()
-    			.filter(entry -> !boundComponents.contains(entry.getKey()))
-    			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+    private static Map<CompUnitOrName, ComponentBuilder> filterFreeComponents(
+            Map<CompUnitOrName, ComponentBuilder> components, Collection<CompositeBuilder> composites) {
+        Set<CompUnitOrName> boundComponents = new HashSet<>();
+        for (CompUnitOrName identifier : components.keySet()) {
+            if (composites.stream()
+                .anyMatch(composite -> composite.hasPart(identifier))) {
+                boundComponents.add(identifier);
+            }
+        }
+        return components.entrySet()
+            .stream()
+            .filter(entry -> !boundComponents.contains(entry.getKey()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private static Set<Component> createComponents(Map<CompUnitOrName, ComponentBuilder> components,
@@ -137,17 +138,16 @@ public class PCMDetectionResult {
 
         return provisions;
     }
-    
-    private static void removeBoundComponents(Map<CompUnitOrName, ComponentBuilder> freeComponents, Set<Composite> composites) {
-        Set<CompUnitOrName> boundComponents = composites
-        		.stream()
-        		.flatMap(composite -> composite
-        				.parts()
-        				.stream())
-        		.map(part -> part.identifier())
-        		.collect(Collectors.toSet());
+
+    private static void removeBoundComponents(Map<CompUnitOrName, ComponentBuilder> freeComponents,
+            Set<Composite> composites) {
+        Set<CompUnitOrName> boundComponents = composites.stream()
+            .flatMap(composite -> composite.parts()
+                .stream())
+            .map(part -> part.identifier())
+            .collect(Collectors.toSet());
         for (CompUnitOrName identifier : boundComponents) {
-        	freeComponents.remove(identifier);
+            freeComponents.remove(identifier);
         }
     }
 

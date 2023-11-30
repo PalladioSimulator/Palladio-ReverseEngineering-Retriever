@@ -1,6 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.impl
 
-
 import static org.palladiosimulator.somox.analyzer.rules.engine.RuleHelper.*
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard
 import java.nio.file.Path
@@ -23,18 +22,18 @@ import java.util.Set
 import org.palladiosimulator.somox.analyzer.rules.engine.Rule
 
 class SpringRules implements Rule {
-    static final Logger LOG = Logger.getLogger(SpringRules)
+	static final Logger LOG = Logger.getLogger(SpringRules)
 
-    public static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.spring"
-    public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java"
-    public static final String YAML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.yaml"
-    public static final String YAML_MAPPERS_KEY = YAML_DISCOVERER_ID + ".mappers"
-    public static final String XML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.xml"
-    public static final String PROPERTIES_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.properties"
+	public static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.spring"
+	public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java"
+	public static final String YAML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.yaml"
+	public static final String YAML_MAPPERS_KEY = YAML_DISCOVERER_ID + ".mappers"
+	public static final String XML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.xml"
+	public static final String PROPERTIES_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.properties"
 
 	override processRules(RuleEngineBlackboard blackboard, Path path) {
 		val unit = blackboard.getDiscoveredFiles(JAVA_DISCOVERER_ID, typeof(CompilationUnit)).get(path)
-		if (unit === null) return;
+		if(unit === null) return;
 
 		val rawYamls = blackboard.getPartition(YAML_DISCOVERER_ID) as Map<Path, Iterable<Map<String, Object>>>
 		val yamlMappers = blackboard.getPartition(YAML_MAPPERS_KEY) as Map<Path, Function<String, Optional<String>>>
@@ -43,18 +42,24 @@ class SpringRules implements Rule {
 
 		val projectRoot = findProjectRoot(path, poms)
 		val configRoot = findConfigRoot(poms)
-		val bootstrapYaml = yamlMappers.get(findFile(yamlMappers.keySet, projectRoot.resolve("src/main/resources"), Set.of("bootstrap.yaml", "bootstrap.yml")))
-		val applicationProperties = propertyFiles.get(findFile(propertyFiles.keySet, projectRoot.resolve("src/main/resources"), Set.of("application.properties")))
+		val bootstrapYaml = yamlMappers.get(
+			findFile(yamlMappers.keySet, projectRoot.resolve("src/main/resources"),
+				Set.of("bootstrap.yaml", "bootstrap.yml")))
+		val applicationProperties = propertyFiles.get(
+			findFile(propertyFiles.keySet, projectRoot.resolve("src/main/resources"), Set.of("application.properties")))
 
 		val applicationName = getFromYamlOrProperties("spring.application.name", bootstrapYaml, applicationProperties)
-		val projectConfigYaml = yamlMappers.get(findFile(yamlMappers.keySet, configRoot, Set.of(applicationName + ".yaml", applicationName + ".yml")))
-		val contextPathOption = Optional.ofNullable(projectConfigYaml).flatMap[x | x.apply("server.servlet.context-path")]
+		val projectConfigYaml = yamlMappers.get(
+			findFile(yamlMappers.keySet, configRoot, Set.of(applicationName + ".yaml", applicationName + ".yml")))
+		val contextPathOption = Optional.ofNullable(projectConfigYaml).flatMap[x|x.apply("server.servlet.context-path")]
 		var contextPath = contextPathOption.orElse("/")
-		if (applicationName !== null) contextPath += applicationName + "/"
-		
-		val rawApplicationYaml = rawYamls.get(findFile(yamlMappers.keySet, projectRoot.resolve("src/main/resources"), Set.of("application.yaml", "application.yml")))
+		if(applicationName !== null) contextPath += applicationName + "/"
+
+		val rawApplicationYaml = rawYamls.get(
+			findFile(yamlMappers.keySet, projectRoot.resolve("src/main/resources"),
+				Set.of("application.yaml", "application.yml")))
 		val contextVariables = collectContextVariables(rawApplicationYaml)
-		
+
 		processRuleForCompUnit(blackboard, unit, contextPath, contextVariables)
 	}
 
@@ -62,12 +67,9 @@ class SpringRules implements Rule {
 		if (currentPath === null || poms === null) {
 			return null
 		}
-		val closestPom = poms.entrySet.stream
-			.map([ entry | entry.key ])
-			// Only keep poms above the current compilation unit.
-			.filter([ path | currentPath.startsWith(path.parent) ])
-			// Take the longest path, which is the pom.xml closest to the compilation unit
-			.max([a, b | a.size.compareTo(b.size)])
+		val closestPom = poms.entrySet.stream.map([entry|entry.key])// Only keep poms above the current compilation unit.
+		.filter([path|currentPath.startsWith(path.parent)])// Take the longest path, which is the pom.xml closest to the compilation unit
+		.max([a, b|a.size.compareTo(b.size)])
 
 		if (closestPom.present) {
 			return closestPom.get.parent
@@ -80,17 +82,18 @@ class SpringRules implements Rule {
 		if (poms === null) {
 			return null
 		}
-		val configRoots = poms.entrySet.stream
-			.map[ entry | entry.key -> entry.value.rootElement.getChild("dependencies", entry.value.rootElement.namespace) ]
-			.filter[ entry | entry.value !== null ]
-			.map[ entry | entry.key -> entry.value.getChildren("dependency", entry.value.namespace) ]
-			.filter[ entry | !entry.value.empty ]
-			.filter[ entry | entry.value
-				.filter[ dependency | dependency.getChildTextTrim("groupId", dependency.namespace) == "org.springframework.cloud" ]
-				.exists[ dependency | dependency.getChildTextTrim("artifactId", dependency.namespace) == "spring-cloud-config-server" ]
+		val configRoots = poms.entrySet.stream.map [ entry |
+			entry.key -> entry.value.rootElement.getChild("dependencies", entry.value.rootElement.namespace)
+		].filter[entry|entry.value !== null].map [ entry |
+			entry.key -> entry.value.getChildren("dependency", entry.value.namespace)
+		].filter[entry|!entry.value.empty].filter [ entry |
+			entry.value.filter [ dependency |
+				dependency.getChildTextTrim("groupId", dependency.namespace) == "org.springframework.cloud"
+			].exists [ dependency |
+				dependency.getChildTextTrim("artifactId", dependency.namespace) == "spring-cloud-config-server"
 			]
-			.collect(Collectors.toList)
-		
+		].collect(Collectors.toList)
+
 		if (configRoots.size > 1) {
 			LOG.warn("Multiple Spring config servers, choosing \"" + configRoots.get(0).key.parent + "\" arbitrarily")
 		} else if (configRoots.empty) {
@@ -98,26 +101,27 @@ class SpringRules implements Rule {
 		}
 		return configRoots.get(0).key.parent
 	}
-	
+
 	def findFile(Set<Path> paths, Path directory, Set<String> possibleNames) {
 		if (paths === null || directory === null || possibleNames === null) {
 			return null
 		}
-		val candidates =  paths.stream
-			.filter[ path | path.parent == directory ]
-			.filter[ path | possibleNames.contains(path.fileName.toString) ]
-			.collect(Collectors.toList)
+		val candidates = paths.stream.filter[path|path.parent == directory].filter [ path |
+			possibleNames.contains(path.fileName.toString)
+		].collect(Collectors.toList)
 
 		if (candidates.size > 1) {
 			// fileName must exist since candidates were found
 			val fileName = possibleNames.iterator.next;
-			LOG.warn("Multiple " + fileName + " in " + directory + ", choosing " + directory.relativize(candidates.get(0)) + " arbitrarily")
+			LOG.warn(
+				"Multiple " + fileName + " in " + directory + ", choosing " + directory.relativize(candidates.get(0)) +
+					" arbitrarily")
 		} else if (candidates.empty) {
 			return null
 		}
 		return candidates.get(0)
 	}
-	
+
 	def getFromYamlOrProperties(String key, Function<String, Optional<String>> yamlMapper, Properties properties) {
 		if (yamlMapper !== null) {
 			val result = yamlMapper.apply(key)
@@ -125,11 +129,11 @@ class SpringRules implements Rule {
 				return result.get()
 			}
 		}
-		
+
 		if (properties !== null) {
 			return properties.getProperty(key)
 		}
-		
+
 		return null
 	}
 
@@ -138,10 +142,10 @@ class SpringRules implements Rule {
 		if (applicationYaml === null || applicationYaml.empty) {
 			return result;
 		}
-		
+
 		return collectContextVariables(applicationYaml.get(0));
 	}
-	
+
 	def Map<String, String> collectContextVariables(Map<String, Object> applicationYaml) {
 		val result = new HashMap<String, String>();
 		if (applicationYaml === null) {
@@ -182,30 +186,32 @@ class SpringRules implements Rule {
 		return result;
 	}
 
-	def processRuleForCompUnit(RuleEngineBlackboard blackboard, CompilationUnit unit, String contextPath, Map<String, String> contextVariables) {
+	def processRuleForCompUnit(RuleEngineBlackboard blackboard, CompilationUnit unit, String contextPath,
+		Map<String, String> contextVariables) {
 		val pcmDetector = blackboard.getPCMDetector
-		if (pcmDetector === null) return;
+		if(pcmDetector === null) return;
 
 		// Abort if there is no CompilationUnit at the specified path
-		if (unit === null) return;
+		if(unit === null) return;
 
 		val isService = isUnitAnnotatedWithName(unit, "Service")
-		val isController = isUnitAnnotatedWithName(unit, "RestController") || isUnitAnnotatedWithName(unit, "Controller")
+		val isController = isUnitAnnotatedWithName(unit, "RestController") ||
+			isUnitAnnotatedWithName(unit, "Controller")
 		val isClient = isUnitAnnotatedWithName(unit, "FeignClient")
 		val isRepository = isRepository(unit)
-		val isComponent = isService || isController || isClient || isRepository || isUnitAnnotatedWithName(unit, "Component")
-		
+		val isComponent = isService || isController || isClient || isRepository ||
+			isUnitAnnotatedWithName(unit, "Component")
+
 		val identifier = new CompUnitOrName(unit)
 
 		if (isComponent) {
 			pcmDetector.detectComponent(identifier)
 
-			getConstructors(unit)
-				.stream
-				.filter[c | isMethodAnnotatedWithName(c, "Autowired")]
-				.flatMap[c | getParameters(c).stream]
-				.filter[p | !isParameterAnnotatedWith(p, "Value")]
-				.forEach[p | pcmDetector.detectRequiredInterface(identifier, p)]
+			getConstructors(unit).stream.filter[c|isMethodAnnotatedWithName(c, "Autowired")].flatMap [ c |
+				getParameters(c).stream
+			].filter[p|!isParameterAnnotatedWith(p, "Value")].forEach [ p |
+				pcmDetector.detectRequiredInterface(identifier, p)
+			]
 		}
 
 		if (isService || isController) {
@@ -236,7 +242,8 @@ class SpringRules implements Rule {
 						var methodName = ifaceName + "/" + requestedMapping;
 						methodName = replaceArgumentsWithWildcards(methodName);
 						val httpMethod = getHTTPMethod(m);
-						pcmDetector.detectCompositeProvidedOperation(identifier, m.resolveBinding, new RESTName(methodName, httpMethod));
+						pcmDetector.detectCompositeProvidedOperation(identifier, m.resolveBinding,
+							new RESTName(methodName, httpMethod));
 					}
 				}
 			}
@@ -276,7 +283,7 @@ class SpringRules implements Rule {
 			}
 		}
 	}
-	
+
 	def substituteVariables(String string, Map<String, String> contextVariables) {
 		var result = string;
 
@@ -295,23 +302,19 @@ class SpringRules implements Rule {
 
 		return result;
 	}
-	
+
 	def replaceArgumentsWithWildcards(String methodName) {
-		var newName = methodName.replaceAll("\\{.*\\}", "*")
-						 .replaceAll("[\\*\\/]*$", "")
-						 .replaceAll("[\\*\\/]*\\[", "[")
+		var newName = methodName.replaceAll("\\{.*\\}", "*").replaceAll("[\\*\\/]*$", "").replaceAll("[\\*\\/]*\\[",
+			"[")
 		newName = "/" + newName
 		newName = newName.replaceAll("/+", "/")
 		return newName
 	}
 
 	def hasMapping(MethodDeclaration m) {
-		return isMethodAnnotatedWithName(m, "RequestMapping")
-		    ||isMethodAnnotatedWithName(m, "GetMapping")
-    		||isMethodAnnotatedWithName(m, "PostMapping")
-	    	||isMethodAnnotatedWithName(m, "PutMapping")
-		    ||isMethodAnnotatedWithName(m, "DeleteMapping")
-    		||isMethodAnnotatedWithName(m, "PatchMapping");
+		return isMethodAnnotatedWithName(m, "RequestMapping") || isMethodAnnotatedWithName(m, "GetMapping") ||
+			isMethodAnnotatedWithName(m, "PostMapping") || isMethodAnnotatedWithName(m, "PutMapping") ||
+			isMethodAnnotatedWithName(m, "DeleteMapping") || isMethodAnnotatedWithName(m, "PatchMapping");
 	}
 
 	def getMapping(MethodDeclaration m) {
@@ -344,7 +347,7 @@ class SpringRules implements Rule {
 		if (patchMapping !== null) {
 			return patchMapping;
 		}
-		
+
 		return null;
 	}
 
@@ -378,7 +381,7 @@ class SpringRules implements Rule {
 		if (patchMapping !== null) {
 			return Optional.of(HTTPMethod.PATCH);
 		}
-		
+
 		return null;
 	}
 
@@ -391,42 +394,40 @@ class SpringRules implements Rule {
 		val path = getMethodAnnotationStringValue(m, annotationName, "path");
 		return path;
 	}
-	
+
 	def isRepository(ITypeBinding binding) {
-		return isImplementingOrExtending(binding, "Repository")
-			|| isImplementingOrExtending(binding, "CrudRepository")
-			|| isImplementingOrExtending(binding, "JpaRepository")
-			|| isImplementingOrExtending(binding, "PagingAndSortingRepository")
-			|| isImplementingOrExtending(binding, "MongoRepository")
+		return isImplementingOrExtending(binding, "Repository") ||
+			isImplementingOrExtending(binding, "CrudRepository") ||
+			isImplementingOrExtending(binding, "JpaRepository") ||
+			isImplementingOrExtending(binding, "PagingAndSortingRepository") ||
+			isImplementingOrExtending(binding, "MongoRepository")
 	}
 
 	def isRepository(CompilationUnit unit) {
-		return isUnitAnnotatedWithName(unit, "Repository") 
-			|| isImplementingOrExtending(unit, "Repository")
-			|| isImplementingOrExtending(unit, "CrudRepository")
-			|| isImplementingOrExtending(unit, "JpaRepository")
-			|| isImplementingOrExtending(unit, "PagingAndSortingRepository")
-			|| isImplementingOrExtending(unit, "MongoRepository")
+		return isUnitAnnotatedWithName(unit, "Repository") || isImplementingOrExtending(unit, "Repository") ||
+			isImplementingOrExtending(unit, "CrudRepository") || isImplementingOrExtending(unit, "JpaRepository") ||
+			isImplementingOrExtending(unit, "PagingAndSortingRepository") ||
+			isImplementingOrExtending(unit, "MongoRepository")
 	}
-	
+
 	override isBuildRule() {
 		return false
 	}
-	
+
 	override getConfigurationKeys() {
 		return Set.of
 	}
-	
+
 	override getID() {
 		return RULE_ID
 	}
-	
+
 	override getName() {
 		return "Spring Rules"
 	}
-	
+
 	override getRequiredServices() {
 		return Set.of(JAVA_DISCOVERER_ID, YAML_DISCOVERER_ID, XML_DISCOVERER_ID, PROPERTIES_DISCOVERER_ID)
 	}
-	
+
 }

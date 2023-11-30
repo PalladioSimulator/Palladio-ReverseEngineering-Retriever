@@ -56,16 +56,14 @@ public class Provisions implements Iterable<OperationInterface> {
                 .collect(Collectors.toList()));
             for (OperationInterface member : groupedProvisions.get(root)) {
                 simplifiedRoot.addAll(member.simplified()
-                        .values()
-                        .stream()
-                        .flatMap(x -> x.stream())
-                        .collect(Collectors.toList()));
+                    .values()
+                    .stream()
+                    .flatMap(x -> x.stream())
+                    .collect(Collectors.toList()));
             }
-            simplifiedInterfaces.add(Map.of(
-            		root,
-            		simplifiedRoot.stream()
-            			.distinct()
-            			.collect(Collectors.toList())));
+            simplifiedInterfaces.add(Map.of(root, simplifiedRoot.stream()
+                .distinct()
+                .collect(Collectors.toList())));
         }
         return MapMerger.merge(simplifiedInterfaces);
     }

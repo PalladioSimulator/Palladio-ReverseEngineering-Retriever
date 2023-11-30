@@ -28,9 +28,11 @@ public class CompositeBuilder {
     public void addPart(ComponentBuilder componentBuilder) {
         explicitParts.add(componentBuilder);
     }
-    
+
     public boolean hasPart(CompUnitOrName identifier) {
-    	return explicitParts.stream().anyMatch(part -> part.identifier().equals(identifier));
+        return explicitParts.stream()
+            .anyMatch(part -> part.identifier()
+                .equals(identifier));
     }
 
     public Composite construct(Collection<Component> freeComponents, Requirements compositeRequirements,

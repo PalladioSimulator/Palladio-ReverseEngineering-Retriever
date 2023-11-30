@@ -60,76 +60,82 @@ public class RuleEngineJob extends AbstractExtendableJob<RuleEngineBlackboard> {
 
         super.add(new PlantUmlJob(configuration, getBlackboard()));
     }
-    
-    private List<ParallelJob> createRuleJobs(RuleEngineConfiguration configuration) {
-    	List<ParallelJob> jobs = new ArrayList<>();
 
-        for (Collection<Rule> step : configuration.getConfig(Rule.class).getExecutionOrder()) {
-        	ParallelJob parentJob = new ParallelJob();
-        	for (Rule rule : step) {
-        		// Assume only build rules depend on build rules.
-        		if (rule.isBuildRule()) {
-        			continue;
-        		}
-        		IBlackboardInteractingJob<RuleEngineBlackboard> ruleJob = rule.create(configuration, myBlackboard);
-        		parentJob.add(ruleJob);
-        		logger.info("Adding rule job \"" + ruleJob.getName() + "\"");
-        	}
-        	jobs.add(parentJob);
+    private List<ParallelJob> createRuleJobs(RuleEngineConfiguration configuration) {
+        List<ParallelJob> jobs = new ArrayList<>();
+
+        for (Collection<Rule> step : configuration.getConfig(Rule.class)
+            .getExecutionOrder()) {
+            ParallelJob parentJob = new ParallelJob();
+            for (Rule rule : step) {
+                // Assume only build rules depend on build rules.
+                if (rule.isBuildRule()) {
+                    continue;
+                }
+                IBlackboardInteractingJob<RuleEngineBlackboard> ruleJob = rule.create(configuration, myBlackboard);
+                parentJob.add(ruleJob);
+                logger.info("Adding rule job \"" + ruleJob.getName() + "\"");
+            }
+            jobs.add(parentJob);
         }
-        
+
         return jobs;
     }
 
     private List<ParallelJob> createBuildRulesJob(RuleEngineConfiguration configuration) {
-    	List<ParallelJob> jobs = new ArrayList<>();
+        List<ParallelJob> jobs = new ArrayList<>();
 
-        for (Collection<Rule> step : configuration.getConfig(Rule.class).getExecutionOrder()) {
-        	ParallelJob parentJob = new ParallelJob();
-        	for (Rule rule : step) {
-        		// Assume only build rules depend on build rules.
-        		if (!rule.isBuildRule()) {
-        			continue;
-        		}
-        		IBlackboardInteractingJob<RuleEngineBlackboard> ruleJob = rule.create(configuration, myBlackboard);
-        		parentJob.add(ruleJob);
-        		logger.info("Adding build rule job \"" + ruleJob.getName() + "\"");
-        	}
-        	jobs.add(parentJob);
+        for (Collection<Rule> step : configuration.getConfig(Rule.class)
+            .getExecutionOrder()) {
+            ParallelJob parentJob = new ParallelJob();
+            for (Rule rule : step) {
+                // Assume only build rules depend on build rules.
+                if (!rule.isBuildRule()) {
+                    continue;
+                }
+                IBlackboardInteractingJob<RuleEngineBlackboard> ruleJob = rule.create(configuration, myBlackboard);
+                parentJob.add(ruleJob);
+                logger.info("Adding build rule job \"" + ruleJob.getName() + "\"");
+            }
+            jobs.add(parentJob);
         }
-        
+
         return jobs;
     }
 
     private List<ParallelJob> createDiscovererJobs(RuleEngineConfiguration configuration) {
-    	List<ParallelJob> jobs = new ArrayList<>();
+        List<ParallelJob> jobs = new ArrayList<>();
 
-        for (Collection<Discoverer> step : configuration.getConfig(Discoverer.class).getExecutionOrder()) {
-        	ParallelJob parentJob = new ParallelJob();
-        	for (Discoverer discoverer : step) {
-        		IBlackboardInteractingJob<RuleEngineBlackboard> discovererJob = discoverer.create(configuration, myBlackboard);
-        		parentJob.add(discovererJob);
-        		logger.info("Adding discoverer job \"" + discovererJob.getName() + "\"");
-        	}
-        	jobs.add(parentJob);
+        for (Collection<Discoverer> step : configuration.getConfig(Discoverer.class)
+            .getExecutionOrder()) {
+            ParallelJob parentJob = new ParallelJob();
+            for (Discoverer discoverer : step) {
+                IBlackboardInteractingJob<RuleEngineBlackboard> discovererJob = discoverer.create(configuration,
+                        myBlackboard);
+                parentJob.add(discovererJob);
+                logger.info("Adding discoverer job \"" + discovererJob.getName() + "\"");
+            }
+            jobs.add(parentJob);
         }
-        
+
         return jobs;
     }
 
     private List<ParallelJob> createAnalystJobs(RuleEngineConfiguration configuration) {
-    	List<ParallelJob> jobs = new ArrayList<>();
+        List<ParallelJob> jobs = new ArrayList<>();
 
-        for (Collection<Analyst> step : configuration.getConfig(Analyst.class).getExecutionOrder()) {
-        	ParallelJob parentJob = new ParallelJob();
-        	for (Analyst analyst : step) {
-        		IBlackboardInteractingJob<RuleEngineBlackboard> analystJob = analyst.create(configuration, myBlackboard);
-        		parentJob.add(analystJob);
-        		logger.info("Adding analyst job \"" + analystJob.getName() + "\"");
-        	}
-        	jobs.add(parentJob);
+        for (Collection<Analyst> step : configuration.getConfig(Analyst.class)
+            .getExecutionOrder()) {
+            ParallelJob parentJob = new ParallelJob();
+            for (Analyst analyst : step) {
+                IBlackboardInteractingJob<RuleEngineBlackboard> analystJob = analyst.create(configuration,
+                        myBlackboard);
+                parentJob.add(analystJob);
+                logger.info("Adding analyst job \"" + analystJob.getName() + "\"");
+            }
+            jobs.add(parentJob);
         }
-        
+
         return jobs;
     }
 }

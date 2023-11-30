@@ -19,34 +19,36 @@ public class ServiceConfigurationManager<T extends Service> {
     }
 
     public void initializeFrom(ILaunchConfiguration configuration) {
-    	try {
-			serviceConfiguration.applyAttributeMap(configuration.getAttributes());
-		} catch (CoreException e) {
+        try {
+            serviceConfiguration.applyAttributeMap(configuration.getAttributes());
+        } catch (CoreException e) {
             LaunchConfigPlugin.log(IStatus.ERROR, e.getMessage());
-		}
+        }
     }
 
     public void performApply(ILaunchConfigurationWorkingCopy configuration) {
         // Update the LaunchConfiguration
-    	writeServiceConfigAttributes(configuration);
+        writeServiceConfigAttributes(configuration);
     }
 
     /**
      * Called when a new launch configuration is created, to set the values to sensible defaults.
-     * @param configuration the new launch configuration
+     * 
+     * @param configuration
+     *            the new launch configuration
      */
     public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
         writeServiceConfigAttributes(configuration);
     }
-    
+
     private void writeServiceConfigAttributes(ILaunchConfigurationWorkingCopy configuration) {
-    	Map<String, Object> attributes = serviceConfiguration.toMap();
-    	for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
-    		configuration.setAttribute(attribute.getKey(), attribute.getValue());
-    	}
+        Map<String, Object> attributes = serviceConfiguration.toMap();
+        for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
+            configuration.setAttribute(attribute.getKey(), attribute.getValue());
+        }
     }
-    
+
     public ServiceConfiguration<T> getServiceConfiguration() {
-    	return serviceConfiguration;
+        return serviceConfiguration;
     }
 }

@@ -1,6 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.impl
 
-
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard
 import java.nio.file.Path;
 import java.util.HashSet
@@ -9,7 +8,7 @@ import java.util.Set
 import org.palladiosimulator.somox.analyzer.rules.engine.Rule
 
 class MavenRules implements Rule {
-	
+
 	static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.maven"
 	static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java";
 	static final String MAVEN_FILE_NAME = "pom.xml";
@@ -29,25 +28,25 @@ class MavenRules implements Rule {
 			blackboard.addSystemAssociations(path, children);
 		}
 	}
-	
+
 	override isBuildRule() {
 		return true
 	}
-	
+
 	override getConfigurationKeys() {
 		return Set.of
 	}
-	
+
 	override getID() {
 		return RULE_ID
 	}
-	
+
 	override getName() {
 		return "Maven Rules"
 	}
-	
+
 	override getRequiredServices() {
-		return Set.of(JAVA_DISCOVERER_ID )
+		return Set.of(JAVA_DISCOVERER_ID)
 	}
-	
+
 }

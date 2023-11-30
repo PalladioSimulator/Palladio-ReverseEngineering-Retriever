@@ -21,5 +21,5 @@ public interface Service {
 
     String getID();
 
-	Set<String> getRequiredServices();
+    Set<String> getRequiredServices();
 }

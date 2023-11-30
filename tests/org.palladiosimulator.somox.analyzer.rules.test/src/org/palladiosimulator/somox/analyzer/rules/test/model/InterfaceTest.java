@@ -67,7 +67,7 @@ public class InterfaceTest {
         Operation expectedOperation = new Operation(null, new RESTName("/method", Optional.empty()));
         builder.provisions()
             .add(expectedOperation);
-        
+
         List<OperationInterface> allDependencies = List.of(expectedOperation);
         List<OperationInterface> visibleProvisions = List.of(expectedOperation);
 

@@ -48,11 +48,12 @@ public class CompositeTest {
 
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
-        
+
         List<OperationInterface> allDependencies = List.of(provision, requirement);
         List<OperationInterface> visibleProvisions = List.of(provision);
 
-        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(), allDependencies, visibleProvisions),
+        Composite result = compositeBuilder.construct(List.of(),
+                new Requirements(List.of(), allDependencies, visibleProvisions),
                 new Provisions(List.of(), allDependencies), visibleProvisions);
 
         assertEquals(1, result.parts()
@@ -128,7 +129,7 @@ public class CompositeTest {
 
         List<OperationInterface> allDependencies = List.of(provision1, provision2, requirement1, requirement2);
         List<OperationInterface> visibleProvisions = List.of(provision1, provision2);
-        
+
         Composite result = compositeBuilder.construct(List.of(),
                 new Requirements(List.of(requirement1, requirement2), allDependencies, visibleProvisions),
                 new Provisions(List.of(provision1, provision2), allDependencies), visibleProvisions);
@@ -174,7 +175,7 @@ public class CompositeTest {
 
         Composite result = compositeBuilder.construct(List.of(),
                 new Requirements(List.of(requirement), allDependencies, visibleProvisions),
-                new Provisions(List.of(provision), allDependencies), visibleProvisions); 
+                new Provisions(List.of(provision), allDependencies), visibleProvisions);
 
         assertEquals(2, result.parts()
             .size(), "this composite should have exactly two parts");
@@ -186,7 +187,7 @@ public class CompositeTest {
 
     @Test
     void impreciseExposure() {
-    	// TODO: Re-think this test.
+        // TODO: Re-think this test.
         OperationInterface provision = new Operation(null, new JavaOperationName("Interface", "providedMethod"));
         OperationInterface impreciseProvision = new EntireInterface(new JavaInterfaceName("Interface"));
 
@@ -196,7 +197,7 @@ public class CompositeTest {
 
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
-        
+
         List<OperationInterface> allDependencies = List.of(provision);
         List<OperationInterface> visibleProvisions = List.of(provision);
 

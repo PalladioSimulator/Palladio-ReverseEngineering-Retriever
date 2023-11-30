@@ -34,9 +34,9 @@ public interface Discoverer extends Service {
         }
         return Stream.empty();
     }
-    
+
     @Override
     default Set<String> getRequiredServices() {
-    	return Set.of();
+        return Set.of();
     }
 }

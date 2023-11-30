@@ -1,6 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.impl
 
-
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard
 import java.nio.file.Path;
 import java.util.HashSet
@@ -29,25 +28,25 @@ class GradleRules implements Rule {
 			blackboard.addSystemAssociations(path, children);
 		}
 	}
-	
+
 	override isBuildRule() {
 		return true
 	}
-	
+
 	override getConfigurationKeys() {
 		return Set.of
 	}
-	
+
 	override getID() {
 		return RULE_ID
 	}
-	
+
 	override getName() {
 		return "Gradle Rules"
 	}
-	
+
 	override getRequiredServices() {
 		return Set.of(JAVA_DISCOVERER_ID)
 	}
-	
+
 }

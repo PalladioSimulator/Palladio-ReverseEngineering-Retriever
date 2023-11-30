@@ -19,10 +19,12 @@ public final class DependencyUtils {
     }
 
     /**
-     * Group all dependencies in {@code dependencies} by finding their common ancestors.
-     * Ensure that no other dependency (not in {@code dependencies}, but in {@code allDependencies}) is included into a group by accident.
+     * Group all dependencies in {@code dependencies} by finding their common ancestors. Ensure that
+     * no other dependency (not in {@code dependencies}, but in {@code allDependencies}) is included
+     * into a group by accident.
      * 
-     * @param <T> only for ease of calling
+     * @param <T>
+     *            only for ease of calling
      */
     public static <T extends OperationInterface> Map<OperationInterface, List<OperationInterface>> groupDependencies(
             Collection<T> dependencies, Collection<OperationInterface> allDependencies) {
@@ -76,7 +78,8 @@ public final class DependencyUtils {
             }
             if (isRoot) {
                 groupedDependencies.put(grouplessDependency, new LinkedList<>());
-                groupedDependencies.get(grouplessDependency).add(grouplessDependency);
+                groupedDependencies.get(grouplessDependency)
+                    .add(grouplessDependency);
             }
         }
         return groupedDependencies;

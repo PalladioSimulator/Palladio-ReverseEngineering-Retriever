@@ -25,20 +25,21 @@ public interface Rule extends Service {
             RuleEngineBlackboard blackboard) {
         Rule rule = this;
         return new AbstractBlackboardInteractingJob<RuleEngineBlackboard>() {
-        	@Override
-			public void execute(IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
-				for (Path path : blackboard.getDiscoveredPaths()) {
-					rule.processRules(blackboard, path);
-				}
-			}
+            @Override
+            public void execute(IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
+                for (Path path : blackboard.getDiscoveredPaths()) {
+                    rule.processRules(blackboard, path);
+                }
+            }
 
-			@Override
-			public void cleanup(IProgressMonitor monitor) throws CleanupFailedException {}
+            @Override
+            public void cleanup(IProgressMonitor monitor) throws CleanupFailedException {
+            }
 
-			@Override
-			public String getName() {
-				return rule.getName() + " Job";
-			}
-		};
+            @Override
+            public String getName() {
+                return rule.getName() + " Job";
+            }
+        };
     }
 }
