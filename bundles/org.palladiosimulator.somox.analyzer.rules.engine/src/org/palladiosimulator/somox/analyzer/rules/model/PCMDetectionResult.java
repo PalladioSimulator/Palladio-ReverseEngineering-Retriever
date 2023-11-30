@@ -1,6 +1,5 @@
 package org.palladiosimulator.somox.analyzer.rules.model;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,9 +18,6 @@ public class PCMDetectionResult {
             Map<String, CompositeBuilder> composites, ProvisionsBuilder compositeProvisions,
             RequirementsBuilder compositeRequirements) {
 
-        Map<CompUnitOrName, ComponentBuilder> freeComponents = PCMDetectionResult.filterFreeComponents(components,
-                composites.values());
-
         // Collect globally visible provisions
         Set<Component> temporaryComponents = PCMDetectionResult.createComponents(components, compositeProvisions,
                 compositeRequirements, Set.of());
@@ -30,32 +26,15 @@ public class PCMDetectionResult {
         Set<OperationInterface> visibleProvisions = PCMDetectionResult.collectVisibleProvisions(temporaryComponents,
                 temporaryComposites);
 
-        PCMDetectionResult.removeBoundComponents(components, temporaryComposites);
-
         // TODO: Do not rebuild everything, that is theoretically not necessary since provisions do
         // not change.
 
         // Construct final result
-        this.components = PCMDetectionResult.createComponents(freeComponents, compositeProvisions,
-                compositeRequirements, visibleProvisions);
+        this.components = PCMDetectionResult.createComponents(components, compositeProvisions, compositeRequirements,
+                visibleProvisions);
         this.composites = PCMDetectionResult.createCompositeComponents(this.components, composites, compositeProvisions,
                 compositeRequirements, visibleProvisions);
         this.operationInterfaces = createOperationInterfaces();
-    }
-
-    private static Map<CompUnitOrName, ComponentBuilder> filterFreeComponents(
-            Map<CompUnitOrName, ComponentBuilder> components, Collection<CompositeBuilder> composites) {
-        Set<CompUnitOrName> boundComponents = new HashSet<>();
-        for (CompUnitOrName identifier : components.keySet()) {
-            if (composites.stream()
-                .anyMatch(composite -> composite.hasPart(identifier))) {
-                boundComponents.add(identifier);
-            }
-        }
-        return components.entrySet()
-            .stream()
-            .filter(entry -> !boundComponents.contains(entry.getKey()))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private static Set<Component> createComponents(Map<CompUnitOrName, ComponentBuilder> components,
@@ -80,8 +59,8 @@ public class PCMDetectionResult {
         Set<Composite> constructedComposites = new HashSet<>();
         List<Composite> allComposites = composites.values()
             .stream()
-            .map(x -> x.construct(freeComponents, compositeRequirements.create(List.of(), visibleProvisions),
-                    compositeProvisions.create(List.of()), visibleProvisions))
+            .map(x -> x.construct(freeComponents, compositeRequirements.create(visibleProvisions, visibleProvisions),
+                    compositeProvisions.create(visibleProvisions), visibleProvisions))
             .collect(Collectors.toList());
 
         // Remove redundant composites.
@@ -137,18 +116,6 @@ public class PCMDetectionResult {
             .forEach(provisions::add);
 
         return provisions;
-    }
-
-    private static void removeBoundComponents(Map<CompUnitOrName, ComponentBuilder> freeComponents,
-            Set<Composite> composites) {
-        Set<CompUnitOrName> boundComponents = composites.stream()
-            .flatMap(composite -> composite.parts()
-                .stream())
-            .map(part -> part.identifier())
-            .collect(Collectors.toSet());
-        for (CompUnitOrName identifier : boundComponents) {
-            freeComponents.remove(identifier);
-        }
     }
 
     private Map<OperationInterface, List<Operation>> createOperationInterfaces() {

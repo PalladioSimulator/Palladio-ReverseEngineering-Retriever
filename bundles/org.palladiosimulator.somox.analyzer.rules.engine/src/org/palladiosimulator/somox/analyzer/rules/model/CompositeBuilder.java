@@ -35,7 +35,7 @@ public class CompositeBuilder {
                 .equals(identifier));
     }
 
-    public Composite construct(Collection<Component> freeComponents, Requirements compositeRequirements,
+    public Composite construct(Collection<Component> allComponents, Requirements compositeRequirements,
             Provisions compositeProvisions, Collection<OperationInterface> visibleProvisions) {
         Logger.getLogger(getClass())
             .warn("Constructing composite component " + name);
@@ -53,7 +53,7 @@ public class CompositeBuilder {
             .map(x -> x.create(allDependencies, visibleProvisions))
             .collect(Collectors.toSet());
 
-        Set<Component> remainingComponents = new HashSet<>(freeComponents);
+        Set<Component> remainingComponents = new HashSet<>(allComponents);
         remainingComponents.removeAll(parts);
         Set<OperationInterface> internalInterfaces = new HashSet<>();
 
