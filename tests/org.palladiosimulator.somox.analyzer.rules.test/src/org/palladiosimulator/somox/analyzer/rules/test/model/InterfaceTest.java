@@ -64,7 +64,7 @@ public class InterfaceTest {
     @Test
     void singlePathOperation() {
         ComponentBuilder builder = new ComponentBuilder(null);
-        Operation expectedOperation = new Operation(null, new RESTName("/method", Optional.empty()));
+        Operation expectedOperation = new Operation(null, new RESTName("test-host", "/method", Optional.empty()));
         builder.provisions()
             .add(expectedOperation);
 
@@ -90,9 +90,9 @@ public class InterfaceTest {
         assertEquals(1, operations.size(), "more than one operation in the interface");
 
         List<Operation> firstMethodCandidates = operations.stream()
-            .filter(x -> Optional.of("/method")
+            .filter(x -> Optional.of("test-host/method")
                 .equals(x.getName()
-                    .forInterface("/method")))
+                    .forInterface("test-host/method")))
             .collect(Collectors.toList());
 
         assertFalse(firstMethodCandidates.isEmpty(), "interface does not contain an operation");
@@ -156,8 +156,10 @@ public class InterfaceTest {
     @Test
     void entirePathInterface() {
         ComponentBuilder builder = new ComponentBuilder(null);
-        Operation firstMethod = new Operation(null, new RESTName("/common_interface/first_method", Optional.empty()));
-        Operation secondMethod = new Operation(null, new RESTName("/common_interface/second_method", Optional.empty()));
+        Operation firstMethod = new Operation(null,
+                new RESTName("test-host", "/common_interface/first_method", Optional.empty()));
+        Operation secondMethod = new Operation(null,
+                new RESTName("test-host", "/common_interface/second_method", Optional.empty()));
         builder.provisions()
             .add(firstMethod);
         builder.provisions()
@@ -167,7 +169,8 @@ public class InterfaceTest {
         List<OperationInterface> visibleProvisions = List.of(firstMethod, secondMethod);
 
         Component builtComponent = builder.create(allDependencies, visibleProvisions);
-        EntireInterface expectedInterface = new EntireInterface(new RESTName("/common_interface", Optional.empty()));
+        EntireInterface expectedInterface = new EntireInterface(
+                new RESTName("test-host", "/common_interface", Optional.empty()));
         assertTrue(builtComponent.provisions()
             .containsPartOf(expectedInterface));
 
@@ -186,18 +189,18 @@ public class InterfaceTest {
         assertEquals(2, operations.size(), "wrong number of operations in the interface");
 
         List<Operation> firstMethodCandidates = operations.stream()
-            .filter(x -> Optional.of("/common_interface/first_method")
+            .filter(x -> Optional.of("test-host/common_interface/first_method")
                 .equals(x.getName()
-                    .forInterface("/common_interface")))
+                    .forInterface("test-host/common_interface")))
             .collect(Collectors.toList());
 
         assertFalse(firstMethodCandidates.isEmpty(), "interface does not contain first method");
         assertEquals(1, firstMethodCandidates.size(), "interface contains multiple instances of first method");
 
         List<Operation> secondMethodCandidates = operations.stream()
-            .filter(x -> Optional.of("/common_interface/second_method")
+            .filter(x -> Optional.of("test-host/common_interface/second_method")
                 .equals(x.getName()
-                    .forInterface("/common_interface")))
+                    .forInterface("test-host/common_interface")))
             .collect(Collectors.toList());
 
         assertFalse(secondMethodCandidates.isEmpty(), "interface does not contain second method");

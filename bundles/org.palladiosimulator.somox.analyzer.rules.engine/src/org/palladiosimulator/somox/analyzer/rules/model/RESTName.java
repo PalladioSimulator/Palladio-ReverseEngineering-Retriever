@@ -8,16 +8,21 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class RESTName implements InterfaceName, OperationName {
+    private final String host;
     private final List<String> path;
     private final Optional<HTTPMethod> httpMethod;
 
-    public RESTName(String path, Optional<HTTPMethod> httpMethod) throws IllegalArgumentException {
+    public RESTName(String host, String path, Optional<HTTPMethod> httpMethod) throws IllegalArgumentException {
+        this.host = host;
         this.httpMethod = httpMethod;
-        Optional<List<String>> parsedPath = parsePath(path);
+        Optional<List<String>> parsedPath = parsePath(host + path);
         if (parsedPath.isEmpty()) {
             throw new IllegalArgumentException("Could not parse path due to illegal format: \"" + path + "\"");
         }
         this.path = parsedPath.get();
+
+        // Keep host name separate
+        this.path.remove(0);
     }
 
     @Override
@@ -71,7 +76,7 @@ public class RESTName implements InterfaceName, OperationName {
 
     @Override
     public InterfaceName createInterface(String name) {
-        return new RESTName(name, Optional.empty());
+        return new RESTName(host, name, Optional.empty());
     }
 
     private static String toName(List<String> path) {
@@ -88,25 +93,20 @@ public class RESTName implements InterfaceName, OperationName {
 
     @Override
     public String toString() {
+        String pathString = toName(path);
+        String methodString = "";
         if (httpMethod.isPresent()) {
-            return toName(path) + "[" + httpMethod.get()
+            methodString = "[" + httpMethod.get()
                 .toString() + "]";
-        } else {
-            return toName(path);
         }
+        return host + pathString + methodString;
     }
 
     private Optional<List<String>> parsePath(String string) {
-        if (string.equals("/")) {
-            return Optional.of(List.of());
-        }
         String[] segments = string.split("/");
-        if (segments.length <= 1) {
-            return Optional.empty();
-        }
 
-        // Require an absolute path.
-        if (!segments[0].isEmpty()) {
+        // Require at least a "/" after the host name
+        if (segments.length == 1 && !string.endsWith("/")) {
             return Optional.empty();
         }
 
@@ -119,7 +119,7 @@ public class RESTName implements InterfaceName, OperationName {
 
     @Override
     public int hashCode() {
-        return Objects.hash(path);
+        return Objects.hash(host, path, httpMethod);
     }
 
     @Override
@@ -134,7 +134,8 @@ public class RESTName implements InterfaceName, OperationName {
             return false;
         }
         RESTName other = (RESTName) obj;
-        return Objects.equals(path, other.path);
+        return Objects.equals(host, other.host) && Objects.equals(path, other.path)
+                && Objects.equals(httpMethod, other.httpMethod);
     }
 
     @Override
@@ -145,6 +146,11 @@ public class RESTName implements InterfaceName, OperationName {
             return false;
         }
         List<String> interfacePath = interfacePathOption.get();
+        String otherHost = interfacePath.remove(0);
+
+        if (!otherHost.equals(host)) {
+            return false;
+        }
 
         if (interfacePath.size() > path.size()) {
             return false;

@@ -53,22 +53,21 @@ class SpringRules implements Rule {
 			findFile(yamlMappers.keySet, configRoot, Set.of(applicationName + ".yaml", applicationName + ".yml")))
 		val contextPathOption = Optional.ofNullable(projectConfigYaml).flatMap[x|x.apply("server.servlet.context-path")]
 		var contextPath = contextPathOption.orElse("/")
-		if(applicationName !== null) contextPath += applicationName + "/"
 
 		val rawApplicationYaml = rawYamls.get(
 			findFile(yamlMappers.keySet, projectRoot.resolve("src/main/resources"),
 				Set.of("application.yaml", "application.yml")))
 		val contextVariables = collectContextVariables(rawApplicationYaml)
 
-		processRuleForCompUnit(blackboard, unit, contextPath, contextVariables)
+		processRuleForCompUnit(blackboard, unit, applicationName, contextPath, contextVariables)
 	}
 
 	def findProjectRoot(Path currentPath, Map<Path, Document> poms) {
 		if (currentPath === null || poms === null) {
 			return null
 		}
-		val closestPom = poms.entrySet.stream.map([entry|entry.key])// Only keep poms above the current compilation unit.
-		.filter([path|currentPath.startsWith(path.parent)])// Take the longest path, which is the pom.xml closest to the compilation unit
+		val closestPom = poms.entrySet.stream.map([entry|entry.key]) // Only keep poms above the current compilation unit.
+		.filter([path|currentPath.startsWith(path.parent)]) // Take the longest path, which is the pom.xml closest to the compilation unit
 		.max([a, b|a.size.compareTo(b.size)])
 
 		if (closestPom.present) {
@@ -186,8 +185,8 @@ class SpringRules implements Rule {
 		return result;
 	}
 
-	def processRuleForCompUnit(RuleEngineBlackboard blackboard, CompilationUnit unit, String contextPath,
-		Map<String, String> contextVariables) {
+	def processRuleForCompUnit(RuleEngineBlackboard blackboard, CompilationUnit unit, String applicationName,
+		String contextPath, Map<String, String> contextVariables) {
 		val pcmDetector = blackboard.getPCMDetector
 		if(pcmDetector === null) return;
 
@@ -243,13 +242,14 @@ class SpringRules implements Rule {
 						methodName = replaceArgumentsWithWildcards(methodName);
 						val httpMethod = getHTTPMethod(m);
 						pcmDetector.detectCompositeProvidedOperation(identifier, m.resolveBinding,
-							new RESTName(methodName, httpMethod));
+							new RESTName(applicationName, methodName, httpMethod));
 					}
 				}
 			}
 		}
 
 		if (isClient) {
+			val serviceIdentifier = getUnitAnnotationStringValue(unit, "FeignClient", "name");
 			val requestedUnitMapping = getUnitAnnotationStringValue(unit, "RequestMapping");
 			// Do not include the context path since client requests are expressed as uniquely identifiable paths.
 			var ifaceName = "";
@@ -265,7 +265,8 @@ class SpringRules implements Rule {
 						var methodName = ifaceName + "/" + requestedMapping;
 						methodName = replaceArgumentsWithWildcards(methodName);
 						val httpMethod = getHTTPMethod(m);
-						pcmDetector.detectCompositeRequiredInterface(identifier, new RESTName(methodName, httpMethod));
+						pcmDetector.detectCompositeRequiredInterface(identifier,
+							new RESTName(serviceIdentifier, methodName, httpMethod));
 					}
 				}
 			}

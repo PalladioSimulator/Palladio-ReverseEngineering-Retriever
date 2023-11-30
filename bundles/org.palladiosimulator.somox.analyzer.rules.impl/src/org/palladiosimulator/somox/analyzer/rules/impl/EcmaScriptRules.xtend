@@ -74,9 +74,9 @@ class EcmaScriptRules implements Rule {
 			for (url : resolvedUrls) {
 				val urlWithWildcards = url.replaceAll(VARIABLE_PREFIX + ".*\\/?", "*")
 				pcmDetector.detectRequiredInterface(GATEWAY_NAME,
-					new RESTName("/" + urlWithWildcards, Optional.empty()));
+					new RESTName("TODO-some-backend-host", "/" + urlWithWildcards, Optional.empty()));
 				pcmDetector.detectProvidedOperation(GATEWAY_NAME, null,
-					new RESTName(GATEWAY_PREFIX + "/" + urlWithWildcards, Optional.empty()));
+					new RESTName("TODO-api", GATEWAY_PREFIX + "/" + urlWithWildcards, Optional.empty()));
 			}
 		}
 
