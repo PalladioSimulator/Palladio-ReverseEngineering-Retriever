@@ -3,7 +3,6 @@ package org.palladiosimulator.somox.analyzer.rules.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -69,17 +68,15 @@ public class Requirements implements Iterable<OperationInterface> {
                 .flatMap(x -> x.stream())
                 .collect(Collectors.toList()));
             for (OperationInterface member : groupedRequirements.get(root)) {
-                    simplifiedRoot.addAll(member.simplified()
-                        .values()
-                        .stream()
-                        .flatMap(x -> x.stream())
-                        .collect(Collectors.toList()));
+                simplifiedRoot.addAll(member.simplified()
+                    .values()
+                    .stream()
+                    .flatMap(x -> x.stream())
+                    .collect(Collectors.toList()));
             }
-            simplifiedInterfaces.add(Map.of(
-            		root,
-            		simplifiedRoot.stream()
-            			.distinct()
-            			.collect(Collectors.toList())));
+            simplifiedInterfaces.add(Map.of(root, simplifiedRoot.stream()
+                .distinct()
+                .collect(Collectors.toList())));
         }
         return MapMerger.merge(simplifiedInterfaces);
     }

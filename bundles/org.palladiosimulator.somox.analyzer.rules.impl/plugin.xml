@@ -49,5 +49,13 @@
             class="org.palladiosimulator.somox.analyzer.rules.impl.SpringRules">
       </rule>
    </extension>
+   <extension
+         id="org.palladiosimulator.somox.analyzer.rules.impl.spring.zuul"
+         name="Spring Zuul Rules"
+         point="org.palladiosimulator.somox.analyzer.rule">
+      <rule
+            class="org.palladiosimulator.somox.analyzer.rules.impl.SpringZuulRules">
+      </rule>
+   </extension>
 
 </plugin>
