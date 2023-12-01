@@ -65,7 +65,7 @@ class SpringZuulRules implements Rule {
 		routeMap.put(projectRoot, routes)
 		blackboard.addPartition(RULE_ID, routeMap)
 		blackboard.addPartition(ECMASCRIPT_ROUTES_ID, routeMap)
-		
+
 		var hostnameMap = blackboard.getPartition(ECMASCRIPT_HOSTNAMES_ID) as Map<Path, String>
 		if (hostnameMap === null) {
 			hostnameMap = new HashMap<Path, String>()
@@ -93,20 +93,48 @@ class SpringZuulRules implements Rule {
 		for (route : routes.values) {
 			val pathObject = route.get("path")
 			val serviceIdObject = route.get("serviceId")
+			val urlObject = route.get("url")
 			var stripPrefixObject = route.get("stripPrefix")
-			if (stripPrefixObject === null) {
+			if (stripPrefixObject === null || !(stripPrefixObject instanceof Boolean)) {
 				stripPrefixObject = true
 			}
-			if (pathObject !== null && serviceIdObject !== null && pathObject instanceof String &&
-				serviceIdObject instanceof String && stripPrefixObject instanceof Boolean) {
+			val stripPrefix = stripPrefixObject as Boolean
+
+			val hasServiceId = serviceIdObject !== null && serviceIdObject instanceof String
+			val hasPath = pathObject !== null && pathObject instanceof String
+			val hasUrl = urlObject !== null && urlObject instanceof String
+
+			if (hasPath && (hasServiceId || hasUrl)) {
 				val path = pathObject as String
-				val serviceId = serviceIdObject as String
-				val stripPrefix = stripPrefixObject as Boolean
-				result.add(new GatewayRoute(path, serviceId, stripPrefix))
+				if (hasServiceId) {
+					val serviceId = serviceIdObject as String
+					result.add(new GatewayRoute(path, serviceId, stripPrefix))
+				} else if (hasUrl) {
+					val url = urlObject as String
+					result.add(new GatewayRoute(path, toHostname(url), stripPrefix))
+				}
 			}
 		}
 
 		return result;
+	}
+	
+	def toHostname(String url) {
+		var schemaEnd = url.lastIndexOf("://")
+		if (schemaEnd == -1) {
+			schemaEnd = -3 
+		}
+		val hostnameStart = schemaEnd + 3
+		var portIndex = url.indexOf(":", hostnameStart)
+		if (portIndex == -1) {
+			portIndex = url.length
+		}
+		var pathIndex = url.indexOf("/", hostnameStart)
+		if (pathIndex == -1) {
+			pathIndex = url.length
+		}
+		val hostnameEnd = Math.min(portIndex, pathIndex)
+		return url.substring(hostnameStart, hostnameEnd)
 	}
 
 	override isBuildRule() {
