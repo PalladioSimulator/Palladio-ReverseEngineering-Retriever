@@ -14,12 +14,12 @@ import org.jdom2.Document
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard
 import org.palladiosimulator.somox.analyzer.rules.engine.Rule
 import org.palladiosimulator.somox.analyzer.rules.impl.util.SpringHelper
+import org.palladiosimulator.somox.analyzer.rules.impl.data.SpringZuulRoute
 
 class SpringZuulRules implements Rule {
 	static final Logger LOG = Logger.getLogger(SpringZuulRules)
 
 	public static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.spring.zuul"
-	public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java"
 	public static final String YAML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.yaml"
 	public static final String YAML_MAPPERS_KEY = YAML_DISCOVERER_ID + ".mappers"
 	public static final String XML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.xml"
@@ -34,9 +34,9 @@ class SpringZuulRules implements Rule {
 		val projectRoot = SpringHelper.findProjectRoot(path, poms)
 		val configRoot = SpringHelper.findConfigRoot(poms)
 
-		var routeMap = blackboard.getPartition(RULE_ID) as Map<Path, List<Route>>
+		var routeMap = blackboard.getPartition(RULE_ID) as Map<Path, List<SpringZuulRoute>>
 		if (routeMap === null) {
-			routeMap = new HashMap<Path, List<Route>>()
+			routeMap = new HashMap<Path, List<SpringZuulRoute>>()
 		}
 
 		// Execute only once for each Spring application/service
@@ -63,7 +63,7 @@ class SpringZuulRules implements Rule {
 		blackboard.addPartition(RULE_ID, routeMap)
 	}
 
-	def List<Route> collectRoutes(Iterable<Map<String, Object>> applicationYamlIter) {
+	def List<SpringZuulRoute> collectRoutes(Iterable<Map<String, Object>> applicationYamlIter) {
 		val result = new ArrayList()
 
 		if(applicationYamlIter === null || applicationYamlIter.empty) return result
@@ -86,7 +86,7 @@ class SpringZuulRules implements Rule {
 				serviceIdObject instanceof String) {
 				val path = pathObject as String
 				val serviceId = serviceIdObject as String
-				result.add(new Route(path, serviceId))
+				result.add(new SpringZuulRoute(path, serviceId))
 			}
 		}
 
@@ -110,16 +110,6 @@ class SpringZuulRules implements Rule {
 	}
 
 	override getRequiredServices() {
-		return Set.of(JAVA_DISCOVERER_ID, YAML_DISCOVERER_ID, XML_DISCOVERER_ID, PROPERTIES_DISCOVERER_ID)
-	}
-
-	static class Route {
-		public String path
-		public String serviceId
-
-		new(String path, String serviceId) {
-			this.path = path
-			this.serviceId = serviceId
-		}
+		return Set.of(YAML_DISCOVERER_ID, XML_DISCOVERER_ID, PROPERTIES_DISCOVERER_ID)
 	}
 }
