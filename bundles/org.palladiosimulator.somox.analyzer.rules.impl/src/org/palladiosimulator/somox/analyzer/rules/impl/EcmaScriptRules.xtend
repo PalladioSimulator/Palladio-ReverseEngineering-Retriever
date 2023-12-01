@@ -24,14 +24,16 @@ import org.palladiosimulator.somox.analyzer.rules.model.RESTName
 import java.util.Optional
 import org.palladiosimulator.somox.analyzer.rules.model.CompUnitOrName
 import org.palladiosimulator.somox.analyzer.rules.engine.Rule
+import org.palladiosimulator.somox.analyzer.rules.impl.data.GatewayRoute
 
 class EcmaScriptRules implements Rule {
 
 	public static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.ecmascript"
 
 	public static final String ECMASCRIPT_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.ecmascript"
+	public static final String HOSTNAMES_ID = "org.palladiosimulator.somox.analyzer.rules.impl.ecmascript.hostnames"
+	public static final String GATEWAY_ROUTES_ID = "org.palladiosimulator.somox.analyzer.rules.impl.ecmascript.routes"
 
-	static final String GATEWAY_PREFIX = "/gateway"
 	static final CompUnitOrName GATEWAY_NAME = new CompUnitOrName("Gateway")
 	static final String START_NONWORD_CHARS = "^[\\W]+"
 	static final String SEPARATOR = "."
@@ -46,14 +48,46 @@ class EcmaScriptRules implements Rule {
 		val compilationUnits = blackboard.getDiscoveredFiles(ECMASCRIPT_DISCOVERER_ID, typeof(CompilationUnitTree))
 		val compilationUnit = compilationUnits.get(path)
 		if(compilationUnit === null) return
+
+		var gatewayRouteMap = blackboard.getPartition(GATEWAY_ROUTES_ID) as Map<Path, List<GatewayRoute>>
+		if (gatewayRouteMap === null) {
+			gatewayRouteMap = Map.of
+		}
+		var gatewayRoutes = List.of
+		var Path mostSpecificGatewayPath = null
+		for (gatewayPath : gatewayRouteMap.keySet) {
+			if (path.startsWith(gatewayPath) && (mostSpecificGatewayPath === null || gatewayPath.startsWith(mostSpecificGatewayPath))) {
+				gatewayRoutes = gatewayRouteMap.get(gatewayPath)
+				mostSpecificGatewayPath = gatewayPath
+			}
+		}
+
+		var hostnameMap = blackboard.getPartition(HOSTNAMES_ID) as Map<Path, String>
+		if (hostnameMap === null) {
+			hostnameMap = Map.of
+		}
+		var hostname = "API-HOST"
+		var Path mostSpecificHostnamePath = null
+		for (hostnamePath : hostnameMap.keySet) {
+			if (path.startsWith(hostnamePath) && (mostSpecificHostnamePath === null || hostnamePath.startsWith(mostSpecificHostnamePath))) {
+				hostname = hostnameMap.get(hostnamePath)
+				mostSpecificHostnamePath = hostnamePath
+			}
+		}
+
+		val pcmDetector = blackboard.PCMDetector
 		val httpRequests = findAllHttpRequests(blackboard, compilationUnit)
 		for (key : httpRequests.keySet) {
-			System.out.println("\t" + key + " = " + httpRequests.get(key));
+			for (url : httpRequests.get(key)) {
+				System.out.println("\t" + key + " = " + url);
+				pcmDetector.detectRequiredInterface(GATEWAY_NAME, mapURL(hostname, "/" + url, gatewayRoutes));
+				pcmDetector.detectProvidedOperation(GATEWAY_NAME, null,
+					new RESTName(hostname, "/" + url, Optional.empty()));
+			}
 		}
 	}
 
 	def findAllHttpRequests(RuleEngineBlackboard blackboard, CompilationUnitTree unit) {
-		val pcmDetector = blackboard.PCMDetector
 		val source = unit.getSourceName().substring(0, unit.getSourceName().lastIndexOf(SEPARATOR) + 1)
 		val assignments = findVariableAssignments(unit)
 		val requests = join(findFunctionCallsWithUrls(unit), findFunctionDeclarationsWithUrls(unit),
@@ -70,14 +104,12 @@ class EcmaScriptRules implements Rule {
 					resolvedUrls.add(url)
 				}
 			}
-			normalizedRequests.put(source + key.replaceAll(START_NONWORD_CHARS, BLANK), resolvedUrls)
+			var urlsWithWildcards = new HashSet()
 			for (url : resolvedUrls) {
-				val urlWithWildcards = url.replaceAll(VARIABLE_PREFIX + ".*\\/?", "*")
-				pcmDetector.detectRequiredInterface(GATEWAY_NAME,
-					new RESTName("TODO-some-backend-host", "/" + urlWithWildcards, Optional.empty()));
-				pcmDetector.detectProvidedOperation(GATEWAY_NAME, null,
-					new RESTName("TODO-api", GATEWAY_PREFIX + "/" + urlWithWildcards, Optional.empty()));
+				urlsWithWildcards.add(url.replaceAll(VARIABLE_PREFIX + ".*\\/?", "*"))
 			}
+
+			normalizedRequests.put(source + key.replaceAll(START_NONWORD_CHARS, BLANK), urlsWithWildcards)
 		}
 
 		return normalizedRequests
@@ -233,6 +265,15 @@ class EcmaScriptRules implements Rule {
 			}
 		}
 		return join
+	}
+
+	def mapURL(String host, String url, List<GatewayRoute> routes) {
+		for (route : routes) {
+			if (route.matches(url)) {
+				return route.applyTo(url)
+			}
+		}
+		return new RESTName(host, url, Optional.empty)
 	}
 
 	override isBuildRule() {

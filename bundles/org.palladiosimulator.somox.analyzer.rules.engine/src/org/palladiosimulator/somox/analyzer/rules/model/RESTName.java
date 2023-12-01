@@ -79,7 +79,7 @@ public class RESTName implements InterfaceName, OperationName {
         return new RESTName(host, name, Optional.empty());
     }
 
-    private static String toName(List<String> path) {
+    private String toName(List<String> path) {
         StringBuilder name = new StringBuilder();
         name.append("/");
         for (int i = 0; i < path.size(); i++) {
@@ -88,7 +88,7 @@ public class RESTName implements InterfaceName, OperationName {
                 name.append("/");
             }
         }
-        return name.toString();
+        return host + name.toString();
     }
 
     @Override
@@ -99,7 +99,7 @@ public class RESTName implements InterfaceName, OperationName {
             methodString = "[" + httpMethod.get()
                 .toString() + "]";
         }
-        return host + pathString + methodString;
+        return pathString + methodString;
     }
 
     private Optional<List<String>> parsePath(String string) {
