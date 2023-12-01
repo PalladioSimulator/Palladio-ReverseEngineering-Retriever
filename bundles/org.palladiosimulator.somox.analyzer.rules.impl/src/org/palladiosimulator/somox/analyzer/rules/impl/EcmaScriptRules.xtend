@@ -255,4 +255,7 @@ class EcmaScriptRules implements Rule {
 		return Set.of(ECMASCRIPT_DISCOVERER_ID)
 	}
 
+	override getDependentServices() {
+		Set.of
+	}
 }

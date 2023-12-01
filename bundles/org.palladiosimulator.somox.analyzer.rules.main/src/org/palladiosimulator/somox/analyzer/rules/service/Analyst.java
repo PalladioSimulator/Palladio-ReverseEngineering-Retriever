@@ -1,5 +1,7 @@
 package org.palladiosimulator.somox.analyzer.rules.service;
 
+import java.util.Set;
+
 import org.palladiosimulator.somox.analyzer.rules.engine.Service;
 
 /**
@@ -10,4 +12,8 @@ import org.palladiosimulator.somox.analyzer.rules.engine.Service;
  * @author Florian Bossert
  */
 public interface Analyst extends Service {
+    @Override
+    default Set<String> getDependentServices() {
+        return Set.of();
+    }
 }

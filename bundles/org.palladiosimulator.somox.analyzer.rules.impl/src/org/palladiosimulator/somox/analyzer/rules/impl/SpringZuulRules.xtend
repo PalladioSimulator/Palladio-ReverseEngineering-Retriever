@@ -24,6 +24,7 @@ class SpringZuulRules implements Rule {
 	public static final String YAML_MAPPERS_KEY = YAML_DISCOVERER_ID + ".mappers"
 	public static final String XML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.xml"
 	public static final String PROPERTIES_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.properties"
+	public static final String ECMASCRIPT_RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.ecmascript"
 
 	override processRules(RuleEngineBlackboard blackboard, Path path) {
 		val rawYamls = blackboard.getPartition(YAML_DISCOVERER_ID) as Map<Path, Iterable<Map<String, Object>>>
@@ -111,5 +112,9 @@ class SpringZuulRules implements Rule {
 
 	override getRequiredServices() {
 		return Set.of(YAML_DISCOVERER_ID, XML_DISCOVERER_ID, PROPERTIES_DISCOVERER_ID)
+	}
+
+	override getDependentServices() {
+		Set.of(ECMASCRIPT_RULE_ID)
 	}
 }

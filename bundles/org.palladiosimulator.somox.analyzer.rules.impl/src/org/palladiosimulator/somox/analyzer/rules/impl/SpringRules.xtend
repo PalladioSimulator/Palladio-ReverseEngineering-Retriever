@@ -361,4 +361,7 @@ class SpringRules implements Rule {
 		return Set.of(JAVA_DISCOVERER_ID, YAML_DISCOVERER_ID, XML_DISCOVERER_ID, PROPERTIES_DISCOVERER_ID, ZUUL_RULE_ID)
 	}
 
+	override getDependentServices() {
+		Set.of
+	}
 }

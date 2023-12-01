@@ -111,12 +111,32 @@ public class ServiceConfiguration<T extends Service> {
         List<Collection<T>> executionOrder = new ArrayList<>();
         Queue<T> remainingServices = new ArrayDeque<>(getSelected());
         List<T> requiringServices = new LinkedList<>();
+        Map<String, Set<String>> extendedRequirements = new HashMap<>();
+
+        for (T service : remainingServices) {
+            extendedRequirements.put(service.getID(), new HashSet<>(service.getRequiredServices()));
+        }
+
+        // Rephrase all dependencies into requirements
+        for (T providingService : remainingServices) {
+            for (String dependentID : providingService.getDependentServices()) {
+                if (!extendedRequirements.containsKey(dependentID)) {
+                    continue;
+                }
+                extendedRequirements.get(dependentID)
+                    .add(providingService.getID());
+            }
+        }
+
         while (!remainingServices.isEmpty()) {
             T candidate = remainingServices.poll();
-            if (isRequiringAny(candidate, remainingServices) || isRequiringAny(candidate, requiringServices)) {
+            String candidateID = candidate.getID();
+            Set<String> candidateRequirements = extendedRequirements.get(candidateID);
+            if (isRequiringAny(candidateRequirements, remainingServices)
+                    || isRequiringAny(candidateRequirements, requiringServices)) {
                 requiringServices.add(candidate);
             } else {
-                addAfterRequirements(candidate, executionOrder);
+                addAfterRequirements(candidate, candidateRequirements, executionOrder);
 
                 remainingServices.addAll(requiringServices);
                 requiringServices.clear();
@@ -128,8 +148,9 @@ public class ServiceConfiguration<T extends Service> {
         return new ArrayDeque<>(executionOrder);
     }
 
-    private void addAfterRequirements(T service, List<Collection<T>> executionOrder) {
-        if (executionOrder.isEmpty() || isRequiringAny(service, executionOrder.get(executionOrder.size() - 1))) {
+    private void addAfterRequirements(T service, Set<String> serviceRequirements, List<Collection<T>> executionOrder) {
+        if (executionOrder.isEmpty()
+                || isRequiringAny(serviceRequirements, executionOrder.get(executionOrder.size() - 1))) {
             Collection<T> newStep = new ArrayList<>();
             newStep.add(service);
             executionOrder.add(newStep);
@@ -139,7 +160,7 @@ public class ServiceConfiguration<T extends Service> {
         Collection<T> earliestCandidate = executionOrder.get(executionOrder.size() - 1);
         for (int i = executionOrder.size() - 2; i >= 0; i--) {
             Collection<T> currentStep = executionOrder.get(i);
-            if (isRequiringAny(service, currentStep)) {
+            if (isRequiringAny(serviceRequirements, currentStep)) {
                 break;
             }
             earliestCandidate = currentStep;
@@ -147,11 +168,10 @@ public class ServiceConfiguration<T extends Service> {
         earliestCandidate.add(service);
     }
 
-    private boolean isRequiringAny(T service, Collection<T> services) {
-        Set<String> dependencies = service.getRequiredServices();
+    private boolean isRequiringAny(Set<String> requirements, Collection<T> services) {
         return services.stream()
             .map(Service::getID)
-            .anyMatch(dependencies::contains);
+            .anyMatch(requirements::contains);
     }
 
     public Collection<T> getAvailable() {

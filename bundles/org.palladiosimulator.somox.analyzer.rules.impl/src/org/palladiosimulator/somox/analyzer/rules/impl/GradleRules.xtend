@@ -49,4 +49,7 @@ class GradleRules implements Rule {
 		return Set.of(JAVA_DISCOVERER_ID)
 	}
 
+	override getDependentServices() {
+		Set.of
+	}
 }

@@ -42,8 +42,8 @@ class JaxRSRules implements Rule {
 		if (isUnitController) {
 			pcmDetector.detectComponent(identifier)
 			getMethods(unit).forEach [ m |
-				if(isMethodAnnotatedWithName(m, "DELETE", "GET", "HEAD", "PUT", "POST", "OPTIONS")) pcmDetector.
-					detectProvidedOperation(identifier, m.resolveBinding)
+				if (isMethodAnnotatedWithName(m, "DELETE", "GET", "HEAD", "PUT", "POST", "OPTIONS"))
+					pcmDetector.detectProvidedOperation(identifier, m.resolveBinding)
 			]
 			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(identifier, f)]
 			return
@@ -53,8 +53,8 @@ class JaxRSRules implements Rule {
 		if (isWebListener) {
 			pcmDetector.detectComponent(identifier)
 			getMethods(unit).forEach [ m |
-				if(isMethodModifiedExactlyWith(m, "public") || isMethodModifiedExactlyWith(m, "protected")) pcmDetector.
-					detectProvidedOperation(identifier, m.resolveBinding)
+				if (isMethodModifiedExactlyWith(m, "public") || isMethodModifiedExactlyWith(m, "protected"))
+					pcmDetector.detectProvidedOperation(identifier, m.resolveBinding)
 			]
 			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(identifier, f)]
 			return
@@ -107,4 +107,7 @@ class JaxRSRules implements Rule {
 		return Set.of(JAVA_DISCOVERER_ID)
 	}
 
+	override getDependentServices() {
+		Set.of
+	}
 }

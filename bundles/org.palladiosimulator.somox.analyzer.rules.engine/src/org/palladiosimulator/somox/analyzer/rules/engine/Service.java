@@ -21,5 +21,13 @@ public interface Service {
 
     String getID();
 
+    /**
+     * IDs of services that must run before this one.
+     */
     Set<String> getRequiredServices();
+
+    /**
+     * IDs of services that may only run after this one.
+     */
+    Set<String> getDependentServices();
 }

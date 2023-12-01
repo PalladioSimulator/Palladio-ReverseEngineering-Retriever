@@ -39,4 +39,9 @@ public interface Discoverer extends Service {
     default Set<String> getRequiredServices() {
         return Set.of();
     }
+
+    @Override
+    default Set<String> getDependentServices() {
+        return Set.of();
+    }
 }
