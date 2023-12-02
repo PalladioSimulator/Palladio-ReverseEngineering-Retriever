@@ -171,7 +171,9 @@ public class RESTName implements InterfaceName, OperationName {
             ifaceHttpMethod = Optional.of(HTTPMethod.valueOf(httpMethodName));
         }
 
-        if (interfacePath.size() == path.size() && ifaceHttpMethod.isPresent()
+        // TODO: If this.httpMethod.isEmpty(), see it as part of the other interface anyway.
+        // This allows some imprecision from ECMAScript detection
+        if (interfacePath.size() == path.size() && ifaceHttpMethod.isPresent() && this.httpMethod.isPresent()
                 && !ifaceHttpMethod.equals(this.httpMethod)) {
             return false;
         }
