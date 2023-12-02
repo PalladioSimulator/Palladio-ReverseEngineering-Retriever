@@ -57,5 +57,13 @@
             class="org.palladiosimulator.somox.analyzer.rules.impl.SpringZuulRules">
       </rule>
    </extension>
+   <extension
+         id="org.palladiosimulator.somox.analyzer.rules.impl.spring.cloudgateway"
+         name="Spring Cloud Gateway Rules"
+         point="org.palladiosimulator.somox.analyzer.rule">
+      <rule
+            class="org.palladiosimulator.somox.analyzer.rules.impl.SpringGatewayRules">
+      </rule>
+   </extension>
 
 </plugin>

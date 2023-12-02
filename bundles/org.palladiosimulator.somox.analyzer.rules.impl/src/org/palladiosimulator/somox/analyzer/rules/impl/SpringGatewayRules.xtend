@@ -16,10 +16,10 @@ import org.palladiosimulator.somox.analyzer.rules.engine.Rule
 import org.palladiosimulator.somox.analyzer.rules.impl.util.SpringHelper
 import org.palladiosimulator.somox.analyzer.rules.impl.data.GatewayRoute
 
-class SpringZuulRules implements Rule {
-	static final Logger LOG = Logger.getLogger(SpringZuulRules)
+class SpringGatewayRules implements Rule {
+	static final Logger LOG = Logger.getLogger(SpringGatewayRules)
 
-	public static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.spring.zuul"
+	public static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.spring.cloudgateway"
 	public static final String YAML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.yaml"
 	public static final String YAML_MAPPERS_KEY = YAML_DISCOVERER_ID + ".mappers"
 	public static final String XML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.xml"
@@ -35,7 +35,6 @@ class SpringZuulRules implements Rule {
 		val propertyFiles = blackboard.getDiscoveredFiles(PROPERTIES_DISCOVERER_ID, typeof(Properties))
 
 		val projectRoot = SpringHelper.findProjectRoot(path, poms)
-		val configRoot = SpringHelper.findConfigRoot(poms)
 
 		var routeMap = blackboard.getPartition(RULE_ID) as Map<Path, List<GatewayRoute>>
 		if (routeMap === null) {
@@ -53,12 +52,12 @@ class SpringZuulRules implements Rule {
 				Set.of("application.properties")))
 		val applicationName = SpringHelper.getFromYamlOrProperties("spring.application.name", bootstrapYaml,
 			applicationProperties)
-		val projectConfigYaml = rawYamls.get(
-			SpringHelper.findFile(rawYamls.keySet, configRoot.resolve("src/main/resources/shared"),
-				Set.of(applicationName + ".yaml", applicationName + ".yml")))
+		val rawApplicationYaml = rawYamls.get(
+			SpringHelper.findFile(yamlMappers.keySet, projectRoot.resolve("src/main/resources"),
+				Set.of("application.yaml", "application.yml")))
 
-		// Query zuul.routes in config server only (for now)
-		val routes = collectRoutes(projectConfigYaml)
+		// Query spring.cloud.gateway.routes in application.yaml only
+		val routes = collectRoutes(rawApplicationYaml)
 		for (route : routes) {
 			LOG.warn("Route in " + applicationName + ": " + route.path + " -> " + route.getTargetHost)
 		}
@@ -81,6 +80,7 @@ class SpringZuulRules implements Rule {
 			hostnameMap = new HashMap<Path, String>()
 		}
 		hostnameMap.put(projectRoot, applicationName)
+
 		blackboard.addPartition(ECMASCRIPT_HOSTNAMES_ID, hostnameMap)
 	}
 
@@ -92,47 +92,75 @@ class SpringZuulRules implements Rule {
 		val applicationYaml = applicationYamlIter.get(0) as Map<String, Object>
 		if(applicationYaml === null) return result
 
-		val zuulObject = applicationYaml.get("zuul")
-		if(!(zuulObject instanceof Map)) return result
-		val zuul = zuulObject as Map<String, Object>
+		val springObject = applicationYaml.get("spring")
+		if(!(springObject instanceof Map)) return result
+		val spring = springObject as Map<String, Object>
 
-		val routesObject = zuul.get("routes")
-		if(!(routesObject instanceof Map)) return result
-		val routes = routesObject as Map<String, Map<String, Object>>
+		val cloudObject = spring.get("cloud")
+		if(!(cloudObject instanceof Map)) return result
+		val cloud = cloudObject as Map<String, Object>
 
-		for (route : routes.values) {
-			val pathObject = route.get("path")
-			val serviceIdObject = route.get("serviceId")
-			val urlObject = route.get("url")
-			var stripPrefixObject = route.get("stripPrefix")
-			if (stripPrefixObject === null || !(stripPrefixObject instanceof Boolean)) {
-				stripPrefixObject = true
+		val gatewayObject = cloud.get("gateway")
+		if(!(gatewayObject instanceof Map)) return result
+		val gateway = gatewayObject as Map<String, Object>
+
+		val routesObject = gateway.get("routes")
+		if(!(routesObject instanceof List)) return result
+		val routes = routesObject as List<Map<String, Object>>
+
+		for (route : routes) {
+			val uriObject = route.get("uri")
+			val predicatesObject = route.get("predicates")
+			val filtersObject = route.get("filters")
+
+			var path = Optional.empty
+			if (predicatesObject !== null && predicatesObject instanceof List) {
+				path = getPath(predicatesObject as List<String>)
 			}
-			val stripPrefix = stripPrefixObject as Boolean
+			var stripPrefixLength = 0
+			if (filtersObject !== null && filtersObject instanceof List) {
+				stripPrefixLength = getStripPrefixLength(filtersObject as List<String>)
+			}
+			val hasUri = uriObject !== null && uriObject instanceof String
 
-			val hasServiceId = serviceIdObject !== null && serviceIdObject instanceof String
-			val hasPath = pathObject !== null && pathObject instanceof String
-			val hasUrl = urlObject !== null && urlObject instanceof String
-
-			if (hasPath && (hasServiceId || hasUrl)) {
-				val path = pathObject as String
-				if (hasServiceId) {
-					val serviceId = serviceIdObject as String
-					result.add(new GatewayRoute(path, serviceId, stripPrefix))
-				} else if (hasUrl) {
-					val url = urlObject as String
-					result.add(new GatewayRoute(path, toHostname(url), stripPrefix))
-				}
+			if (path.present && hasUri) {
+				val uri = uriObject as String
+				result.add(new GatewayRoute(path.get, toHostname(uri), stripPrefixLength))
 			}
 		}
 
 		return result;
 	}
-	
+
+	def getPath(List<String> predicates) {
+		for (predicate : predicates) {
+			val prefix = "Path="
+			if (predicate.startsWith(prefix)) {
+				return Optional.of(predicate.substring(prefix.length))
+			}
+		}
+		return Optional.empty
+	}
+
+	def getStripPrefixLength(List<String> filters) {
+		for (filter : filters) {
+			val prefix = "StripPrefix="
+			if (filter.startsWith(prefix)) {
+				val stripPrefixLength = filter.substring(prefix.length)
+				try {
+					return Integer.parseInt(stripPrefixLength)
+				} catch (NumberFormatException e) {
+					return 0
+				}
+			}
+		}
+		return 0
+	}
+
 	def toHostname(String url) {
 		var schemaEnd = url.lastIndexOf("://")
 		if (schemaEnd == -1) {
-			schemaEnd = -3 
+			schemaEnd = -3
 		}
 		val hostnameStart = schemaEnd + 3
 		var portIndex = url.indexOf(":", hostnameStart)
@@ -160,7 +188,7 @@ class SpringZuulRules implements Rule {
 	}
 
 	override getName() {
-		return "Spring Zuul Rules"
+		return "Spring Cloud Gateway Rules"
 	}
 
 	override getRequiredServices() {

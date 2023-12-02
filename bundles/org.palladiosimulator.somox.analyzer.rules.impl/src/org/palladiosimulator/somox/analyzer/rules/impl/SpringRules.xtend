@@ -31,6 +31,7 @@ class SpringRules implements Rule {
 	public static final String XML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.xml"
 	public static final String PROPERTIES_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.properties"
 	public static final String ZUUL_RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.spring.zuul";
+	public static final String CLOUD_GATEWAY_RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.spring.cloudgateway";
 
 	override processRules(RuleEngineBlackboard blackboard, Path path) {
 		val unit = blackboard.getDiscoveredFiles(JAVA_DISCOVERER_ID, typeof(CompilationUnit)).get(path)
@@ -358,7 +359,8 @@ class SpringRules implements Rule {
 	}
 
 	override getRequiredServices() {
-		return Set.of(JAVA_DISCOVERER_ID, YAML_DISCOVERER_ID, XML_DISCOVERER_ID, PROPERTIES_DISCOVERER_ID, ZUUL_RULE_ID)
+		return Set.of(JAVA_DISCOVERER_ID, YAML_DISCOVERER_ID, XML_DISCOVERER_ID, PROPERTIES_DISCOVERER_ID, ZUUL_RULE_ID,
+			CLOUD_GATEWAY_RULE_ID)
 	}
 
 	override getDependentServices() {
