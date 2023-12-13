@@ -36,6 +36,10 @@ class SpringZuulRules implements Rule {
 
 		val projectRoot = SpringHelper.findProjectRoot(path, poms)
 		val configRoot = SpringHelper.findConfigRoot(poms)
+		
+		if (configRoot === null) {
+			return
+		}
 
 		var routeMap = blackboard.getPartition(RULE_ID) as Map<Path, List<GatewayRoute>>
 		if (routeMap === null) {

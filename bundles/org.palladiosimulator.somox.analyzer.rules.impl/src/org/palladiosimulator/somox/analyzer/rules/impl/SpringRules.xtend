@@ -54,9 +54,15 @@ class SpringRules implements Rule {
 
 		var applicationName = SpringHelper.getFromYamlOrProperties("spring.application.name", bootstrapYaml,
 			applicationProperties)
-		val projectConfigYaml = yamlMappers.get(
-			SpringHelper.findFile(yamlMappers.keySet, configRoot.resolve("src/main/resources/shared"),
-				Set.of(applicationName + ".yaml", applicationName + ".yml")))
+		if (applicationName === null) {
+			applicationName = "UNKNOWN-spring-application"
+		}
+
+		val projectConfigYaml = configRoot === null
+				? null
+				: yamlMappers.get(
+				SpringHelper.findFile(yamlMappers.keySet, configRoot.resolve("src/main/resources/shared"),
+					Set.of(applicationName + ".yaml", applicationName + ".yml")))
 		val contextPathOption = Optional.ofNullable(projectConfigYaml).flatMap[x|x.apply("server.servlet.context-path")]
 		var contextPath = contextPathOption.orElse("/")
 
