@@ -20,6 +20,7 @@ import java.util.function.Function
 import java.util.Set
 import org.palladiosimulator.somox.analyzer.rules.engine.Rule
 import org.palladiosimulator.somox.analyzer.rules.impl.util.SpringHelper
+import org.palladiosimulator.somox.analyzer.rules.impl.util.RESTHelper
 
 class SpringRules implements Rule {
 	static final Logger LOG = Logger.getLogger(SpringRules)
@@ -51,7 +52,7 @@ class SpringRules implements Rule {
 			SpringHelper.findFile(propertyFiles.keySet, projectRoot.resolve("src/main/resources"),
 				Set.of("application.properties")))
 
-		val applicationName = SpringHelper.getFromYamlOrProperties("spring.application.name", bootstrapYaml,
+		var applicationName = SpringHelper.getFromYamlOrProperties("spring.application.name", bootstrapYaml,
 			applicationProperties)
 		val projectConfigYaml = yamlMappers.get(
 			SpringHelper.findFile(yamlMappers.keySet, configRoot.resolve("src/main/resources/shared"),
@@ -170,7 +171,7 @@ class SpringRules implements Rule {
 					if (requestedMapping !== null) {
 						requestedMapping = substituteVariables(requestedMapping, contextVariables);
 						var methodName = ifaceName + "/" + requestedMapping;
-						methodName = replaceArgumentsWithWildcards(methodName);
+						methodName = RESTHelper.replaceArgumentsWithWildcards(methodName);
 						val httpMethod = getHTTPMethod(m);
 						pcmDetector.detectCompositeProvidedOperation(identifier, m.resolveBinding,
 							new RESTName(applicationName, methodName, httpMethod));
@@ -194,7 +195,7 @@ class SpringRules implements Rule {
 					if (requestedMapping !== null) {
 						requestedMapping = substituteVariables(requestedMapping, contextVariables);
 						var methodName = ifaceName + "/" + requestedMapping;
-						methodName = replaceArgumentsWithWildcards(methodName);
+						methodName = RESTHelper.replaceArgumentsWithWildcards(methodName);
 						val httpMethod = getHTTPMethod(m);
 						pcmDetector.detectCompositeRequiredInterface(identifier,
 							new RESTName(serviceIdentifier, methodName, httpMethod));
@@ -233,14 +234,6 @@ class SpringRules implements Rule {
 		}
 
 		return result;
-	}
-
-	def replaceArgumentsWithWildcards(String methodName) {
-		var newName = methodName.replaceAll("\\{.*\\}", "*").replaceAll("[\\*\\/]*$", "").replaceAll("[\\*\\/]*\\[",
-			"[")
-		newName = "/" + newName
-		newName = newName.replaceAll("/+", "/")
-		return newName
 	}
 
 	def hasMapping(MethodDeclaration m) {

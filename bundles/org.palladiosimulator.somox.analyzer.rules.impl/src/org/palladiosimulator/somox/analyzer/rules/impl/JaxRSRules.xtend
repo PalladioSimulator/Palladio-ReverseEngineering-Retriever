@@ -7,6 +7,9 @@ import static org.palladiosimulator.somox.analyzer.rules.engine.RuleHelper.*
 import org.palladiosimulator.somox.analyzer.rules.model.CompUnitOrName
 import java.util.Set
 import org.palladiosimulator.somox.analyzer.rules.engine.Rule
+import org.palladiosimulator.somox.analyzer.rules.model.RESTName
+import java.util.Optional
+import org.palladiosimulator.somox.analyzer.rules.impl.util.RESTHelper
 
 class JaxRSRules implements Rule {
 
@@ -40,41 +43,39 @@ class JaxRSRules implements Rule {
 		// detect controller component	
 		val isUnitController = isUnitAnnotatedWithName(unit, "Path")
 		if (isUnitController) {
+			var unitPath = getUnitAnnotationStringValue(unit, "Path")
+			if (unitPath === null) {
+				unitPath = ""
+			}
+			val path = "/" + unitPath
 			pcmDetector.detectComponent(identifier)
 			getMethods(unit).forEach [ m |
-				if (isMethodAnnotatedWithName(m, "DELETE", "GET", "HEAD", "PUT", "POST", "OPTIONS"))
-					pcmDetector.detectProvidedOperation(identifier, m.resolveBinding)
+				if (isMethodAnnotatedWithName(m, "DELETE", "GET", "HEAD", "PUT", "POST", "OPTIONS")) {
+					var methodPath = getMethodAnnotationStringValue(m, "Path")
+					if (methodPath === null) {
+						methodPath = path
+					} else {
+						methodPath = path + "/" + methodPath
+					}
+					methodPath = RESTHelper.replaceArgumentsWithWildcards(methodPath)
+					// TODO: HTTP method switch-case
+					pcmDetector.detectCompositeProvidedOperation(identifier, m.resolveBinding, new RESTName("TODO-host", methodPath, Optional.empty))
+				}
 			]
-			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(identifier, f)]
+			// getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(identifier, f)]
 			return
 		}
 
-		val isWebListener = isUnitAnnotatedWithName(unit, "WebListener", "WebServlet")
-		if (isWebListener) {
+		val isWebServlet = isUnitAnnotatedWithName(unit, "WebServlet")
+		if (isWebServlet) {
+			// TODO: path
 			pcmDetector.detectComponent(identifier)
 			getMethods(unit).forEach [ m |
 				if (isMethodModifiedExactlyWith(m, "public") || isMethodModifiedExactlyWith(m, "protected"))
 					pcmDetector.detectProvidedOperation(identifier, m.resolveBinding)
 			]
-			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(identifier, f)]
+			// getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(identifier, f)]
 			return
-		}
-
-		// detect implementing component
-		val isUnit = isClassImplementing(unit)
-		if (isUnit && !isUnitController && !isWebListener && getAllInterfaces(unit).size() > 0) {
-			pcmDetector.detectComponent(identifier)
-			val firstIn = getAllInterfaces(unit).get(0)
-			getMethods(firstIn).forEach[m|pcmDetector.detectProvidedOperation(identifier, firstIn.resolveBinding, m)]
-			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(identifier, f)]
-			return
-		}
-
-		// detect normal components
-		val classModified = isClassModifiedExactlyWith(unit, "public", "final");
-		if (!isUnit && !isUnitController && !isWebListener && classModified) {
-			pcmDetector.detectComponent(identifier)
-			detectDefault(blackboard, unit)
 		}
 	}
 
