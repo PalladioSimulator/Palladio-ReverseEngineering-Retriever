@@ -57,9 +57,11 @@ class SpringZuulRules implements Rule {
 				Set.of("application.properties")))
 		val applicationName = SpringHelper.getFromYamlOrProperties("spring.application.name", bootstrapYaml,
 			applicationProperties)
-		val projectConfigYaml = rawYamls.get(
-			SpringHelper.findFile(rawYamls.keySet, configRoot.resolve("src/main/resources/shared"),
-				Set.of(applicationName + ".yaml", applicationName + ".yml")))
+		val projectConfigYaml = configRoot === null
+				? null
+				: rawYamls.get(
+				SpringHelper.findFile(rawYamls.keySet, configRoot.resolve("src/main/resources/shared"),
+					Set.of(applicationName + ".yaml", applicationName + ".yml")))
 
 		// Query zuul.routes in config server only (for now)
 		val routes = collectRoutes(projectConfigYaml)
@@ -80,12 +82,14 @@ class SpringZuulRules implements Rule {
 			blackboard.addPartition(ECMASCRIPT_ROUTES_ID, routeMap)
 		}
 
-		var hostnameMap = blackboard.getPartition(ECMASCRIPT_HOSTNAMES_ID) as Map<Path, String>
-		if (hostnameMap === null) {
-			hostnameMap = new HashMap<Path, String>()
+		if (applicationName !== null) {
+			var hostnameMap = blackboard.getPartition(ECMASCRIPT_HOSTNAMES_ID) as Map<Path, String>
+			if (hostnameMap === null) {
+				hostnameMap = new HashMap<Path, String>()
+			}
+			hostnameMap.put(projectRoot, applicationName)
+			blackboard.addPartition(ECMASCRIPT_HOSTNAMES_ID, hostnameMap)
 		}
-		hostnameMap.put(projectRoot, applicationName)
-		blackboard.addPartition(ECMASCRIPT_HOSTNAMES_ID, hostnameMap)
 	}
 
 	def List<GatewayRoute> collectRoutes(Iterable<Map<String, Object>> applicationYamlIter) {
@@ -132,11 +136,11 @@ class SpringZuulRules implements Rule {
 
 		return result;
 	}
-	
+
 	def toHostname(String url) {
 		var schemaEnd = url.lastIndexOf("://")
 		if (schemaEnd == -1) {
-			schemaEnd = -3 
+			schemaEnd = -3
 		}
 		val hostnameStart = schemaEnd + 3
 		var portIndex = url.indexOf(":", hostnameStart)

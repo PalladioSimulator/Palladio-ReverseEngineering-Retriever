@@ -141,9 +141,9 @@ class SpringRules implements Rule {
 
 		val identifier = new CompUnitOrName(unit)
 
-		if (isComponent) {
-			pcmDetector.detectComponent(identifier)
+		pcmDetector.detectComponent(identifier)
 
+		if (isComponent) {
 			getConstructors(unit).stream.filter[c|isMethodAnnotatedWithName(c, "Autowired")].flatMap [ c |
 				getParameters(c).stream
 			].filter[p|!isParameterAnnotatedWith(p, "Value")].forEach [ p |
@@ -158,9 +158,6 @@ class SpringRules implements Rule {
 					pcmDetector.detectRequiredInterface(identifier, f)
 				}
 			}
-		}
-
-		if (isService || isController) {
 			pcmDetector.detectPartOfComposite(identifier, getUnitName(unit));
 		}
 
@@ -210,15 +207,10 @@ class SpringRules implements Rule {
 			}
 		}
 
-		// TODO: This can be solved differently now, for all implemented interfaces instead of just one.
-		var inFs = getAllInterfaces(unit)
-		val isImplementingOne = inFs.size == 1
-
-		if (isComponent && isImplementingOne) {
-			var firstIn = inFs.get(0)
-			pcmDetector.detectProvidedInterface(identifier, firstIn.resolveBinding)
-			for (m : getMethods(firstIn)) {
-				pcmDetector.detectProvidedOperation(identifier, firstIn.resolveBinding, m)
+		for (iface : getAllInterfaces(unit)) {
+			pcmDetector.detectProvidedInterface(identifier, iface.resolveBinding)
+			for (m : getMethods(iface)) {
+				pcmDetector.detectProvidedOperation(identifier, iface.resolveBinding, m)
 			}
 		}
 	}

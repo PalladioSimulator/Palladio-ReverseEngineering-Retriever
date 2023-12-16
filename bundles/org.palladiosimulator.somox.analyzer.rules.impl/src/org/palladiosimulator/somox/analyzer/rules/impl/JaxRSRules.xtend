@@ -10,12 +10,17 @@ import org.palladiosimulator.somox.analyzer.rules.engine.Rule
 import org.palladiosimulator.somox.analyzer.rules.model.RESTName
 import java.util.Optional
 import org.palladiosimulator.somox.analyzer.rules.impl.util.RESTHelper
+import java.util.Map
+import org.palladiosimulator.somox.analyzer.rules.model.HTTPMethod
 
 class JaxRSRules implements Rule {
 
 	public static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.jax_rs"
 
 	public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java"
+
+	static final Map<String, HTTPMethod> SERVLET_METHODS = Map.of("doGet", HTTPMethod.GET, "doPost", HTTPMethod.POST,
+		"doDelete", HTTPMethod.DELETE, "doPut", HTTPMethod.PUT);
 
 	override processRules(RuleEngineBlackboard blackboard, Path path) {
 		val unit = blackboard.getDiscoveredFiles(JAVA_DISCOVERER_ID, typeof(CompilationUnit)).get(path)
@@ -32,17 +37,15 @@ class JaxRSRules implements Rule {
 		}
 
 		val identifier = new CompUnitOrName(unit)
+		val isConverter = isUnitAnnotatedWithName(unit, "Converter")
+		val isUnitController = isUnitAnnotatedWithName(unit, "Path")
+		val isWebServlet = isUnitAnnotatedWithName(unit, "WebServlet")
 
 		// technology based and general recognition
-		val isConverter = isUnitAnnotatedWithName(unit, "Converter")
 		if (isConverter) {
 			detectDefault(blackboard, unit)
-			return
-		}
-
-		// detect controller component	
-		val isUnitController = isUnitAnnotatedWithName(unit, "Path")
-		if (isUnitController) {
+		} // detect controller component	
+		else if (isUnitController) {
 			var unitPath = getUnitAnnotationStringValue(unit, "Path")
 			if (unitPath === null) {
 				unitPath = ""
@@ -59,23 +62,36 @@ class JaxRSRules implements Rule {
 					}
 					methodPath = RESTHelper.replaceArgumentsWithWildcards(methodPath)
 					// TODO: HTTP method switch-case
-					pcmDetector.detectCompositeProvidedOperation(identifier, m.resolveBinding, new RESTName("TODO-host", methodPath, Optional.empty))
+					pcmDetector.detectCompositeProvidedOperation(identifier, m.resolveBinding,
+						new RESTName("TODO-host", methodPath, Optional.empty))
 				}
 			]
-			// getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(identifier, f)]
-			return
-		}
-
-		val isWebServlet = isUnitAnnotatedWithName(unit, "WebServlet")
-		if (isWebServlet) {
-			// TODO: path
+			getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]
+			pcmDetector.detectPartOfComposite(identifier, getUnitName(unit));
+		} else if (isWebServlet) {
+			var unitPath = getUnitAnnotationStringValue(unit, "WebServlet")
+			if (unitPath === null) {
+				unitPath = ""
+			}
+			val path = "/" + unitPath
 			pcmDetector.detectComponent(identifier)
 			getMethods(unit).forEach [ m |
-				if (isMethodModifiedExactlyWith(m, "public") || isMethodModifiedExactlyWith(m, "protected"))
-					pcmDetector.detectProvidedOperation(identifier, m.resolveBinding)
+				if (SERVLET_METHODS.containsKey(m.name.identifier)) {
+					pcmDetector.detectProvidedOperation(identifier, m.resolveBinding,
+						new RESTName("TODO-host", path, Optional.of(SERVLET_METHODS.get(m.name.identifier))))
+				}
 			]
-			// getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(identifier, f)]
-			return
+			getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]
+			pcmDetector.detectPartOfComposite(identifier, getUnitName(unit));
+		} else {
+			detectDefault(blackboard, unit)
+		}
+
+		for (iface : getAllInterfaces(unit)) {
+			pcmDetector.detectProvidedInterface(identifier, iface.resolveBinding)
+			for (m : getMethods(iface)) {
+				pcmDetector.detectProvidedOperation(identifier, iface.resolveBinding, m)
+			}
 		}
 	}
 
@@ -84,8 +100,9 @@ class JaxRSRules implements Rule {
 		val identifier = new CompUnitOrName(unit)
 
 		pcmDetector.detectComponent(identifier)
+
 		getAllPublicMethods(unit).forEach[m|pcmDetector.detectProvidedOperation(identifier, m.resolveBinding)]
-		getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(identifier, f)]
+		getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]
 	}
 
 	override isBuildRule() {

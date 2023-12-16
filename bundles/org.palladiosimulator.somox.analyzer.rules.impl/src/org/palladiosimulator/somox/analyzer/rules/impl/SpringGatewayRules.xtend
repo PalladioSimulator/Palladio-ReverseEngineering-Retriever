@@ -75,13 +75,15 @@ class SpringGatewayRules implements Rule {
 			blackboard.addPartition(ECMASCRIPT_ROUTES_ID, routeMap)
 		}
 
-		var hostnameMap = blackboard.getPartition(ECMASCRIPT_HOSTNAMES_ID) as Map<Path, String>
-		if (hostnameMap === null) {
-			hostnameMap = new HashMap<Path, String>()
-		}
-		hostnameMap.put(projectRoot, applicationName)
+		if (applicationName !== null) {
+			var hostnameMap = blackboard.getPartition(ECMASCRIPT_HOSTNAMES_ID) as Map<Path, String>
+			if (hostnameMap === null) {
+				hostnameMap = new HashMap<Path, String>()
+			}
+			hostnameMap.put(projectRoot, applicationName)
 
-		blackboard.addPartition(ECMASCRIPT_HOSTNAMES_ID, hostnameMap)
+			blackboard.addPartition(ECMASCRIPT_HOSTNAMES_ID, hostnameMap)
+		}
 	}
 
 	def List<GatewayRoute> collectRoutes(Iterable<Map<String, Object>> applicationYamlIter) {
