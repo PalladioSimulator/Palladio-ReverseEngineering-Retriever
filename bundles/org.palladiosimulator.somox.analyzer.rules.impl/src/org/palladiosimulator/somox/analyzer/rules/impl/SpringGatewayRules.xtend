@@ -36,25 +36,31 @@ class SpringGatewayRules implements Rule {
 
 		val projectRoot = SpringHelper.findProjectRoot(path, poms)
 
-		var routeMap = blackboard.getPartition(RULE_ID) as Map<Path, List<GatewayRoute>>
-		if (routeMap === null) {
-			routeMap = new HashMap<Path, List<GatewayRoute>>()
+		var Map<Path, List<GatewayRoute>> routeMap = new HashMap<Path, List<GatewayRoute>>()
+		if (blackboard.hasPartition(RULE_ID)) {
+			routeMap = blackboard.getPartition(RULE_ID) as Map<Path, List<GatewayRoute>>
 		}
 
 		// Execute only once for each Spring application/service
 		if(routeMap.containsKey(projectRoot)) return
 
-		val bootstrapYaml = yamlMappers.get(
-			SpringHelper.findFile(yamlMappers.keySet, projectRoot.resolve("src/main/resources"),
-				Set.of("bootstrap.yaml", "bootstrap.yml")))
-		val applicationProperties = propertyFiles.get(
-			SpringHelper.findFile(propertyFiles.keySet, projectRoot.resolve("src/main/resources"),
-				Set.of("application.properties")))
+		val bootstrapYaml = projectRoot === null
+				? null
+				: yamlMappers.get(
+				SpringHelper.findFile(yamlMappers.keySet, projectRoot.resolve("src/main/resources"),
+					Set.of("bootstrap.yaml", "bootstrap.yml")))
+		val applicationProperties = projectRoot === null
+				? null
+				: propertyFiles.get(
+				SpringHelper.findFile(propertyFiles.keySet, projectRoot.resolve("src/main/resources"),
+					Set.of("application.properties")))
 		val applicationName = SpringHelper.getFromYamlOrProperties("spring.application.name", bootstrapYaml,
 			applicationProperties)
-		val rawApplicationYaml = rawYamls.get(
-			SpringHelper.findFile(yamlMappers.keySet, projectRoot.resolve("src/main/resources"),
-				Set.of("application.yaml", "application.yml")))
+		val rawApplicationYaml = projectRoot === null
+				? null
+				: rawYamls.get(
+				SpringHelper.findFile(yamlMappers.keySet, projectRoot.resolve("src/main/resources"),
+					Set.of("application.yaml", "application.yml")))
 
 		// Query spring.cloud.gateway.routes in application.yaml only
 		val routes = collectRoutes(rawApplicationYaml)
@@ -63,8 +69,8 @@ class SpringGatewayRules implements Rule {
 		}
 		routeMap.put(projectRoot, routes)
 		blackboard.addPartition(RULE_ID, routeMap)
-		val ecmaScriptRouteMap = blackboard.getPartition(ECMASCRIPT_ROUTES_ID) as Map<Path, List<GatewayRoute>>
-		if (ecmaScriptRouteMap !== null) {
+		if (blackboard.hasPartition(ECMASCRIPT_ROUTES_ID)) {
+			val ecmaScriptRouteMap = blackboard.getPartition(ECMASCRIPT_ROUTES_ID) as Map<Path, List<GatewayRoute>>
 			if (ecmaScriptRouteMap.containsKey(projectRoot)) {
 				ecmaScriptRouteMap.get(projectRoot).addAll(routes)
 			} else {
@@ -76,9 +82,9 @@ class SpringGatewayRules implements Rule {
 		}
 
 		if (applicationName !== null) {
-			var hostnameMap = blackboard.getPartition(ECMASCRIPT_HOSTNAMES_ID) as Map<Path, String>
-			if (hostnameMap === null) {
-				hostnameMap = new HashMap<Path, String>()
+			var Map<Path, String> hostnameMap = new HashMap<Path, String>()
+			if (blackboard.hasPartition(ECMASCRIPT_HOSTNAMES_ID)) {
+				hostnameMap = blackboard.getPartition(ECMASCRIPT_HOSTNAMES_ID) as Map<Path, String>
 			}
 			hostnameMap.put(projectRoot, applicationName)
 

@@ -41,9 +41,9 @@ class SpringZuulRules implements Rule {
 			return
 		}
 
-		var routeMap = blackboard.getPartition(RULE_ID) as Map<Path, List<GatewayRoute>>
-		if (routeMap === null) {
-			routeMap = new HashMap<Path, List<GatewayRoute>>()
+		var Map<Path, List<GatewayRoute>> routeMap = new HashMap<Path, List<GatewayRoute>>()
+		if (blackboard.hasPartition(RULE_ID)) {
+			routeMap = blackboard.getPartition(RULE_ID) as Map<Path, List<GatewayRoute>>
 		}
 
 		// Execute only once for each Spring application/service
@@ -70,8 +70,9 @@ class SpringZuulRules implements Rule {
 		}
 		routeMap.put(projectRoot, routes)
 		blackboard.addPartition(RULE_ID, routeMap)
-		val ecmaScriptRouteMap = blackboard.getPartition(ECMASCRIPT_ROUTES_ID) as Map<Path, List<GatewayRoute>>
-		if (ecmaScriptRouteMap !== null) {
+
+		if (blackboard.hasPartition(ECMASCRIPT_ROUTES_ID)) {
+			val ecmaScriptRouteMap = blackboard.getPartition(ECMASCRIPT_ROUTES_ID) as Map<Path, List<GatewayRoute>>
 			if (ecmaScriptRouteMap.containsKey(projectRoot)) {
 				ecmaScriptRouteMap.get(projectRoot).addAll(routes)
 			} else {
@@ -83,9 +84,9 @@ class SpringZuulRules implements Rule {
 		}
 
 		if (applicationName !== null) {
-			var hostnameMap = blackboard.getPartition(ECMASCRIPT_HOSTNAMES_ID) as Map<Path, String>
-			if (hostnameMap === null) {
-				hostnameMap = new HashMap<Path, String>()
+			var Map<Path, String> hostnameMap = new HashMap<Path, String>()
+			if (blackboard.hasPartition(ECMASCRIPT_HOSTNAMES_ID)) {
+				hostnameMap = blackboard.getPartition(ECMASCRIPT_HOSTNAMES_ID) as Map<Path, String>
 			}
 			hostnameMap.put(projectRoot, applicationName)
 			blackboard.addPartition(ECMASCRIPT_HOSTNAMES_ID, hostnameMap)

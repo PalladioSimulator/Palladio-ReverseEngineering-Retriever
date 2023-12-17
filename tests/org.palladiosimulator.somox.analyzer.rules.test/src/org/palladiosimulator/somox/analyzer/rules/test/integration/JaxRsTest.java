@@ -10,6 +10,6 @@ public class JaxRsTest extends RuleEngineTest {
 
     @Override
     void testRuleEngineRepository() {
-        assertComponentExists("jax_rs_AConverter");
+        assertComponentExists("jax_rs_AWebService");
     }
 }

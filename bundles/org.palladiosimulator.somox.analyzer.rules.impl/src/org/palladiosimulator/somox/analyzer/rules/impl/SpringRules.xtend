@@ -45,12 +45,16 @@ class SpringRules implements Rule {
 
 		val projectRoot = SpringHelper.findProjectRoot(path, poms)
 		val configRoot = SpringHelper.findConfigRoot(poms)
-		val bootstrapYaml = yamlMappers.get(
-			SpringHelper.findFile(yamlMappers.keySet, projectRoot.resolve("src/main/resources"),
-				Set.of("bootstrap.yaml", "bootstrap.yml")))
-		val applicationProperties = propertyFiles.get(
-			SpringHelper.findFile(propertyFiles.keySet, projectRoot.resolve("src/main/resources"),
-				Set.of("application.properties")))
+		val bootstrapYaml = projectRoot === null
+				? null
+				: yamlMappers.get(
+				SpringHelper.findFile(yamlMappers.keySet, projectRoot.resolve("src/main/resources"),
+					Set.of("bootstrap.yaml", "bootstrap.yml")))
+		val applicationProperties = projectRoot === null
+				? null
+				: propertyFiles.get(
+				SpringHelper.findFile(propertyFiles.keySet, projectRoot.resolve("src/main/resources"),
+					Set.of("application.properties")))
 
 		var applicationName = SpringHelper.getFromYamlOrProperties("spring.application.name", bootstrapYaml,
 			applicationProperties)
@@ -66,9 +70,11 @@ class SpringRules implements Rule {
 		val contextPathOption = Optional.ofNullable(projectConfigYaml).flatMap[x|x.apply("server.servlet.context-path")]
 		var contextPath = contextPathOption.orElse("/")
 
-		val rawApplicationYaml = rawYamls.get(
-			SpringHelper.findFile(yamlMappers.keySet, projectRoot.resolve("src/main/resources"),
-				Set.of("application.yaml", "application.yml")))
+		val rawApplicationYaml = projectRoot === null
+				? null
+				: rawYamls.get(
+				SpringHelper.findFile(yamlMappers.keySet, projectRoot.resolve("src/main/resources"),
+					Set.of("application.yaml", "application.yml")))
 		val contextVariables = collectContextVariables(rawApplicationYaml)
 
 		processRuleForCompUnit(blackboard, unit, applicationName, contextPath, contextVariables)

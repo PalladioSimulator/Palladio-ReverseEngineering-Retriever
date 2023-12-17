@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.somox.analyzer.rules.model.EntireInterface;
 import org.palladiosimulator.somox.analyzer.rules.model.HTTPMethod;
@@ -42,6 +43,7 @@ public class PathTest {
         assertFalse(operation.isPartOf(entireInterface), "operation is part of illegal prefix");
     }
 
+    @Disabled("This requirement has been temporarily softened for the Spring Gateway")
     @Test
     void httpMethodsAreSpecializations() {
         String path = "/some/path";

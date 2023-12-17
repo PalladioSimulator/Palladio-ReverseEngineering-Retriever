@@ -29,6 +29,7 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
     private PCMDetector pcmDetector;
 
     public RuleEngineBlackboard() {
+        super();
         repositoryComponentLocations = new HashMap<>();
         systemAssociations = new HashMap<>();
         systemPaths = new HashMap<>();

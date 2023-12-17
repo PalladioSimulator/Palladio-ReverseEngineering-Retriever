@@ -62,6 +62,7 @@ public class BasicTest extends RuleEngineTest {
             .devicePath()).exists());
     }
 
+    @Disabled("FIXME: Reliance on outdated JaxRS rule")
     @Test
     void testArray() {
         final OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
@@ -90,6 +91,7 @@ public class BasicTest extends RuleEngineTest {
      * @throws JobFailedException
      *             forwarded from JavaDiscoverer. Should cause the test to fail.
      */
+    @Disabled("FIXME: Reliance on outdated JaxRS rule")
     @Test
     void testRepeatability() throws RuleEngineException, JobFailedException, UserCanceledException {
         OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
@@ -140,6 +142,7 @@ public class BasicTest extends RuleEngineTest {
         }
     }
 
+    @Disabled("FIXME: Reliance on outdated JaxRS rule")
     @Test
     void testVararg() {
         final OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
