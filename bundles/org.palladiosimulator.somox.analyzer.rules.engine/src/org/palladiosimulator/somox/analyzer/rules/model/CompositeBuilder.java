@@ -35,6 +35,10 @@ public class CompositeBuilder {
                 .equals(identifier));
     }
 
+    public Collection<ComponentBuilder> getParts() {
+        return Set.copyOf(explicitParts);
+    }
+
     public Composite construct(Collection<Component> allComponents, Requirements compositeRequirements,
             Provisions compositeProvisions, Collection<OperationInterface> visibleProvisions) {
         Logger.getLogger(getClass())

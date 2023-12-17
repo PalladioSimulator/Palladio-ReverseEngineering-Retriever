@@ -21,20 +21,42 @@ public class PCMDetectionResult {
         // Collect globally visible provisions
         Set<Component> temporaryComponents = PCMDetectionResult.createComponents(components, compositeProvisions,
                 compositeRequirements, Set.of());
-        Set<Composite> temporaryComposites = PCMDetectionResult.createCompositeComponents(temporaryComponents,
+        Set<Component> connectedComponents = PCMDetectionResult.collectConnectedComponents(temporaryComponents,
+                composites, compositeProvisions, compositeRequirements);
+        Set<Composite> temporaryComposites = PCMDetectionResult.createCompositeComponents(connectedComponents,
                 composites, compositeProvisions, compositeRequirements, Set.of());
-        Set<OperationInterface> visibleProvisions = PCMDetectionResult.collectVisibleProvisions(temporaryComponents,
+        Set<OperationInterface> visibleProvisions = PCMDetectionResult.collectVisibleProvisions(connectedComponents,
                 temporaryComposites);
 
         // TODO: Do not rebuild everything, that is theoretically not necessary since provisions do
         // not change.
 
+        Map<CompUnitOrName, ComponentBuilder> connectedComponentBuilders = connectedComponents.stream()
+            .map(Component::identifier)
+            .map(components::get)
+            .collect(Collectors.toMap(ComponentBuilder::identifier, x -> x));
+
         // Construct final result
-        this.components = PCMDetectionResult.createComponents(components, compositeProvisions, compositeRequirements,
-                visibleProvisions);
+        this.components = PCMDetectionResult.createComponents(connectedComponentBuilders, compositeProvisions,
+                compositeRequirements, visibleProvisions);
         this.composites = PCMDetectionResult.createCompositeComponents(this.components, composites, compositeProvisions,
                 compositeRequirements, visibleProvisions);
         this.operationInterfaces = createOperationInterfaces();
+    }
+
+    private static Set<Component> collectConnectedComponents(Set<Component> temporaryComponents,
+            Map<String, CompositeBuilder> composites, ProvisionsBuilder compositeProvisions,
+            RequirementsBuilder compositeRequirements) {
+        CompositeBuilder metaCompositeBuilder = new CompositeBuilder("Meta Composite");
+        for (CompositeBuilder composite : composites.values()) {
+            for (ComponentBuilder part : composite.getParts()) {
+                metaCompositeBuilder.addPart(part);
+            }
+        }
+        Composite metaComposite = metaCompositeBuilder.construct(temporaryComponents,
+                new RequirementsBuilder().create(Set.of(), Set.of()), new ProvisionsBuilder().create(Set.of()),
+                Set.of());
+        return metaComposite.parts();
     }
 
     private static Set<Component> createComponents(Map<CompUnitOrName, ComponentBuilder> components,
