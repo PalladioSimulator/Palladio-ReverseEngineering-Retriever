@@ -20,7 +20,8 @@ class JaxRSRules implements Rule {
 	public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java"
 
 	static final Map<String, HTTPMethod> SERVLET_METHODS = Map.of("doGet", HTTPMethod.GET, "doPost", HTTPMethod.POST,
-		"doDelete", HTTPMethod.DELETE, "doPut", HTTPMethod.PUT);
+		"doDelete", HTTPMethod.DELETE, "doPut", HTTPMethod.PUT, "handleGETRequest", HTTPMethod.GET, "handlePOSTRequest",
+		HTTPMethod.POST, "handleDELETERequest", HTTPMethod.DELETE, "handlePUTRequest", HTTPMethod.PUT);
 
 	override processRules(RuleEngineBlackboard blackboard, Path path) {
 		val unit = blackboard.getDiscoveredFiles(JAVA_DISCOVERER_ID, typeof(CompilationUnit)).get(path)
