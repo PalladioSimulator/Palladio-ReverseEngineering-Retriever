@@ -103,7 +103,10 @@ class JaxRSRules implements Rule {
 		pcmDetector.detectComponent(identifier)
 
 		getAllPublicMethods(unit).forEach[m|pcmDetector.detectProvidedOperation(identifier, m.resolveBinding)]
-		getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]
+		// Do not detect requirements of services, this may connect them too tightly
+		if (!identifier.name.endsWith("ServiceImpl")) {
+			getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]
+		}
 	}
 
 	override isBuildRule() {
