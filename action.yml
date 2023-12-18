@@ -87,7 +87,7 @@ runs:
         rmdir tmp
 
     - name: Upload analysis results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ruleengine
         path: ${{ env.tmp_dir }}/ruleengine_out
@@ -102,7 +102,7 @@ runs:
 
     - name: Upload Eclipse logs
       if: failure()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: eclipse_logs
         path: ${{ env.tmp_dir }}/eclipse_logs
