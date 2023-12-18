@@ -64,7 +64,7 @@ class JaxRSRules implements Rule {
 					methodPath = RESTHelper.replaceArgumentsWithWildcards(methodPath)
 					// TODO: HTTP method switch-case
 					pcmDetector.detectCompositeProvidedOperation(identifier, m.resolveBinding,
-						new RESTName("TODO-host", methodPath, Optional.empty))
+						new RESTName("host", methodPath, Optional.empty))
 				}
 			]
 			getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]
@@ -79,7 +79,7 @@ class JaxRSRules implements Rule {
 			getMethods(unit).forEach [ m |
 				if (SERVLET_METHODS.containsKey(m.name.identifier)) {
 					pcmDetector.detectProvidedOperation(identifier, m.resolveBinding,
-						new RESTName("TODO-host", path, Optional.of(SERVLET_METHODS.get(m.name.identifier))))
+						new RESTName("SERVICE-HOST", path, Optional.of(SERVLET_METHODS.get(m.name.identifier))))
 				}
 			]
 			getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]

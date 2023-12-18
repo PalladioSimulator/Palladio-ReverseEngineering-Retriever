@@ -59,7 +59,7 @@ class SpringRules implements Rule {
 		var applicationName = SpringHelper.getFromYamlOrProperties("spring.application.name", bootstrapYaml,
 			applicationProperties)
 		if (applicationName === null) {
-			applicationName = "UNKNOWN-spring-application"
+			applicationName = "SPRING-APPLICATION"
 		}
 
 		val projectConfigYaml = configRoot === null
