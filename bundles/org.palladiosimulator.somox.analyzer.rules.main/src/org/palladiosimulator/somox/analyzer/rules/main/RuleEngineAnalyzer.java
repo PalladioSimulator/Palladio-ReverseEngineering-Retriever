@@ -1,23 +1,16 @@
 package org.palladiosimulator.somox.analyzer.rules.main;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.common.util.URI;
@@ -27,14 +20,11 @@ import org.palladiosimulator.generator.fluent.system.api.ISystem;
 import org.palladiosimulator.generator.fluent.system.factory.FluentSystemFactory;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
-import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.engine.DockerParser;
-import org.palladiosimulator.somox.analyzer.rules.engine.IRule;
-import org.palladiosimulator.somox.analyzer.rules.engine.PCMDetector;
+import org.palladiosimulator.somox.analyzer.rules.engine.Rule;
 import org.palladiosimulator.somox.analyzer.rules.engine.PCMInstanceCreator;
-import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
+import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
 
 /**
  * The rule engine identifies PCM elements like components and interfaces inside source code via
@@ -46,8 +36,6 @@ import org.palladiosimulator.somox.discoverer.JavaDiscoverer;
  * the engine provides the public methods loadRules() and loadModel().
  */
 public class RuleEngineAnalyzer {
-    private static final Logger LOG = Logger.getLogger(RuleEngineAnalyzer.class);
-
     private final RuleEngineBlackboard blackboard;
 
     private static Repository pcm;
@@ -75,48 +63,15 @@ public class RuleEngineAnalyzer {
             final URI out = CommonPlugin.asLocalURI(ruleEngineConfiguration.getOutputFolder());
             final Path outPath = Paths.get(out.devicePath());
 
-            final Set<DefaultRule> rules = ruleEngineConfiguration.getSelectedRules();
+            final Set<Rule> rules = ruleEngineConfiguration.getConfig(Rule.class)
+                .getSelected();
 
-            final Map<String, CompilationUnit> rootsWithPaths = fetchEclipseCompilationUnits();
-            final List<CompilationUnit> roots = new ArrayList<>();
-            for (String path : rootsWithPaths.keySet()) {
-                CompilationUnit unit = rootsWithPaths.get(path);
-                roots.add(unit);
-                blackboard.putCompilationUnitLocation(unit, Path.of(path));
-            }
-
-            executeWith(inPath, outPath, roots, rules, blackboard);
+            executeWith(inPath, outPath, rules, blackboard);
         } catch (Exception e) {
             throw new RuleEngineException("Analysis did not complete successfully", e);
         }
     }
 
-    private Map<String, CompilationUnit> fetchEclipseCompilationUnits() {
-        // TODO Select a partition name
-        if (!blackboard.hasPartition(JavaDiscoverer.DISCOVERER_ID)) {
-            return new HashMap<>();
-        }
-        Object compUnitPartition = blackboard.getPartition(JavaDiscoverer.DISCOVERER_ID);
-        if (!(compUnitPartition instanceof Map<?, ?>)) {
-            return new HashMap<>();
-        }
-        @SuppressWarnings("unchecked") // , since it is actually checked.
-        Map<Object, Object> compUnitObjs = (Map<Object, Object>) compUnitPartition;
-        if (compUnitObjs.isEmpty()) {
-            return new HashMap<>();
-        }
-        Entry<Object, Object> anEntry = null;
-        for (Entry<Object, Object> entry : compUnitObjs.entrySet()) {
-            anEntry = entry;
-        }
-        if (!(anEntry.getKey() instanceof String) || !(anEntry.getValue() instanceof CompilationUnit)) {
-            return new HashMap<>();
-        }
-        return compUnitObjs.entrySet()
-            .stream()
-            .collect(Collectors.toMap(x -> (String) x.getKey(), x -> (CompilationUnit) x.getValue()));
-    }
-
     /**
      * Extracts PCM elements out of an existing Eclipse JDT model using an IRule file.
      *
@@ -129,81 +84,23 @@ public class RuleEngineAnalyzer {
      * @param ruleDoc
      *            the object containing the rules
      */
-    public static void executeWith(Path projectPath, Path outPath, List<CompilationUnit> model,
-            Set<DefaultRule> rules) {
+    public static void executeWith(Path projectPath, Path outPath, List<CompilationUnit> model, Set<Rule> rules) {
         executeWith(projectPath, outPath, model, rules);
     }
 
     /**
-     * Extracts PCM elements out of an existing Eclipse JDT model using an IRule file.
+     * Extracts PCM elements out of discovered files using rules.
      *
      * @param projectPath
      *            the project directory
      * @param outPath
      *            the output directory
-     * @param model
-     *            the Java model
-     * @param ruleDoc
-     *            the object containing the rules
+     * @param rules
+     *            the rules
      * @param blackboard
-     *            the rule engine blackboard
+     *            the rule engine blackboard, containing (among other things) the discovered files
      */
-    private static void executeWith(Path projectPath, Path outPath, List<CompilationUnit> model, Set<DefaultRule> rules,
-            RuleEngineBlackboard blackboard) {
-
-        // Set up blackboard
-        blackboard.setPCMDetector(new PCMDetector());
-        blackboard.addCompilationUnits(model);
-
-        // Look for build files in projectPath
-        Set<Path> buildPaths;
-        try (final Stream<Path> walk = Files.walk(projectPath)) {
-            buildPaths = walk.filter(Files::isRegularFile)
-                .collect(Collectors.toSet());
-        } catch (final IOException e) {
-            buildPaths = new HashSet<>();
-            e.printStackTrace();
-        }
-
-        boolean processedLocationless = false;
-        // For each unit, execute rules
-        for (final CompilationUnit u : model) {
-            Path unitPath = blackboard.getCompilationUnitLocation(u);
-            if (unitPath == null) {
-                if (processedLocationless) {
-                    continue;
-                }
-                // Execute rules for all CompilationUnits without associated files
-                for (final DefaultRule rule : rules) {
-                    rule.getRule(blackboard)
-                        .processRules(null);
-                }
-                processedLocationless = true;
-            }
-
-            // TODO It could *hypothetically* happen that a build file is a compilation unit as
-            // well. In that case, the build file rule could not assume that all
-            // compilation units have been found.
-
-            // It is assumed that files with compilation units cannot be build files
-            buildPaths.remove(unitPath);
-
-            for (final DefaultRule rule : rules) {
-                rule.getRule(blackboard)
-                    .processRules(unitPath);
-            }
-        }
-        LOG.info("Applied rules to the compilation units");
-
-        // For each potential build file, execute rules
-        for (final Path path : buildPaths) {
-            for (final DefaultRule rule : rules) {
-                rule.getRule(blackboard)
-                    .processRules(path);
-            }
-        }
-        LOG.info("Applied rules to the build files");
-
+    private static void executeWith(Path projectPath, Path outPath, Set<Rule> rules, RuleEngineBlackboard blackboard) {
         // Creates a PCM repository with systems, components, interfaces and roles
 
         // Parses the docker-compose file to get a mapping between microservice names and
@@ -246,7 +143,7 @@ public class RuleEngineAnalyzer {
         }
 
         // Persist the repository at ./pcm.repository
-        blackboard.addPartition(RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY, pcm);
+        blackboard.addPartition(RuleEngineBlackboard.KEY_REPOSITORY, pcm);
         ModelSaver.saveRepository(pcm, outPath.toString(), "pcm");
     }
 
@@ -260,7 +157,7 @@ public class RuleEngineAnalyzer {
      *            the path to a .class file containing the rules
      * @return the rules from the specified (via gui) file system place
      */
-    public static IRule loadRules(String namespace, Path rulesFile) {
+    public static Rule loadRules(String namespace, Path rulesFile) {
 
         final File file = rulesFile.toFile();
 
@@ -270,8 +167,8 @@ public class RuleEngineAnalyzer {
                 .replace(".class", ""));
             final Object instance = c.getDeclaredConstructor()
                 .newInstance();
-            if (instance instanceof IRule) {
-                return (IRule) instance;
+            if (instance instanceof Rule) {
+                return (Rule) instance;
             }
         } catch (final Exception e) {
             e.printStackTrace();

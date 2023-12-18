@@ -6,21 +6,22 @@ import java.util.Map;
 public interface OperationInterface extends Comparable<OperationInterface> {
     Name getName();
 
-    Map<String, List<Operation>> simplified();
+    Map<OperationInterface, List<Operation>> simplified();
 
     /**
-     * @returns the most specific interface name
+     * @returns the most specific interface name (and the interface name for java)
      */
     String getInterface();
 
     default boolean isPartOf(OperationInterface other) {
-        return getName().isPartOf(other.getInterface());
+        return getName().isPartOf(other.getName()
+            .toString());
     }
 
     @Override
     default int compareTo(OperationInterface other) {
-        boolean isSubset = isPartOf(other);
-        boolean isSuperset = isPartOf(other);
+        boolean isSubset = this.isPartOf(other);
+        boolean isSuperset = other.isPartOf(this);
         if (isSubset && isSuperset) {
             return 0; // equal
         } else if (isSubset) {
@@ -29,6 +30,8 @@ public interface OperationInterface extends Comparable<OperationInterface> {
             return -1;
         }
 
-        return 0; // disjoint
+        return getName().toString()
+            .compareTo(other.getName()
+                .toString()); // disjoint
     }
 }

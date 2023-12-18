@@ -1,88 +1,135 @@
 package org.palladiosimulator.somox.analyzer.rules.impl
 
-import org.palladiosimulator.somox.analyzer.rules.engine.IRule
-
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard
 import java.nio.file.Path;
 import org.eclipse.jdt.core.dom.CompilationUnit
 import static org.palladiosimulator.somox.analyzer.rules.engine.RuleHelper.*
+import org.palladiosimulator.somox.analyzer.rules.model.CompUnitOrName
+import java.util.Set
+import org.palladiosimulator.somox.analyzer.rules.engine.Rule
+import org.palladiosimulator.somox.analyzer.rules.model.RESTName
+import java.util.Optional
+import org.palladiosimulator.somox.analyzer.rules.impl.util.RESTHelper
+import java.util.Map
+import org.palladiosimulator.somox.analyzer.rules.model.HTTPMethod
 
-class JaxRSRules extends IRule{
-	
-	new(RuleEngineBlackboard blackboard) {
-		super(blackboard)
+class JaxRSRules implements Rule {
+
+	public static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.jax_rs"
+
+	public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java"
+
+	static final Map<String, HTTPMethod> SERVLET_METHODS = Map.of("doGet", HTTPMethod.GET, "doPost", HTTPMethod.POST,
+		"doDelete", HTTPMethod.DELETE, "doPut", HTTPMethod.PUT, "handleGETRequest", HTTPMethod.GET, "handlePOSTRequest",
+		HTTPMethod.POST, "handleDELETERequest", HTTPMethod.DELETE, "handlePUTRequest", HTTPMethod.PUT);
+
+	override processRules(RuleEngineBlackboard blackboard, Path path) {
+		val unit = blackboard.getDiscoveredFiles(JAVA_DISCOVERER_ID, typeof(CompilationUnit)).get(path)
+
+		if(unit === null) return;
+
+		processRuleForCompUnit(blackboard, unit)
 	}
-	
-	override boolean processRules(Path path) {
-		val units = blackboard.getCompilationUnitAt(path)
-		
-		var containedSuccessful = false
-		for (unit : units) {
-			containedSuccessful = processRuleForCompUnit(unit) || containedSuccessful
-		}
-		
-		return containedSuccessful
-	}
-	
-	def boolean processRuleForCompUnit(CompilationUnit unit) {
+
+	def processRuleForCompUnit(RuleEngineBlackboard blackboard, CompilationUnit unit) {
 		val pcmDetector = blackboard.getPCMDetector()
 		if (pcmDetector === null) {
-		return false
+			return
 		}
+
+		val identifier = new CompUnitOrName(unit)
+		val isConverter = isUnitAnnotatedWithName(unit, "Converter")
+		val isUnitController = isUnitAnnotatedWithName(unit, "Path")
+		val isWebServlet = isUnitAnnotatedWithName(unit, "WebServlet")
 
 		// technology based and general recognition
-		val isConverter = isUnitAnnotatedWithName(unit, "Converter")
-		if(isConverter){
-			detectDefault(unit)
-		return true
+		if (isConverter) {
+			detectDefault(blackboard, unit)
+		} // detect controller component	
+		else if (isUnitController) {
+			var unitPath = getUnitAnnotationStringValue(unit, "Path")
+			if (unitPath === null) {
+				unitPath = ""
+			}
+			val path = "/" + unitPath
+			pcmDetector.detectComponent(identifier)
+			getMethods(unit).forEach [ m |
+				if (isMethodAnnotatedWithName(m, "DELETE", "GET", "HEAD", "PUT", "POST", "OPTIONS")) {
+					var methodPath = getMethodAnnotationStringValue(m, "Path")
+					if (methodPath === null) {
+						methodPath = path
+					} else {
+						methodPath = path + "/" + methodPath
+					}
+					methodPath = RESTHelper.replaceArgumentsWithWildcards(methodPath)
+					// TODO: HTTP method switch-case
+					pcmDetector.detectCompositeProvidedOperation(identifier, m.resolveBinding,
+						new RESTName("host", methodPath, Optional.empty))
+				}
+			]
+			getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]
+			pcmDetector.detectPartOfComposite(identifier, getUnitName(unit));
+		} else if (isWebServlet) {
+			var unitPath = getUnitAnnotationStringValue(unit, "WebServlet")
+			if (unitPath === null) {
+				unitPath = ""
+			}
+			val path = "/" + unitPath
+			pcmDetector.detectComponent(identifier)
+			getMethods(unit).forEach [ m |
+				if (SERVLET_METHODS.containsKey(m.name.identifier)) {
+					pcmDetector.detectProvidedOperation(identifier, m.resolveBinding,
+						new RESTName("SERVICE-HOST", path, Optional.of(SERVLET_METHODS.get(m.name.identifier))))
+				}
+			]
+			getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]
+			pcmDetector.detectPartOfComposite(identifier, getUnitName(unit));
+		} else {
+			detectDefault(blackboard, unit)
 		}
-		
-		// detect controller component	
-		val isUnitController = isUnitAnnotatedWithName(unit, "Path")
-		if(isUnitController){
-			pcmDetector.detectComponent(unit) 
-			getMethods(unit).forEach[m|
-			if(isMethodAnnotatedWithName(m,"DELETE","GET","HEAD","PUT","POST","OPTIONS")) pcmDetector.detectProvidedOperation(unit,m.resolveBinding)]
-			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
-		return true
-		} 
-		
-		val isWebListener = isUnitAnnotatedWithName(unit, "WebListener","WebServlet")
-		if(isWebListener){
-			pcmDetector.detectComponent(unit)
-			getMethods(unit).forEach[m|
-			if(isMethodModifiedExactlyWith(m,"public") || isMethodModifiedExactlyWith(m,"protected")) pcmDetector.detectProvidedOperation(unit,m.resolveBinding)]
-			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
-		return true
-		}
-		
-		// detect implementing component
-		val isUnit = isClassImplementing(unit)
-		if(isUnit && !isUnitController && !isWebListener && getAllInterfaces(unit).size() > 0){
-			pcmDetector.detectComponent(unit)
-			val firstIn = getAllInterfaces(unit).get(0)
-			getMethods(firstIn).forEach[m|pcmDetector.detectProvidedOperation(unit, firstIn.resolveBinding, m)]
-			getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
-			return true
-		}
-		
-		// detect normal components
-		val classModified = isClassModifiedExactlyWith(unit, "public","final");
-		if(!isUnit && !isUnitController && !isWebListener && classModified){
-			pcmDetector.detectComponent(unit)
-			detectDefault(unit)
-			return true
-		} 
-		return false
-		
-	}
-	
-	def detectDefault(CompilationUnit unit) {
-		val pcmDetector = blackboard.getPCMDetector()
 
-		pcmDetector.detectComponent(unit)
-		getAllPublicMethods(unit).forEach[m|pcmDetector.detectProvidedOperation(unit,m.resolveBinding)]
-		getFields(unit).forEach[f|if(isFieldAbstract(f)) pcmDetector.detectRequiredInterface(unit, f)]
+		for (iface : getAllInterfaces(unit)) {
+			pcmDetector.detectProvidedInterface(identifier, iface.resolveBinding)
+			for (m : getMethods(iface)) {
+				pcmDetector.detectProvidedOperation(identifier, iface.resolveBinding, m)
+			}
+		}
 	}
-	
+
+	def detectDefault(RuleEngineBlackboard blackboard, CompilationUnit unit) {
+		val pcmDetector = blackboard.getPCMDetector()
+		val identifier = new CompUnitOrName(unit)
+
+		pcmDetector.detectComponent(identifier)
+
+		getAllPublicMethods(unit).forEach[m|pcmDetector.detectProvidedOperation(identifier, m.resolveBinding)]
+		// Do not detect requirements of services, this may connect them too tightly
+		if (!identifier.name.endsWith("ServiceImpl")) {
+			getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]
+		}
+	}
+
+	override isBuildRule() {
+		return false
+	}
+
+	override getConfigurationKeys() {
+		return Set.of
+	}
+
+	override getID() {
+		return RULE_ID
+	}
+
+	override getName() {
+		return "JAX RS Rules"
+	}
+
+	override getRequiredServices() {
+		return Set.of(JAVA_DISCOVERER_ID)
+	}
+
+	override getDependentServices() {
+		Set.of
+	}
 }

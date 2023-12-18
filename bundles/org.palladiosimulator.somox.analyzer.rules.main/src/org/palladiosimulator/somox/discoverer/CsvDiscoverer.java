@@ -19,7 +19,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.CommonPlugin;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;
@@ -45,11 +45,11 @@ public class CsvDiscoverer implements Discoverer {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
-                final Map<String, List<CSVRecord>> csvs = new HashMap<>();
+                final Map<Path, List<CSVRecord>> csvs = new HashMap<>();
                 Discoverer.find(root, ".csv", logger)
                     .forEach(p -> {
                         final List<CSVRecord> records = new LinkedList<>();
-                        try (Reader reader = new FileReader(p)) {
+                        try (Reader reader = new FileReader(p.toFile())) {
                             DEFAULT.parse(reader)
                                 .forEach(records::add);
                         } catch (final IllegalStateException | IOException e) {
@@ -57,7 +57,7 @@ public class CsvDiscoverer implements Discoverer {
                         }
                         csvs.put(p, records);
                     });
-                getBlackboard().addPartition(DISCOVERER_ID, csvs);
+                getBlackboard().putDiscoveredFiles(DISCOVERER_ID, csvs);
             }
 
             @Override

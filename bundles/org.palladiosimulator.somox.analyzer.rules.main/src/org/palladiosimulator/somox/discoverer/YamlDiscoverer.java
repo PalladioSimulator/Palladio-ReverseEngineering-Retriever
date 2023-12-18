@@ -17,7 +17,8 @@ import java.util.stream.Stream;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.CommonPlugin;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
+import org.palladiosimulator.somox.discoverer.wrapper.YamlMapper;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 
@@ -30,6 +31,7 @@ import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 public class YamlDiscoverer implements Discoverer {
 
     public static final String DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.yaml";
+    public static final String MAPPER_PARTITION_KEY = DISCOVERER_ID + ".mappers";
 
     @Override
     public IBlackboardInteractingJob<RuleEngineBlackboard> create(final RuleEngineConfiguration configuration,
@@ -45,19 +47,22 @@ public class YamlDiscoverer implements Discoverer {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
-                final Map<String, Object> yamls = new HashMap<>();
+                final Map<Path, Object> yamls = new HashMap<>();
+                final Map<Path, YamlMapper> mappers = new HashMap<>();
                 Stream.concat(Discoverer.find(root, ".yml", logger), Discoverer.find(root, ".yaml", logger))
                     .forEach(p -> {
-                        try (Reader reader = new FileReader(p)) {
+                        try (Reader reader = new FileReader(p.toFile())) {
                             List<Object> yamlContents = new ArrayList<>();
                             new Yaml().loadAll(reader)
                                 .forEach(yamlContents::add);
                             yamls.put(p, yamlContents);
+                            mappers.put(p, new YamlMapper(yamlContents));
                         } catch (final IOException | YAMLException e) {
                             logger.error(String.format("%s could not be read correctly.", p), e);
                         }
                     });
-                getBlackboard().addPartition(DISCOVERER_ID, yamls);
+                getBlackboard().putDiscoveredFiles(DISCOVERER_ID, yamls);
+                getBlackboard().putDiscoveredFiles(MAPPER_PARTITION_KEY, mappers);
             }
 
             @Override

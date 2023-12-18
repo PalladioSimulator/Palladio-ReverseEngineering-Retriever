@@ -3,8 +3,6 @@ package org.palladiosimulator.somox.analyzer.rules.model;
 import java.util.Collection;
 import java.util.Objects;
 
-import org.eclipse.jdt.core.dom.CompilationUnit;
-
 /**
  * Used to build {@code Component}s.
  * 
@@ -12,14 +10,18 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
  * @author Florian Bossert
  */
 public class ComponentBuilder {
-    private final CompilationUnit compilationUnit;
+    private final CompUnitOrName compUnitOrName;
     private final RequirementsBuilder requirements;
     private final ProvisionsBuilder provisions;
 
-    public ComponentBuilder(CompilationUnit compilationUnit) {
-        this.compilationUnit = compilationUnit;
-        requirements = new RequirementsBuilder();
+    public ComponentBuilder(CompUnitOrName compUnitOrName) {
+        this.compUnitOrName = compUnitOrName;
+        this.requirements = new RequirementsBuilder();
         this.provisions = new ProvisionsBuilder();
+    }
+
+    public CompUnitOrName identifier() {
+        return compUnitOrName;
     }
 
     public RequirementsBuilder requirements() {
@@ -30,13 +32,15 @@ public class ComponentBuilder {
         return provisions;
     }
 
-    public Component create(Collection<OperationInterface> allDependencies) {
-        return new Component(compilationUnit, requirements.create(), provisions.create(allDependencies));
+    public Component create(Collection<OperationInterface> allDependencies,
+            Collection<OperationInterface> visibleProvisions) {
+        return new Component(compUnitOrName, requirements.create(allDependencies, visibleProvisions),
+                provisions.create(allDependencies));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(compilationUnit, provisions, requirements);
+        return Objects.hash(compUnitOrName, provisions, requirements);
     }
 
     @Override
@@ -51,7 +55,7 @@ public class ComponentBuilder {
             return false;
         }
         ComponentBuilder other = (ComponentBuilder) obj;
-        return Objects.equals(compilationUnit, other.compilationUnit) && Objects.equals(provisions, other.provisions)
+        return Objects.equals(compUnitOrName, other.compUnitOrName) && Objects.equals(provisions, other.provisions)
                 && Objects.equals(requirements, other.requirements);
     }
 }

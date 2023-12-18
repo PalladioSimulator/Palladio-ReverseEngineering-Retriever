@@ -1,9 +1,11 @@
 package org.palladiosimulator.somox.analyzer.rules.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -12,14 +14,32 @@ import java.util.stream.Collectors;
 
 import org.palladiosimulator.somox.analyzer.rules.engine.MapMerger;
 
-public class Requirements implements Iterable<EntireInterface> {
-    private final Set<EntireInterface> requirements;
+public class Requirements implements Iterable<OperationInterface> {
+    private final Set<OperationInterface> requirements;
+    private final Map<OperationInterface, List<OperationInterface>> groupedRequirements;
 
-    public Requirements(Collection<EntireInterface> requiredInterfaces) {
-        this.requirements = new HashSet<>(requiredInterfaces);
+    public Requirements(Collection<OperationInterface> requiredInterfaces,
+            Collection<OperationInterface> allDependencies, Collection<OperationInterface> visibleProvisions) {
+        this.requirements = new HashSet<>();
+
+        List<OperationInterface> sortedProvisions = new ArrayList<>(visibleProvisions);
+        Collections.sort(sortedProvisions);
+        Collections.reverse(sortedProvisions);
+        for (OperationInterface requirement : requiredInterfaces) {
+            OperationInterface generalizedRequirement = requirement;
+            for (OperationInterface provision : sortedProvisions) {
+                if (requirement.isPartOf(provision)) {
+                    generalizedRequirement = provision;
+                    break;
+                }
+            }
+            requirements.add(generalizedRequirement);
+        }
+
+        this.groupedRequirements = DependencyUtils.groupDependencies(requirements, allDependencies);
     }
 
-    public Set<EntireInterface> get() {
+    public Set<OperationInterface> get() {
         return Collections.unmodifiableSet(requirements);
     }
 
@@ -34,16 +54,30 @@ public class Requirements implements Iterable<EntireInterface> {
     }
 
     @Override
-    public Iterator<EntireInterface> iterator() {
+    public Iterator<OperationInterface> iterator() {
         return Collections.unmodifiableCollection(requirements)
             .iterator();
     }
 
-    public Map<String, List<Operation>> simplified() {
-        List<Map<String, List<Operation>>> simplifiedInterfaces = requirements.stream()
-            .map(OperationInterface::simplified)
-            .collect(Collectors.toList());
-
+    public Map<OperationInterface, List<Operation>> simplified() {
+        List<Map<OperationInterface, List<Operation>>> simplifiedInterfaces = new LinkedList<>();
+        for (OperationInterface root : groupedRequirements.keySet()) {
+            List<Operation> simplifiedRoot = new ArrayList<>(root.simplified()
+                .values()
+                .stream()
+                .flatMap(x -> x.stream())
+                .collect(Collectors.toList()));
+            for (OperationInterface member : groupedRequirements.get(root)) {
+                simplifiedRoot.addAll(member.simplified()
+                    .values()
+                    .stream()
+                    .flatMap(x -> x.stream())
+                    .collect(Collectors.toList()));
+            }
+            simplifiedInterfaces.add(Map.of(root, simplifiedRoot.stream()
+                .distinct()
+                .collect(Collectors.toList())));
+        }
         return MapMerger.merge(simplifiedInterfaces);
     }
 
@@ -70,10 +104,10 @@ public class Requirements implements Iterable<EntireInterface> {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        Map<String, List<Operation>> simplified = simplified();
+        Map<OperationInterface, List<Operation>> simplified = simplified();
 
-        for (String iface : simplified.keySet()) {
-            builder.append(iface);
+        for (OperationInterface iface : simplified.keySet()) {
+            builder.append(iface.getName());
             simplified.get(iface)
                 .forEach(x -> builder.append("\n\t")
                     .append(x));

@@ -24,8 +24,8 @@ public class Operation implements OperationInterface {
     }
 
     @Override
-    public Map<String, List<Operation>> simplified() {
-        return Map.of(getInterface(), List.of(this));
+    public Map<OperationInterface, List<Operation>> simplified() {
+        return Map.of(this, List.of(this));
     }
 
     @Override

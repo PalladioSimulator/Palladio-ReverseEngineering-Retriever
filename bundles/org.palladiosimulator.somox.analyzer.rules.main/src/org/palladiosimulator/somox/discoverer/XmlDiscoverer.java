@@ -17,7 +17,7 @@ import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;
@@ -43,23 +43,24 @@ public class XmlDiscoverer implements Discoverer {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
-                final Map<String, Document> xmls = new HashMap<>();
+                final Map<Path, Document> xmls = new HashMap<>();
                 Discoverer.find(root, ".xml", logger)
                     .forEach(p -> {
-                        try (Reader reader = new FileReader(p)) {
+                        try (Reader reader = new FileReader(p.toFile())) {
                             xmls.put(p, new SAXBuilder().build(reader));
                         } catch (IOException | JDOMException e) {
                             logger.error(String.format("%s could not be read correctly.", p), e);
                         }
                     });
 
-                final Map<String, Document> poms = new HashMap<>();
+                final Map<Path, Document> poms = new HashMap<>();
                 xmls.keySet()
                     .stream()
-                    .filter(p -> p.toLowerCase()
-                        .endsWith("pom.xml"))
-                    .forEach(k -> poms.put(k, xmls.get(k)));
-                getBlackboard().addPartition(DISCOVERER_ID, poms);
+                    .filter(p -> p.getFileName()
+                        .toString()
+                        .equalsIgnoreCase("pom.xml"))
+                    .forEach(p -> poms.put(p, xmls.get(p)));
+                getBlackboard().putDiscoveredFiles(DISCOVERER_ID, poms);
             }
 
             @Override

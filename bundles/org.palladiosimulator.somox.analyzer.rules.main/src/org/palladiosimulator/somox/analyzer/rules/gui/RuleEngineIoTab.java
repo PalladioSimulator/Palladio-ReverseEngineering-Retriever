@@ -3,8 +3,6 @@ package org.palladiosimulator.somox.analyzer.rules.gui;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.CoreException;
@@ -17,17 +15,16 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
-import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfigurationImpl;
+import org.palladiosimulator.somox.analyzer.rules.engine.Rule;
+import org.palladiosimulator.somox.analyzer.rules.engine.ServiceCollection;
+import org.palladiosimulator.somox.analyzer.rules.engine.ServiceConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.service.Analyst;
 import org.palladiosimulator.somox.analyzer.rules.service.AnalystCollection;
 import org.palladiosimulator.somox.analyzer.rules.service.EmptyCollection;
-import org.palladiosimulator.somox.analyzer.rules.service.ServiceCollection;
+import org.palladiosimulator.somox.analyzer.rules.service.RuleCollection;
 import org.palladiosimulator.somox.discoverer.Discoverer;
 import org.palladiosimulator.somox.discoverer.DiscovererCollection;
 
@@ -45,11 +42,10 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     private final ModifyListener modifyListener;
 
     private Text in;
-    private Set<DefaultRule> rules;
-    private Set<Button> ruleButtons;
     private Text out;
+    private final ServiceConfigurationManager<Discoverer> discovererConfigManager;
+    private final ServiceConfigurationView<Rule> ruleConfigView;
     private final ServiceConfigurationView<Analyst> analystConfigView;
-    private final ServiceConfigurationView<Discoverer> discovererConfigView;
 
     public RuleEngineIoTab() {
         // Create the default path of this Eclipse application
@@ -58,27 +54,12 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
             .normalize()
             .toString();
 
-        // Initialize the selected rules
-        rules = new HashSet<>();
-
         // Create a listener for GUI modification events
         modifyListener = e -> {
             // e may be null here!
             setDirty(true);
             updateLaunchConfigurationDialog();
         };
-
-        ServiceCollection<Analyst> analystCollection = null;
-        try {
-            analystCollection = new AnalystCollection();
-        } catch (CoreException e) {
-            Logger.getLogger(RuleEngineIoTab.class)
-                .error("Exception occurred while discovering analysts!");
-            analystCollection = new EmptyCollection<>();
-        }
-        analystConfigView = new ServiceConfigurationView<>(analystCollection, modifyListener, this::error, getName(),
-                RuleEngineConfiguration.RULE_ENGINE_ANALYST_CONFIG_PREFIX,
-                RuleEngineConfiguration.RULE_ENGINE_SELECTED_ANALYSTS);
 
         ServiceCollection<Discoverer> discovererCollection = null;
         try {
@@ -88,9 +69,40 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
                 .error("Exception occurred while discovering discoverers!");
             discovererCollection = new EmptyCollection<>();
         }
-        discovererConfigView = new ServiceConfigurationView<>(discovererCollection, modifyListener, this::error,
-                getName(), RuleEngineConfiguration.RULE_ENGINE_DISCOVERER_CONFIG_PREFIX,
-                RuleEngineConfiguration.RULE_ENGINE_SELECTED_DISCOVERERS);
+        ServiceConfiguration<Discoverer> discovererConfig = new ServiceConfiguration<>(discovererCollection,
+                RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_DISCOVERERS,
+                RuleEngineConfigurationImpl.RULE_ENGINE_DISCOVERER_CONFIG_PREFIX);
+        discovererConfigManager = new ServiceConfigurationManager<>(discovererConfig);
+
+        ServiceCollection<Rule> ruleCollection = null;
+        try {
+            ruleCollection = new RuleCollection();
+        } catch (CoreException e) {
+            Logger.getLogger(RuleEngineIoTab.class)
+                .error("Exception occurred while discovering rules!");
+            ruleCollection = new EmptyCollection<>();
+        }
+        ServiceConfiguration<Rule> ruleConfig = new ServiceConfiguration<>(ruleCollection,
+                RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_RULES,
+                RuleEngineConfigurationImpl.RULE_ENGINE_RULE_CONFIG_PREFIX);
+        ruleConfig.addDependencyProvider(discovererConfig);
+        ruleConfigView = new ServiceConfigurationView<>(ruleConfig, modifyListener);
+
+        ServiceCollection<Analyst> analystCollection = null;
+        try {
+            analystCollection = new AnalystCollection();
+        } catch (CoreException e) {
+            Logger.getLogger(RuleEngineIoTab.class)
+                .error("Exception occurred while discovering analysts!");
+            analystCollection = new EmptyCollection<>();
+        }
+        ServiceConfiguration<Analyst> analystConfig = new ServiceConfiguration<>(analystCollection,
+                RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_ANALYSTS,
+                RuleEngineConfigurationImpl.RULE_ENGINE_ANALYST_CONFIG_PREFIX);
+        analystConfig.addDependencyProvider(discovererConfig);
+        analystConfig.addDependencyProvider(ruleConfig);
+        analystConfigView = new ServiceConfigurationView<>(analystConfig, modifyListener);
+
     }
 
     @Override
@@ -111,26 +123,16 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         TabHelper.createFolderInputSection(container, modifyListener, "File In", in, "File In", getShell(),
                 defaultPath);
 
-        Group ruleSelection = new Group(container, SWT.NONE);
-        ruleSelection.setText("Rules");
-        ruleSelection.setLayout(new RowLayout());
-        ruleButtons = new HashSet<>();
-        for (DefaultRule rule : DefaultRule.values()) {
-            final Button selectionButton = new Button(ruleSelection, SWT.CHECK);
-            selectionButton.setText(rule.toString());
-            selectionButton
-                .addSelectionListener(new RuleSelectionListener(selectionButton, modifyListener, rules, rule));
-            ruleButtons.add(selectionButton);
-        }
-
         // Create file input area for output
         out = new Text(container, SWT.SINGLE | SWT.BORDER);
         TabHelper.createFolderInputSection(container, modifyListener, "File Out", out, "File Out", getShell(),
                 defaultPath);
 
-        // Create tree view for analyst and discoverer configuration
+        // Create tree view for rule and analyst configuration
+        // Do not create a view for discoverers, they can always be selected automatically.
+        // If a discoverer is added that requires configuration, this view has to be added back.
+        ruleConfigView.createControl(container);
         analystConfigView.createControl(container);
-        discovererConfigView.createControl(container);
     }
 
     private boolean validateFolderInput(Text widget) {
@@ -176,31 +178,12 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
     @Override
     public void initializeFrom(ILaunchConfiguration configuration) {
-        setText(configuration, in, RuleEngineConfiguration.RULE_ENGINE_INPUT_PATH);
-        setText(configuration, out, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH);
+        setText(configuration, in, RuleEngineConfigurationImpl.RULE_ENGINE_INPUT_PATH);
+        setText(configuration, out, RuleEngineConfigurationImpl.RULE_ENGINE_OUTPUT_PATH);
 
-        for (Button ruleButton : ruleButtons) {
-            setButton(configuration, ruleButton, RuleEngineConfiguration.RULE_ENGINE_SELECTED_RULES);
-        }
-
+        discovererConfigManager.initializeFrom(configuration);
+        ruleConfigView.initializeFrom(configuration);
         analystConfigView.initializeFrom(configuration);
-        discovererConfigView.initializeFrom(configuration);
-    }
-
-    private void setButton(ILaunchConfiguration configuration, Button ruleButton, String attributeName) {
-        try {
-            Set<String> configRules = configuration.getAttribute(attributeName, new HashSet<>());
-            if (configRules.contains(ruleButton.getText())) {
-                ruleButton.setSelection(true);
-                rules.add(DefaultRule.valueOf(ruleButton.getText()));
-            } else {
-                ruleButton.setSelection(false);
-                rules.remove(DefaultRule.valueOf(ruleButton.getText()));
-            }
-        } catch (final Exception e) {
-            LaunchConfigPlugin.errorLogger(getName(), attributeName, e.getMessage());
-            error(e.getLocalizedMessage());
-        }
     }
 
     private void setText(ILaunchConfiguration configuration, Text textWidget, String attributeName) {
@@ -214,11 +197,11 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
     @Override
     public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-        setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_INPUT_PATH, in);
-        setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH, out);
-        setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_SELECTED_RULES, rules);
+        setAttribute(configuration, RuleEngineConfigurationImpl.RULE_ENGINE_INPUT_PATH, in);
+        setAttribute(configuration, RuleEngineConfigurationImpl.RULE_ENGINE_OUTPUT_PATH, out);
+        discovererConfigManager.performApply(configuration);
+        ruleConfigView.performApply(configuration);
         analystConfigView.performApply(configuration);
-        discovererConfigView.performApply(configuration);
     }
 
     private void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName, Text textWidget) {
@@ -234,29 +217,17 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         }
     }
 
-    private void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName,
-            Set<DefaultRule> rules) {
-        try {
-            configuration.setAttribute(attributeName, RuleEngineConfiguration.serializeRules(rules));
-        } catch (final Exception e) {
-            error(e.getLocalizedMessage());
-        }
-    }
-
     @Override
     public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
         setText(in, defaultPath);
-        setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_INPUT_PATH, in);
+        setAttribute(configuration, RuleEngineConfigurationImpl.RULE_ENGINE_INPUT_PATH, in);
 
         setText(out, defaultPath);
-        setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_OUTPUT_PATH, out);
+        setAttribute(configuration, RuleEngineConfigurationImpl.RULE_ENGINE_OUTPUT_PATH, out);
 
-        // By default, no rule is selected
-        rules = new HashSet<>();
-        setAttribute(configuration, RuleEngineConfiguration.RULE_ENGINE_SELECTED_RULES, rules);
-
+        discovererConfigManager.setDefaults(configuration);
+        ruleConfigView.setDefaults(configuration);
         analystConfigView.setDefaults(configuration);
-        discovererConfigView.setDefaults(configuration);
     }
 
     private void setText(final Text textWidget, final String attributeName) {

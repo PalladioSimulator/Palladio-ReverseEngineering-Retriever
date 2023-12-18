@@ -8,7 +8,7 @@
       license-feature-version="1.0.0">
 
    <license url="">
-
+      
    </license>
 
    <requires>
@@ -28,13 +28,6 @@
    </requires>
 
    <plugin
-         id="org.palladiosimulator.somox.analyzer.rules.all"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.palladiosimulator.somox.analyzer.rules.engine"
          download-size="0"
          install-size="0"
@@ -49,19 +42,12 @@
          unpack="false"/>
 
    <plugin
-         id="org.palladiosimulator.somox.analyzer.rules.build"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.palladiosimulator.somox.analyzer.rules.main"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="org.palladiosimulator.somox.analyzer.rules.mocore"
          download-size="0"

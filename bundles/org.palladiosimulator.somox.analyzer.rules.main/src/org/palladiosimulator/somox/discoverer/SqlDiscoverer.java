@@ -14,7 +14,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.CommonPlugin;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;
@@ -43,16 +43,16 @@ public class SqlDiscoverer implements Discoverer {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
-                final Map<String, Statement> sqls = new HashMap<>();
+                final Map<Path, Statement> sqls = new HashMap<>();
                 Discoverer.find(root, ".sql", logger)
                     .forEach(p -> {
-                        try (Reader reader = new FileReader(p)) {
+                        try (Reader reader = new FileReader(p.toFile())) {
                             sqls.put(p, CCJSqlParserUtil.parse(reader));
                         } catch (final IOException | JSQLParserException e) {
                             logger.error(String.format("%s could not be read correctly.", p), e);
                         }
                     });
-                getBlackboard().addPartition(DISCOVERER_ID, sqls);
+                getBlackboard().putDiscoveredFiles(DISCOVERER_ID, sqls);
             }
 
             @Override

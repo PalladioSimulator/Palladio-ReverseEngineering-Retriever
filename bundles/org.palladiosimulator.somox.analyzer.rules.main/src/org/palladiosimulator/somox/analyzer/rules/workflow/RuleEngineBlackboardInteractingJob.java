@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineAnalyzer;
 import org.palladiosimulator.somox.analyzer.rules.main.RuleEngineException;
 

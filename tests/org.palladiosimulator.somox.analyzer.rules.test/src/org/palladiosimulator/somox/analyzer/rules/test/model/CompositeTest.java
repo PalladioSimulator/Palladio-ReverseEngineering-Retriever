@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.palladiosimulator.somox.analyzer.rules.model.CompUnitOrName;
 import org.palladiosimulator.somox.analyzer.rules.model.Component;
 import org.palladiosimulator.somox.analyzer.rules.model.ComponentBuilder;
 import org.palladiosimulator.somox.analyzer.rules.model.Composite;
@@ -23,8 +24,8 @@ public class CompositeTest {
     @Test
     void emptyComposite() {
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
-        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of()),
-                new Provisions(List.of(), List.of()));
+        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(), List.of(), List.of()),
+                new Provisions(List.of(), List.of()), List.of());
 
         assertTrue(result.parts()
             .isEmpty(), "empty composite should have no parts");
@@ -39,7 +40,7 @@ public class CompositeTest {
         OperationInterface provision = new Operation(null, new JavaOperationName("Interface", "providedMethod"));
         EntireInterface requirement = new EntireInterface(new JavaInterfaceName("RequiredInterface"));
 
-        ComponentBuilder componentBuilder = new ComponentBuilder(null);
+        ComponentBuilder componentBuilder = new ComponentBuilder(new CompUnitOrName("Component"));
         componentBuilder.provisions()
             .add(provision);
         componentBuilder.requirements()
@@ -47,8 +48,13 @@ public class CompositeTest {
 
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
-        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of()),
-                new Provisions(List.of(), List.of(provision, requirement)));
+
+        List<OperationInterface> allDependencies = List.of(provision, requirement);
+        List<OperationInterface> visibleProvisions = List.of(provision);
+
+        Composite result = compositeBuilder.construct(List.of(),
+                new Requirements(List.of(), allDependencies, visibleProvisions),
+                new Provisions(List.of(), allDependencies), visibleProvisions);
 
         assertEquals(1, result.parts()
             .size(), "this composite should have exactly one part");
@@ -74,7 +80,7 @@ public class CompositeTest {
         OperationInterface provision = new Operation(null, new JavaOperationName("Interface", "providedMethod"));
         EntireInterface requirement = new EntireInterface(new JavaInterfaceName("RequiredInterface"));
 
-        ComponentBuilder componentBuilder = new ComponentBuilder(null);
+        ComponentBuilder componentBuilder = new ComponentBuilder(new CompUnitOrName("Component"));
         componentBuilder.provisions()
             .add(provision);
         componentBuilder.requirements()
@@ -82,8 +88,13 @@ public class CompositeTest {
 
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
-        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(requirement)),
-                new Provisions(List.of(provision), List.of(provision, requirement)));
+
+        List<OperationInterface> allDependencies = List.of(provision, requirement);
+        List<OperationInterface> visibleProvisions = List.of(provision);
+
+        Composite result = compositeBuilder.construct(List.of(),
+                new Requirements(List.of(requirement), allDependencies, visibleProvisions),
+                new Provisions(List.of(provision), allDependencies), visibleProvisions);
 
         assertEquals(1, result.parts()
             .size(), "this composite should have exactly one part");
@@ -100,13 +111,13 @@ public class CompositeTest {
         EntireInterface requirement1 = new EntireInterface(new JavaInterfaceName("RequiredInterfaceA"));
         EntireInterface requirement2 = new EntireInterface(new JavaInterfaceName("RequiredInterfaceB"));
 
-        ComponentBuilder componentBuilder1 = new ComponentBuilder(null);
+        ComponentBuilder componentBuilder1 = new ComponentBuilder(new CompUnitOrName("Component 1"));
         componentBuilder1.provisions()
             .add(provision1);
         componentBuilder1.requirements()
             .add(requirement1);
 
-        ComponentBuilder componentBuilder2 = new ComponentBuilder(null);
+        ComponentBuilder componentBuilder2 = new ComponentBuilder(new CompUnitOrName("Component 2"));
         componentBuilder2.provisions()
             .add(provision2);
         componentBuilder2.requirements()
@@ -115,9 +126,13 @@ public class CompositeTest {
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder1);
         compositeBuilder.addPart(componentBuilder2);
-        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(requirement1, requirement2)),
-                new Provisions(List.of(provision1, provision2),
-                        List.of(provision1, provision2, requirement1, requirement2)));
+
+        List<OperationInterface> allDependencies = List.of(provision1, provision2, requirement1, requirement2);
+        List<OperationInterface> visibleProvisions = List.of(provision1, provision2);
+
+        Composite result = compositeBuilder.construct(List.of(),
+                new Requirements(List.of(requirement1, requirement2), allDependencies, visibleProvisions),
+                new Provisions(List.of(provision1, provision2), allDependencies), visibleProvisions);
 
         assertEquals(2, result.parts()
             .size(), "this composite should have exactly two parts");
@@ -134,7 +149,7 @@ public class CompositeTest {
         EntireInterface additionalRequirement1 = new EntireInterface(new JavaInterfaceName("RequiredInterfaceA"));
         EntireInterface additionalRequirement2 = new EntireInterface(new JavaInterfaceName("RequiredInterfaceB"));
 
-        ComponentBuilder componentBuilder1 = new ComponentBuilder(null);
+        ComponentBuilder componentBuilder1 = new ComponentBuilder(new CompUnitOrName("Component 1"));
         componentBuilder1.provisions()
             .add(provision);
         componentBuilder1.requirements()
@@ -142,7 +157,7 @@ public class CompositeTest {
         componentBuilder1.requirements()
             .add(additionalRequirement1);
 
-        ComponentBuilder componentBuilder2 = new ComponentBuilder(null);
+        ComponentBuilder componentBuilder2 = new ComponentBuilder(new CompUnitOrName("Component 2"));
         componentBuilder2.provisions()
             .add(provision);
         componentBuilder2.requirements()
@@ -153,8 +168,14 @@ public class CompositeTest {
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder1);
         compositeBuilder.addPart(componentBuilder2);
-        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(requirement)), new Provisions(
-                List.of(provision), List.of(provision, requirement, additionalRequirement1, additionalRequirement2)));
+
+        List<OperationInterface> allDependencies = List.of(provision, requirement, additionalRequirement1,
+                additionalRequirement2);
+        List<OperationInterface> visibleProvisions = List.of(provision);
+
+        Composite result = compositeBuilder.construct(List.of(),
+                new Requirements(List.of(requirement), allDependencies, visibleProvisions),
+                new Provisions(List.of(provision), allDependencies), visibleProvisions);
 
         assertEquals(2, result.parts()
             .size(), "this composite should have exactly two parts");
@@ -166,17 +187,23 @@ public class CompositeTest {
 
     @Test
     void impreciseExposure() {
+        // TODO: Re-think this test.
         OperationInterface provision = new Operation(null, new JavaOperationName("Interface", "providedMethod"));
+        OperationInterface impreciseProvision = new EntireInterface(new JavaInterfaceName("Interface"));
 
-        ComponentBuilder componentBuilder = new ComponentBuilder(null);
+        ComponentBuilder componentBuilder = new ComponentBuilder(new CompUnitOrName("Component"));
         componentBuilder.provisions()
             .add(provision);
 
         CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
-        OperationInterface provisionInterface = new EntireInterface(new JavaInterfaceName("Interface"));
-        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of()),
-                new Provisions(List.of(provisionInterface), List.of(provision)));
+
+        List<OperationInterface> allDependencies = List.of(provision);
+        List<OperationInterface> visibleProvisions = List.of(provision);
+
+        Composite result = compositeBuilder.construct(List.of(),
+                new Requirements(List.of(), allDependencies, visibleProvisions),
+                new Provisions(List.of(impreciseProvision), allDependencies), visibleProvisions);
 
         assertEquals(1, result.parts()
             .size(), "this composite should have exactly one part");

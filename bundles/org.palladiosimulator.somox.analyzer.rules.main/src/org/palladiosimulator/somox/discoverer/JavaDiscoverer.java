@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FileASTRequestor;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;
@@ -42,7 +42,7 @@ public class JavaDiscoverer implements Discoverer {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
-                final Map<String, CompilationUnit> compilationUnits = new HashMap<>();
+                final Map<Path, CompilationUnit> compilationUnits = new HashMap<>();
                 final ASTParser parser = ASTParser.newParser(AST.getJLSLatest());
                 parser.setKind(ASTParser.K_COMPILATION_UNIT);
                 parser.setResolveBindings(true);
@@ -53,8 +53,10 @@ public class JavaDiscoverer implements Discoverer {
                         Map.of(JavaCore.COMPILER_SOURCE, latestJavaVersion, JavaCore.COMPILER_COMPLIANCE,
                                 latestJavaVersion, JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, latestJavaVersion));
                 final String[] classpathEntries = Discoverer.find(root, ".jar", logger)
+                    .map(Path::toString)
                     .toArray(String[]::new);
                 final String[] sourceFilePaths = Discoverer.find(root, ".java", logger)
+                    .map(Path::toString)
                     .toArray(String[]::new);
                 try {
                     parser.setEnvironment(classpathEntries, new String[0], new String[0], true);
@@ -62,13 +64,13 @@ public class JavaDiscoverer implements Discoverer {
                             new FileASTRequestor() {
                                 @Override
                                 public void acceptAST(final String sourceFilePath, final CompilationUnit ast) {
-                                    compilationUnits.put(sourceFilePath, ast);
+                                    compilationUnits.put(Path.of(sourceFilePath), ast);
                                 }
                             }, monitor);
                 } catch (IllegalArgumentException | IllegalStateException e) {
                     logger.error(String.format("No Java files in %s could be transposed.", root), e);
                 }
-                getBlackboard().addPartition(DISCOVERER_ID, compilationUnits);
+                getBlackboard().putDiscoveredFiles(DISCOVERER_ID, compilationUnits);
             }
 
             @Override

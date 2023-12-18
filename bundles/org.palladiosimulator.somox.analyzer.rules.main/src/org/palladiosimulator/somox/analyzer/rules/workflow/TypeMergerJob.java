@@ -35,8 +35,10 @@ public class TypeMergerJob implements IBlackboardInteractingJob<Blackboard<Objec
 
         // Move types from source to destination repository
         monitor.subTask("Merging types from source into destination repository");
-        destinationRepository.getDataTypes__Repository().addAll(sourceRepository.getDataTypes__Repository());
-        destinationRepository.getFailureTypes__Repository().addAll(sourceRepository.getFailureTypes__Repository());
+        destinationRepository.getDataTypes__Repository()
+            .addAll(sourceRepository.getDataTypes__Repository());
+        destinationRepository.getFailureTypes__Repository()
+            .addAll(sourceRepository.getFailureTypes__Repository());
         monitor.done();
     }
 

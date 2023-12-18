@@ -15,7 +15,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.CommonPlugin;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;
@@ -41,10 +41,10 @@ public class PropertiesDiscoverer implements Discoverer {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
-                final Map<String, Object> propertyFiles = new HashMap<>();
+                final Map<Path, Object> propertyFiles = new HashMap<>();
                 Discoverer.find(root, ".properties", logger)
                     .forEach(p -> {
-                        try (Reader reader = new FileReader(p)) {
+                        try (Reader reader = new FileReader(p.toFile())) {
                             Properties properties = new Properties();
                             properties.load(reader);
                             propertyFiles.put(p, properties);
@@ -52,7 +52,7 @@ public class PropertiesDiscoverer implements Discoverer {
                             logger.error(String.format("%s could not be read correctly.", p), e);
                         }
                     });
-                getBlackboard().addPartition(DISCOVERER_ID, propertyFiles);
+                getBlackboard().putDiscoveredFiles(DISCOVERER_ID, propertyFiles);
             }
 
             @Override

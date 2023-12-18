@@ -7,6 +7,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.palladiosimulator.somox.analyzer.rules.engine.ServiceCollection;
 
 public class AnalystCollection implements ServiceCollection<Analyst> {
     public static final String EXTENSION_POINT = "org.palladiosimulator.somox.analyzer.rules.analyst";

@@ -30,8 +30,8 @@ public class EntireInterface implements OperationInterface {
     }
 
     @Override
-    public Map<String, List<Operation>> simplified() {
-        return Map.of(name.getName(), List.of());
+    public Map<OperationInterface, List<Operation>> simplified() {
+        return Map.of(this, List.of());
     }
 
     @Override

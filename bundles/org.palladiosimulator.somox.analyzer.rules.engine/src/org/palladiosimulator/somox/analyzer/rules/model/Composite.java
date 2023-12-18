@@ -1,8 +1,6 @@
 package org.palladiosimulator.somox.analyzer.rules.model;
 
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -11,11 +9,11 @@ public class Composite {
     private final String name;
     private final Set<Component> parts;
     private final Set<OperationInterface> internalInterfaces;
-    private final Map<String, List<Operation>> requirements;
-    private final Map<String, List<Operation>> provisions;
+    private final Set<OperationInterface> requirements;
+    private final Set<OperationInterface> provisions;
 
-    public Composite(String name, Set<Component> parts, Map<String, List<Operation>> requirements,
-            Map<String, List<Operation>> provisions, Set<OperationInterface> internalInterfaces) {
+    public Composite(String name, Set<Component> parts, Set<OperationInterface> requirements,
+            Set<OperationInterface> provisions, Set<OperationInterface> internalInterfaces) {
         this.name = name;
         this.parts = parts;
         this.internalInterfaces = internalInterfaces;
@@ -27,11 +25,11 @@ public class Composite {
         return name;
     }
 
-    public Map<String, List<Operation>> requirements() {
+    public Set<OperationInterface> requirements() {
         return requirements;
     }
 
-    public Map<String, List<Operation>> provisions() {
+    public Set<OperationInterface> provisions() {
         return provisions;
     }
 

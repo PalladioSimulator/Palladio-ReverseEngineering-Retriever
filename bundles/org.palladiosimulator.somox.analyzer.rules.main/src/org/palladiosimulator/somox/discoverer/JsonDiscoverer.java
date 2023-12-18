@@ -17,7 +17,7 @@ import org.eclipse.emf.common.CommonPlugin;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;
@@ -43,10 +43,10 @@ public class JsonDiscoverer implements Discoverer {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
                 setBlackboard(Objects.requireNonNull(blackboard));
-                final Map<String, JSONObject> jsons = new HashMap<>();
+                final Map<Path, JSONObject> jsons = new HashMap<>();
                 Discoverer.find(root, ".json", logger)
                     .forEach(p -> {
-                        try (BufferedReader reader = new BufferedReader(new FileReader(p))) {
+                        try (BufferedReader reader = new BufferedReader(new FileReader(p.toFile()))) {
                             String jsonSource = reader.lines()
                                 .collect(Collectors.joining(System.lineSeparator()));
                             jsons.put(p, new JSONObject(jsonSource));
@@ -54,7 +54,7 @@ public class JsonDiscoverer implements Discoverer {
                             logger.error(String.format("%s could not be read correctly.", p), e);
                         }
                     });
-                getBlackboard().addPartition(DISCOVERER_ID, jsons);
+                getBlackboard().putDiscoveredFiles(DISCOVERER_ID, jsons);
             }
 
             @Override

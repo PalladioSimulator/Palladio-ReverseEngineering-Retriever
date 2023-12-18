@@ -1,9 +1,9 @@
 package org.palladiosimulator.somox.analyzer.rules.engine;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -19,9 +18,8 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
-import org.palladiosimulator.somox.analyzer.rules.model.Component;
+import org.palladiosimulator.somox.analyzer.rules.model.CompUnitOrName;
 import org.palladiosimulator.somox.analyzer.rules.model.ComponentBuilder;
-import org.palladiosimulator.somox.analyzer.rules.model.Composite;
 import org.palladiosimulator.somox.analyzer.rules.model.CompositeBuilder;
 import org.palladiosimulator.somox.analyzer.rules.model.EntireInterface;
 import org.palladiosimulator.somox.analyzer.rules.model.InterfaceName;
@@ -30,6 +28,7 @@ import org.palladiosimulator.somox.analyzer.rules.model.JavaOperationName;
 import org.palladiosimulator.somox.analyzer.rules.model.Operation;
 import org.palladiosimulator.somox.analyzer.rules.model.OperationInterface;
 import org.palladiosimulator.somox.analyzer.rules.model.OperationName;
+import org.palladiosimulator.somox.analyzer.rules.model.PCMDetectionResult;
 import org.palladiosimulator.somox.analyzer.rules.model.ProvisionsBuilder;
 import org.palladiosimulator.somox.analyzer.rules.model.RequirementsBuilder;
 
@@ -42,15 +41,13 @@ import org.palladiosimulator.somox.analyzer.rules.model.RequirementsBuilder;
 public class PCMDetector {
     private static final Logger LOG = Logger.getLogger(PCMDetector.class);
 
-    private Map<CompilationUnit, ComponentBuilder> components = new HashMap<>();
+    private Map<CompUnitOrName, ComponentBuilder> components = new HashMap<>();
     private Map<String, CompositeBuilder> composites = new HashMap<>();
     private ProvisionsBuilder compositeProvisions = new ProvisionsBuilder();
     private RequirementsBuilder compositeRequirements = new RequirementsBuilder();
+    private Set<OperationInterface> providedInterfaces = new HashSet<>();
 
-    private Set<Component> constructedComponents = new HashSet<>();
-    private Set<Composite> constructedComposites = new HashSet<>();
-
-    private static String getFullUnitName(CompilationUnit unit) {
+    private static String getFullUnitName(CompUnitOrName unit) {
         // TODO this is potentially problematic, maybe restructure
         // On the other hand, it is still fit as a unique identifier,
         // since types cannot be declared multiple times.
@@ -62,9 +59,15 @@ public class PCMDetector {
         return null;
     }
 
-    private static List<String> getFullUnitNames(CompilationUnit unit) {
+    private static List<String> getFullUnitNames(CompUnitOrName unit) {
+        if (!unit.isUnit()) {
+            return List.of(unit.name());
+        }
+
         List<String> names = new ArrayList<>();
-        for (Object type : unit.types()) {
+        for (Object type : unit.compilationUnit()
+            .get()
+            .types()) {
             if (type instanceof AbstractTypeDeclaration) {
                 names.add(getFullTypeName((AbstractTypeDeclaration) type));
             }
@@ -78,8 +81,14 @@ public class PCMDetector {
             .getFullyQualifiedName();
     }
 
-    public void detectComponent(CompilationUnit unit) {
-        for (Object type : unit.types()) {
+    public void detectComponent(CompUnitOrName unit) {
+        if (!unit.isUnit()) {
+            components.put(unit, new ComponentBuilder(unit));
+            return;
+        }
+        for (Object type : unit.compilationUnit()
+            .get()
+            .types()) {
             if (type instanceof TypeDeclaration) {
                 components.put(unit, new ComponentBuilder(unit));
                 ITypeBinding binding = ((TypeDeclaration) type).resolveBinding();
@@ -88,51 +97,46 @@ public class PCMDetector {
         }
     }
 
-    public void detectRequiredInterface(CompilationUnit unit, InterfaceName interfaceName) {
+    public void detectRequiredInterface(CompUnitOrName unit, InterfaceName interfaceName) {
         detectRequiredInterface(unit, interfaceName, false);
     }
 
-    public void detectRequiredInterface(CompilationUnit unit, InterfaceName interfaceName, boolean compositeRequired) {
+    public void detectRequiredInterface(CompUnitOrName unit, InterfaceName interfaceName, boolean compositeRequired) {
         if (components.get(unit) == null) {
             components.put(unit, new ComponentBuilder(unit));
         }
         EntireInterface iface = new EntireInterface(interfaceName);
-        components.get(unit)
-            .requirements()
-            .add(iface);
-        if (compositeRequired) {
-            compositeRequirements.add(iface);
-        }
+        detectRequiredInterface(unit, compositeRequired, false, iface);
     }
 
-    public void detectRequiredInterface(CompilationUnit unit, FieldDeclaration field) {
-        detectRequiredInterface(unit, field, false);
+    public void detectRequiredInterface(CompUnitOrName unit, FieldDeclaration field) {
+        detectRequiredInterface(unit, field, false, false);
     }
 
-    private void detectRequiredInterface(CompilationUnit unit, FieldDeclaration field, boolean compositeRequired) {
+    public void detectRequiredInterfaceWeakly(CompUnitOrName unit, FieldDeclaration field) {
+        detectRequiredInterface(unit, field, false, true);
+    }
+
+    private void detectRequiredInterface(CompUnitOrName unit, FieldDeclaration field, boolean compositeRequired,
+            boolean detectWeakly) {
         if (components.get(unit) == null) {
             components.put(unit, new ComponentBuilder(unit));
         }
         @SuppressWarnings("unchecked")
-        List<EntireInterface> ifaces = ((List<VariableDeclaration>) field.fragments()).stream()
+        List<OperationInterface> ifaces = ((List<VariableDeclaration>) field.fragments()).stream()
             .map(x -> x.resolveBinding())
             .filter(x -> x != null)
             .map(x -> x.getType())
             .map(x -> new EntireInterface(x, new JavaInterfaceName(NameConverter.toPCMIdentifier(x))))
             .collect(Collectors.toList());
-        components.get(unit)
-            .requirements()
-            .add(ifaces);
-        if (compositeRequired) {
-            compositeRequirements.add(ifaces);
-        }
+        detectRequiredInterface(unit, compositeRequired, detectWeakly, ifaces);
     }
 
-    public void detectRequiredInterface(CompilationUnit unit, SingleVariableDeclaration parameter) {
+    public void detectRequiredInterface(CompUnitOrName unit, SingleVariableDeclaration parameter) {
         detectRequiredInterface(unit, parameter, false);
     }
 
-    private void detectRequiredInterface(CompilationUnit unit, SingleVariableDeclaration parameter,
+    private void detectRequiredInterface(CompUnitOrName unit, SingleVariableDeclaration parameter,
             boolean compositeRequired) {
         if (components.get(unit) == null) {
             components.put(unit, new ComponentBuilder(unit));
@@ -145,25 +149,46 @@ public class PCMDetector {
         }
         ITypeBinding type = parameterBinding.getType();
         EntireInterface iface = new EntireInterface(type, new JavaInterfaceName(NameConverter.toPCMIdentifier(type)));
-        components.get(unit)
-            .requirements()
-            .add(iface);
-        if (compositeRequired) {
-            compositeRequirements.add(iface);
+        detectRequiredInterface(unit, compositeRequired, false, iface);
+    }
+
+    private void detectRequiredInterface(CompUnitOrName unit, boolean compositeRequired, boolean detectWeakly,
+            OperationInterface iface) {
+        detectRequiredInterface(unit, compositeRequired, detectWeakly, List.of(iface));
+    }
+
+    private void detectRequiredInterface(CompUnitOrName unit, boolean compositeRequired, boolean detectWeakly,
+            Collection<OperationInterface> ifaces) {
+        for (OperationInterface iface : ifaces) {
+            if (detectWeakly && !providedInterfaces.contains(iface)) {
+                components.get(unit)
+                    .requirements()
+                    .addWeakly(iface);
+                if (compositeRequired) {
+                    compositeRequirements.addWeakly(iface);
+                }
+            } else {
+                components.get(unit)
+                    .requirements()
+                    .add(iface);
+                if (compositeRequired) {
+                    compositeRequirements.add(iface);
+                }
+            }
         }
     }
 
-    public void detectProvidedInterface(CompilationUnit unit, ITypeBinding iface) {
+    public void detectProvidedInterface(CompUnitOrName unit, ITypeBinding iface) {
         if (iface == null) {
             LOG.warn("Unresolved type binding detected in " + getFullUnitName(unit) + "!");
             return;
         }
-        components.get(unit)
-            .provisions()
-            .add(new EntireInterface(iface, new JavaInterfaceName(NameConverter.toPCMIdentifier(iface))));
+        OperationInterface provision = new EntireInterface(iface,
+                new JavaInterfaceName(NameConverter.toPCMIdentifier(iface)));
+        detectProvidedInterface(unit, provision);
     }
 
-    public void detectProvidedOperation(CompilationUnit unit, IMethodBinding method) {
+    public void detectProvidedOperation(CompUnitOrName unit, IMethodBinding method) {
         if (method == null) {
             LOG.warn("Unresolved method binding detected in " + getFullUnitName(unit) + "!");
             return;
@@ -171,7 +196,7 @@ public class PCMDetector {
         detectProvidedOperation(unit, method.getDeclaringClass(), method);
     }
 
-    public void detectProvidedOperation(CompilationUnit unit, ITypeBinding declaringIface, IMethodBinding method) {
+    public void detectProvidedOperation(CompUnitOrName unit, ITypeBinding declaringIface, IMethodBinding method) {
         if (declaringIface == null) {
             LOG.warn("Unresolved type binding detected in " + getFullUnitName(unit) + "!");
             return;
@@ -179,7 +204,7 @@ public class PCMDetector {
         detectProvidedOperation(unit, NameConverter.toPCMIdentifier(declaringIface), method);
     }
 
-    public void detectProvidedOperation(CompilationUnit unit, String declaringIface, IMethodBinding method) {
+    public void detectProvidedOperation(CompUnitOrName unit, String declaringIface, IMethodBinding method) {
         String operationName;
         if (method == null) {
             LOG.warn("Unresolved method binding detected in " + getFullUnitName(unit) + "!");
@@ -191,49 +216,59 @@ public class PCMDetector {
         detectProvidedOperation(unit, method, new JavaOperationName(declaringIface, operationName));
     }
 
-    public void detectProvidedOperation(CompilationUnit unit, IMethodBinding method, OperationName name) {
+    public void detectProvidedOperation(CompUnitOrName unit, IMethodBinding method, OperationName name) {
         if (components.get(unit) == null) {
             components.put(unit, new ComponentBuilder(unit));
         }
-        components.get(unit)
-            .provisions()
-            .add(new Operation(method, name));
+        OperationInterface provision = new Operation(method, name);
+        detectProvidedInterface(unit, provision);
     }
 
-    public void detectPartOfComposite(CompilationUnit unit, String compositeName) {
+    public void detectProvidedInterface(CompUnitOrName unit, OperationInterface provision) {
+        components.get(unit)
+            .provisions()
+            .add(provision);
+        providedInterfaces.add(provision);
+        components.values()
+            .stream()
+            .forEach(component -> component.requirements()
+                .strengthenIfPresent(provision));
+    }
+
+    public void detectPartOfComposite(CompUnitOrName unit, String compositeName) {
         if (components.get(unit) == null) {
             components.put(unit, new ComponentBuilder(unit));
         }
         getComposite(compositeName).addPart(components.get(unit));
     }
 
-    public void detectCompositeRequiredInterface(CompilationUnit unit, InterfaceName interfaceName) {
+    public void detectCompositeRequiredInterface(CompUnitOrName unit, InterfaceName interfaceName) {
         detectRequiredInterface(unit, interfaceName, true);
     }
 
-    public void detectCompositeRequiredInterface(CompilationUnit unit, FieldDeclaration field) {
-        detectRequiredInterface(unit, field, true);
+    public void detectCompositeRequiredInterface(CompUnitOrName unit, FieldDeclaration field) {
+        detectRequiredInterface(unit, field, true, false);
     }
 
-    public void detectCompositeRequiredInterface(CompilationUnit unit, SingleVariableDeclaration parameter) {
+    public void detectCompositeRequiredInterface(CompUnitOrName unit, SingleVariableDeclaration parameter) {
         detectRequiredInterface(unit, parameter, true);
     }
 
-    public void detectCompositeProvidedOperation(CompilationUnit unit, IMethodBinding method) {
+    public void detectCompositeProvidedOperation(CompUnitOrName unit, IMethodBinding method) {
         detectCompositeProvidedOperation(unit, method.getDeclaringClass(), method);
     }
 
-    public void detectCompositeProvidedOperation(CompilationUnit unit, ITypeBinding declaringIface,
+    public void detectCompositeProvidedOperation(CompUnitOrName unit, ITypeBinding declaringIface,
             IMethodBinding method) {
         detectCompositeProvidedOperation(unit, NameConverter.toPCMIdentifier(declaringIface), method);
     }
 
-    public void detectCompositeProvidedOperation(CompilationUnit unit, String declaringIface, IMethodBinding method) {
+    public void detectCompositeProvidedOperation(CompUnitOrName unit, String declaringIface, IMethodBinding method) {
         compositeProvisions.add(new Operation(method, new JavaOperationName(declaringIface, method.getName())));
         detectProvidedOperation(unit, declaringIface, method);
     }
 
-    public void detectCompositeProvidedOperation(CompilationUnit unit, IMethodBinding method, OperationName name) {
+    public void detectCompositeProvidedOperation(CompUnitOrName unit, IMethodBinding method, OperationName name) {
         compositeProvisions.add(new Operation(method, name));
         detectProvidedOperation(unit, method, name);
     }
@@ -245,83 +280,18 @@ public class PCMDetector {
         return composites.get(name);
     }
 
-    public Set<CompilationUnit> getCompilationUnits() {
+    public Set<CompUnitOrName> getCompilationUnits() {
         return components.keySet();
     }
 
-    protected Set<Component> getComponents() {
-        if (constructedComponents.isEmpty()) {
-            List<OperationInterface> allDependencies = new LinkedList<>();
-            allDependencies.addAll(compositeRequirements.toList());
-            allDependencies.addAll(compositeProvisions.toList());
-
-            constructedComponents = components.values()
-                .stream()
-                .map(x -> x.create(allDependencies))
-                .collect(Collectors.toSet());
-        }
-        return constructedComponents;
-    }
-
-    protected Map<String, List<Operation>> getOperationInterfaces() {
-        // TODO: This has to include composite interfaces as well
-        List<Map<String, List<Operation>>> operationInterfaces = getComponents().stream()
-            .map(x -> x.provisions()
-                .simplified())
-            .collect(Collectors.toList());
-        getComponents().stream()
-            .map(x -> x.requirements()
-                .simplified())
-            .forEach(x -> operationInterfaces.add(x));
-        getCompositeComponents().stream()
-            .map(x -> x.provisions())
-            .forEach(x -> operationInterfaces.add(x));
-        getCompositeComponents().stream()
-            .map(x -> x.requirements())
-            .forEach(x -> operationInterfaces.add(x));
-        return MapMerger.merge(operationInterfaces);
-    }
-
-    protected Set<Composite> getCompositeComponents() {
-        // Construct composites.
-        if (constructedComposites.isEmpty()) {
-            List<Composite> allComposites = composites.values()
-                .stream()
-                .map(x -> x.construct(getComponents(), compositeRequirements.create(),
-                        compositeProvisions.create(List.of())))
-                .collect(Collectors.toList());
-
-            // Remove redundant composites.
-            Set<Composite> redundantComposites = new HashSet<>();
-            for (int i = 0; i < allComposites.size(); ++i) {
-                Composite subject = allComposites.get(i);
-                long subsetCount = allComposites.subList(i + 1, allComposites.size())
-                    .stream()
-                    .filter(x -> subject.isSubsetOf(x) || x.isSubsetOf(subject))
-                    .count();
-
-                // Any composite is guaranteed to be the subset of at least one composite in the
-                // list,
-                // namely itself. If it is the subset of any composites other than itself, it is
-                // redundant.
-                if (subsetCount > 0) {
-                    redundantComposites.add(subject);
-                }
-
-                // TODO: Is there any merging necessary, like adapting the redundant composite's
-                // requirements to its peer?
-                constructedComposites = allComposites.stream()
-                    .filter(x -> !redundantComposites.contains(x))
-                    .collect(Collectors.toUnmodifiableSet());
-            }
-        }
-        return constructedComposites;
+    public PCMDetectionResult getResult() {
+        return new PCMDetectionResult(components, composites, compositeProvisions, compositeRequirements);
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(149);
-        sb.append("[EclipsePCMDetector] {\n\tcomponents: {\n");
+        StringBuilder sb = new StringBuilder(142);
+        sb.append("[PCMDetector] {\n\tcomponents: {\n");
         components.entrySet()
             .forEach(entry -> {
                 sb.append("\t\t\"");

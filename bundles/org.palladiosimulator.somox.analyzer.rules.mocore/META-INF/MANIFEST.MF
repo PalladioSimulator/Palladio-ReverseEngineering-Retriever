@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.palladiosimulator.somox.analyzer.rules.mocore;singleton
 Bundle-Version: 1.0.0.qualifier
 Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.mocore
 Bundle-Vendor: palladiosimulator.org
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Export-Package: org.palladiosimulator.somox.analyzer.rules.mocore.discovery,
  org.palladiosimulator.somox.analyzer.rules.mocore.orchestration,

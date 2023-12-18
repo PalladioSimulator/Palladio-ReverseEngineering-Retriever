@@ -14,8 +14,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.common.util.Diagnostic;
@@ -39,13 +37,12 @@ import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.resourceenvironment.ResourceEnvironment;
 import org.palladiosimulator.pcm.system.System;
-import org.palladiosimulator.somox.analyzer.rules.all.DefaultRule;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
-import org.palladiosimulator.somox.analyzer.rules.service.ServiceConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfigurationImpl;
+import org.palladiosimulator.somox.analyzer.rules.engine.Rule;
+import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.engine.ServiceConfiguration;
 import org.palladiosimulator.somox.analyzer.rules.workflow.RuleEngineJob;
-import org.palladiosimulator.somox.discoverer.Discoverer;
-import org.palladiosimulator.somox.discoverer.DiscovererCollection;
 
 import com.google.common.collect.Sets;
 
@@ -68,14 +65,14 @@ abstract class RuleEngineTest {
     // Seperate instances for every child test
     private final Logger logger = Logger.getLogger(this.getClass());
 
-    private final RuleEngineConfiguration config = new RuleEngineConfiguration();
+    private final RuleEngineConfiguration config = new RuleEngineConfigurationImpl();
     private final RuleEngineJob ruleEngine;
     private final boolean executedSuccessfully;
     private Repository repository;
     private System system;
     private ResourceEnvironment resourceEnvironment;
     private Allocation allocation;
-    private final Set<DefaultRule> rules;
+    private final Set<Rule> rules;
 
     /**
      * Tests the basic functionality of the RuleEngineAnalyzer. Requires it to execute without an
@@ -86,7 +83,7 @@ abstract class RuleEngineTest {
      * @param rules
      *            the rules to execute
      */
-    protected RuleEngineTest(String projectDirectory, DefaultRule... rules) {
+    protected RuleEngineTest(String projectDirectory, Rule... rules) {
         this.rules = Set.of(rules);
 
         outDir = TEST_DIR.appendSegment("out")
@@ -95,16 +92,10 @@ abstract class RuleEngineTest {
 
         config.setInputFolder(TEST_DIR.appendSegments(projectDirectory.split("/")));
         config.setOutputFolder(outDir);
-        config.setSelectedRules(this.rules);
 
-        // Enable all discoverers.
-        ServiceConfiguration<Discoverer> discovererConfig = config.getDiscovererConfig();
-        try {
-            for (Discoverer discoverer : new DiscovererCollection().getServices()) {
-                discovererConfig.setSelected(discoverer, true);
-            }
-        } catch (InvalidRegistryObjectException | CoreException e) {
-            logger.error(e);
+        ServiceConfiguration<Rule> ruleConfig = config.getConfig(Rule.class);
+        for (Rule rule : rules) {
+            ruleConfig.select(rule);
         }
 
         ruleEngine = new RuleEngineJob(config);
@@ -348,7 +339,7 @@ abstract class RuleEngineTest {
         return ruleEngine.getBlackboard();
     }
 
-    public Set<DefaultRule> getRules() {
+    public Set<Rule> getRules() {
         return Collections.unmodifiableSet(rules);
     }
 

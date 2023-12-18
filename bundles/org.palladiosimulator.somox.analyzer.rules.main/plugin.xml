@@ -89,6 +89,14 @@
     </discoverer>
  </extension>
  <extension
+       id="org.palladiosimulator.somox.discoverer.ecmascript"
+       name="ECMAScript Discoverer"
+       point="org.palladiosimulator.somox.discoverer">
+    <discoverer
+          class="org.palladiosimulator.somox.discoverer.EcmaScriptDiscoverer">
+    </discoverer>
+ </extension>
+ <extension
        id="org.palladiosimulator.somox.analyzer.rules.service.performance_analyst"
        name="Performance Analyst"
        point="org.palladiosimulator.somox.analyzer.rules.analyst">

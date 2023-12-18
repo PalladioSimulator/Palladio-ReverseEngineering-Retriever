@@ -1,14 +1,10 @@
 package org.palladiosimulator.somox.analyzer.rules.gui;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -23,40 +19,24 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
-import org.palladiosimulator.somox.analyzer.rules.service.Service;
-import org.palladiosimulator.somox.analyzer.rules.service.ServiceCollection;
-import org.palladiosimulator.somox.analyzer.rules.service.ServiceConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.engine.Service;
+import org.palladiosimulator.somox.analyzer.rules.engine.ServiceConfiguration;
 
-import de.uka.ipd.sdq.workflow.launchconfig.LaunchConfigPlugin;
-
-public class ServiceConfigurationView<T extends Service> {
+public class ServiceConfigurationView<T extends Service> extends ServiceConfigurationManager<T> {
     private static final int SERVICE_CONFIGURATION_VALUE_COLUMN = 1;
 
     private final Map<String, Map<String, TreeItem>> configTreeItems;
     private final Map<String, Button> serviceCheckboxes;
 
-    private final List<T> services;
-    private final Set<T> selectedServices;
-
     private final ModifyListener modifyListener;
-    private final Consumer<String> error;
-    private final String tabName;
-    private final String serviceConfigKeyPrefix;
-    private final String selectedServicesKey;
 
-    public ServiceConfigurationView(ServiceCollection<T> serviceCollection, ModifyListener modifyListener,
-            Consumer<String> error, String tabName, String serviceConfigKeyPrefix, String selectedServicesKey) {
-        selectedServices = new HashSet<>();
+    public ServiceConfigurationView(ServiceConfiguration<T> serviceConfiguration, ModifyListener modifyListener) {
+        super(serviceConfiguration);
+
         configTreeItems = new HashMap<>();
         serviceCheckboxes = new HashMap<>();
-        services = new ArrayList<>(serviceCollection.getServices());
 
         this.modifyListener = modifyListener;
-        this.error = error;
-        this.tabName = tabName;
-        this.serviceConfigKeyPrefix = serviceConfigKeyPrefix;
-        this.selectedServicesKey = selectedServicesKey;
-
     }
 
     public void createControl(Composite container) {
@@ -68,7 +48,8 @@ public class ServiceConfigurationView<T extends Service> {
 
         tree.addListener(SWT.Selection, new TreeEditListener(tree, modifyListener, SERVICE_CONFIGURATION_VALUE_COLUMN));
 
-        List<T> sortedServices = services.stream()
+        List<T> sortedServices = getServiceConfiguration().getAvailable()
+            .stream()
             .sorted(Comparator.comparing(T::getName))
             .collect(Collectors.toList());
         for (T service : sortedServices) {
@@ -97,9 +78,9 @@ public class ServiceConfigurationView<T extends Service> {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (((Button) e.getSource()).getSelection()) {
-                    selectedServices.add(service);
+                    getServiceConfiguration().select(service);
                 } else {
-                    selectedServices.remove(service);
+                    getServiceConfiguration().deselect(service);
                 }
                 modifyListener.modifyText(null);
             }
@@ -115,93 +96,62 @@ public class ServiceConfigurationView<T extends Service> {
         editor.setEditor(checkbox, item, SERVICE_CONFIGURATION_VALUE_COLUMN);
     }
 
+    @Override
     public void initializeFrom(ILaunchConfiguration configuration) {
-        for (T service : services) {
+        super.initializeFrom(configuration);
+        for (T service : getServiceConfiguration().getAvailable()) {
             String id = service.getID();
-            setCheckbox(configuration, service, serviceCheckboxes.get(id), selectedServicesKey);
-            setTreeItems(configuration, configTreeItems.get(id), serviceConfigKeyPrefix + id);
+            initializeCheckbox(service, serviceCheckboxes.get(id));
+            initializeTreeItems(service, configTreeItems.get(id));
         }
     }
 
-    private void setCheckbox(ILaunchConfiguration configuration, T service, Button checkbox, String attributeName) {
-        try {
-            Set<String> configServiceIds = configuration.getAttribute(attributeName, new HashSet<>());
-            if (configServiceIds.contains(service.getID())) {
-                checkbox.setSelection(true);
-                selectedServices.add(service);
-            } else {
-                checkbox.setSelection(false);
-                selectedServices.remove(service);
+    private void initializeCheckbox(T service, Button checkbox) {
+        boolean selected = getServiceConfiguration().isManuallySelected(service);
+        checkbox.setSelection(selected);
+    }
+
+    private void initializeTreeItems(T service, Map<String, TreeItem> treeItems) {
+        Map<String, String> strings = getServiceConfiguration().getWholeConfig(service.getID());
+        for (Entry<String, TreeItem> entry : treeItems.entrySet()) {
+            String value = strings.get(entry.getKey());
+            if (value == null) {
+                value = "";
             }
-        } catch (final Exception e) {
-            LaunchConfigPlugin.errorLogger(tabName, attributeName, e.getMessage());
-            error.accept(e.getLocalizedMessage());
+            entry.getValue()
+                .setText(SERVICE_CONFIGURATION_VALUE_COLUMN, value);
         }
     }
 
-    private void setTreeItems(ILaunchConfiguration configuration, Map<String, TreeItem> treeItems,
-            String attributeName) {
-        Map<String, String> strings;
-        try {
-            strings = configuration.getAttribute(attributeName, new HashMap<>());
-            for (Entry<String, TreeItem> entry : treeItems.entrySet()) {
-                String value = strings.get(entry.getKey());
-                if (value == null) {
-                    entry.getValue()
-                        .setText(SERVICE_CONFIGURATION_VALUE_COLUMN, "");
-                } else {
-                    entry.getValue()
-                        .setText(SERVICE_CONFIGURATION_VALUE_COLUMN, value);
-                }
-            }
-        } catch (final Exception e) {
-            LaunchConfigPlugin.errorLogger(tabName, attributeName, e.getMessage());
-            error.accept(e.getLocalizedMessage());
-        }
-    }
-
+    @Override
     public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-        for (T service : services) {
-            setAttribute(configuration, serviceConfigKeyPrefix + service.getID(), configTreeItems.get(service.getID()));
-        }
-        setAttribute(configuration, selectedServicesKey, selectedServices);
-    }
-
-    private void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName, Set<T> services) {
-        try {
-            configuration.setAttribute(attributeName, ServiceConfiguration.serializeServices(services));
-        } catch (final Exception e) {
-            error.accept(e.getLocalizedMessage());
-        }
-    }
-
-    private static void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName,
-            Map<String, TreeItem> treeItems) {
-        Map<String, String> strings = new HashMap<>();
-        if (treeItems != null) {
-            for (Entry<String, TreeItem> entry : treeItems.entrySet()) {
-                strings.put(entry.getKey(), entry.getValue()
-                    .getText(SERVICE_CONFIGURATION_VALUE_COLUMN));
+        // Update the ServiceConfiguration with the values from the tree items
+        for (T service : getServiceConfiguration().getAvailable()) {
+            for (Entry<String, TreeItem> entry : configTreeItems.get(service.getID())
+                .entrySet()) {
+                TreeItem treeItem = entry.getValue();
+                String configurationValue = treeItem.getText(SERVICE_CONFIGURATION_VALUE_COLUMN);
+                getServiceConfiguration().setConfig(service.getID(), entry.getKey(), configurationValue);
             }
         }
-        configuration.setAttribute(attributeName, strings);
+
+        super.performApply(configuration);
     }
 
+    /**
+     * Called when a new launch configuration is created, to set the values to sensible defaults.
+     * 
+     * @param configuration
+     *            the new launch configuration
+     */
     public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-        for (T service : services) {
-            Map<String, TreeItem> treeItems = configTreeItems.get(service.getID());
-            clearTreeItems(treeItems);
-            setAttribute(configuration, serviceConfigKeyPrefix + service.getID(), treeItems);
-        }
-        setAttribute(configuration, selectedServicesKey, selectedServices);
+        writeServiceConfigAttributes(configuration);
     }
 
-    private static void clearTreeItems(Map<String, TreeItem> treeItems) {
-    	if (treeItems != null) {
-    		for (Entry<String, TreeItem> entry : treeItems.entrySet()) {
-            	entry.getValue()
-            		.setText("");
-        	}
-    	}
+    private void writeServiceConfigAttributes(ILaunchConfigurationWorkingCopy configuration) {
+        Map<String, Object> attributes = getServiceConfiguration().toMap();
+        for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
+            configuration.setAttribute(attribute.getKey(), attribute.getValue());
+        }
     }
 }

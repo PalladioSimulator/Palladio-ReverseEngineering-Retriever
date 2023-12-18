@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.somox.analyzer.rules.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.somox.analyzer.rules.configuration.RuleEngineConfiguration;
+import org.palladiosimulator.somox.analyzer.rules.engine.RuleEngineConfiguration;
 import org.palladiosimulator.view.plantuml.generator.PcmComponentDiagramGenerator;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
@@ -41,8 +41,8 @@ public class PlantUmlJob extends AbstractBlackboardInteractingJob<RuleEngineBlac
 
     @Override
     public void execute(IProgressMonitor arg0) throws JobFailedException, UserCanceledException {
-        PcmComponentDiagramGenerator generator = new PcmComponentDiagramGenerator((Repository) getBlackboard()
-            .getPartition(RuleEngineConfiguration.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY));
+        PcmComponentDiagramGenerator generator = new PcmComponentDiagramGenerator(
+                (Repository) getBlackboard().getPartition(RuleEngineBlackboard.KEY_REPOSITORY));
         String plantUmlSource = "@startuml\n" + generator.getDiagramText() + "\n@enduml\n";
 
         if (configuration.getOutputFolder()
