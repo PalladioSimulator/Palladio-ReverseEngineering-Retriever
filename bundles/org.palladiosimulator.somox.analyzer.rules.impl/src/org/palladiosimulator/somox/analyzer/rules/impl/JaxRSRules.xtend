@@ -40,7 +40,7 @@ class JaxRSRules implements Rule {
 		val identifier = new CompUnitOrName(unit)
 		val isConverter = isUnitAnnotatedWithName(unit, "Converter")
 		val isUnitController = isUnitAnnotatedWithName(unit, "Path")
-		val isWebServlet = isUnitAnnotatedWithName(unit, "WebServlet")
+		val isWebServlet = isUnitAnnotatedWithName(unit, "WebServlet") || isImplementingOrExtending(unit, "HttpServlet")
 
 		// technology based and general recognition
 		if (isConverter) {
