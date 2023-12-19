@@ -42,6 +42,8 @@ class JaxRSRules implements Rule {
 		val isUnitController = isUnitAnnotatedWithName(unit, "Path")
 		val isWebServlet = isUnitAnnotatedWithName(unit, "WebServlet") || isImplementingOrExtending(unit, "HttpServlet")
 
+		if(identifier.toString.endsWith("Test")) return;
+
 		// technology based and general recognition
 		if (isConverter) {
 			detectDefault(blackboard, unit)

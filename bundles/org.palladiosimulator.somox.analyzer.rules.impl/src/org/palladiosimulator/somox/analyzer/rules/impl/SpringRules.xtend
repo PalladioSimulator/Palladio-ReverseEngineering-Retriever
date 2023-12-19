@@ -147,6 +147,8 @@ class SpringRules implements Rule {
 
 		val identifier = new CompUnitOrName(unit)
 
+		if(identifier.toString.endsWith("Test")) return;
+
 		pcmDetector.detectComponent(identifier)
 
 		if (isComponent) {
