@@ -40,7 +40,7 @@ class JaxRSRules implements Rule {
 		val identifier = new CompUnitOrName(unit)
 		val isConverter = isUnitAnnotatedWithName(unit, "Converter")
 		val isUnitController = isUnitAnnotatedWithName(unit, "Path")
-		val isWebServlet = isUnitAnnotatedWithName(unit, "WebServlet")
+		val isWebServlet = isUnitAnnotatedWithName(unit, "WebServlet") || isImplementingOrExtending(unit, "HttpServlet")
 
 		// technology based and general recognition
 		if (isConverter) {
@@ -64,7 +64,7 @@ class JaxRSRules implements Rule {
 					methodPath = RESTHelper.replaceArgumentsWithWildcards(methodPath)
 					// TODO: HTTP method switch-case
 					pcmDetector.detectCompositeProvidedOperation(identifier, m.resolveBinding,
-						new RESTName("host", methodPath, Optional.empty))
+						new RESTName("SERVICE-HOST", methodPath, Optional.empty))
 				}
 			]
 			getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]

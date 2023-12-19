@@ -399,7 +399,7 @@ public class RuleHelper {
             return false;
         }
         String rest = withGeneric.substring(withoutGeneric.length());
-        if (!rest.startsWith("<") || !rest.endsWith(">")) {
+        if (!rest.isEmpty() && (!rest.startsWith("<") || !rest.endsWith(">"))) {
             return false;
         }
         return true;
