@@ -56,7 +56,8 @@ class EcmaScriptRules implements Rule {
 		var gatewayRoutes = List.of
 		var Path mostSpecificGatewayPath = null
 		for (gatewayPath : gatewayRouteMap.keySet) {
-			if (path.startsWith(gatewayPath) && (mostSpecificGatewayPath === null || gatewayPath.startsWith(mostSpecificGatewayPath))) {
+			if (gatewayPath !== null && path.startsWith(gatewayPath) &&
+				(mostSpecificGatewayPath === null || gatewayPath.startsWith(mostSpecificGatewayPath))) {
 				gatewayRoutes = gatewayRouteMap.get(gatewayPath)
 				mostSpecificGatewayPath = gatewayPath
 			}
@@ -69,7 +70,8 @@ class EcmaScriptRules implements Rule {
 		var hostname = "API-HOST"
 		var Path mostSpecificHostnamePath = null
 		for (hostnamePath : hostnameMap.keySet) {
-			if (path.startsWith(hostnamePath) && (mostSpecificHostnamePath === null || hostnamePath.startsWith(mostSpecificHostnamePath))) {
+			if (hostnamePath !== null && path.startsWith(hostnamePath) &&
+				(mostSpecificHostnamePath === null || hostnamePath.startsWith(mostSpecificHostnamePath))) {
 				hostname = hostnameMap.get(hostnamePath)
 				mostSpecificHostnamePath = hostnamePath
 			}
