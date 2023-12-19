@@ -122,11 +122,13 @@ class SpringGatewayRules implements Rule {
 			val filtersObject = route.get("filters")
 
 			var path = Optional.empty
-			if (predicatesObject !== null && predicatesObject instanceof List) {
+			if (predicatesObject !== null && predicatesObject instanceof List &&
+				(predicatesObject as List<Object>).get(0) instanceof String) {
 				path = getPath(predicatesObject as List<String>)
 			}
 			var stripPrefixLength = 0
-			if (filtersObject !== null && filtersObject instanceof List) {
+			if (filtersObject !== null && filtersObject instanceof List &&
+				(filtersObject as List<Object>).get(0) instanceof String) {
 				stripPrefixLength = getStripPrefixLength(filtersObject as List<String>)
 			}
 			val hasUri = uriObject !== null && uriObject instanceof String

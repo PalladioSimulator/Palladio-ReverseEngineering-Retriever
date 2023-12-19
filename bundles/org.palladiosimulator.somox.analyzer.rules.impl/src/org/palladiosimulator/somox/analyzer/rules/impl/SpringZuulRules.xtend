@@ -36,7 +36,7 @@ class SpringZuulRules implements Rule {
 
 		val projectRoot = SpringHelper.findProjectRoot(path, poms)
 		val configRoot = SpringHelper.findConfigRoot(poms)
-		
+
 		if (configRoot === null) {
 			return
 		}
@@ -47,14 +47,18 @@ class SpringZuulRules implements Rule {
 		}
 
 		// Execute only once for each Spring application/service
-		if(routeMap.containsKey(projectRoot)) return
+		if(projectRoot !== null && routeMap.containsKey(projectRoot)) return
 
-		val bootstrapYaml = yamlMappers.get(
-			SpringHelper.findFile(yamlMappers.keySet, projectRoot.resolve("src/main/resources"),
-				Set.of("bootstrap.yaml", "bootstrap.yml")))
-		val applicationProperties = propertyFiles.get(
-			SpringHelper.findFile(propertyFiles.keySet, projectRoot.resolve("src/main/resources"),
-				Set.of("application.properties")))
+		val bootstrapYaml = projectRoot === null
+				? null
+				: yamlMappers.get(
+				SpringHelper.findFile(yamlMappers.keySet, projectRoot.resolve("src/main/resources"),
+					Set.of("bootstrap.yaml", "bootstrap.yml")))
+		val applicationProperties = projectRoot === null
+				? null
+				: propertyFiles.get(
+				SpringHelper.findFile(propertyFiles.keySet, projectRoot.resolve("src/main/resources"),
+					Set.of("application.properties")))
 		val applicationName = SpringHelper.getFromYamlOrProperties("spring.application.name", bootstrapYaml,
 			applicationProperties)
 		val projectConfigYaml = configRoot === null
