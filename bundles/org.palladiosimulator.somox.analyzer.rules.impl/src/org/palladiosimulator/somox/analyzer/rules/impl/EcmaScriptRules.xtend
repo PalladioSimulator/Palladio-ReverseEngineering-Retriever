@@ -79,8 +79,10 @@ class EcmaScriptRules implements Rule {
 		val httpRequests = findAllHttpRequests(blackboard, compilationUnit)
 		for (key : httpRequests.keySet) {
 			for (url : httpRequests.get(key)) {
-				System.out.println("\t" + key + " = " + url);
-				pcmDetector.detectRequiredInterface(GATEWAY_NAME, mapURL(hostname, "/" + url, gatewayRoutes));
+				val mappedURL = mapURL(hostname, "/" + url, gatewayRoutes)
+				if (!mappedURL.isPartOf("/" + hostname)) {
+					pcmDetector.detectRequiredInterface(GATEWAY_NAME, mappedURL);
+				}
 				pcmDetector.detectProvidedOperation(GATEWAY_NAME, null,
 					new RESTName(hostname, "/" + url, Optional.empty()));
 			}
