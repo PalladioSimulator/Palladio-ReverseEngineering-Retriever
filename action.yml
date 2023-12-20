@@ -1,6 +1,6 @@
 # A GitHub Action that allows to run the RuleEngine on arbitrary GitHub repositories.
 
-name: 'Run RuleEngine'
+name: "Run RuleEngine"
 description: |
   'Reverse-engineers a project''s source into a Palladio Component Model.
   Uploads the PCM as an artifact called `ruleengine`.
@@ -9,22 +9,22 @@ description: |
 
 inputs:
   source_path:
-    description: 'The location of the project to reverse-engineer'
+    description: "The location of the project to reverse-engineer"
     required: true
-    default: '.'
+    default: "."
   rules:
-    description: 'The rules to reverse-engineer with, as a comma-separated list'
+    description: "The rules to reverse-engineer with, as a comma-separated list"
     required: true
-    default: 'SPRING,MAVEN'
+    default: "SPRING,MAVEN"
 
 runs:
   using: "composite"
   steps:
     - name: Set Up JDK 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v3
       with:
-        distribution: 'temurin'
-        java-version: '17'
+        distribution: "temurin"
+        java-version: "17"
 
     - name: Create temporary directory
       shell: bash
@@ -32,6 +32,48 @@ runs:
         TMP_DIR=$(mktemp -d)
         echo "tmp_dir=$TMP_DIR" >> $GITHUB_ENV
         mkdir $TMP_DIR/ruleengine_out
+
+    - name: Gather Git Repository Info
+      shell: bash
+      run: |
+        GIT_INFO_FILE=${{ env.tmp_dir }}/ruleengine_out/git_info.txt
+        echo "GIT_INFO_FILE=$GIT_INFO_FILE" >> $GITHUB_ENV
+        {
+          echo "Git repository information:"
+          echo "Repository URL: $(git config --get remote.origin.url)"
+          echo "Current Branch: $(git branch --show-current)"
+          echo "Latest Commit: $(git log -1 --pretty=format:"%H - %s")"
+        } > $GIT_INFO_FILE
+    
+    - name: Install Neofetch
+      shell: bash
+      run: sudo apt-get install -y neofetch
+    
+    - name: Gather Specific System Information with Neofetch
+      shell: bash
+      run: |
+        SYSTEM_INFO_FILE=${{ env.tmp_dir }}/ruleengine_out/system_info.txt
+        echo "SYSTEM_INFO_FILE=$SYSTEM_INFO_FILE" >> $GITHUB_ENV
+        echo "SYSTEM_INFO_FILE=${{ env.tmp_dir }}/ruleengine_out/system_info.txt" >> $GITHUB_ENV
+        {
+          echo "system information:"
+          neofetch os distro kernel cpu gpu memory --stdout
+        } > $SYSTEM_INFO_FILE
+    
+    - name: Install cloc
+      shell: bash
+      run: |
+        sudo apt install cloc
+
+    - name: Run cloc analysis
+      shell: bash
+      run: |
+        CLOC_INFO_FILE=${{ env.tmp_dir }}/ruleengine_out/cloc.txt
+        echo "CLOC_INFO_FILE=$CLOC_INFO_FILE" >> $GITHUB_ENV
+        {
+          echo "cloc analysis output:"
+          cloc ${{ inputs.source_path }} --quiet
+        } > $CLOC_INFO_FILE
 
     - name: Get action version
       shell: bash
@@ -75,8 +117,41 @@ runs:
     - name: Execute RuleEngine
       shell: bash
       working-directory: ${{ env.tmp_dir }}/ruleengine
-      run: ./eclipse -i "${{ github.workspace }}/${{ inputs.source_path }}" -o "${{ env.tmp_dir }}/ruleengine_out" -r "${{ inputs.rules }}"
-      
+      env:
+        RULEENGINE_COMMAND: './eclipse -i "${{ github.workspace }}/${{ inputs.source_path }}" -o "${{ env.tmp_dir }}/ruleengine_out" -r "${{ inputs.rules }}"'
+      run: |
+        TIMING_INFO_FILE=${{ env.tmp_dir }}/ruleengine_out/timing.txt
+        echo "TIMING_INFO_FILE=$TIMING_INFO_FILE" >> $GITHUB_ENV
+        /usr/bin/time -p -o "$TIMING_INFO_FILE" $RULEENGINE_COMMAND
+        # Read and reformat the timing information
+        {
+          echo "RuleEngine execution time:"
+          while IFS= read -r line; do
+            case "$line" in
+              real*) echo "Total Elapsed Time (seconds): ${line#* }" ;;
+              user*) echo "User CPU Time (seconds): ${line#* }" ;;
+              sys*) echo "System CPU Time (seconds): ${line#* }" ;;
+            esac
+          done < "$TIMING_INFO_FILE"
+        } > "${TIMING_INFO_FILE}.tmp" && mv "${TIMING_INFO_FILE}.tmp" "$TIMING_INFO_FILE"
+
+    - name: Combine and Clean Up Files
+      shell: bash
+      run: |
+        # Combine files into one, with empty lines between file contents
+        {
+          cat $GIT_INFO_FILE
+          echo
+          cat $SYSTEM_INFO_FILE
+          echo
+          cat $CLOC_INFO_FILE
+          echo
+          cat $TIMING_INFO_FILE
+        } > ${{ env.tmp_dir }}/ruleengine_out/report.txt
+        # Delete the original files
+        rm -f $GIT_INFO_FILE $SYSTEM_INFO_FILE $CLOC_INFO_FILE $TIMING_INFO_FILE
+
+
     - name: Prepare analysis results for upload
       shell: bash
       working-directory: ${{ env.tmp_dir }}
@@ -91,7 +166,7 @@ runs:
       with:
         name: ruleengine
         path: ${{ env.tmp_dir }}/ruleengine_out
-      
+
     - name: Prepare Eclipse logs for upload
       if: failure()
       shell: bash
