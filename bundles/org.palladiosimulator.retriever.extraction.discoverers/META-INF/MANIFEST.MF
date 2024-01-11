@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Retriever Discoverers
+Bundle-SymbolicName: org.palladiosimulator.retriever.extraction.discoverers;singleton:=true
+Bundle-Version: 5.2.0.qualifier
+Bundle-Vendor: palladiosimulator.org
+Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.impl
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Export-Package: org.palladiosimulator.retriever.extraction.discoverers
+Require-Bundle: org.palladiosimulator.pcm,
+ org.palladiosimulator.retriever.extraction,
+ org.eclipse.jdt.core,
+ de.uka.ipd.sdq.workflow,
+ org.jdom2,
+ org.openjdk.nashorn.core;bundle-version="15.4.0",
+ com.github.jsqlparser,
+ org.yaml.snakeyaml,
+ org.json,
+ org.apache.commons.csv

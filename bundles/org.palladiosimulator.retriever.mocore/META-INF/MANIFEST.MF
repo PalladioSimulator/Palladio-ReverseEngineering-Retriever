@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: org.palladiosimulator.somox.analyzer.rules.mocore
+Bundle-Name: org.palladiosimulator.retriever.mocore
 Bundle-SymbolicName: org.palladiosimulator.retriever.mocore;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.mocore

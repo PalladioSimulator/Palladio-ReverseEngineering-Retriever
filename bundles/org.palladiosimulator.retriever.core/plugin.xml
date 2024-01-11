@@ -5,7 +5,7 @@
    <extension-point id="org.palladiosimulator.somox.discoverer" name="RuleEngine Discoverer" schema="schema/org.palladiosimulator.somox.discoverer.exsd"/>
 	<extension point="org.eclipse.debug.core.launchConfigurationTypes">
 	    <launchConfigurationType
-           delegate="org.palladiosimulator.somox.analyzer.rules.gui.RuleEngineConfigurationDelegate"
+           delegate="org.palladiosimulator.retriever.core.gui.RuleEngineConfigurationDelegate"
            id="org.palladiosimulator.somox.analyzer.rules.runconfig.LaunchRuleEngineAnalyzer"
            modes="run, debug"
            name="Launch Rule Engine"
@@ -15,7 +15,7 @@
    <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
 	    <launchConfigurationTabGroup
 	        type="org.palladiosimulator.somox.analyzer.rules.runconfig.LaunchRuleEngineAnalyzer"
-	        class="org.palladiosimulator.somox.analyzer.rules.gui.RuleEngineTabGroup"
+	        class="org.palladiosimulator.retriever.core.gui.RuleEngineTabGroup"
 	        id="org.palladiosimulator.somox.analyzer.rules.runconfig.LaunchRuleEngineTabGroup">
 	    </launchConfigurationTabGroup>
 	</extension>
@@ -36,7 +36,7 @@
           thread="main"
           visible="true">
 	    <run
-	     class="org.palladiosimulator.somox.analyzer.rules.cli.RuleEngineApplication">
+	     class="org.palladiosimulator.retriever.core.cli.RuleEngineApplication">
 	    </run>
     </application>
  </extension>

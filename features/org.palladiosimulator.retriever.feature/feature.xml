@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.palladiosimulator.somox.analyzer.rules.feature"
-      label="SoMoX Rule Engine Feature"
+      id="org.palladiosimulator.retriever.feature"
+      label="Retriever Feature"
       version="5.2.0.qualifier"
       plugin="org.palladiosimulator.branding"
       license-feature="org.palladiosimulator.license"
@@ -28,30 +28,38 @@
    </requires>
 
    <plugin
-         id="org.palladiosimulator.somox.analyzer.rules.engine"
+         id="org.palladiosimulator.retriever.core"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.palladiosimulator.somox.analyzer.rules.impl"
+         id="org.palladiosimulator.retriever.extraction"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.palladiosimulator.somox.analyzer.rules.main"
+         id="org.palladiosimulator.retriever.extraction.discoverers"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.palladiosimulator.somox.analyzer.rules.mocore"
+         id="org.palladiosimulator.retriever.extraction.rules"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.palladiosimulator.retriever.mocore"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>

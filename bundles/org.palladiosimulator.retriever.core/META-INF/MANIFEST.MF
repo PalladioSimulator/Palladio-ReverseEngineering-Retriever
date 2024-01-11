@@ -1,38 +1,23 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: SoMoX Rule Main
+Bundle-Name: Retriever Core
 Bundle-SymbolicName: org.palladiosimulator.retriever.core;singleton:=true
 Bundle-Version: 5.2.0.qualifier
 Bundle-Vendor: palladiosimulator.org
 Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.main
 Bundle-RequiredExecutionEnvironment: JavaSE-17
-Require-Bundle: org.eclipse.core.resources,
- org.eclipse.jdt.core,
- org.palladiosimulator.pcm,
+Require-Bundle: org.eclipse.jdt.core,
  org.palladiosimulator.retriever.extraction,
- org.palladiosimulator.retriever.extraction.rules,
- org.apache.log4j,
- de.uka.ipd.sdq.workflow,
  de.uka.ipd.sdq.workflow.launchconfig,
  org.eclipse.debug.ui,
- org.eclipse.equinox.app,
  org.eclipse.swt,
- org.palladiosimulator.commons,
- org.eclipse.emf.ecore,
  org.palladiosimulator.generator.fluent,
- org.apache.commons.csv,
- org.jdom2,
- org.yaml.snakeyaml,
- org.json,
- org.apache.commons.cli,
- com.github.jsqlparser,
  org.palladiosimulator.somox.ast2seff,
  org.palladiosimulator.retriever.mocore,
  org.palladiosimulator.view.plantuml.generator,
- org.openjdk.nashorn.core
-Export-Package: org.palladiosimulator.somox.analyzer.rules.cli;uses:="org.eclipse.equinox.app",
- org.palladiosimulator.somox.analyzer.rules.configuration,
- org.palladiosimulator.somox.analyzer.rules.main,
- org.palladiosimulator.somox.analyzer.rules.service,
- org.palladiosimulator.somox.analyzer.rules.workflow,
- org.palladiosimulator.somox.discoverer
+ org.palladiosimulator.retriever.extraction.discoverers
+Export-Package: org.palladiosimulator.retriever.core.cli;uses:="org.eclipse.equinox.app",
+ org.palladiosimulator.retriever.core.configuration,
+ org.palladiosimulator.retriever.core.main,
+ org.palladiosimulator.retriever.core.service,
+ org.palladiosimulator.retriever.core.workflow

@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: SoMoX Rule Engine Test
-Bundle-SymbolicName: org.palladiosimulator.somox.analyzer.rules.engine.test;singleton:=true
+Bundle-Name: Retriever Test
+Bundle-SymbolicName: org.palladiosimulator.retriever.test;singleton:=true
 Bundle-Version: 5.2.0.qualifier
 Bundle-Vendor: palladiosimulator.org
 Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.engine.test
@@ -18,11 +18,12 @@ Require-Bundle: com.google.guava,
  org.junit,
  org.palladiosimulator.generator.fluent,
  org.palladiosimulator.pcm,
- org.palladiosimulator.retriever.extraction,
- org.palladiosimulator.retriever.extraction.rules,
- org.palladiosimulator.retriever.core,
  org.palladiosimulator.retriever.mocore,
  org.palladiosimulator.somox.ast2seff,
  org.apache.commons.io,
  org.apache.log4j,
- junit-jupiter-api
+ junit-jupiter-api,
+ org.palladiosimulator.retriever.extraction,
+ org.palladiosimulator.retriever.core,
+ org.palladiosimulator.retriever.extraction.discoverers,
+ org.palladiosimulator.retriever.extraction.rules
