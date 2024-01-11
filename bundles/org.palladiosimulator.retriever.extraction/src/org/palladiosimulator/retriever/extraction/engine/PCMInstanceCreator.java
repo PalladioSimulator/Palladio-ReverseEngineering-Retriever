@@ -43,7 +43,7 @@ import org.palladiosimulator.retriever.extraction.commonalities.PCMDetectionResu
 public class PCMInstanceCreator {
     private static final Logger LOG = Logger.getLogger(PCMInstanceCreator.class);
 
-    private static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java";
+    private static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.java";
 
     private static final String REPO_NAME = "Software Architecture Repository";
     private final FluentRepositoryFactory create;

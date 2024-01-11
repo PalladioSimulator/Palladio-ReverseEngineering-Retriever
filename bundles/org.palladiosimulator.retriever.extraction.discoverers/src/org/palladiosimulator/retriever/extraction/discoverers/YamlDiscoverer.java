@@ -30,7 +30,7 @@ import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 public class YamlDiscoverer implements Discoverer {
 
-    public static final String DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.yaml";
+    public static final String DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.yaml";
     public static final String MAPPER_PARTITION_KEY = DISCOVERER_ID + ".mappers";
 
     @Override

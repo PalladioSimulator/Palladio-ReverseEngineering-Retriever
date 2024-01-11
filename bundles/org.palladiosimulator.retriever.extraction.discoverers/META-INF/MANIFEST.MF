@@ -4,7 +4,7 @@ Bundle-Name: Retriever Discoverers
 Bundle-SymbolicName: org.palladiosimulator.retriever.extraction.discoverers;singleton:=true
 Bundle-Version: 5.2.0.qualifier
 Bundle-Vendor: palladiosimulator.org
-Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.impl
+Automatic-Module-Name: org.palladiosimulator.retriever.extraction.rules
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.palladiosimulator.retriever.extraction.discoverers
 Require-Bundle: org.palladiosimulator.pcm,

@@ -4,7 +4,7 @@ Bundle-Name: Retriever Test
 Bundle-SymbolicName: org.palladiosimulator.retriever.test;singleton:=true
 Bundle-Version: 5.2.0.qualifier
 Bundle-Vendor: palladiosimulator.org
-Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.engine.test
+Automatic-Module-Name: org.palladiosimulator.retriever.extraction.engine.test
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: com.google.guava,
  de.uka.ipd.sdq.workflow,

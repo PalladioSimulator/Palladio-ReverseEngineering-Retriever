@@ -35,7 +35,7 @@ import de.uka.ipd.sdq.workflow.launchconfig.tabs.TabHelper;
 public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
     public static final String NAME = "Rule Engine IO";
-    public static final String PLUGIN_ID = "org.palladiosimulator.somox.analyzer.rules.runconfig.LaunchRuleEngineAnalyzer";
+    public static final String PLUGIN_ID = "org.palladiosimulator.retriever.core.gui.LaunchRuleEngineAnalyzer";
     private static final String FILENAME_TAB_IMAGE_PATH = "icons/RuleEngine_16x16.gif";
 
     private final String defaultPath;

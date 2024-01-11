@@ -4,7 +4,7 @@ Bundle-Name: Retriever Extraction
 Bundle-SymbolicName: org.palladiosimulator.retriever.extraction;singleton:=true
 Bundle-Version: 5.2.0.qualifier
 Bundle-Vendor: palladiosimulator.org
-Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.engine
+Automatic-Module-Name: org.palladiosimulator.retriever.extraction.engine
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.palladiosimulator.retriever.extraction.blackboard,
  org.palladiosimulator.retriever.extraction.commonalities,

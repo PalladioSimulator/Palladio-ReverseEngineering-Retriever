@@ -19,7 +19,7 @@ import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
  * @author Florian Bossert
  */
 public class PerformanceAnalyst implements Analyst {
-    private static final String ANALYST_ID = "org.palladiosimulator.somox.analyzer.rules.service.performance_analyst";
+    private static final String ANALYST_ID = "org.palladiosimulator.retriever.core.service.performance_analyst";
 
     @Override
     public IBlackboardInteractingJob<RuleEngineBlackboard> create(RuleEngineConfiguration configuration,

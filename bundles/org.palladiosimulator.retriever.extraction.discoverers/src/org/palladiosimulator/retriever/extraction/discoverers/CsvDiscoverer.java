@@ -29,7 +29,7 @@ import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 public class CsvDiscoverer implements Discoverer {
 
-    private static final String DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.csv";
+    private static final String DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.csv";
 
     @Override
     public IBlackboardInteractingJob<RuleEngineBlackboard> create(final RuleEngineConfiguration configuration,

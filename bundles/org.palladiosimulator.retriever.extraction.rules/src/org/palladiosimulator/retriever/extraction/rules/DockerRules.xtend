@@ -9,8 +9,8 @@ import org.palladiosimulator.retriever.extraction.engine.Rule
 
 class DockerRules implements Rule {
 
-	static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.docker"
-	static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java"
+	static final String RULE_ID = "org.palladiosimulator.retriever.extraction.rules.docker"
+	static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.java"
 	static final String DOCKER_FILE_NAME = "Dockerfile";
 
 	override processRules(RuleEngineBlackboard blackboard, Path path) {

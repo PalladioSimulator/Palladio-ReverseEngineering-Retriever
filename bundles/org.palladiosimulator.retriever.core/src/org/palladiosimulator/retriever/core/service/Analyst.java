@@ -5,7 +5,7 @@ import java.util.Set;
 import org.palladiosimulator.retriever.extraction.engine.Service;
 
 /**
- * The defining interface of the org.palladiosimulator.somox.analyzer.rules.analyst extension point.
+ * The defining interface of the org.palladiosimulator.retriever.extraction.analyst extension point.
  * Implement this interface to extend the rule engine by an additional analyst that can then process
  * the generated model.
  *

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.palladiosimulator.somox.analyzer.rules.analyst" name="RuleEngine Analyst" schema="schema/org.palladiosimulator.somox.analyzer.rules.analyst.exsd"/>
-   <extension-point id="org.palladiosimulator.somox.discoverer" name="RuleEngine Discoverer" schema="schema/org.palladiosimulator.somox.discoverer.exsd"/>
+   <extension-point id="org.palladiosimulator.retriever.extraction.analyst" name="RuleEngine Analyst" schema="schema/org.palladiosimulator.retriever.extraction.analyst.exsd"/>
+   <extension-point id="org.palladiosimulator.retriever.extraction.discoverer" name="RuleEngine Discoverer" schema="schema/org.palladiosimulator.retriever.extraction.discoverer.exsd"/>
 	<extension point="org.eclipse.debug.core.launchConfigurationTypes">
 	    <launchConfigurationType
            delegate="org.palladiosimulator.retriever.core.gui.RuleEngineConfigurationDelegate"
-           id="org.palladiosimulator.somox.analyzer.rules.runconfig.LaunchRuleEngineAnalyzer"
+           id="org.palladiosimulator.retriever.core.gui.LaunchRuleEngineAnalyzer"
            modes="run, debug"
            name="Launch Rule Engine"
            public="true">        
@@ -14,16 +14,16 @@
    </extension>
    <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
 	    <launchConfigurationTabGroup
-	        type="org.palladiosimulator.somox.analyzer.rules.runconfig.LaunchRuleEngineAnalyzer"
+	        type="org.palladiosimulator.retriever.core.gui.LaunchRuleEngineAnalyzer"
 	        class="org.palladiosimulator.retriever.core.gui.RuleEngineTabGroup"
-	        id="org.palladiosimulator.somox.analyzer.rules.runconfig.LaunchRuleEngineTabGroup">
+	        id="org.palladiosimulator.retriever.core.gui.LaunchRuleEngineTabGroup">
 	    </launchConfigurationTabGroup>
 	</extension>
 	<extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
 		<launchConfigurationTypeImage
 	        icon="icons/RuleEngine_16x16.gif"
-	        configTypeID="org.palladiosimulator.somox.analyzer.rules.runconfig.LaunchRuleEngineAnalyzer"
-	        id="org.palladiosimulator.somox.analyzer.rules.runconfig.LaunchRuleEngineTypeImages">
+	        configTypeID="org.palladiosimulator.retriever.core.gui.LaunchRuleEngineAnalyzer"
+	        id="org.palladiosimulator.retriever.core.gui.LaunchRuleEngineTypeImages">
 	    </launchConfigurationTypeImage>
 	</extension>
  <extension
@@ -41,67 +41,67 @@
     </application>
  </extension>
  <extension
-       id="org.palladiosimulator.somox.discoverer.csv"
+       id="org.palladiosimulator.retriever.extraction.discoverer.csv"
        name="CSV Discoverer"
-       point="org.palladiosimulator.somox.discoverer">
+       point="org.palladiosimulator.retriever.extraction.discoverer">
     <discoverer
-          class="org.palladiosimulator.somox.discoverer.CsvDiscoverer">
+          class="org.palladiosimulator.retriever.extraction.discoverer.CsvDiscoverer">
     </discoverer>
  </extension>
  <extension
-       id="org.palladiosimulator.somox.discoverer.java"
+       id="org.palladiosimulator.retriever.extraction.discoverer.java"
        name="Java Discoverer"
-       point="org.palladiosimulator.somox.discoverer">
+       point="org.palladiosimulator.retriever.extraction.discoverer">
     <discoverer
-          class="org.palladiosimulator.somox.discoverer.JavaDiscoverer">
+          class="org.palladiosimulator.retriever.extraction.discoverer.JavaDiscoverer">
     </discoverer>
  </extension>
  <extension
-       id="org.palladiosimulator.somox.discoverer.json"
+       id="org.palladiosimulator.retriever.extraction.discoverer.json"
        name="JSON Discoverer"
-       point="org.palladiosimulator.somox.discoverer">
+       point="org.palladiosimulator.retriever.extraction.discoverer">
     <discoverer
-          class="org.palladiosimulator.somox.discoverer.JsonDiscoverer">
+          class="org.palladiosimulator.retriever.extraction.discoverer.JsonDiscoverer">
     </discoverer>
  </extension>
  <extension
-       id="org.palladiosimulator.somox.discoverer.xml"
+       id="org.palladiosimulator.retriever.extraction.discoverer.xml"
        name="XML Discoverer"
-       point="org.palladiosimulator.somox.discoverer">
+       point="org.palladiosimulator.retriever.extraction.discoverer">
     <discoverer
-          class="org.palladiosimulator.somox.discoverer.XmlDiscoverer">
+          class="org.palladiosimulator.retriever.extraction.discoverer.XmlDiscoverer">
     </discoverer>
  </extension>
  <extension
-       id="org.palladiosimulator.somox.discoverer.yaml"
+       id="org.palladiosimulator.retriever.extraction.discoverer.yaml"
        name="YAML Discoverer"
-       point="org.palladiosimulator.somox.discoverer">
+       point="org.palladiosimulator.retriever.extraction.discoverer">
     <discoverer
-          class="org.palladiosimulator.somox.discoverer.YamlDiscoverer">
+          class="org.palladiosimulator.retriever.extraction.discoverer.YamlDiscoverer">
     </discoverer>
  </extension>
  <extension
-       id="org.palladiosimulator.somox.discoverer.properties"
+       id="org.palladiosimulator.retriever.extraction.discoverer.properties"
        name=".properties Discoverer"
-       point="org.palladiosimulator.somox.discoverer">
+       point="org.palladiosimulator.retriever.extraction.discoverer">
     <discoverer
-          class="org.palladiosimulator.somox.discoverer.PropertiesDiscoverer">
+          class="org.palladiosimulator.retriever.extraction.discoverer.PropertiesDiscoverer">
     </discoverer>
  </extension>
  <extension
-       id="org.palladiosimulator.somox.discoverer.ecmascript"
+       id="org.palladiosimulator.retriever.extraction.discoverer.ecmascript"
        name="ECMAScript Discoverer"
-       point="org.palladiosimulator.somox.discoverer">
+       point="org.palladiosimulator.retriever.extraction.discoverer">
     <discoverer
-          class="org.palladiosimulator.somox.discoverer.EcmaScriptDiscoverer">
+          class="org.palladiosimulator.retriever.extraction.discoverer.EcmaScriptDiscoverer">
     </discoverer>
  </extension>
  <extension
-       id="org.palladiosimulator.somox.analyzer.rules.service.performance_analyst"
+       id="org.palladiosimulator.retriever.core.service.performance_analyst"
        name="Performance Analyst"
-       point="org.palladiosimulator.somox.analyzer.rules.analyst">
+       point="org.palladiosimulator.retriever.extraction.analyst">
     <analyst
-          class="org.palladiosimulator.somox.analyzer.rules.service.PerformanceAnalyst">
+          class="org.palladiosimulator.retriever.core.service.PerformanceAnalyst">
     </analyst>
  </extension>
 </plugin>

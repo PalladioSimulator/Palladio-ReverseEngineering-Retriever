@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
     <!-- add features here -->
-    <feature id="org.palladiosimulator.somox.analyzer.rules.feature">
+    <feature id="org.palladiosimulator.retriever.feature">
         <category name="org.palladiosimulator.reverseengineering.category" />
     </feature>
-    <feature id="org.palladiosimulator.somox.analyzer.rules.feature.source">
+    <feature id="org.palladiosimulator.retriever.feature.source">
         <category name="org.palladiosimulator.reverseengineering.category" />
     </feature>
     <!-- category definitions -->

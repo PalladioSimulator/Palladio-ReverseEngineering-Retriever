@@ -8,9 +8,9 @@
 		<relativePath>../../</relativePath>
 	</parent>
 
-	<groupId>org.palladiosimulator.somox</groupId>
-	<artifactId>org.palladiosimulator.somox.analyzer.rules.engine.test</artifactId>
-	<name>[test-bundle] SoMoX Rule CLI</name>
+	<groupId>org.palladiosimulator.retriever</groupId>
+	<artifactId>org.palladiosimulator.retriever.test</artifactId>
+	<name>[test-bundle] Retriever</name>
 	<version>5.2.0-SNAPSHOT</version>
 	<packaging>eclipse-test-plugin</packaging>
 

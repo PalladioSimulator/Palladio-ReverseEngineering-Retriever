@@ -9,8 +9,8 @@ import org.palladiosimulator.retriever.extraction.engine.Rule
 
 class MavenRules implements Rule {
 
-	static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.maven"
-	static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java";
+	static final String RULE_ID = "org.palladiosimulator.retriever.extraction.rules.maven"
+	static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.java";
 	static final String MAVEN_FILE_NAME = "pom.xml";
 
 	override processRules(RuleEngineBlackboard blackboard, Path path) {

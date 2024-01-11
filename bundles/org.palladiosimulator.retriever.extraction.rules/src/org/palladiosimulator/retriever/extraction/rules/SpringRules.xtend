@@ -25,14 +25,14 @@ import org.palladiosimulator.retriever.extraction.rules.util.RESTHelper
 class SpringRules implements Rule {
 	static final Logger LOG = Logger.getLogger(SpringRules)
 
-	public static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.spring"
-	public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java"
-	public static final String YAML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.yaml"
+	public static final String RULE_ID = "org.palladiosimulator.retriever.extraction.rules.spring"
+	public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.java"
+	public static final String YAML_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.yaml"
 	public static final String YAML_MAPPERS_KEY = YAML_DISCOVERER_ID + ".mappers"
-	public static final String XML_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.xml"
-	public static final String PROPERTIES_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.properties"
-	public static final String ZUUL_RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.spring.zuul";
-	public static final String CLOUD_GATEWAY_RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.spring.cloudgateway";
+	public static final String XML_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.xml"
+	public static final String PROPERTIES_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.properties"
+	public static final String ZUUL_RULE_ID = "org.palladiosimulator.retriever.extraction.rules.spring.zuul";
+	public static final String CLOUD_GATEWAY_RULE_ID = "org.palladiosimulator.retriever.extraction.rules.spring.cloudgateway";
 
 	override processRules(RuleEngineBlackboard blackboard, Path path) {
 		val unit = blackboard.getDiscoveredFiles(JAVA_DISCOVERER_ID, typeof(CompilationUnit)).get(path)

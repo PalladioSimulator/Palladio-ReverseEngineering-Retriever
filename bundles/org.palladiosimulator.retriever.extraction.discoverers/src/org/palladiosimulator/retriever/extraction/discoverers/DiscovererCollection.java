@@ -11,7 +11,7 @@ import org.eclipse.core.runtime.Platform;
 import org.palladiosimulator.retriever.extraction.engine.ServiceCollection;
 
 public class DiscovererCollection implements ServiceCollection<Discoverer> {
-    public static final String EXTENSION_POINT = "org.palladiosimulator.somox.discoverer";
+    public static final String EXTENSION_POINT = "org.palladiosimulator.retriever.extraction.discoverer";
     private final Set<Discoverer> discoverer = new HashSet<>();
 
     public DiscovererCollection() throws CoreException, InvalidRegistryObjectException {

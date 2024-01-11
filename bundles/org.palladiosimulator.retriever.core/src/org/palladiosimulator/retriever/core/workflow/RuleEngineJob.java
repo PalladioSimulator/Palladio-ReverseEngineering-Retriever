@@ -10,7 +10,7 @@ import org.palladiosimulator.retriever.extraction.blackboard.RuleEngineBlackboar
 import org.palladiosimulator.retriever.extraction.discoverers.Discoverer;
 import org.palladiosimulator.retriever.extraction.engine.Rule;
 import org.palladiosimulator.retriever.extraction.engine.RuleEngineConfiguration;
-import org.palladiosimulator.somox.analyzer.rules.mocore.workflow.MoCoReJob;
+import org.palladiosimulator.retriever.mocore.workflow.MoCoReJob;
 import org.palladiosimulator.somox.ast2seff.jobs.Ast2SeffJob;
 
 import de.uka.ipd.sdq.workflow.extension.AbstractExtendableJob;

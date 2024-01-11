@@ -3,19 +3,19 @@ Bundle-ManifestVersion: 2
 Bundle-Name: org.palladiosimulator.retriever.mocore
 Bundle-SymbolicName: org.palladiosimulator.retriever.mocore;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.mocore
+Automatic-Module-Name: org.palladiosimulator.retriever.mocore
 Bundle-Vendor: palladiosimulator.org
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
-Export-Package: org.palladiosimulator.somox.analyzer.rules.mocore.discovery,
- org.palladiosimulator.somox.analyzer.rules.mocore.orchestration,
- org.palladiosimulator.somox.analyzer.rules.mocore.processor.element,
- org.palladiosimulator.somox.analyzer.rules.mocore.processor.relation,
- org.palladiosimulator.somox.analyzer.rules.mocore.surrogate,
- org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.element,
- org.palladiosimulator.somox.analyzer.rules.mocore.surrogate.relation,
- org.palladiosimulator.somox.analyzer.rules.mocore.transformation,
- org.palladiosimulator.somox.analyzer.rules.mocore.workflow
+Export-Package: org.palladiosimulator.retriever.mocore.discovery,
+ org.palladiosimulator.retriever.mocore.orchestration,
+ org.palladiosimulator.retriever.mocore.processor.element,
+ org.palladiosimulator.retriever.mocore.processor.relation,
+ org.palladiosimulator.retriever.mocore.surrogate,
+ org.palladiosimulator.retriever.mocore.surrogate.element,
+ org.palladiosimulator.retriever.mocore.surrogate.relation,
+ org.palladiosimulator.retriever.mocore.transformation,
+ org.palladiosimulator.retriever.mocore.workflow
 Require-Bundle: tools.mdsd.mocore.framework,
  org.palladiosimulator.pcm,
  org.palladiosimulator.pcm.resources,

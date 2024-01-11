@@ -24,7 +24,7 @@ import de.uka.ipd.sdq.workflow.configuration.AbstractComposedJobConfiguration;
 public class RuleEngineConfigurationImpl extends AbstractComposedJobConfiguration implements RuleEngineConfiguration {
     private static final Logger LOG = Logger.getLogger(RuleEngineConfigurationImpl.class);
 
-    private static final String CONFIG_PREFIX = "org.palladiosimulator.somox.analyzer.rules.configuration.";
+    private static final String CONFIG_PREFIX = "org.palladiosimulator.retriever.core.configuration.";
     public static final String RULE_ENGINE_INPUT_PATH = "input.path";
     public static final String RULE_ENGINE_OUTPUT_PATH = CONFIG_PREFIX + "output.path";
     public static final String RULE_ENGINE_SELECTED_RULES = CONFIG_PREFIX + "rules";

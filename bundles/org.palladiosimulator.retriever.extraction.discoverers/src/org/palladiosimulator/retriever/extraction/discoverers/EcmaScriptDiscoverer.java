@@ -26,7 +26,7 @@ import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 public class EcmaScriptDiscoverer implements Discoverer {
 
-    private static final String DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.ecmascript";
+    private static final String DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.ecmascript";
 
     @Override
     public IBlackboardInteractingJob<RuleEngineBlackboard> create(final RuleEngineConfiguration configuration,

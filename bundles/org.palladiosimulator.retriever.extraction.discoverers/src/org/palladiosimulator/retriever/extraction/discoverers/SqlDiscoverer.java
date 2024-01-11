@@ -27,7 +27,7 @@ import net.sf.jsqlparser.statement.Statement;
 
 public class SqlDiscoverer implements Discoverer {
 
-    public static final String DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.sql";
+    public static final String DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.sql";
 
     @Override
     public IBlackboardInteractingJob<RuleEngineBlackboard> create(final RuleEngineConfiguration configuration,

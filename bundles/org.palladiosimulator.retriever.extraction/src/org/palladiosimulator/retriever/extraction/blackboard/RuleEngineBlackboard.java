@@ -19,8 +19,8 @@ import de.uka.ipd.sdq.workflow.blackboard.Blackboard;
 
 public class RuleEngineBlackboard extends Blackboard<Object> {
 
-    public static final String KEY_REPOSITORY = "org.palladiosimulator.somox.analyzer.repository";
-    public static final String KEY_SEFF_ASSOCIATIONS = "org.palladiosimulator.somox.analyzer.seff_associations";
+    public static final String KEY_REPOSITORY = "org.palladiosimulator.retriever.repository";
+    public static final String KEY_SEFF_ASSOCIATIONS = "org.palladiosimulator.retriever.seff_associations";
 
     private final Map<RepositoryComponent, CompilationUnit> repositoryComponentLocations;
     private final Map<Path, Set<CompilationUnit>> systemAssociations;

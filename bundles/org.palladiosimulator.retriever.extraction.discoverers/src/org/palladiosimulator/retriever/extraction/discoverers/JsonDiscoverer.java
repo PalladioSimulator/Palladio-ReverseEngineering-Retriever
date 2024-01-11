@@ -27,7 +27,7 @@ import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 public class JsonDiscoverer implements Discoverer {
 
-    public static final String DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.json";
+    public static final String DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.json";
 
     @Override
     public IBlackboardInteractingJob<RuleEngineBlackboard> create(final RuleEngineConfiguration configuration,

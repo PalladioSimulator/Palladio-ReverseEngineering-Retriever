@@ -15,9 +15,9 @@ import org.palladiosimulator.retriever.extraction.commonalities.HTTPMethod
 
 class JaxRSRules implements Rule {
 
-	public static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.jax_rs"
+	public static final String RULE_ID = "org.palladiosimulator.retriever.extraction.rules.jax_rs"
 
-	public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java"
+	public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.java"
 
 	static final Map<String, HTTPMethod> SERVLET_METHODS = Map.of("doGet", HTTPMethod.GET, "doPost", HTTPMethod.POST,
 		"doDelete", HTTPMethod.DELETE, "doPut", HTTPMethod.PUT, "handleGETRequest", HTTPMethod.GET, "handlePOSTRequest",

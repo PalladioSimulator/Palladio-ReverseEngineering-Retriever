@@ -9,8 +9,8 @@ import org.palladiosimulator.retriever.extraction.engine.Rule
 
 class GradleRules implements Rule {
 
-	static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.gradle";
-	static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.java";
+	static final String RULE_ID = "org.palladiosimulator.retriever.extraction.rules.gradle";
+	static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.java";
 	static final String GRADLE_FILE_NAME = "build.gradle";
 
 	override processRules(RuleEngineBlackboard blackboard, Path path) {

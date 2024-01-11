@@ -28,11 +28,11 @@ import org.palladiosimulator.retriever.extraction.rules.data.GatewayRoute
 
 class EcmaScriptRules implements Rule {
 
-	public static final String RULE_ID = "org.palladiosimulator.somox.analyzer.rules.impl.ecmascript"
+	public static final String RULE_ID = "org.palladiosimulator.retriever.extraction.rules.ecmascript"
 
-	public static final String ECMASCRIPT_DISCOVERER_ID = "org.palladiosimulator.somox.discoverer.ecmascript"
-	public static final String HOSTNAMES_ID = "org.palladiosimulator.somox.analyzer.rules.impl.ecmascript.hostnames"
-	public static final String GATEWAY_ROUTES_ID = "org.palladiosimulator.somox.analyzer.rules.impl.ecmascript.routes"
+	public static final String ECMASCRIPT_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.ecmascript"
+	public static final String HOSTNAMES_ID = "org.palladiosimulator.retriever.extraction.rules.ecmascript.hostnames"
+	public static final String GATEWAY_ROUTES_ID = "org.palladiosimulator.retriever.extraction.rules.ecmascript.routes"
 
 	static final CompUnitOrName GATEWAY_NAME = new CompUnitOrName("Gateway")
 	static final String START_NONWORD_CHARS = "^[\\W]+"

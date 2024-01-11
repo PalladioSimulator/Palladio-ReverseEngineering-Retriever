@@ -4,7 +4,7 @@ Bundle-Name: Retriever Core
 Bundle-SymbolicName: org.palladiosimulator.retriever.core;singleton:=true
 Bundle-Version: 5.2.0.qualifier
 Bundle-Vendor: palladiosimulator.org
-Automatic-Module-Name: org.palladiosimulator.somox.analyzer.rules.main
+Automatic-Module-Name: org.palladiosimulator.retriever.core
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.eclipse.jdt.core,
  org.palladiosimulator.retriever.extraction,

@@ -3,7 +3,7 @@ package org.palladiosimulator.retriever.core.configuration;
 import org.palladiosimulator.retriever.extraction.blackboard.RuleEngineBlackboard;
 
 public final class RuleEngineBlackboardKeys {
-    private static final String CONFIG_PREFIX = "org.palladiosimulator.somox.analyzer.rules.configuration.";
+    private static final String CONFIG_PREFIX = "org.palladiosimulator.retriever.core.configuration.";
     public static final String RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY = RuleEngineBlackboard.KEY_REPOSITORY;
     public static final String RULE_ENGINE_BLACKBOARD_KEY_SEFF_ASSOCIATIONS = RuleEngineBlackboard.KEY_SEFF_ASSOCIATIONS;
     public static final String RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY = CONFIG_PREFIX + "ast2seff.output.repository";
