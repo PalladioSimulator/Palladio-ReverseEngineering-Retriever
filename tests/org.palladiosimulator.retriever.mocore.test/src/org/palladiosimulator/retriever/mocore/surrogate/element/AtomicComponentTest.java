@@ -16,7 +16,9 @@ public class AtomicComponentTest extends ElementTest<AtomicComponent, BasicCompo
     @Override
     protected BasicComponent getUniqueValue() {
         String identifier = IdentifierGenerator.getUniqueIdentifier();
-        BasicComponent value = new FluentRepositoryFactory().newBasicComponent().withName(identifier).build();
+        BasicComponent value = new FluentRepositoryFactory().newBasicComponent()
+            .withName(identifier)
+            .build();
         return value;
     }
 

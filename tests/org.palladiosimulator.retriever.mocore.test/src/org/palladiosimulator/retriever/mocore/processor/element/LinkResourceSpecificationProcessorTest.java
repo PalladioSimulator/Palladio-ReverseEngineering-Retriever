@@ -26,7 +26,8 @@ public class LinkResourceSpecificationProcessorTest
         LinkResourceSpecification element = createUniqueReplaceable();
 
         // Assertions: Pre-execution
-        assertTrue(processor.getImplications().isEmpty());
+        assertTrue(processor.getImplications()
+            .isEmpty());
 
         // Execution
         processor.refine(element);
@@ -34,14 +35,21 @@ public class LinkResourceSpecificationProcessorTest
 
         // Assertions: Post-execution
         assertEquals(1, implications.size());
-        Replaceable implication = implications.stream().findFirst().orElseThrow();
+        Replaceable implication = implications.stream()
+            .findFirst()
+            .orElseThrow();
         assertEquals(LinkResourceSpecificationRelation.class, implication.getClass());
         LinkResourceSpecificationRelation relation = (LinkResourceSpecificationRelation) implication;
         assertEquals(element, relation.getSource());
         assertTrue(relation.isPlaceholder());
-        assertTrue(relation.getDestination().isPlaceholder());
-        assertTrue(relation.getDestination().getSource().isPlaceholder());
-        assertTrue(relation.getDestination().getDestination().isPlaceholder());
+        assertTrue(relation.getDestination()
+            .isPlaceholder());
+        assertTrue(relation.getDestination()
+            .getSource()
+            .isPlaceholder());
+        assertTrue(relation.getDestination()
+            .getDestination()
+            .isPlaceholder());
     }
 
     @Override

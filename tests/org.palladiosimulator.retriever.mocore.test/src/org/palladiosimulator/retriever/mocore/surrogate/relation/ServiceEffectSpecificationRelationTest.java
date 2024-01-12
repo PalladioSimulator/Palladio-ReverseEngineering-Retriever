@@ -11,8 +11,8 @@ import org.palladiosimulator.retriever.mocore.surrogate.relation.SignatureProvis
 
 import tools.mdsd.mocore.framework.surrogate.RelationTest;
 
-public class ServiceEffectSpecificationRelationTest extends RelationTest<ServiceEffectSpecificationRelation,
-        ComponentSignatureProvisionRelation, ServiceEffectSpecification> {
+public class ServiceEffectSpecificationRelationTest extends
+        RelationTest<ServiceEffectSpecificationRelation, ComponentSignatureProvisionRelation, ServiceEffectSpecification> {
     @Override
     protected ServiceEffectSpecificationRelation createRelation(ComponentSignatureProvisionRelation source,
             ServiceEffectSpecification destination, boolean isPlaceholder) {
@@ -24,10 +24,8 @@ public class ServiceEffectSpecificationRelationTest extends RelationTest<Service
         Component<?> component = Component.getUniquePlaceholder();
         Interface interfsc = Interface.getUniquePlaceholder();
         Signature signature = Signature.getUniquePlaceholder();
-        InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(component,
-                interfsc, true);
-        SignatureProvisionRelation signatureProvision = new SignatureProvisionRelation(signature,
-                interfsc, true);
+        InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(component, interfsc, true);
+        SignatureProvisionRelation signatureProvision = new SignatureProvisionRelation(signature, interfsc, true);
         return new ComponentSignatureProvisionRelation(interfaceProvision, signatureProvision, false);
     }
 

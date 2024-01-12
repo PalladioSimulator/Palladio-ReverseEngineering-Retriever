@@ -54,10 +54,10 @@ public class ResourceEnvironmentTransformerTest
         Deployment sndDeployment = Deployment.getUniquePlaceholder();
         Deployment trdDeployment = Deployment.getUniquePlaceholder();
 
-        DeploymentDeploymentRelation fstLinkRelation = new DeploymentDeploymentRelation(fstDeployment,
-                sndDeployment, false);
-        DeploymentDeploymentRelation sndLinkRelation = new DeploymentDeploymentRelation(sndDeployment,
-                trdDeployment, true);
+        DeploymentDeploymentRelation fstLinkRelation = new DeploymentDeploymentRelation(fstDeployment, sndDeployment,
+                false);
+        DeploymentDeploymentRelation sndLinkRelation = new DeploymentDeploymentRelation(sndDeployment, trdDeployment,
+                true);
 
         LinkResourceSpecification fstLinkSpecification = LinkResourceSpecification.getUniquePlaceholder();
         LinkResourceSpecificationRelation fstLinkSpecificationRelation = new LinkResourceSpecificationRelation(
@@ -84,11 +84,15 @@ public class ResourceEnvironmentTransformerTest
         assertTrue(containsRepresentative(environment, sndDeployment));
         assertTrue(containsRepresentative(environment, trdDeployment));
         assertTrue(containsRepresentative(environment, fstLinkSpecificationRelation.getSource(),
-                List.of(fstLinkSpecificationRelation.getDestination().getSource(),
-                        fstLinkSpecificationRelation.getDestination().getDestination())));
+                List.of(fstLinkSpecificationRelation.getDestination()
+                    .getSource(),
+                        fstLinkSpecificationRelation.getDestination()
+                            .getDestination())));
         assertTrue(containsRepresentative(environment, sndLinkSpecificationRelation.getSource(),
-                List.of(sndLinkSpecificationRelation.getDestination().getSource(),
-                        sndLinkSpecificationRelation.getDestination().getDestination())));
+                List.of(sndLinkSpecificationRelation.getDestination()
+                    .getSource(),
+                        sndLinkSpecificationRelation.getDestination()
+                            .getDestination())));
     }
 
     @Override

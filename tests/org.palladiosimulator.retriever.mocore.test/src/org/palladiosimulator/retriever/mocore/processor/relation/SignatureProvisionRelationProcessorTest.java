@@ -9,8 +9,8 @@ import org.palladiosimulator.retriever.mocore.utility.ElementFactory;
 
 import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 
-public class SignatureProvisionRelationProcessorTest extends RelationProcessorTest<SignatureProvisionRelationProcessor,
-        PcmSurrogate, SignatureProvisionRelation, Signature, Interface> {
+public class SignatureProvisionRelationProcessorTest extends
+        RelationProcessorTest<SignatureProvisionRelationProcessor, PcmSurrogate, SignatureProvisionRelation, Signature, Interface> {
     @Override
     protected SignatureProvisionRelation createRelation(Signature source, Interface destination,
             boolean isPlaceholder) {

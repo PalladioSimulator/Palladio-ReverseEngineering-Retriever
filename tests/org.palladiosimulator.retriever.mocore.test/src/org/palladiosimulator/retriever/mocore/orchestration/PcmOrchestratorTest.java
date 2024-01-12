@@ -30,7 +30,8 @@ public class PcmOrchestratorTest {
         PcmOrchestrator orchestrator = new PcmOrchestrator();
         Component<?> component = ElementFactory.createUniqueComponent(false);
         orchestrator.processDiscovery(component);
-        assertTrue(orchestrator.getModel().contains(component));
+        assertTrue(orchestrator.getModel()
+            .contains(component));
     }
 
     @Test
@@ -42,11 +43,13 @@ public class PcmOrchestratorTest {
         PcmSurrogate model = orchestrator.getModel();
         List<Deployment> deployments = model.getByType(Deployment.class);
         Stream<ComponentAllocationRelation> componentDeploymentRelations = model
-                .getByType(ComponentAllocationRelation.class).stream();
+            .getByType(ComponentAllocationRelation.class)
+            .stream();
 
         // Assertions
         assertTrue(model.contains(component));
-        assertTrue(componentDeploymentRelations.anyMatch(element -> element.getSource().equals(component)));
+        assertTrue(componentDeploymentRelations.anyMatch(element -> element.getSource()
+            .equals(component)));
         assertFalse(deployments.isEmpty());
     }
 
@@ -55,7 +58,8 @@ public class PcmOrchestratorTest {
         PcmOrchestrator orchestrator = new PcmOrchestrator();
         Deployment deployment = ElementFactory.createUniqueDeployment(false);
         orchestrator.processDiscovery(deployment);
-        assertTrue(orchestrator.getModel().contains(deployment));
+        assertTrue(orchestrator.getModel()
+            .contains(deployment));
     }
 
     @Test
@@ -122,18 +126,30 @@ public class PcmOrchestratorTest {
         assertFalse(model.contains(placeholderInterfaceProvision));
         assertFalse(model.contains(placeholderAllocation));
 
-        assertEquals(1, model.getByType(Signature.class).size());
-        assertEquals(1, model.getByType(Interface.class).size());
-        assertEquals(1, model.getByType(Component.class).size());
-        assertEquals(1, model.getByType(Deployment.class).size());
-        assertEquals(0, model.getByType(LinkResourceSpecification.class).size());
+        assertEquals(1, model.getByType(Signature.class)
+            .size());
+        assertEquals(1, model.getByType(Interface.class)
+            .size());
+        assertEquals(1, model.getByType(Component.class)
+            .size());
+        assertEquals(1, model.getByType(Deployment.class)
+            .size());
+        assertEquals(0, model.getByType(LinkResourceSpecification.class)
+            .size());
 
-        assertEquals(1, model.getByType(SignatureProvisionRelation.class).size());
-        assertEquals(1, model.getByType(InterfaceProvisionRelation.class).size());
-        assertEquals(0, model.getByType(InterfaceRequirementRelation.class).size());
-        assertEquals(1, model.getByType(ComponentAllocationRelation.class).size());
-        assertEquals(0, model.getByType(ComponentAssemblyRelation.class).size());
-        assertEquals(0, model.getByType(DeploymentDeploymentRelation.class).size());
-        assertEquals(0, model.getByType(LinkResourceSpecificationRelation.class).size());
+        assertEquals(1, model.getByType(SignatureProvisionRelation.class)
+            .size());
+        assertEquals(1, model.getByType(InterfaceProvisionRelation.class)
+            .size());
+        assertEquals(0, model.getByType(InterfaceRequirementRelation.class)
+            .size());
+        assertEquals(1, model.getByType(ComponentAllocationRelation.class)
+            .size());
+        assertEquals(0, model.getByType(ComponentAssemblyRelation.class)
+            .size());
+        assertEquals(0, model.getByType(DeploymentDeploymentRelation.class)
+            .size());
+        assertEquals(0, model.getByType(LinkResourceSpecificationRelation.class)
+            .size());
     }
 }

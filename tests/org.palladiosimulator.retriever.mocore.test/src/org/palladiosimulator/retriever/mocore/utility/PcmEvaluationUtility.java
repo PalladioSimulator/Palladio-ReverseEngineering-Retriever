@@ -55,8 +55,7 @@ public final class PcmEvaluationUtility {
     public static boolean representSame(DataType type, DataType otherType) {
         boolean equalType;
         if (type instanceof Identifier && otherType instanceof Identifier) {
-            equalType = Objects.equals(((Identifier) type).getId(),
-                    ((Identifier) otherType).getId());
+            equalType = Objects.equals(((Identifier) type).getId(), ((Identifier) otherType).getId());
         } else {
             equalType = Objects.equals(type, otherType);
         }
@@ -124,7 +123,8 @@ public final class PcmEvaluationUtility {
 
     public static boolean representSame(ResourceContainer container, ResourceContainer otherContainer) {
         boolean equalName = Objects.equals(container.getEntityName(), otherContainer.getEntityName());
-        // TODO ResourceSpecifications are removed from old container on copy. Consequently, comparing it is not
+        // TODO ResourceSpecifications are removed from old container on copy. Consequently,
+        // comparing it is not
         // possible.
         return equalName;
     }
@@ -140,8 +140,7 @@ public final class PcmEvaluationUtility {
     public static boolean representSame(ResourceDemandingSEFF seff, ResourceDemandingSEFF otherSeff) {
         boolean equalIdentifier = Objects.equals(seff.getId(), otherSeff.getId());
         boolean equalTypeIdentifier = Objects.equals(seff.getSeffTypeID(), otherSeff.getSeffTypeID());
-        boolean equalSteps = areCollectionsEqualIgnoringOrder(
-                mapToIdentifier(seff.getSteps_Behaviour()),
+        boolean equalSteps = areCollectionsEqualIgnoringOrder(mapToIdentifier(seff.getSteps_Behaviour()),
                 mapToIdentifier(otherSeff.getSteps_Behaviour()));
         boolean equalInternalBehaviors = areCollectionsEqualIgnoringOrder(
                 mapToIdentifier(seff.getResourceDemandingInternalBehaviours()),
@@ -152,8 +151,8 @@ public final class PcmEvaluationUtility {
         boolean equalBranchTransition = Objects.equals(
                 mapToIdentifier(seff.getAbstractBranchTransition_ResourceDemandingBehaviour()),
                 mapToIdentifier(otherSeff.getAbstractBranchTransition_ResourceDemandingBehaviour()));
-        return equalIdentifier && equalTypeIdentifier && equalSteps && equalInternalBehaviors
-                && equalLoopAction && equalBranchTransition;
+        return equalIdentifier && equalTypeIdentifier && equalSteps && equalInternalBehaviors && equalLoopAction
+                && equalBranchTransition;
     }
 
     public static Optional<ResourceContainer> getRepresentative(ResourceEnvironment resourceEnvironment,
@@ -193,16 +192,21 @@ public final class PcmEvaluationUtility {
     }
 
     public static boolean containsRepresentative(Repository repository, CompositionRelation composition) {
-        CompositeComponent wrappedComposite = composition.getSource().getValue();
-        RepositoryComponent wrappedChild = composition.getDestination().getValue();
+        CompositeComponent wrappedComposite = composition.getSource()
+            .getValue();
+        RepositoryComponent wrappedChild = composition.getDestination()
+            .getValue();
         return repository.getComponents__Repository()
-                .stream()
-                .filter(component -> component instanceof CompositeComponent)
-                .map(component -> (CompositeComponent) component)
-                .filter(composite -> composite.getEntityName().equals(wrappedComposite.getEntityName()))
-                .flatMap(composite -> composite.getAssemblyContexts__ComposedStructure().stream())
-                .anyMatch(assemblyContext -> assemblyContext.getEncapsulatedComponent__AssemblyContext().getEntityName()
-                        .equals(wrappedChild.getEntityName()));
+            .stream()
+            .filter(component -> component instanceof CompositeComponent)
+            .map(component -> (CompositeComponent) component)
+            .filter(composite -> composite.getEntityName()
+                .equals(wrappedComposite.getEntityName()))
+            .flatMap(composite -> composite.getAssemblyContexts__ComposedStructure()
+                .stream())
+            .anyMatch(assemblyContext -> assemblyContext.getEncapsulatedComponent__AssemblyContext()
+                .getEntityName()
+                .equals(wrappedChild.getEntityName()));
     }
 
     public static boolean containsRepresentative(Repository repository,
@@ -210,17 +214,18 @@ public final class PcmEvaluationUtility {
         return getRepresentative(repository, interFace).isPresent();
     }
 
-    public static boolean containsRepresentative(Repository repository,
-            InterfaceProvisionRelation interfaceProvision) {
-        OperationInterface wrappedInterface = interfaceProvision.getDestination().getValue();
+    public static boolean containsRepresentative(Repository repository, InterfaceProvisionRelation interfaceProvision) {
+        OperationInterface wrappedInterface = interfaceProvision.getDestination()
+            .getValue();
         Optional<RepositoryComponent> optionalComponent = getRepresentative(repository, interfaceProvision.getSource());
         if (optionalComponent.isPresent()) {
-            List<ProvidedRole> roles = optionalComponent.get().getProvidedRoles_InterfaceProvidingEntity();
+            List<ProvidedRole> roles = optionalComponent.get()
+                .getProvidedRoles_InterfaceProvidingEntity();
             return roles.stream()
-                    .filter(role -> role instanceof OperationProvidedRole)
-                    .map(role -> (OperationProvidedRole) role)
-                    .map(OperationProvidedRole::getProvidedInterface__OperationProvidedRole)
-                    .anyMatch(interFace -> representSame(wrappedInterface, interFace));
+                .filter(role -> role instanceof OperationProvidedRole)
+                .map(role -> (OperationProvidedRole) role)
+                .map(OperationProvidedRole::getProvidedInterface__OperationProvidedRole)
+                .anyMatch(interFace -> representSame(wrappedInterface, interFace));
         } else {
             return false;
         }
@@ -228,16 +233,18 @@ public final class PcmEvaluationUtility {
 
     public static boolean containsRepresentative(Repository repository,
             InterfaceRequirementRelation interfaceRequirement) {
-        OperationInterface wrappedInterface = interfaceRequirement.getDestination().getValue();
+        OperationInterface wrappedInterface = interfaceRequirement.getDestination()
+            .getValue();
         Optional<RepositoryComponent> optionalComponent = getRepresentative(repository,
                 interfaceRequirement.getSource());
         if (optionalComponent.isPresent()) {
-            List<RequiredRole> roles = optionalComponent.get().getRequiredRoles_InterfaceRequiringEntity();
+            List<RequiredRole> roles = optionalComponent.get()
+                .getRequiredRoles_InterfaceRequiringEntity();
             return roles.stream()
-                    .filter(role -> role instanceof OperationRequiredRole)
-                    .map(role -> (OperationRequiredRole) role)
-                    .map(OperationRequiredRole::getRequiredInterface__OperationRequiredRole)
-                    .anyMatch(interFace -> representSame(wrappedInterface, interFace));
+                .filter(role -> role instanceof OperationRequiredRole)
+                .map(role -> (OperationRequiredRole) role)
+                .map(OperationRequiredRole::getRequiredInterface__OperationRequiredRole)
+                .anyMatch(interFace -> representSame(wrappedInterface, interFace));
         } else {
             return false;
         }
@@ -246,29 +253,37 @@ public final class PcmEvaluationUtility {
     public static boolean containsRepresentative(Repository repository, SignatureProvisionRelation signatureProvision) {
         Optional<OperationInterface> optionalOperationInterface = getRepresentative(repository,
                 signatureProvision.getDestination());
-        return optionalOperationInterface.isPresent()
-                && optionalOperationInterface.get().getSignatures__OperationInterface().stream()
-                        .anyMatch(signature -> representSame(signatureProvision.getSource().getValue(), signature));
+        return optionalOperationInterface.isPresent() && optionalOperationInterface.get()
+            .getSignatures__OperationInterface()
+            .stream()
+            .anyMatch(signature -> representSame(signatureProvision.getSource()
+                .getValue(), signature));
     }
 
     public static boolean containsRepresentative(Repository repository,
             ServiceEffectSpecificationRelation seffProvision) {
-        Component<?> provider = seffProvision.getSource().getSource().getSource();
-        Signature signature = seffProvision.getSource().getDestination().getSource();
+        Component<?> provider = seffProvision.getSource()
+            .getSource()
+            .getSource();
+        Signature signature = seffProvision.getSource()
+            .getDestination()
+            .getSource();
         ServiceEffectSpecification seff = seffProvision.getDestination();
 
         Optional<RepositoryComponent> optionalComponent = getRepresentative(repository, provider);
         if (optionalComponent.isPresent() && optionalComponent.get() instanceof BasicComponent) {
             BasicComponent component = (BasicComponent) optionalComponent.get();
             for (org.palladiosimulator.pcm.seff.ServiceEffectSpecification componentSeff : component
-                    .getServiceEffectSpecifications__BasicComponent()) {
+                .getServiceEffectSpecifications__BasicComponent()) {
                 if (representSame(seff.getValue(), componentSeff)) {
                     ResourceDemandingSEFF componentRdSeff = (ResourceDemandingSEFF) componentSeff;
                     return representSame(provider.getValue(),
                             componentRdSeff.getBasicComponent_ServiceEffectSpecification())
                             && representSame(signature.getValue(), componentRdSeff.getDescribedService__SEFF())
-                            && containsRepresentative(repository, seffProvision.getSource().getSource())
-                            && containsRepresentative(repository, seffProvision.getSource().getDestination());
+                            && containsRepresentative(repository, seffProvision.getSource()
+                                .getSource())
+                            && containsRepresentative(repository, seffProvision.getSource()
+                                .getDestination());
                 }
             }
         }
@@ -305,14 +320,15 @@ public final class PcmEvaluationUtility {
             List<ResourceContainer> linkedContainers = new LinkedList<>(
                     linkingResource.getConnectedResourceContainers_LinkingResource());
             CommunicationLinkResourceSpecification linkSpecification = linkingResource
-                    .getCommunicationLinkResourceSpecifications_LinkingResource();
+                .getCommunicationLinkResourceSpecifications_LinkingResource();
             boolean containsContainers = true;
             for (Deployment deployment : deployments) {
                 containsContainers = containsContainers
                         && linkedContainers.removeIf(element -> representSame(deployment.getValue(), element));
             }
             if (containsContainers && linkedContainers.isEmpty()) {
-                if (specification.getId().equals(linkSpecification.getId())) {
+                if (specification.getId()
+                    .equals(linkSpecification.getId())) {
                     return true;
                 }
             }
@@ -348,21 +364,28 @@ public final class PcmEvaluationUtility {
     }
 
     public static boolean containsRepresentative(System system, ComponentAssemblyRelation assemblyRelation) {
-        RepositoryComponent provider = assemblyRelation.getSource().getSource().getValue();
-        RepositoryComponent consumer = assemblyRelation.getDestination().getSource().getValue();
-        OperationInterface providerConsumerInterface = assemblyRelation.getSource().getDestination().getValue();
+        RepositoryComponent provider = assemblyRelation.getSource()
+            .getSource()
+            .getValue();
+        RepositoryComponent consumer = assemblyRelation.getDestination()
+            .getSource()
+            .getValue();
+        OperationInterface providerConsumerInterface = assemblyRelation.getSource()
+            .getDestination()
+            .getValue();
 
-        List<AssemblyConnector> assemblyConnectors = system.getConnectors__ComposedStructure().stream()
-                .filter(connector -> connector instanceof AssemblyConnector)
-                .map(connector -> (AssemblyConnector) connector)
-                .collect(Collectors.toList());
+        List<AssemblyConnector> assemblyConnectors = system.getConnectors__ComposedStructure()
+            .stream()
+            .filter(connector -> connector instanceof AssemblyConnector)
+            .map(connector -> (AssemblyConnector) connector)
+            .collect(Collectors.toList());
         for (AssemblyConnector connector : assemblyConnectors) {
             RepositoryComponent connectorProvider = connector.getProvidingAssemblyContext_AssemblyConnector()
-                    .getEncapsulatedComponent__AssemblyContext();
+                .getEncapsulatedComponent__AssemblyContext();
             RepositoryComponent connectorConsumer = connector.getRequiringAssemblyContext_AssemblyConnector()
-                    .getEncapsulatedComponent__AssemblyContext();
+                .getEncapsulatedComponent__AssemblyContext();
             OperationInterface connectorProviderConsumerInterface = connector.getProvidedRole_AssemblyConnector()
-                    .getProvidedInterface__OperationProvidedRole();
+                .getProvidedInterface__OperationProvidedRole();
 
             boolean sameProvider = representSame(provider, connectorProvider);
             boolean sameConsumer = representSame(consumer, connectorConsumer);
@@ -374,8 +397,8 @@ public final class PcmEvaluationUtility {
         return false;
     }
 
-    private static <T> boolean areCollectionsEqual(Collection<T> collection,
-            Collection<T> otherCollection, BiFunction<T, T, Boolean> comparisonFunction) {
+    private static <T> boolean areCollectionsEqual(Collection<T> collection, Collection<T> otherCollection,
+            BiFunction<T, T, Boolean> comparisonFunction) {
         if (collection.isEmpty() && otherCollection.isEmpty()) {
             return true;
         } else if (collection.size() != otherCollection.size()) {
@@ -403,8 +426,8 @@ public final class PcmEvaluationUtility {
 
     private static List<String> mapToIdentifier(Collection<? extends Identifier> collection) {
         return collection.stream()
-                .dropWhile(element -> element == null)
-                .map(Identifier::getId)
-                .collect(Collectors.toList());
+            .dropWhile(element -> element == null)
+            .map(Identifier::getId)
+            .collect(Collectors.toList());
     }
 }

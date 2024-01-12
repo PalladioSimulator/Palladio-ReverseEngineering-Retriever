@@ -35,9 +35,8 @@ public class MoCoReJobTest {
     @Test
     public void testConstructorWithValidInput() {
         Blackboard<Object> blackboard = new Blackboard<Object>();
-        assertDoesNotThrow(() -> new MoCoReJob(blackboard, BLACKBOARD_INPUT_REPOSITORY,
-                BLACKBOARD_OUTPUT_REPOSITORY, BLACKBOARD_OUTPUT_SYSTEM, BLACKBOARD_OUTPUT_ALLOCATION,
-                BLACKBOARD_OUTPUT_RESOURCEENVIRONMENT));
+        assertDoesNotThrow(() -> new MoCoReJob(blackboard, BLACKBOARD_INPUT_REPOSITORY, BLACKBOARD_OUTPUT_REPOSITORY,
+                BLACKBOARD_OUTPUT_SYSTEM, BLACKBOARD_OUTPUT_ALLOCATION, BLACKBOARD_OUTPUT_RESOURCEENVIRONMENT));
     }
 
     @Test
@@ -63,101 +62,118 @@ public class MoCoReJobTest {
         Repo fluentRepository = fluentFactory.newRepository();
 
         // Create composite component and add to fluent repository
-        fluentRepository
-                .addToRepository(fluentFactory.newOperationInterface().withName(interfaceNameInternal))
-                .addToRepository(fluentFactory.newOperationInterface().withName(interfaceNameExternalRequired))
-                .addToRepository(fluentFactory.newOperationInterface().withName(interfaceNameExternalProvided))
-                .addToRepository(fluentFactory.newBasicComponent()
-                        .withName(componentNameOne)
-                        .provides(fluentFactory.fetchOfOperationInterface(interfaceNameInternal),
-                                roleNameInternalProvided)
-                        .requires(fluentFactory.fetchOfOperationInterface(interfaceNameExternalRequired),
-                                roleNameExternalRequiredInner))
-                .addToRepository(fluentFactory.newBasicComponent()
-                        .withName(componentNameTwo)
-                        .requires(fluentFactory.fetchOfOperationInterface(interfaceNameInternal),
-                                roleNameInternalRequired)
-                        .provides(fluentFactory.fetchOfOperationInterface(interfaceNameExternalProvided),
-                                roleNameExternalProvidedInner))
-                .addToRepository(fluentFactory.newCompositeComponent()
-                        .provides(fluentFactory.fetchOfOperationInterface(interfaceNameExternalProvided),
-                                roleNameExternalProvidedOuter)
-                        .requires(fluentFactory.fetchOfOperationInterface(interfaceNameExternalRequired),
-                                roleNameExternalRequiredOuter)
-                        .withAssemblyContext(fluentFactory.fetchOfComponent(componentNameOne), contextNameOne)
-                        .withAssemblyContext(fluentFactory.fetchOfComponent(componentNameTwo), contextNameTwo)
-                        .withAssemblyConnection(
-                                fluentFactory.fetchOfOperationProvidedRole(roleNameInternalProvided),
-                                fluentFactory.fetchOfAssemblyContext(contextNameOne),
-                                fluentFactory.fetchOfOperationRequiredRole(roleNameInternalRequired),
-                                fluentFactory.fetchOfAssemblyContext(contextNameTwo))
-                        .withProvidedDelegationConnection(fluentFactory.fetchOfAssemblyContext(contextNameTwo),
-                                fluentFactory.fetchOfOperationProvidedRole(roleNameExternalProvidedInner),
-                                fluentFactory.fetchOfOperationProvidedRole(roleNameExternalProvidedOuter))
-                        .withRequiredDelegationConnection(fluentFactory.fetchOfAssemblyContext(contextNameOne),
-                                fluentFactory.fetchOfOperationRequiredRole(roleNameExternalRequiredInner),
-                                fluentFactory.fetchOfOperationRequiredRole(roleNameExternalRequiredOuter)));
+        fluentRepository.addToRepository(fluentFactory.newOperationInterface()
+            .withName(interfaceNameInternal))
+            .addToRepository(fluentFactory.newOperationInterface()
+                .withName(interfaceNameExternalRequired))
+            .addToRepository(fluentFactory.newOperationInterface()
+                .withName(interfaceNameExternalProvided))
+            .addToRepository(fluentFactory.newBasicComponent()
+                .withName(componentNameOne)
+                .provides(fluentFactory.fetchOfOperationInterface(interfaceNameInternal), roleNameInternalProvided)
+                .requires(fluentFactory.fetchOfOperationInterface(interfaceNameExternalRequired),
+                        roleNameExternalRequiredInner))
+            .addToRepository(fluentFactory.newBasicComponent()
+                .withName(componentNameTwo)
+                .requires(fluentFactory.fetchOfOperationInterface(interfaceNameInternal), roleNameInternalRequired)
+                .provides(fluentFactory.fetchOfOperationInterface(interfaceNameExternalProvided),
+                        roleNameExternalProvidedInner))
+            .addToRepository(fluentFactory.newCompositeComponent()
+                .provides(fluentFactory.fetchOfOperationInterface(interfaceNameExternalProvided),
+                        roleNameExternalProvidedOuter)
+                .requires(fluentFactory.fetchOfOperationInterface(interfaceNameExternalRequired),
+                        roleNameExternalRequiredOuter)
+                .withAssemblyContext(fluentFactory.fetchOfComponent(componentNameOne), contextNameOne)
+                .withAssemblyContext(fluentFactory.fetchOfComponent(componentNameTwo), contextNameTwo)
+                .withAssemblyConnection(fluentFactory.fetchOfOperationProvidedRole(roleNameInternalProvided),
+                        fluentFactory.fetchOfAssemblyContext(contextNameOne),
+                        fluentFactory.fetchOfOperationRequiredRole(roleNameInternalRequired),
+                        fluentFactory.fetchOfAssemblyContext(contextNameTwo))
+                .withProvidedDelegationConnection(fluentFactory.fetchOfAssemblyContext(contextNameTwo),
+                        fluentFactory.fetchOfOperationProvidedRole(roleNameExternalProvidedInner),
+                        fluentFactory.fetchOfOperationProvidedRole(roleNameExternalProvidedOuter))
+                .withRequiredDelegationConnection(fluentFactory.fetchOfAssemblyContext(contextNameOne),
+                        fluentFactory.fetchOfOperationRequiredRole(roleNameExternalRequiredInner),
+                        fluentFactory.fetchOfOperationRequiredRole(roleNameExternalRequiredOuter)));
 
         // Fill blackboard
         blackboard.addPartition(BLACKBOARD_INPUT_REPOSITORY, fluentRepository.createRepositoryNow());
 
         // Create and run job
-        MoCoReJob job = new MoCoReJob(blackboard, BLACKBOARD_INPUT_REPOSITORY,
-                BLACKBOARD_OUTPUT_REPOSITORY, BLACKBOARD_OUTPUT_SYSTEM, BLACKBOARD_OUTPUT_ALLOCATION,
-                BLACKBOARD_OUTPUT_RESOURCEENVIRONMENT);
+        MoCoReJob job = new MoCoReJob(blackboard, BLACKBOARD_INPUT_REPOSITORY, BLACKBOARD_OUTPUT_REPOSITORY,
+                BLACKBOARD_OUTPUT_SYSTEM, BLACKBOARD_OUTPUT_ALLOCATION, BLACKBOARD_OUTPUT_RESOURCEENVIRONMENT);
         job.execute(new NullProgressMonitor());
 
         // Check if components exist in repository
         Repository outputRepository = (Repository) blackboard.getPartition(BLACKBOARD_OUTPUT_REPOSITORY);
         EList<RepositoryComponent> components = outputRepository.getComponents__Repository();
         CompositeComponent composite = (CompositeComponent) components.stream()
-                .filter(component -> component instanceof CompositeComponent).findFirst().orElseThrow();
-        assertEquals(2, composite.getAssemblyContexts__ComposedStructure().size());
+            .filter(component -> component instanceof CompositeComponent)
+            .findFirst()
+            .orElseThrow();
+        assertEquals(2, composite.getAssemblyContexts__ComposedStructure()
+            .size());
 
         // Check if assembly connector created correctly
-        List<AssemblyConnector> assemblyConnectors = composite.getConnectors__ComposedStructure().stream()
-                .filter(genericConnector -> genericConnector instanceof AssemblyConnector)
-                .map(genericConnector -> (AssemblyConnector) genericConnector).collect(Collectors.toList());
+        List<AssemblyConnector> assemblyConnectors = composite.getConnectors__ComposedStructure()
+            .stream()
+            .filter(genericConnector -> genericConnector instanceof AssemblyConnector)
+            .map(genericConnector -> (AssemblyConnector) genericConnector)
+            .collect(Collectors.toList());
         assertEquals(1, assemblyConnectors.size());
         AssemblyConnector assemblyConnector = assemblyConnectors.get(0);
         assertEquals(componentNameOne, assemblyConnector.getProvidingAssemblyContext_AssemblyConnector()
-                .getEncapsulatedComponent__AssemblyContext().getEntityName());
+            .getEncapsulatedComponent__AssemblyContext()
+            .getEntityName());
         assertEquals(componentNameTwo, assemblyConnector.getRequiringAssemblyContext_AssemblyConnector()
-                .getEncapsulatedComponent__AssemblyContext().getEntityName());
+            .getEncapsulatedComponent__AssemblyContext()
+            .getEntityName());
         assertEquals(interfaceNameInternal, assemblyConnector.getProvidedRole_AssemblyConnector()
-                .getProvidedInterface__OperationProvidedRole().getEntityName());
+            .getProvidedInterface__OperationProvidedRole()
+            .getEntityName());
         assertEquals(interfaceNameInternal, assemblyConnector.getRequiredRole_AssemblyConnector()
-                .getRequiredInterface__OperationRequiredRole().getEntityName());
+            .getRequiredInterface__OperationRequiredRole()
+            .getEntityName());
 
         // Check if provided delegation created correctly
-        List<ProvidedDelegationConnector> providedDelegations = composite.getConnectors__ComposedStructure().stream()
-                .filter(genericConnector -> genericConnector instanceof ProvidedDelegationConnector)
-                .map(genericConnector -> (ProvidedDelegationConnector) genericConnector).collect(Collectors.toList());
+        List<ProvidedDelegationConnector> providedDelegations = composite.getConnectors__ComposedStructure()
+            .stream()
+            .filter(genericConnector -> genericConnector instanceof ProvidedDelegationConnector)
+            .map(genericConnector -> (ProvidedDelegationConnector) genericConnector)
+            .collect(Collectors.toList());
         assertEquals(1, providedDelegations.size());
         ProvidedDelegationConnector providedDelegationConnector = providedDelegations.get(0);
         assertEquals(componentNameTwo, providedDelegationConnector.getAssemblyContext_ProvidedDelegationConnector()
-                .getEncapsulatedComponent__AssemblyContext().getEntityName());
+            .getEncapsulatedComponent__AssemblyContext()
+            .getEntityName());
         assertEquals(interfaceNameExternalProvided,
                 providedDelegationConnector.getInnerProvidedRole_ProvidedDelegationConnector()
-                        .getProvidedInterface__OperationProvidedRole().getEntityName());
+                    .getProvidedInterface__OperationProvidedRole()
+                    .getEntityName());
         assertEquals(interfaceNameExternalProvided,
                 providedDelegationConnector.getOuterProvidedRole_ProvidedDelegationConnector()
-                        .getProvidedInterface__OperationProvidedRole().getEntityName());
+                    .getProvidedInterface__OperationProvidedRole()
+                    .getEntityName());
 
         // Check if required delegation created correctly
-        List<RequiredDelegationConnector> requiredDelegations = composite.getConnectors__ComposedStructure().stream()
-                .filter(genericConnector -> genericConnector instanceof RequiredDelegationConnector)
-                .map(genericConnector -> (RequiredDelegationConnector) genericConnector).collect(Collectors.toList());
+        List<RequiredDelegationConnector> requiredDelegations = composite.getConnectors__ComposedStructure()
+            .stream()
+            .filter(genericConnector -> genericConnector instanceof RequiredDelegationConnector)
+            .map(genericConnector -> (RequiredDelegationConnector) genericConnector)
+            .collect(Collectors.toList());
         assertEquals(1, requiredDelegations.size());
         RequiredDelegationConnector requiredDelegationConnector = requiredDelegations.get(0);
         assertEquals(componentNameOne, requiredDelegationConnector.getAssemblyContext_RequiredDelegationConnector()
-                .getEncapsulatedComponent__AssemblyContext().getEntityName());
+            .getEncapsulatedComponent__AssemblyContext()
+            .getEntityName());
         assertEquals(interfaceNameExternalRequired,
                 requiredDelegationConnector.getInnerRequiredRole_RequiredDelegationConnector()
-                        .getRequiredInterface__OperationRequiredRole().getEntityName());
+                    .getRequiredInterface__OperationRequiredRole()
+                    .getEntityName());
         assertEquals(interfaceNameExternalRequired,
                 requiredDelegationConnector.getOuterRequiredRole_RequiredDelegationConnector()
-                        .getRequiredInterface__OperationRequiredRole().getEntityName());
+                    .getRequiredInterface__OperationRequiredRole()
+                    .getEntityName());
     }
 
     @Test
@@ -168,39 +184,42 @@ public class MoCoReJobTest {
         Repo fluentRepository = fluentFactory.newRepository();
 
         // Create composite component and add to fluent repository
-        fluentRepository
-                .addToRepository(fluentFactory.newOperationInterface().withName("Doable"))
-                .addToRepository(fluentFactory.newBasicComponent()
-                        .withName("Child")
-                        .provides(fluentFactory.fetchOfOperationInterface("Doable"), "Doable Role"))
-                .addToRepository(fluentFactory.newCompositeComponent()
-                        .withName("Inner Parent")
-                        .withAssemblyContext(fluentFactory.fetchOfComponent("Child")))
-                .addToRepository(fluentFactory.newCompositeComponent()
-                        .withName("Middle Parent")
-                        .withAssemblyContext(fluentFactory.fetchOfComponent("Inner Parent")))
-                .addToRepository(fluentFactory.newCompositeComponent()
-                        .withName("Outer Parent")
-                        .withAssemblyContext(fluentFactory.fetchOfComponent("Middle Parent")));
+        fluentRepository.addToRepository(fluentFactory.newOperationInterface()
+            .withName("Doable"))
+            .addToRepository(fluentFactory.newBasicComponent()
+                .withName("Child")
+                .provides(fluentFactory.fetchOfOperationInterface("Doable"), "Doable Role"))
+            .addToRepository(fluentFactory.newCompositeComponent()
+                .withName("Inner Parent")
+                .withAssemblyContext(fluentFactory.fetchOfComponent("Child")))
+            .addToRepository(fluentFactory.newCompositeComponent()
+                .withName("Middle Parent")
+                .withAssemblyContext(fluentFactory.fetchOfComponent("Inner Parent")))
+            .addToRepository(fluentFactory.newCompositeComponent()
+                .withName("Outer Parent")
+                .withAssemblyContext(fluentFactory.fetchOfComponent("Middle Parent")));
 
         // Fill blackboard
         blackboard.addPartition(BLACKBOARD_INPUT_REPOSITORY, fluentRepository.createRepositoryNow());
 
         // Create and run job
-        MoCoReJob job = new MoCoReJob(blackboard, BLACKBOARD_INPUT_REPOSITORY,
-                BLACKBOARD_OUTPUT_REPOSITORY, BLACKBOARD_OUTPUT_SYSTEM, BLACKBOARD_OUTPUT_ALLOCATION,
-                BLACKBOARD_OUTPUT_RESOURCEENVIRONMENT);
+        MoCoReJob job = new MoCoReJob(blackboard, BLACKBOARD_INPUT_REPOSITORY, BLACKBOARD_OUTPUT_REPOSITORY,
+                BLACKBOARD_OUTPUT_SYSTEM, BLACKBOARD_OUTPUT_ALLOCATION, BLACKBOARD_OUTPUT_RESOURCEENVIRONMENT);
         job.execute(new NullProgressMonitor());
 
         // Check inner provision was recursively
         Repository outputRepository = (Repository) blackboard.getPartition(BLACKBOARD_OUTPUT_REPOSITORY);
         EList<RepositoryComponent> components = outputRepository.getComponents__Repository();
         List<CompositeComponent> composites = components.stream()
-                .filter(component -> component instanceof CompositeComponent)
-                .map(component -> (CompositeComponent) component).toList();
-        composites.forEach(composite -> assertTrue(composite.getProvidedRoles_InterfaceProvidingEntity().stream()
-                .anyMatch(role -> role instanceof OperationProvidedRole && ((OperationProvidedRole) role)
-                        .getProvidedInterface__OperationProvidedRole().getEntityName().equals("Doable"))));
+            .filter(component -> component instanceof CompositeComponent)
+            .map(component -> (CompositeComponent) component)
+            .toList();
+        composites.forEach(composite -> assertTrue(composite.getProvidedRoles_InterfaceProvidingEntity()
+            .stream()
+            .anyMatch(role -> role instanceof OperationProvidedRole
+                    && ((OperationProvidedRole) role).getProvidedInterface__OperationProvidedRole()
+                        .getEntityName()
+                        .equals("Doable"))));
 
         // Check most outer provision was delegated by system
         System outputSystem = (System) blackboard.getPartition(BLACKBOARD_OUTPUT_SYSTEM);
@@ -208,10 +227,13 @@ public class MoCoReJobTest {
         assertEquals(1, connectors.size());
         ProvidedDelegationConnector delegationConnector = (ProvidedDelegationConnector) connectors.get(0);
         assertEquals("Outer Parent", delegationConnector.getAssemblyContext_ProvidedDelegationConnector()
-                .getEncapsulatedComponent__AssemblyContext().getEntityName());
+            .getEncapsulatedComponent__AssemblyContext()
+            .getEntityName());
         assertEquals("Doable", delegationConnector.getInnerProvidedRole_ProvidedDelegationConnector()
-                .getProvidedInterface__OperationProvidedRole().getEntityName());
+            .getProvidedInterface__OperationProvidedRole()
+            .getEntityName());
         assertEquals("Doable", delegationConnector.getOuterProvidedRole_ProvidedDelegationConnector()
-                .getProvidedInterface__OperationProvidedRole().getEntityName());
+            .getProvidedInterface__OperationProvidedRole()
+            .getEntityName());
     }
 }

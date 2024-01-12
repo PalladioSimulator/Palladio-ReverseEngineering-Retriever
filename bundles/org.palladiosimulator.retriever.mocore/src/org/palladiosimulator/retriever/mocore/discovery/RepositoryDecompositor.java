@@ -39,12 +39,14 @@ import org.palladiosimulator.retriever.mocore.surrogate.relation.SignatureProvis
 import tools.mdsd.mocore.framework.discovery.Discoverer;
 
 /**
- * A decompositor able to extract model-elements and model-relations from a {@link Repository PCM repository}.
+ * A decompositor able to extract model-elements and model-relations from a {@link Repository PCM
+ * repository}.
  */
 public class RepositoryDecompositor implements Decompositor<Repository> {
     @Override
     public Collection<Discoverer<?>> decompose(Repository repository) {
-        // Fetch components, interface provisions and requirements, signatures, and service effect specifications
+        // Fetch components, interface provisions and requirements, signatures, and service effect
+        // specifications
         Set<AtomicComponent> atomicComponents = new HashSet<>();
         Set<Composite> composites = new HashSet<>();
         Set<CompositionRelation> compositions = new HashSet<>();
@@ -66,13 +68,13 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                 // Basic component specific behavior
                 // Fetch service effect specifications from basic component
                 for (org.palladiosimulator.pcm.seff.ServiceEffectSpecification seff : atomicComponent.getValue()
-                        .getServiceEffectSpecifications__BasicComponent()) {
+                    .getServiceEffectSpecifications__BasicComponent()) {
                     if (seff instanceof ResourceDemandingSEFF) {
                         if (seff.getDescribedService__SEFF() instanceof OperationSignature) {
                             ServiceEffectSpecification seffWrapper = new ServiceEffectSpecification(
                                     (ResourceDemandingSEFF) seff, false);
                             OperationSignature operationSignature = (OperationSignature) seff
-                                    .getDescribedService__SEFF();
+                                .getDescribedService__SEFF();
                             Signature signature = new Signature(operationSignature, false);
                             Interface interFace = new Interface(operationSignature.getInterface__OperationSignature(),
                                     false);
@@ -94,9 +96,10 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
 
                 // Composite specific behavior
                 // Create composition relations for each composite
-                for (AssemblyContext assemblyContext : composite.getValue().getAssemblyContexts__ComposedStructure()) {
+                for (AssemblyContext assemblyContext : composite.getValue()
+                    .getAssemblyContexts__ComposedStructure()) {
                     RepositoryComponent encapsulatedComponent = assemblyContext
-                            .getEncapsulatedComponent__AssemblyContext();
+                        .getEncapsulatedComponent__AssemblyContext();
 
                     // Create appropriate wrapper for child component
                     Component<?> childWrapper = getGenericWrapperFor(encapsulatedComponent);
@@ -111,24 +114,27 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                 }
 
                 // Process connectors of composite component
-                for (Connector connector : composite.getValue().getConnectors__ComposedStructure()) {
+                for (Connector connector : composite.getValue()
+                    .getConnectors__ComposedStructure()) {
                     if (connector instanceof AssemblyConnector) {
                         AssemblyConnector assemblyConnector = (AssemblyConnector) connector;
 
                         // Wrap provider and consumer component
                         Component<?> provider = getGenericWrapperFor(
                                 assemblyConnector.getProvidingAssemblyContext_AssemblyConnector()
-                                        .getEncapsulatedComponent__AssemblyContext());
+                                    .getEncapsulatedComponent__AssemblyContext());
                         Component<?> consumer = getGenericWrapperFor(
                                 assemblyConnector.getRequiringAssemblyContext_AssemblyConnector()
-                                        .getEncapsulatedComponent__AssemblyContext());
+                                    .getEncapsulatedComponent__AssemblyContext());
 
                         // Wrap role interfaces
-                        Interface providedInterface = new Interface(assemblyConnector
-                                .getProvidedRole_AssemblyConnector().getProvidedInterface__OperationProvidedRole(),
+                        Interface providedInterface = new Interface(
+                                assemblyConnector.getProvidedRole_AssemblyConnector()
+                                    .getProvidedInterface__OperationProvidedRole(),
                                 false);
-                        Interface requiredInterface = new Interface(assemblyConnector
-                                .getRequiredRole_AssemblyConnector().getRequiredInterface__OperationRequiredRole(),
+                        Interface requiredInterface = new Interface(
+                                assemblyConnector.getRequiredRole_AssemblyConnector()
+                                    .getRequiredInterface__OperationRequiredRole(),
                                 false);
 
                         // Create interface relations & component assembly relation
@@ -147,21 +153,21 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                         // Wrap the providing component & the inner and outer role's interfaces
                         Component<?> connectorComponent = getGenericWrapperFor(
                                 providedDelegationConnector.getAssemblyContext_ProvidedDelegationConnector()
-                                        .getEncapsulatedComponent__AssemblyContext());
+                                    .getEncapsulatedComponent__AssemblyContext());
                         Interface innerInterface = new Interface(
                                 providedDelegationConnector.getInnerProvidedRole_ProvidedDelegationConnector()
-                                        .getProvidedInterface__OperationProvidedRole(),
+                                    .getProvidedInterface__OperationProvidedRole(),
                                 false);
                         Interface outerInterface = new Interface(
                                 providedDelegationConnector.getOuterProvidedRole_ProvidedDelegationConnector()
-                                        .getProvidedInterface__OperationProvidedRole(),
+                                    .getProvidedInterface__OperationProvidedRole(),
                                 false);
 
                         // Create interface relations
                         InterfaceProvisionRelation innerInterfaceRelation = new InterfaceProvisionRelation(
                                 connectorComponent, innerInterface, false);
-                        InterfaceProvisionRelation outerInterfaceRelation = new InterfaceProvisionRelation(
-                                composite, outerInterface, false);
+                        InterfaceProvisionRelation outerInterfaceRelation = new InterfaceProvisionRelation(composite,
+                                outerInterface, false);
                         CompositeProvisionDelegationRelation delegationRelation = new CompositeProvisionDelegationRelation(
                                 outerInterfaceRelation, innerInterfaceRelation, false);
 
@@ -173,14 +179,14 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                         // Wrap the requiring component & the inner and outer role's interfaces
                         Component<?> connectorComponent = getGenericWrapperFor(
                                 requiredDelegationConnector.getAssemblyContext_RequiredDelegationConnector()
-                                        .getEncapsulatedComponent__AssemblyContext());
+                                    .getEncapsulatedComponent__AssemblyContext());
                         Interface innerInterface = new Interface(
                                 requiredDelegationConnector.getInnerRequiredRole_RequiredDelegationConnector()
-                                        .getRequiredInterface__OperationRequiredRole(),
+                                    .getRequiredInterface__OperationRequiredRole(),
                                 false);
                         Interface outerInterface = new Interface(
                                 requiredDelegationConnector.getOuterRequiredRole_RequiredDelegationConnector()
-                                        .getRequiredInterface__OperationRequiredRole(),
+                                    .getRequiredInterface__OperationRequiredRole(),
                                 false);
 
                         // Create interface relations & delegation relation
@@ -211,10 +217,10 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
 
                     // Create signature provisions for provider interface
                     for (OperationSignature operationSignature : providerInterface.getValue()
-                            .getSignatures__OperationInterface()) {
+                        .getSignatures__OperationInterface()) {
                         Signature signatureWrapper = new Signature(operationSignature, false);
-                        signatureProvisions.add(new SignatureProvisionRelation(signatureWrapper,
-                                providerInterface, false));
+                        signatureProvisions
+                            .add(new SignatureProvisionRelation(signatureWrapper, providerInterface, false));
                     }
                 }
             }
@@ -229,10 +235,10 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
 
                     // Create signature provisions for consumer interface
                     for (OperationSignature operationSignature : consumerInterface.getValue()
-                            .getSignatures__OperationInterface()) {
+                        .getSignatures__OperationInterface()) {
                         Signature signatureWrapper = new Signature(operationSignature, false);
-                        signatureProvisions.add(new SignatureProvisionRelation(signatureWrapper,
-                                consumerInterface, false));
+                        signatureProvisions
+                            .add(new SignatureProvisionRelation(signatureWrapper, consumerInterface, false));
                     }
                 }
             }
@@ -255,9 +261,8 @@ public class RepositoryDecompositor implements Decompositor<Repository> {
                 ComponentAssemblyRelation.class);
         SimpleDiscoverer<CompositeProvisionDelegationRelation> provisionDelegationDiscoverer = new SimpleDiscoverer<>(
                 provisionDelegations, CompositeProvisionDelegationRelation.class);
-        SimpleDiscoverer<
-                CompositeRequirementDelegationRelation> requirementDelegationDiscoverer = new SimpleDiscoverer<>(
-                        requirementDelegations, CompositeRequirementDelegationRelation.class);
+        SimpleDiscoverer<CompositeRequirementDelegationRelation> requirementDelegationDiscoverer = new SimpleDiscoverer<>(
+                requirementDelegations, CompositeRequirementDelegationRelation.class);
         return List.of(atomicComponentDiscoverer, compositeDiscoverer, compositionDiscoverer,
                 signatureProvisionDiscoverer, interfaceProvisionDiscoverer, interfaceRequirementDiscoverer,
                 seffProvisionDiscoverer, assemblyDiscoverer, provisionDelegationDiscoverer,

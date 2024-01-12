@@ -24,8 +24,7 @@ public class RetrieverConfigurationDelegate
             throws CoreException {
 
         final RetrieverWorkflowConfiguration analyzerConfiguration = new RetrieverWorkflowConfiguration();
-        analyzerConfiguration
-            .setRetrieverConfiguration(new RetrieverConfigurationImpl(configuration.getAttributes()));
+        analyzerConfiguration.setRetrieverConfiguration(new RetrieverConfigurationImpl(configuration.getAttributes()));
 
         return analyzerConfiguration;
     }

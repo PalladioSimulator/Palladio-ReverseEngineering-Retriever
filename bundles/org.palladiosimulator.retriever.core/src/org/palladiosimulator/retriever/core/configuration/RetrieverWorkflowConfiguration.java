@@ -5,8 +5,8 @@ import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
 import de.uka.ipd.sdq.workflow.launchconfig.AbstractWorkflowBasedRunConfiguration;
 
 /**
- * An adapter for RetrieverConfiguration, not more than a formality for use as a type parameter
- * in AbstractWorkflowBasedLaunchConfigurationDelegate
+ * An adapter for RetrieverConfiguration, not more than a formality for use as a type parameter in
+ * AbstractWorkflowBasedLaunchConfigurationDelegate
  *
  * @see de.uka.ipd.sdq.workflow.launchconfig.AbstractWorkflowBasedLaunchConfigurationDelegate
  */

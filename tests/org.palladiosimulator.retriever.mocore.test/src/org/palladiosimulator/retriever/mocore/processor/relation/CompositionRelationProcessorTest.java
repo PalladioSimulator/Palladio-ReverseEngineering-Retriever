@@ -9,11 +9,10 @@ import org.palladiosimulator.retriever.mocore.utility.ElementFactory;
 
 import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 
-public class CompositionRelationProcessorTest extends RelationProcessorTest<CompositionRelationProcessor,
-        PcmSurrogate, CompositionRelation, Composite, Component<?>> {
+public class CompositionRelationProcessorTest extends
+        RelationProcessorTest<CompositionRelationProcessor, PcmSurrogate, CompositionRelation, Composite, Component<?>> {
     @Override
-    protected CompositionRelation createRelation(Composite source, Component<?> destination,
-            boolean isPlaceholder) {
+    protected CompositionRelation createRelation(Composite source, Component<?> destination, boolean isPlaceholder) {
         return new CompositionRelation(source, destination, isPlaceholder);
     }
 

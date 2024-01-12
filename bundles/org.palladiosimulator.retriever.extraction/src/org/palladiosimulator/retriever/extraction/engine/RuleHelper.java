@@ -34,10 +34,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 /**
- * This class is used as a supporting library for writing rules for Retriever. It contains
- * numerous methods to query a certain state of a java model instance. For example, is a class is
- * annotated with a specific annotation name. Also the helper contains methods for retrieving
- * aspects of a class like the interfaces it is implementing.
+ * This class is used as a supporting library for writing rules for Retriever. It contains numerous
+ * methods to query a certain state of a java model instance. For example, is a class is annotated
+ * with a specific annotation name. Also the helper contains methods for retrieving aspects of a
+ * class like the interfaces it is implementing.
  *
  * @author Florian Bossert
  */

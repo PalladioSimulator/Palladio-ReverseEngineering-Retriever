@@ -114,8 +114,8 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
         Composite compositeLevelZero = Composite.getUniquePlaceholder();
         Composite compositeLevelOne = Composite.getUniquePlaceholder();
         AtomicComponent component = AtomicComponent.getUniquePlaceholder();
-        CompositionRelation compositionRelationFst = new CompositionRelation(compositeLevelZero,
-                compositeLevelOne, false);
+        CompositionRelation compositionRelationFst = new CompositionRelation(compositeLevelZero, compositeLevelOne,
+                false);
         CompositionRelation compositionRelationSnd = new CompositionRelation(compositeLevelOne, component, false);
 
         model.add(compositeLevelZero);
@@ -161,8 +161,8 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
         PcmSurrogate model = createEmptyModel();
         Component<?> provider = Component.getUniquePlaceholder();
         Interface providerInterface = Interface.getUniquePlaceholder();
-        InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider,
-                providerInterface, isPlaceholderRelation);
+        InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider, providerInterface,
+                isPlaceholderRelation);
 
         model.add(provider);
         model.add(providerInterface);
@@ -211,11 +211,11 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
         PcmSurrogate model = createEmptyModel();
         Component<?> provider = Component.getUniquePlaceholder();
         Interface providerInterface = Interface.getUniquePlaceholder();
-        InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider,
-                providerInterface, false);
+        InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider, providerInterface,
+                false);
         Signature signature = Signature.getUniquePlaceholder();
-        SignatureProvisionRelation signatureProvision = new SignatureProvisionRelation(signature,
-                providerInterface, isPlaceholderRelation);
+        SignatureProvisionRelation signatureProvision = new SignatureProvisionRelation(signature, providerInterface,
+                isPlaceholderRelation);
 
         model.add(provider);
         model.add(providerInterface);
@@ -242,11 +242,11 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
         PcmSurrogate model = createEmptyModel();
         Component<?> provider = Component.getUniquePlaceholder();
         Interface providerInterface = Interface.getUniquePlaceholder();
-        InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider,
-                providerInterface, false);
+        InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider, providerInterface,
+                false);
         Signature signature = Signature.getUniquePlaceholder();
-        SignatureProvisionRelation signatureProvision = new SignatureProvisionRelation(signature,
-                providerInterface, false);
+        SignatureProvisionRelation signatureProvision = new SignatureProvisionRelation(signature, providerInterface,
+                false);
         ComponentSignatureProvisionRelation componentSignatureProvisionRelation = new ComponentSignatureProvisionRelation(
                 interfaceProvision, signatureProvision, false);
         ServiceEffectSpecification seff = ServiceEffectSpecification.getUniquePlaceholder();

@@ -26,7 +26,8 @@ public class SignatureProcessorTest extends ProcessorTest<SignatureProcessor, Pc
         Signature element = createUniqueReplaceable();
 
         // Assertions: Pre-execution
-        assertTrue(processor.getImplications().isEmpty());
+        assertTrue(processor.getImplications()
+            .isEmpty());
 
         // Execution
         processor.refine(element);
@@ -35,12 +36,15 @@ public class SignatureProcessorTest extends ProcessorTest<SignatureProcessor, Pc
         // Assertions: Post-execution
         //// Implicit providing interface
         assertEquals(1, implications.size());
-        Replaceable implication = implications.stream().findFirst().orElseThrow();
+        Replaceable implication = implications.stream()
+            .findFirst()
+            .orElseThrow();
         assertEquals(SignatureProvisionRelation.class, implication.getClass());
         SignatureProvisionRelation relation = (SignatureProvisionRelation) implication;
         assertEquals(element, relation.getSource());
         assertTrue(relation.isPlaceholder());
-        assertTrue(relation.getDestination().isPlaceholder());
+        assertTrue(relation.getDestination()
+            .isPlaceholder());
     }
 
     @Override

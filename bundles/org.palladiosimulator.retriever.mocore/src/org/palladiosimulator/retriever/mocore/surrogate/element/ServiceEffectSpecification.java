@@ -10,7 +10,12 @@ public class ServiceEffectSpecification extends PcmElement<ResourceDemandingSEFF
 
     public static ServiceEffectSpecification getUniquePlaceholder() {
         ResourceDemandingSEFF value = new FluentRepositoryFactory().newSeff()
-                .withSeffBehaviour().withStartAction().followedBy().stopAction().createBehaviourNow().buildRDSeff();
+            .withSeffBehaviour()
+            .withStartAction()
+            .followedBy()
+            .stopAction()
+            .createBehaviourNow()
+            .buildRDSeff();
         return new ServiceEffectSpecification(value, true);
     }
 }

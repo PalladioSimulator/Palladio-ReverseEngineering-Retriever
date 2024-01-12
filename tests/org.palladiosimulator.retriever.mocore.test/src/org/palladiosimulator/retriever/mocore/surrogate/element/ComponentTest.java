@@ -17,7 +17,9 @@ public class ComponentTest extends ElementTest<Component<RepositoryComponent>, R
     @Override
     protected RepositoryComponent getUniqueValue() {
         String identifier = IdentifierGenerator.getUniqueIdentifier();
-        BasicComponent value = new FluentRepositoryFactory().newBasicComponent().withName(identifier).build();
+        BasicComponent value = new FluentRepositoryFactory().newBasicComponent()
+            .withName(identifier)
+            .build();
         return value;
     }
 

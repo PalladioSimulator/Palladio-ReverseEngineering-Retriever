@@ -9,9 +9,8 @@ import org.palladiosimulator.retriever.mocore.utility.ElementFactory;
 
 import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 
-public class ComponentAllocationRelationProcessorTest
-        extends RelationProcessorTest<ComponentAllocationRelationProcessor,
-                PcmSurrogate, ComponentAllocationRelation, Component<?>, Deployment> {
+public class ComponentAllocationRelationProcessorTest extends
+        RelationProcessorTest<ComponentAllocationRelationProcessor, PcmSurrogate, ComponentAllocationRelation, Component<?>, Deployment> {
     @Override
     protected ComponentAllocationRelation createRelation(Component<?> source, Deployment destination,
             boolean isPlaceholder) {

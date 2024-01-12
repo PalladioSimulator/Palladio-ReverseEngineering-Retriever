@@ -19,7 +19,7 @@ public class LinkResourceSpecificationProcessor extends Processor<PcmSurrogate, 
     @Override
     protected void refine(LinkResourceSpecification discovery) {
         List<LinkResourceSpecificationRelation> relations = this.getModel()
-                .getByType(LinkResourceSpecificationRelation.class);
+            .getByType(LinkResourceSpecificationRelation.class);
         relations.removeIf(relation -> !Objects.equals(relation.getSource(), discovery));
 
         if (relations.isEmpty()) {

@@ -18,8 +18,10 @@ public class CompositeRequirementDelegationRelationProcessor
 
     @Override
     protected void refine(CompositeRequirementDelegationRelation discovery) {
-        Composite discoveryComposite = (Composite) discovery.getSource().getSource();
-        Component<?> discoveryChild = discovery.getDestination().getSource();
+        Composite discoveryComposite = (Composite) discovery.getSource()
+            .getSource();
+        Component<?> discoveryChild = discovery.getDestination()
+            .getSource();
 
         // Check if the sub-component is part of the composite already
         List<CompositionRelation> compositions = getModel().getByType(CompositionRelation.class);

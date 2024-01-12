@@ -10,9 +10,8 @@ import org.palladiosimulator.retriever.mocore.utility.ElementFactory;
 
 import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 
-public class LinkResourceSpecificationRelationProcessorTest
-        extends RelationProcessorTest<LinkResourceSpecificationRelationProcessor, PcmSurrogate,
-                LinkResourceSpecificationRelation, LinkResourceSpecification, DeploymentDeploymentRelation> {
+public class LinkResourceSpecificationRelationProcessorTest extends
+        RelationProcessorTest<LinkResourceSpecificationRelationProcessor, PcmSurrogate, LinkResourceSpecificationRelation, LinkResourceSpecification, DeploymentDeploymentRelation> {
     @Override
     protected LinkResourceSpecificationRelation createRelation(LinkResourceSpecification source,
             DeploymentDeploymentRelation destination, boolean isPlaceholder) {
@@ -31,8 +30,8 @@ public class LinkResourceSpecificationRelationProcessorTest
 
     @Override
     protected DeploymentDeploymentRelation getUniqueNonPlaceholderDestinationEntity() {
-        return new DeploymentDeploymentRelation(Deployment.getUniquePlaceholder(),
-                Deployment.getUniquePlaceholder(), false);
+        return new DeploymentDeploymentRelation(Deployment.getUniquePlaceholder(), Deployment.getUniquePlaceholder(),
+                false);
     }
 
     @Override

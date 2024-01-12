@@ -14,8 +14,7 @@ public class ComponentAssemblyRelationTest
 
     @Override
     protected ComponentAssemblyRelation createRelation(InterfaceProvisionRelation source,
-            InterfaceRequirementRelation destination,
-            boolean isPlaceholder) {
+            InterfaceRequirementRelation destination, boolean isPlaceholder) {
         return new ComponentAssemblyRelation(source, destination, isPlaceholder);
     }
 

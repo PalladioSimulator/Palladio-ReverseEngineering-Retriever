@@ -24,8 +24,8 @@ public class AllocationTransformer implements Transformer<PcmSurrogate, Allocati
     public Allocation transform(PcmSurrogate model, System system, ResourceEnvironment resourceEnvironment) {
         FluentAllocationFactory allocationFactory = new FluentAllocationFactory();
         IAllocationAddition fluentAllocation = allocationFactory.newAllocation()
-                .withSystem(system)
-                .withResourceEnvironment(resourceEnvironment);
+            .withSystem(system)
+            .withResourceEnvironment(resourceEnvironment);
 
         // Add allocation contexts to allocation
         List<ComponentAllocationRelation> relations = model.getByType(ComponentAllocationRelation.class);
@@ -44,8 +44,11 @@ public class AllocationTransformer implements Transformer<PcmSurrogate, Allocati
 
         // Use name of entities to fetch up-to-date entities from system and resource environment
         String assemblyContextName = SystemTransformer.getAssemblyContextName(relation.getSource());
-        String deploymentEntityName = relation.getDestination().getValue().getEntityName();
-        contextCreator.withAssemblyContext(assemblyContextName).withResourceContainer(deploymentEntityName);
+        String deploymentEntityName = relation.getDestination()
+            .getValue()
+            .getEntityName();
+        contextCreator.withAssemblyContext(assemblyContextName)
+            .withResourceContainer(deploymentEntityName);
 
         return contextCreator;
     }

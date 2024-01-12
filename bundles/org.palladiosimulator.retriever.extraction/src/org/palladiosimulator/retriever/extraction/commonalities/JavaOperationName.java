@@ -15,7 +15,7 @@ public class JavaOperationName implements OperationName {
 
     @Override
     public Optional<String> forInterface(String baseInterface) {
-		if (!iface.equals(baseInterface) && !baseInterface.startsWith(iface + "#")) {
+        if (!iface.equals(baseInterface) && !baseInterface.startsWith(iface + "#")) {
             return Optional.empty();
         }
         return Optional.of(method);

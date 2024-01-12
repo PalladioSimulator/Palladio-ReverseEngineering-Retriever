@@ -24,8 +24,8 @@ public class AllocationTransformerTest extends TransformerTest<AllocationTransfo
         PcmSurrogate model = createEmptyModel();
         Component<?> component = Component.getUniquePlaceholder();
         Deployment deployment = Deployment.getUniquePlaceholder();
-        ComponentAllocationRelation allocationRelation = new ComponentAllocationRelation(component,
-                deployment, isPlaceholderAllocation);
+        ComponentAllocationRelation allocationRelation = new ComponentAllocationRelation(component, deployment,
+                isPlaceholderAllocation);
 
         model.add(component);
         model.add(deployment);

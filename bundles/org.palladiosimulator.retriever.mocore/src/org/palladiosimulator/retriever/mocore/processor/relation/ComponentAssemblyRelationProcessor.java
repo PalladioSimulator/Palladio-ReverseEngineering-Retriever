@@ -22,31 +22,35 @@ public class ComponentAssemblyRelationProcessor extends RelationProcessor<PcmSur
     @Override
     protected void refine(ComponentAssemblyRelation discovery) {
         // Identify all allocations of the providing and consuming component in the assembly
-        Component<?> provider = discovery.getSource().getSource();
-        Component<?> consumer = discovery.getDestination().getSource();
-        Interface providerConsumerInterface = discovery.getSource().getDestination();
+        Component<?> provider = discovery.getSource()
+            .getSource();
+        Component<?> consumer = discovery.getDestination()
+            .getSource();
+        Interface providerConsumerInterface = discovery.getSource()
+            .getDestination();
         List<Deployment> providerAllocations = getAllocatedContainers(provider);
         List<Deployment> consumerAllocations = getAllocatedContainers(consumer);
 
         // Add link between allocation containers of assembled components if needed
         if (providerAllocations.isEmpty()) {
             Deployment placeholderDeployment = Deployment.getUniquePlaceholder();
-            ComponentAllocationRelation allocation = new ComponentAllocationRelation(provider,
-                    placeholderDeployment, true);
+            ComponentAllocationRelation allocation = new ComponentAllocationRelation(provider, placeholderDeployment,
+                    true);
             providerAllocations.add(placeholderDeployment);
             this.addImplication(allocation);
         }
         if (consumerAllocations.isEmpty()) {
             Deployment placeholderDeployment = Deployment.getUniquePlaceholder();
-            ComponentAllocationRelation allocation = new ComponentAllocationRelation(consumer,
-                    placeholderDeployment, true);
+            ComponentAllocationRelation allocation = new ComponentAllocationRelation(consumer, placeholderDeployment,
+                    true);
             consumerAllocations.add(placeholderDeployment);
             this.addImplication(allocation);
         }
         for (Deployment providerContainer : providerAllocations) {
             for (Deployment consumerContainer : consumerAllocations) {
                 if (!providerContainer.equals(consumerContainer)) {
-                    // Connect every providing container with each consuming one, except they are the same container
+                    // Connect every providing container with each consuming one, except they are
+                    // the same container
                     DeploymentDeploymentRelation containerLink = new DeploymentDeploymentRelation(providerContainer,
                             consumerContainer, true);
                     this.addImplication(containerLink);
@@ -55,21 +59,27 @@ public class ComponentAssemblyRelationProcessor extends RelationProcessor<PcmSur
         }
 
         // Remove component assembly fully-placeholder relation (non-direct & non-indirect)
-        List<ComponentAssemblyRelation> assemblies = this.getModel().getByType(ComponentAssemblyRelation.class);
-        assemblies.removeIf(assembly -> !assembly.getSource().isPlaceholder()
-                || !assembly.getDestination().isPlaceholder());
+        List<ComponentAssemblyRelation> assemblies = this.getModel()
+            .getByType(ComponentAssemblyRelation.class);
+        assemblies.removeIf(assembly -> !assembly.getSource()
+            .isPlaceholder()
+                || !assembly.getDestination()
+                    .isPlaceholder());
         for (ComponentAssemblyRelation placeholderAssembly : assemblies) {
             if (discovery.equals(placeholderAssembly)) {
                 continue;
             }
-            Component<?> source = placeholderAssembly.getSource().getSource();
-            Component<?> destination = placeholderAssembly.getDestination().getSource();
-            Interface sourceDestinationInterface = placeholderAssembly.getSource().getDestination();
+            Component<?> source = placeholderAssembly.getSource()
+                .getSource();
+            Component<?> destination = placeholderAssembly.getDestination()
+                .getSource();
+            Interface sourceDestinationInterface = placeholderAssembly.getSource()
+                .getDestination();
             // Placeholder are unique and can only be allocated to a single container
-            Optional<Deployment> optionalSourceContainer = getAllocatedContainers(source)
-                    .stream().findFirst();
-            Optional<Deployment> optionalDestinationContainer = getAllocatedContainers(destination)
-                    .stream().findFirst();
+            Optional<Deployment> optionalSourceContainer = getAllocatedContainers(source).stream()
+                .findFirst();
+            Optional<Deployment> optionalDestinationContainer = getAllocatedContainers(destination).stream()
+                .findFirst();
 
             if (optionalSourceContainer.isPresent() && optionalDestinationContainer.isPresent()) {
                 Deployment sourceContainer = optionalSourceContainer.get();
@@ -81,11 +91,14 @@ public class ComponentAssemblyRelationProcessor extends RelationProcessor<PcmSur
                 boolean isInverseAssembly = providerAllocations.contains(destinationContainer)
                         && consumerAllocations.contains(sourceContainer);
                 if (isParallelAssembly || isInverseAssembly) {
-                    this.addImplications(this.getModel().replace(placeholderAssembly, discovery));
-                    this.addImplications(this.getModel().replace(source, provider));
-                    this.addImplications(this.getModel().replace(destination, consumer));
-                    this.addImplications(this.getModel().replace(sourceDestinationInterface,
-                            providerConsumerInterface));
+                    this.addImplications(this.getModel()
+                        .replace(placeholderAssembly, discovery));
+                    this.addImplications(this.getModel()
+                        .replace(source, provider));
+                    this.addImplications(this.getModel()
+                        .replace(destination, consumer));
+                    this.addImplications(this.getModel()
+                        .replace(sourceDestinationInterface, providerConsumerInterface));
                 }
             }
         }
@@ -94,10 +107,12 @@ public class ComponentAssemblyRelationProcessor extends RelationProcessor<PcmSur
     }
 
     private List<Deployment> getAllocatedContainers(Component<?> component) {
-        List<ComponentAllocationRelation> allocations = this.getModel().getByType(ComponentAllocationRelation.class);
+        List<ComponentAllocationRelation> allocations = this.getModel()
+            .getByType(ComponentAllocationRelation.class);
         return allocations.stream()
-                .filter(allocation -> allocation.getSource().equals(component))
-                .map(ComponentAllocationRelation::getDestination)
-                .collect(Collectors.toList());
+            .filter(allocation -> allocation.getSource()
+                .equals(component))
+            .map(ComponentAllocationRelation::getDestination)
+            .collect(Collectors.toList());
     }
 }

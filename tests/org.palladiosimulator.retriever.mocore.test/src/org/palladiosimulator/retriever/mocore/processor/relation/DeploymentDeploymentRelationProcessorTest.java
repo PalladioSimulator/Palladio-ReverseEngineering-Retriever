@@ -25,9 +25,8 @@ import org.palladiosimulator.retriever.mocore.utility.ElementFactory;
 import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
-public class DeploymentDeploymentRelationProcessorTest
-        extends RelationProcessorTest<DeploymentDeploymentRelationProcessor,
-                PcmSurrogate, DeploymentDeploymentRelation, Deployment, Deployment> {
+public class DeploymentDeploymentRelationProcessorTest extends
+        RelationProcessorTest<DeploymentDeploymentRelationProcessor, PcmSurrogate, DeploymentDeploymentRelation, Deployment, Deployment> {
     @Test
     @DisabledIf(TEST_API_ONLY_METHOD_NAME)
     public void testRefineWithValidElementAddsCorrectImplications() {
@@ -37,7 +36,8 @@ public class DeploymentDeploymentRelationProcessorTest
         DeploymentDeploymentRelation relation = createUniqueReplaceable();
 
         // Assertions: Pre-execution
-        assertTrue(processor.getImplications().isEmpty());
+        assertTrue(processor.getImplications()
+            .isEmpty());
 
         // Execution
         processor.refine(relation);
@@ -50,12 +50,15 @@ public class DeploymentDeploymentRelationProcessorTest
 
         //// Implicit LinkResourceSpecificationRelation
         assertEquals(1, implications.size());
-        Replaceable implication = implications.stream().findFirst().orElseThrow();
+        Replaceable implication = implications.stream()
+            .findFirst()
+            .orElseThrow();
         assertEquals(LinkResourceSpecificationRelation.class, implication.getClass());
         LinkResourceSpecificationRelation implicitSpecification = (LinkResourceSpecificationRelation) implication;
         assertEquals(relation, implicitSpecification.getDestination());
         assertTrue(implicitSpecification.isPlaceholder());
-        assertTrue(implicitSpecification.getSource().isPlaceholder());
+        assertTrue(implicitSpecification.getSource()
+            .isPlaceholder());
     }
 
     @Test
@@ -71,11 +74,11 @@ public class DeploymentDeploymentRelationProcessorTest
         Interface interfc = Interface.getUniquePlaceholder();
         InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider, interfc, false);
         InterfaceRequirementRelation interfaceRequirement = new InterfaceRequirementRelation(consumer, interfc, false);
-        ComponentAssemblyRelation assembly = new ComponentAssemblyRelation(interfaceProvision,
-                interfaceRequirement, false);
+        ComponentAssemblyRelation assembly = new ComponentAssemblyRelation(interfaceProvision, interfaceRequirement,
+                false);
 
-        ComponentAllocationRelation providerAllocation = new ComponentAllocationRelation(provider,
-                relation.getSource(), false);
+        ComponentAllocationRelation providerAllocation = new ComponentAllocationRelation(provider, relation.getSource(),
+                false);
         ComponentAllocationRelation consumerAllocation = new ComponentAllocationRelation(consumer,
                 relation.getDestination(), false);
 
@@ -84,7 +87,8 @@ public class DeploymentDeploymentRelationProcessorTest
         model.add(consumerAllocation);
 
         // Assertions: Pre-execution
-        assertTrue(processor.getImplications().isEmpty());
+        assertTrue(processor.getImplications()
+            .isEmpty());
 
         // Execution
         processor.refine(relation);
@@ -115,11 +119,11 @@ public class DeploymentDeploymentRelationProcessorTest
         Interface interfc = Interface.getUniquePlaceholder();
         InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider, interfc, false);
         InterfaceRequirementRelation interfaceRequirement = new InterfaceRequirementRelation(consumer, interfc, false);
-        ComponentAssemblyRelation assembly = new ComponentAssemblyRelation(interfaceProvision,
-                interfaceRequirement, false);
+        ComponentAssemblyRelation assembly = new ComponentAssemblyRelation(interfaceProvision, interfaceRequirement,
+                false);
 
-        ComponentAllocationRelation providerAllocation = new ComponentAllocationRelation(consumer,
-                relation.getSource(), false);
+        ComponentAllocationRelation providerAllocation = new ComponentAllocationRelation(consumer, relation.getSource(),
+                false);
         ComponentAllocationRelation consumerAllocation = new ComponentAllocationRelation(provider,
                 relation.getDestination(), false);
 
@@ -128,7 +132,8 @@ public class DeploymentDeploymentRelationProcessorTest
         model.add(consumerAllocation);
 
         // Assertions: Pre-execution
-        assertTrue(processor.getImplications().isEmpty());
+        assertTrue(processor.getImplications()
+            .isEmpty());
 
         // Execution
         processor.refine(relation);
@@ -167,7 +172,8 @@ public class DeploymentDeploymentRelationProcessorTest
         assertTrue(model.contains(destinationPlaceholder));
         assertFalse(model.contains(destination));
         assertFalse(model.contains(relation));
-        assertTrue(processor.getImplications().isEmpty());
+        assertTrue(processor.getImplications()
+            .isEmpty());
 
         // Execution to replace placeholder
         processor.process(relation);
@@ -210,7 +216,8 @@ public class DeploymentDeploymentRelationProcessorTest
         assertTrue(model.contains(destinationPlaceholder));
         assertFalse(model.contains(destination));
         assertFalse(model.contains(relation));
-        assertTrue(processor.getImplications().isEmpty());
+        assertTrue(processor.getImplications()
+            .isEmpty());
 
         // Execution to replace placeholder
         processor.replaceIndirectPlaceholders(relation);
@@ -253,7 +260,8 @@ public class DeploymentDeploymentRelationProcessorTest
         assertTrue(model.contains(destination));
         assertFalse(model.contains(source));
         assertFalse(model.contains(relation));
-        assertTrue(processor.getImplications().isEmpty());
+        assertTrue(processor.getImplications()
+            .isEmpty());
 
         // Execution to replace placeholder
         processor.replaceIndirectPlaceholders(relation);

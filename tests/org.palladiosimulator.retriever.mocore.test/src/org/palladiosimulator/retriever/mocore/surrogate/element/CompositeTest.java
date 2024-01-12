@@ -17,7 +17,9 @@ public class CompositeTest extends ElementTest<Composite, CompositeComponent> {
     @Override
     protected CompositeComponent getUniqueValue() {
         String identifier = IdentifierGenerator.getUniqueIdentifier();
-        RepositoryComponent value = new FluentRepositoryFactory().newCompositeComponent().withName(identifier).build();
+        RepositoryComponent value = new FluentRepositoryFactory().newCompositeComponent()
+            .withName(identifier)
+            .build();
         return (CompositeComponent) value;
     }
 

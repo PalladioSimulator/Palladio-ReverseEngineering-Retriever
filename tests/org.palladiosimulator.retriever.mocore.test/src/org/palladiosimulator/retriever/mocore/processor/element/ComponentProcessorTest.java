@@ -26,7 +26,8 @@ public abstract class ComponentProcessorTest<T extends Component<?>>
         T element = createUniqueReplaceable();
 
         // Assertions: Pre-execution
-        assertTrue(processor.getImplications().isEmpty());
+        assertTrue(processor.getImplications()
+            .isEmpty());
 
         // Execution
         processor.refine(element);
@@ -34,12 +35,15 @@ public abstract class ComponentProcessorTest<T extends Component<?>>
 
         // Assertions: Post-execution
         assertEquals(1, implications.size());
-        Replaceable implication = implications.stream().findFirst().orElseThrow();
+        Replaceable implication = implications.stream()
+            .findFirst()
+            .orElseThrow();
         assertEquals(ComponentAllocationRelation.class, implication.getClass());
         ComponentAllocationRelation relation = (ComponentAllocationRelation) implication;
         assertEquals(element, relation.getSource());
         assertTrue(relation.isPlaceholder());
-        assertTrue(relation.getDestination().isPlaceholder());
+        assertTrue(relation.getDestination()
+            .isPlaceholder());
     }
 
     @Override

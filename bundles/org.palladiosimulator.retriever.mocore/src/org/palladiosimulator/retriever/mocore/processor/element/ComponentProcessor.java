@@ -17,7 +17,8 @@ public abstract class ComponentProcessor<T extends Component<?>> extends Process
     @Override
     protected void refine(T discovery) {
         List<ComponentAllocationRelation> deploymentRelations = getModel().getByType(ComponentAllocationRelation.class);
-        deploymentRelations.removeIf(relation -> !relation.getSource().equals(discovery));
+        deploymentRelations.removeIf(relation -> !relation.getSource()
+            .equals(discovery));
 
         if (deploymentRelations.isEmpty()) {
             Deployment deployment = Deployment.getUniquePlaceholder();

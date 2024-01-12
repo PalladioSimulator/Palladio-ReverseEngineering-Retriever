@@ -22,7 +22,7 @@ public class LinkResourceSpecificationRelationTest extends
 
     @Override
     protected DeploymentDeploymentRelation getUniqueDestinationEntity() {
-        return new DeploymentDeploymentRelation(Deployment.getUniquePlaceholder(),
-                Deployment.getUniquePlaceholder(), true);
+        return new DeploymentDeploymentRelation(Deployment.getUniquePlaceholder(), Deployment.getUniquePlaceholder(),
+                true);
     }
 }

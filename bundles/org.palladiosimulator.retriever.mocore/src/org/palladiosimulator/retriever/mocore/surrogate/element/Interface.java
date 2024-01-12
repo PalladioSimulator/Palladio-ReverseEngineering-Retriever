@@ -10,7 +10,9 @@ public class Interface extends PcmElement<OperationInterface> {
 
     public static Interface getUniquePlaceholder() {
         String identifier = "Placeholder_" + getUniqueValue();
-        OperationInterface value = new FluentRepositoryFactory().newOperationInterface().withName(identifier).build();
+        OperationInterface value = new FluentRepositoryFactory().newOperationInterface()
+            .withName(identifier)
+            .build();
         return new Interface(value, true);
     }
 }

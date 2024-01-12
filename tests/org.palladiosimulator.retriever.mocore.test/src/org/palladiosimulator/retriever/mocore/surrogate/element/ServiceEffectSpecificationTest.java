@@ -6,8 +6,7 @@ import org.palladiosimulator.retriever.mocore.utility.ElementFactory;
 
 import tools.mdsd.mocore.framework.surrogate.ElementTest;
 
-public class ServiceEffectSpecificationTest
-        extends ElementTest<ServiceEffectSpecification, ResourceDemandingSEFF> {
+public class ServiceEffectSpecificationTest extends ElementTest<ServiceEffectSpecification, ResourceDemandingSEFF> {
     @Override
     protected ServiceEffectSpecification createElement(ResourceDemandingSEFF value, boolean isPlaceholder) {
         return new ServiceEffectSpecification(value, isPlaceholder);
@@ -15,7 +14,8 @@ public class ServiceEffectSpecificationTest
 
     @Override
     protected ResourceDemandingSEFF getUniqueValue() {
-        return ElementFactory.createUniqueServiceEffectSpecification(false).getValue();
+        return ElementFactory.createUniqueServiceEffectSpecification(false)
+            .getValue();
     }
 
     @Override

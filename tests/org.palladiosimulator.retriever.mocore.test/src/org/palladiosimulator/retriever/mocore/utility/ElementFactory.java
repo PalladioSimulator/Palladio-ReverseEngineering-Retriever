@@ -35,19 +35,25 @@ public final class ElementFactory {
 
     public static Interface createUniqueInterface(boolean isPlaceholder) {
         String identifier = IdentifierGenerator.getUniqueIdentifier();
-        OperationInterface value = new FluentRepositoryFactory().newOperationInterface().withName(identifier).build();
+        OperationInterface value = new FluentRepositoryFactory().newOperationInterface()
+            .withName(identifier)
+            .build();
         return new Interface(value, isPlaceholder);
     }
 
     public static Component<?> createUniqueComponent(boolean isPlaceholder) {
         String identifier = IdentifierGenerator.getUniqueIdentifier();
-        BasicComponent value = new FluentRepositoryFactory().newBasicComponent().withName(identifier).build();
+        BasicComponent value = new FluentRepositoryFactory().newBasicComponent()
+            .withName(identifier)
+            .build();
         return new AtomicComponent(value, isPlaceholder);
     }
 
     public static Composite createUniqueComposite(boolean isPlaceholder) {
         String identifier = IdentifierGenerator.getUniqueIdentifier();
-        RepositoryComponent value = new FluentRepositoryFactory().newCompositeComponent().withName(identifier).build();
+        RepositoryComponent value = new FluentRepositoryFactory().newCompositeComponent()
+            .withName(identifier)
+            .build();
         return new Composite((CompositeComponent) value, isPlaceholder);
     }
 
@@ -61,7 +67,7 @@ public final class ElementFactory {
     public static LinkResourceSpecification createUniqueLinkResourceSpecification(boolean isPlaceholder) {
         String identifier = IdentifierGenerator.getUniqueIdentifier();
         CommunicationLinkResourceSpecification value = ResourceenvironmentFactory.eINSTANCE
-                .createCommunicationLinkResourceSpecification();
+            .createCommunicationLinkResourceSpecification();
         value.setId(identifier);
         return new LinkResourceSpecification(value, isPlaceholder);
     }

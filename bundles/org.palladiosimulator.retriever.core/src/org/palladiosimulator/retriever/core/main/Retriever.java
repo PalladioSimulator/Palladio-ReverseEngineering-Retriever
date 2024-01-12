@@ -27,10 +27,10 @@ import org.palladiosimulator.retriever.extraction.engine.Rule;
 import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
 
 /**
- * Retriever identifies PCM elements like components and interfaces inside source code via
- * rules specified by a user before. The output of this procedure is a
- * SourceCodeDecoratorRepositoryModel and a PCMRepository model. For this, the engine needs a
- * project directory, an output directory, a Java model and a IRule file.
+ * Retriever identifies PCM elements like components and interfaces inside source code via rules
+ * specified by a user before. The output of this procedure is a SourceCodeDecoratorRepositoryModel
+ * and a PCMRepository model. For this, the engine needs a project directory, an output directory, a
+ * Java model and a IRule file.
  *
  * To use the engine, invoke executeWith(projectPath, outPath, model, rules). To simplify the use,
  * the engine provides the public methods loadRules() and loadModel().

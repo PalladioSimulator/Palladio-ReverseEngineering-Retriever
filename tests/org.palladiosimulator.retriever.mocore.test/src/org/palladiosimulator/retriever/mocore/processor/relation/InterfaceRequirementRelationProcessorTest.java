@@ -9,9 +9,8 @@ import org.palladiosimulator.retriever.mocore.utility.ElementFactory;
 
 import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 
-public class InterfaceRequirementRelationProcessorTest
-        extends RelationProcessorTest<InterfaceRequirementRelationProcessor,
-                PcmSurrogate, InterfaceRequirementRelation, Component<?>, Interface> {
+public class InterfaceRequirementRelationProcessorTest extends
+        RelationProcessorTest<InterfaceRequirementRelationProcessor, PcmSurrogate, InterfaceRequirementRelation, Component<?>, Interface> {
     @Override
     protected InterfaceRequirementRelation createRelation(Component<?> source, Interface destination,
             boolean isPlaceholder) {

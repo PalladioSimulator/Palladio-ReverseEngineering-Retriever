@@ -12,8 +12,8 @@ import org.palladiosimulator.retriever.mocore.surrogate.relation.InterfaceRequir
 
 import tools.mdsd.mocore.framework.surrogate.RelationTest;
 
-public class CompositeRequirementDelegationRelationTest extends RelationTest<CompositeRequirementDelegationRelation,
-        InterfaceRequirementRelation, InterfaceRequirementRelation> {
+public class CompositeRequirementDelegationRelationTest extends
+        RelationTest<CompositeRequirementDelegationRelation, InterfaceRequirementRelation, InterfaceRequirementRelation> {
     private static final Interface RELATION_INTERFACE = Interface.getUniquePlaceholder();
 
     @Test
@@ -28,8 +28,8 @@ public class CompositeRequirementDelegationRelationTest extends RelationTest<Com
     public void testConstructorWithoutSourceCompositeComponent() {
         AtomicComponent sourceComponent = AtomicComponent.getUniquePlaceholder();
         Composite destinationComponent = Composite.getUniquePlaceholder();
-        InterfaceRequirementRelation source = new InterfaceRequirementRelation(sourceComponent,
-                RELATION_INTERFACE, true);
+        InterfaceRequirementRelation source = new InterfaceRequirementRelation(sourceComponent, RELATION_INTERFACE,
+                true);
         InterfaceRequirementRelation destination = new InterfaceRequirementRelation(destinationComponent,
                 RELATION_INTERFACE, true);
 
@@ -51,8 +51,7 @@ public class CompositeRequirementDelegationRelationTest extends RelationTest<Com
 
     @Override
     protected CompositeRequirementDelegationRelation createRelation(InterfaceRequirementRelation source,
-            InterfaceRequirementRelation destination,
-            boolean isPlaceholder) {
+            InterfaceRequirementRelation destination, boolean isPlaceholder) {
         return new CompositeRequirementDelegationRelation(source, destination, isPlaceholder);
     }
 

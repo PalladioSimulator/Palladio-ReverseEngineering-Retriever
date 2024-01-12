@@ -33,9 +33,8 @@ public class RetrieverJob extends AbstractExtendableJob<RetrieverBlackboard> {
         super.addAll(createAnalystJobs(configuration));
 
         // Generate service effect specifications based on AST nodes and merge them into repository
-        super.add(
-                new Ast2SeffJob(getBlackboard(), RetrieverBlackboardKeys.RULE_ENGINE_BLACKBOARD_KEY_SEFF_ASSOCIATIONS,
-                        RetrieverBlackboardKeys.RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY));
+        super.add(new Ast2SeffJob(getBlackboard(), RetrieverBlackboardKeys.RULE_ENGINE_BLACKBOARD_KEY_SEFF_ASSOCIATIONS,
+                RetrieverBlackboardKeys.RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY));
         super.add(new SeffMergerJob(myBlackboard, RetrieverBlackboardKeys.RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY,
                 RetrieverBlackboardKeys.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY));
 
@@ -128,8 +127,7 @@ public class RetrieverJob extends AbstractExtendableJob<RetrieverBlackboard> {
             .getExecutionOrder()) {
             ParallelJob parentJob = new ParallelJob();
             for (Analyst analyst : step) {
-                IBlackboardInteractingJob<RetrieverBlackboard> analystJob = analyst.create(configuration,
-                        myBlackboard);
+                IBlackboardInteractingJob<RetrieverBlackboard> analystJob = analyst.create(configuration, myBlackboard);
                 parentJob.add(analystJob);
                 logger.info("Adding analyst job \"" + analystJob.getName() + "\"");
             }

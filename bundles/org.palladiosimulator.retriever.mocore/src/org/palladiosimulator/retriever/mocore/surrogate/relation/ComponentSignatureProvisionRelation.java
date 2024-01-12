@@ -5,11 +5,12 @@ import java.util.Objects;
 import tools.mdsd.mocore.framework.surrogate.Relation;
 import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
-public class ComponentSignatureProvisionRelation extends Relation<InterfaceProvisionRelation, SignatureProvisionRelation> {
+public class ComponentSignatureProvisionRelation
+        extends Relation<InterfaceProvisionRelation, SignatureProvisionRelation> {
     private static final String ERROR_UNEQUAL_INTERFACE = "Interfaces of relations have to be equal.";
 
-    public ComponentSignatureProvisionRelation(InterfaceProvisionRelation source, SignatureProvisionRelation destination,
-            boolean isPlaceholder) {
+    public ComponentSignatureProvisionRelation(InterfaceProvisionRelation source,
+            SignatureProvisionRelation destination, boolean isPlaceholder) {
         super(source, destination, isPlaceholder);
         if (!Objects.equals(source.getDestination(), destination.getDestination())) {
             throw new IllegalArgumentException(ERROR_UNEQUAL_INTERFACE);

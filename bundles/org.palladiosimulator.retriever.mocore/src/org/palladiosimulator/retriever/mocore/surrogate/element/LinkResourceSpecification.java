@@ -13,7 +13,7 @@ public class LinkResourceSpecification extends PcmElement<CommunicationLinkResou
         double failureProbability = 0D;
 
         CommunicationLinkResourceSpecification value = ResourceenvironmentFactory.eINSTANCE
-                .createCommunicationLinkResourceSpecification();
+            .createCommunicationLinkResourceSpecification();
         value.setId(identifier);
         value.setFailureProbability(failureProbability);
         return new LinkResourceSpecification(value, true);

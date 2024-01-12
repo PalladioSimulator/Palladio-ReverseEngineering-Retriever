@@ -9,7 +9,9 @@ public class AtomicComponent extends Component<BasicComponent> {
     }
 
     public static AtomicComponent getNamedPlaceholder(String name) {
-        BasicComponent value = new FluentRepositoryFactory().newBasicComponent().withName(name).build();
+        BasicComponent value = new FluentRepositoryFactory().newBasicComponent()
+            .withName(name)
+            .build();
         return new AtomicComponent(value, true);
     }
 

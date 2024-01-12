@@ -15,13 +15,10 @@ import org.palladiosimulator.retriever.mocore.utility.ElementFactory;
 import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 
 public class ServiceEffectSpecificationRelationProcessorTest extends
-        RelationProcessorTest<ServiceEffectSpecificationRelationProcessor,
-                PcmSurrogate, ServiceEffectSpecificationRelation, ComponentSignatureProvisionRelation,
-                ServiceEffectSpecification> {
+        RelationProcessorTest<ServiceEffectSpecificationRelationProcessor, PcmSurrogate, ServiceEffectSpecificationRelation, ComponentSignatureProvisionRelation, ServiceEffectSpecification> {
     @Override
     protected ServiceEffectSpecificationRelation createRelation(ComponentSignatureProvisionRelation source,
-            ServiceEffectSpecification destination,
-            boolean isPlaceholder) {
+            ServiceEffectSpecification destination, boolean isPlaceholder) {
         return new ServiceEffectSpecificationRelation(source, destination, isPlaceholder);
     }
 
@@ -30,10 +27,8 @@ public class ServiceEffectSpecificationRelationProcessorTest extends
         Component<?> component = Component.getUniquePlaceholder();
         Interface interfsc = Interface.getUniquePlaceholder();
         Signature signature = Signature.getUniquePlaceholder();
-        InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(component,
-                interfsc, true);
-        SignatureProvisionRelation signatureProvision = new SignatureProvisionRelation(signature,
-                interfsc, true);
+        InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(component, interfsc, true);
+        SignatureProvisionRelation signatureProvision = new SignatureProvisionRelation(signature, interfsc, true);
         return new ComponentSignatureProvisionRelation(interfaceProvision, signatureProvision, false);
 
     }

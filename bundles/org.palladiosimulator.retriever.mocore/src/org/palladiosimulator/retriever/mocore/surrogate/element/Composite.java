@@ -11,7 +11,9 @@ public class Composite extends Component<CompositeComponent> {
 
     public static Composite getUniquePlaceholder() {
         String identifier = "Placeholder_" + getUniqueValue();
-        RepositoryComponent value = new FluentRepositoryFactory().newCompositeComponent().withName(identifier).build();
+        RepositoryComponent value = new FluentRepositoryFactory().newCompositeComponent()
+            .withName(identifier)
+            .build();
         return new Composite((CompositeComponent) value, true);
     }
 }

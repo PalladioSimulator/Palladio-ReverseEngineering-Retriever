@@ -25,7 +25,8 @@ public class InterfaceProcessorTest extends ProcessorTest<InterfaceProcessor, Pc
         Interface element = createUniqueReplaceable();
 
         // Assertions: Pre-execution
-        assertTrue(processor.getImplications().isEmpty());
+        assertTrue(processor.getImplications()
+            .isEmpty());
 
         // Execution
         processor.refine(element);
@@ -33,13 +34,19 @@ public class InterfaceProcessorTest extends ProcessorTest<InterfaceProcessor, Pc
 
         // Assertions: Post-execution
         assertEquals(1, implications.size());
-        Replaceable implication = implications.stream().findFirst().orElseThrow();
+        Replaceable implication = implications.stream()
+            .findFirst()
+            .orElseThrow();
         assertEquals(InterfaceProvisionRelation.class, implication.getClass());
         InterfaceProvisionRelation relation = (InterfaceProvisionRelation) implication;
         assertEquals(element, relation.getDestination());
         assertTrue(relation.isPlaceholder());
-        assertTrue(relation.getSource().isPlaceholder());
-        assertEquals(element.getValue().getEntityName() + " Provider", relation.getSource().getValue().getEntityName());
+        assertTrue(relation.getSource()
+            .isPlaceholder());
+        assertEquals(element.getValue()
+            .getEntityName() + " Provider", relation.getSource()
+                .getValue()
+                .getEntityName());
     }
 
     @Override

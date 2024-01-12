@@ -8,8 +8,7 @@ import tools.mdsd.mocore.framework.surrogate.Replaceable;
 public class ServiceEffectSpecificationRelation
         extends Relation<ComponentSignatureProvisionRelation, ServiceEffectSpecification> {
     public ServiceEffectSpecificationRelation(ComponentSignatureProvisionRelation source,
-            ServiceEffectSpecification destination,
-            boolean isPlaceholder) {
+            ServiceEffectSpecification destination, boolean isPlaceholder) {
         super(source, destination, isPlaceholder);
     }
 

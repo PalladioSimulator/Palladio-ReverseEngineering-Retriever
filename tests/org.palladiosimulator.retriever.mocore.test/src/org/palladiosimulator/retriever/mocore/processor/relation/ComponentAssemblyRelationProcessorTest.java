@@ -23,8 +23,8 @@ import org.palladiosimulator.retriever.mocore.surrogate.relation.InterfaceRequir
 import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
-public class ComponentAssemblyRelationProcessorTest extends RelationProcessorTest<ComponentAssemblyRelationProcessor,
-        PcmSurrogate, ComponentAssemblyRelation, InterfaceProvisionRelation, InterfaceRequirementRelation> {
+public class ComponentAssemblyRelationProcessorTest extends
+        RelationProcessorTest<ComponentAssemblyRelationProcessor, PcmSurrogate, ComponentAssemblyRelation, InterfaceProvisionRelation, InterfaceRequirementRelation> {
     private static final Interface RELATION_DESTINATION = Interface.getUniquePlaceholder();
 
     @Test
@@ -53,8 +53,8 @@ public class ComponentAssemblyRelationProcessorTest extends RelationProcessorTes
                 placeholderProvision.getSource(), providingContainer, false);
         ComponentAllocationRelation placeholderRequiringAllocation = new ComponentAllocationRelation(
                 placeholderRequirement.getSource(), requiringContainer, false);
-        ComponentAssemblyRelation placeholderRelation = createRelation(placeholderProvision,
-                placeholderRequirement, true);
+        ComponentAssemblyRelation placeholderRelation = createRelation(placeholderProvision, placeholderRequirement,
+                true);
 
         // Add containers, placeholder assembly & allocations to model
         model.add(providingContainer);
@@ -72,7 +72,8 @@ public class ComponentAssemblyRelationProcessorTest extends RelationProcessorTes
         model.add(placeholderRelation);
 
         // Assertions: Pre-execution
-        assertTrue(processor.getImplications().isEmpty());
+        assertTrue(processor.getImplications()
+            .isEmpty());
         assertTrue(model.contains(placeholderProvision.getSource()));
         assertTrue(model.contains(placeholderProvision.getDestination()));
         assertTrue(model.contains(placeholderRequirement.getSource()));
@@ -127,7 +128,8 @@ public class ComponentAssemblyRelationProcessorTest extends RelationProcessorTes
         model.add(requiringAllocation);
 
         // Assertions: Pre-execution
-        assertTrue(processor.getImplications().isEmpty());
+        assertTrue(processor.getImplications()
+            .isEmpty());
 
         // Execution
         processor.refine(relation);
@@ -137,7 +139,9 @@ public class ComponentAssemblyRelationProcessorTest extends RelationProcessorTes
         assertTrue(implications.remove(relation.getSource()));
         assertTrue(implications.remove(relation.getDestination()));
         assertEquals(1, implications.size());
-        Replaceable implication = implications.stream().findFirst().orElseThrow();
+        Replaceable implication = implications.stream()
+            .findFirst()
+            .orElseThrow();
         assertEquals(DeploymentDeploymentRelation.class, implication.getClass());
         DeploymentDeploymentRelation implicitDeploymentLink = (DeploymentDeploymentRelation) implication;
         assertEquals(providingContainer, implicitDeploymentLink.getSource());
@@ -147,8 +151,7 @@ public class ComponentAssemblyRelationProcessorTest extends RelationProcessorTes
 
     @Override
     protected ComponentAssemblyRelation createRelation(InterfaceProvisionRelation source,
-            InterfaceRequirementRelation destination,
-            boolean isPlaceholder) {
+            InterfaceRequirementRelation destination, boolean isPlaceholder) {
         return new ComponentAssemblyRelation(source, destination, isPlaceholder);
     }
 

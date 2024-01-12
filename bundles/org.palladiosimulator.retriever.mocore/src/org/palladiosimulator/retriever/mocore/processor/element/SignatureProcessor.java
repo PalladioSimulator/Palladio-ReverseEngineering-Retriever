@@ -18,7 +18,8 @@ public class SignatureProcessor extends Processor<PcmSurrogate, Signature> {
     protected void refine(Signature discovery) {
         // Add providing interface for signature if none exists
         List<SignatureProvisionRelation> interfaceRelations = getModel().getByType(SignatureProvisionRelation.class);
-        interfaceRelations.removeIf(relation -> !relation.getSource().equals(discovery));
+        interfaceRelations.removeIf(relation -> !relation.getSource()
+            .equals(discovery));
         if (interfaceRelations.isEmpty()) {
             Interface interfaceElement = Interface.getUniquePlaceholder();
             SignatureProvisionRelation relation = new SignatureProvisionRelation(discovery, interfaceElement, true);

@@ -20,13 +20,15 @@ public class DeploymentProcessorTest extends ProcessorTest<DeploymentProcessor, 
         Deployment element = createUniqueReplaceable();
 
         // Assertions: Pre-execution
-        assertTrue(processor.getImplications().isEmpty());
+        assertTrue(processor.getImplications()
+            .isEmpty());
 
         // Execution
         processor.refine(element);
 
         // Assertions: Post-execution
-        assertTrue(processor.getImplications().isEmpty());
+        assertTrue(processor.getImplications()
+            .isEmpty());
     }
 
     @Override

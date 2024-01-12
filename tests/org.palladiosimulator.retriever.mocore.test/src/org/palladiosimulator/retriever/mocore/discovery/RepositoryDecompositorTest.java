@@ -25,7 +25,8 @@ public class RepositoryDecompositorTest extends DecompositorTest<RepositoryDecom
 
         Collection<Discoverer<?>> discoverers = decompositor.decompose(repository);
         assertEquals(10, discoverers.size());
-        discoverers.forEach((discoverer) -> assertTrue(discoverer.getDiscoveries().isEmpty()));
+        discoverers.forEach((discoverer) -> assertTrue(discoverer.getDiscoveries()
+            .isEmpty()));
     }
 
     @Test
@@ -33,12 +34,17 @@ public class RepositoryDecompositorTest extends DecompositorTest<RepositoryDecom
         RepositoryDecompositor decompositor = createDecompositor();
         FluentRepositoryFactory factory = new FluentRepositoryFactory();
         Repository repository = factory.newRepository()
-                .addToRepository(factory.newBasicComponent().withName("Component_1"))
-                .addToRepository(factory.newBasicComponent().withName("Component_2"))
-                .addToRepository(factory.newBasicComponent().withName("Component_3"))
-                .addToRepository(factory.newBasicComponent().withName("Component_4"))
-                .addToRepository(factory.newBasicComponent().withName("Component_5"))
-                .createRepositoryNow();
+            .addToRepository(factory.newBasicComponent()
+                .withName("Component_1"))
+            .addToRepository(factory.newBasicComponent()
+                .withName("Component_2"))
+            .addToRepository(factory.newBasicComponent()
+                .withName("Component_3"))
+            .addToRepository(factory.newBasicComponent()
+                .withName("Component_4"))
+            .addToRepository(factory.newBasicComponent()
+                .withName("Component_5"))
+            .createRepositoryNow();
 
         Collection<Discoverer<?>> discoverers = decompositor.decompose(repository);
         assertFalse(discoverers.isEmpty());
@@ -50,13 +56,16 @@ public class RepositoryDecompositorTest extends DecompositorTest<RepositoryDecom
 
         // Get and check component discoverer
         Discoverer<AtomicComponent> componentDiscoverer = (Discoverer<AtomicComponent>) modifiableDiscoverers.iterator()
-                .next();
-        assertEquals(5, componentDiscoverer.getDiscoveries().size());
+            .next();
+        assertEquals(5, componentDiscoverer.getDiscoveries()
+            .size());
         for (int i = 1; i <= 5; i++) {
             final int j = i;
-            assertTrue(componentDiscoverer.getDiscoveries().stream()
-                    .anyMatch((AtomicComponent component) -> component.getValue().getEntityName()
-                            .equals("Component_" + j)));
+            assertTrue(componentDiscoverer.getDiscoveries()
+                .stream()
+                .anyMatch((AtomicComponent component) -> component.getValue()
+                    .getEntityName()
+                    .equals("Component_" + j)));
         }
     }
 
@@ -74,6 +83,7 @@ public class RepositoryDecompositorTest extends DecompositorTest<RepositoryDecom
     }
 
     private Repository createEmptyRepository() {
-        return new FluentRepositoryFactory().newRepository().createRepositoryNow();
+        return new FluentRepositoryFactory().newRepository()
+            .createRepositoryNow();
     }
 }

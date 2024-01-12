@@ -20,9 +20,8 @@ import org.palladiosimulator.retriever.mocore.surrogate.relation.InterfaceRequir
 import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
-public class CompositeRequirementDelegationRelationProcessorTest
-        extends RelationProcessorTest<CompositeRequirementDelegationRelationProcessor, PcmSurrogate,
-                CompositeRequirementDelegationRelation, InterfaceRequirementRelation, InterfaceRequirementRelation> {
+public class CompositeRequirementDelegationRelationProcessorTest extends
+        RelationProcessorTest<CompositeRequirementDelegationRelationProcessor, PcmSurrogate, CompositeRequirementDelegationRelation, InterfaceRequirementRelation, InterfaceRequirementRelation> {
     private static final Interface RELATION_INTERFACE = Interface.getUniquePlaceholder();
 
     @Test
@@ -34,7 +33,8 @@ public class CompositeRequirementDelegationRelationProcessorTest
         CompositeRequirementDelegationRelation relation = createUniqueReplaceable();
 
         // Assertions: Pre-execution
-        assertTrue(processor.getImplications().isEmpty());
+        assertTrue(processor.getImplications()
+            .isEmpty());
 
         // Execution
         processor.refine(relation);
@@ -46,13 +46,19 @@ public class CompositeRequirementDelegationRelationProcessorTest
 
         // Implicit CompositionRelation between source & destination component
         assertEquals(1, implications.size());
-        Replaceable implication = implications.stream().findFirst().orElseThrow();
+        Replaceable implication = implications.stream()
+            .findFirst()
+            .orElseThrow();
         assertEquals(CompositionRelation.class, implication.getClass());
 
         CompositionRelation implicitComposition = (CompositionRelation) implication;
         assertTrue(implicitComposition.isPlaceholder());
-        assertTrue(implicitComposition.getSource().equals(relation.getSource().getSource()));
-        assertTrue(implicitComposition.getDestination().equals(relation.getDestination().getSource()));
+        assertTrue(implicitComposition.getSource()
+            .equals(relation.getSource()
+                .getSource()));
+        assertTrue(implicitComposition.getDestination()
+            .equals(relation.getDestination()
+                .getSource()));
     }
 
     @Override

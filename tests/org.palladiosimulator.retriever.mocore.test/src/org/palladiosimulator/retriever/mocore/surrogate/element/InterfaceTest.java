@@ -16,7 +16,9 @@ public class InterfaceTest extends ElementTest<Interface, OperationInterface> {
     @Override
     protected OperationInterface getUniqueValue() {
         String identifier = IdentifierGenerator.getUniqueIdentifier();
-        OperationInterface value = new FluentRepositoryFactory().newOperationInterface().withName(identifier).build();
+        OperationInterface value = new FluentRepositoryFactory().newOperationInterface()
+            .withName(identifier)
+            .build();
         return value;
     }
 

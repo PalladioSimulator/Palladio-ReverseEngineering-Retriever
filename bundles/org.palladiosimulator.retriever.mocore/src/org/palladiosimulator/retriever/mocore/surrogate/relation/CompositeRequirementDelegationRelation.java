@@ -12,8 +12,7 @@ public class CompositeRequirementDelegationRelation
     private static final String ERROR_NON_EQUAL_INTERFACES = "Interfaces of the given relations must be equal.";
 
     public CompositeRequirementDelegationRelation(InterfaceRequirementRelation source,
-            InterfaceRequirementRelation destination,
-            boolean isPlaceholder) {
+            InterfaceRequirementRelation destination, boolean isPlaceholder) {
         super(source, destination, isPlaceholder);
 
         // Check whether relations are equal
@@ -22,12 +21,14 @@ public class CompositeRequirementDelegationRelation
         }
 
         // Check whether the delegating component is a composite
-        if (!Composite.class.isAssignableFrom(source.getSource().getClass())) {
+        if (!Composite.class.isAssignableFrom(source.getSource()
+            .getClass())) {
             throw new IllegalArgumentException(ERROR_NOT_COMPOSITE);
         }
 
         // Check whether interfaces are equal
-        if (!source.getDestination().equals(destination.getDestination())) {
+        if (!source.getDestination()
+            .equals(destination.getDestination())) {
             // TODO Allow child/parent interfaces
             throw new IllegalArgumentException(ERROR_NON_EQUAL_INTERFACES);
         }

@@ -21,13 +21,14 @@ public class InterfaceProvisionRelationProcessor extends RelationProcessor<PcmSu
 
         // Get all requirements from model & filter for same interface as in discovery
         List<InterfaceRequirementRelation> requirementRelations = this.getModel()
-                .getByType(InterfaceRequirementRelation.class);
-        requirementRelations.removeIf(relation -> !relation.getDestination().equals(commonInterface));
+            .getByType(InterfaceRequirementRelation.class);
+        requirementRelations.removeIf(relation -> !relation.getDestination()
+            .equals(commonInterface));
 
         // Create component assembly placeholder for pairs of provision & requirement relations
         for (InterfaceRequirementRelation requirementRelation : requirementRelations) {
-            ComponentAssemblyRelation assemblyRelation = new ComponentAssemblyRelation(discovery,
-                    requirementRelation, true);
+            ComponentAssemblyRelation assemblyRelation = new ComponentAssemblyRelation(discovery, requirementRelation,
+                    true);
             this.addImplication(assemblyRelation);
         }
 

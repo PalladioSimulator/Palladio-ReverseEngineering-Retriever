@@ -52,8 +52,8 @@ public class BasicTest extends CaseStudyTest {
     }
 
     /**
-     * Tests the basic functionality of Retriever. Requires it to execute without an
-     * exception and produce an output file.
+     * Tests the basic functionality of Retriever. Requires it to execute without an exception and
+     * produce an output file.
      */
     @Test
     void testExecutesAndProducesFile() {
@@ -80,9 +80,9 @@ public class BasicTest extends CaseStudyTest {
     }
 
     /**
-     * Retriever produced inconsistent results if executed multiple times. Arguments and
-     * methods appear multiple times. This probably has something to do with (discouraged) static
-     * states somewhere in the stack.
+     * Retriever produced inconsistent results if executed multiple times. Arguments and methods
+     * appear multiple times. This probably has something to do with (discouraged) static states
+     * somewhere in the stack.
      *
      * @throws ModelAnalyzerException
      *             forwarded from Retriever. Should cause the test to fail.

@@ -15,7 +15,8 @@ public class LinkResourceSpecificationTest
 
     @Override
     protected CommunicationLinkResourceSpecification getUniqueValue() {
-        return LinkResourceSpecification.getUniquePlaceholder().getValue();
+        return LinkResourceSpecification.getUniquePlaceholder()
+            .getValue();
     }
 
     @Override

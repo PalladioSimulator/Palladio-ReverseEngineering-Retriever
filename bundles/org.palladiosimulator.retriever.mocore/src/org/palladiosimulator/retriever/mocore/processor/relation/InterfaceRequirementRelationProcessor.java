@@ -22,13 +22,14 @@ public class InterfaceRequirementRelationProcessor
 
         // Get all requirements from model & filter for same interface as in discovery
         List<InterfaceProvisionRelation> provisionRelations = this.getModel()
-                .getByType(InterfaceProvisionRelation.class);
-        provisionRelations.removeIf(relation -> !relation.getDestination().equals(commonInterface));
+            .getByType(InterfaceProvisionRelation.class);
+        provisionRelations.removeIf(relation -> !relation.getDestination()
+            .equals(commonInterface));
 
         // Create component assembly placeholder for pairs of provision & requirement relations
         for (InterfaceProvisionRelation provisionRelation : provisionRelations) {
-            ComponentAssemblyRelation assemblyRelation = new ComponentAssemblyRelation(provisionRelation,
-                    discovery, true);
+            ComponentAssemblyRelation assemblyRelation = new ComponentAssemblyRelation(provisionRelation, discovery,
+                    true);
             this.addImplication(assemblyRelation);
         }
 

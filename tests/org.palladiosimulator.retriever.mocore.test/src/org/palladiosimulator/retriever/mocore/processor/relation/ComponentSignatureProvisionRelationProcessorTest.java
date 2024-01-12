@@ -11,9 +11,8 @@ import org.palladiosimulator.retriever.mocore.surrogate.relation.SignatureProvis
 
 import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 
-public class ComponentSignatureProvisionRelationProcessorTest
-        extends RelationProcessorTest<ComponentSignatureProvisionRelationProcessor, PcmSurrogate,
-                ComponentSignatureProvisionRelation, InterfaceProvisionRelation, SignatureProvisionRelation> {
+public class ComponentSignatureProvisionRelationProcessorTest extends
+        RelationProcessorTest<ComponentSignatureProvisionRelationProcessor, PcmSurrogate, ComponentSignatureProvisionRelation, InterfaceProvisionRelation, SignatureProvisionRelation> {
     private static final Interface RELATION_INTERFACE = Interface.getUniquePlaceholder();
 
     @Override
