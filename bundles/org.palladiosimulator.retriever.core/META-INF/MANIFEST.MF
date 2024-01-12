@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Retriever Core
+Bundle-SymbolicName: org.palladiosimulator.retriever.core;singleton:=true
+Bundle-Version: 5.2.0.qualifier
+Bundle-Vendor: palladiosimulator.org
+Automatic-Module-Name: org.palladiosimulator.retriever.core
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Require-Bundle: org.eclipse.jdt.core,
+ org.palladiosimulator.retriever.extraction,
+ de.uka.ipd.sdq.workflow.launchconfig,
+ org.eclipse.debug.ui,
+ org.eclipse.swt,
+ org.palladiosimulator.generator.fluent,
+ org.palladiosimulator.somox.ast2seff,
+ org.palladiosimulator.retriever.mocore,
+ org.palladiosimulator.view.plantuml.generator
+Export-Package: org.palladiosimulator.retriever.core.cli;uses:="org.eclipse.equinox.app",
+ org.palladiosimulator.retriever.core.configuration,
+ org.palladiosimulator.retriever.core.main,
+ org.palladiosimulator.retriever.core.service,
+ org.palladiosimulator.retriever.core.workflow

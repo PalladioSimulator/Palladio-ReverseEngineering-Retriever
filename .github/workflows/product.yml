@@ -35,5 +35,5 @@ jobs:
     - name: Release Products
       uses: softprops/action-gh-release@v1
       with:
-        files: products/org.palladiosimulator.somox.analyzer.rules.product/target/products/*
+        files: products/org.palladiosimulator.retriever.product/target/products/*
         tag_name: ${{ env.release_tag }}
