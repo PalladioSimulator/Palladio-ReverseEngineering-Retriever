@@ -22,8 +22,8 @@ import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.retriever.core.main.RetrieverException;
 import org.palladiosimulator.retriever.core.workflow.RetrieverJob;
 import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
-import org.palladiosimulator.retriever.extraction.engine.Rule;
 import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
+import org.palladiosimulator.retriever.extraction.engine.Rule;
 import org.palladiosimulator.retriever.extraction.rules.JaxRSRules;
 
 import de.uka.ipd.sdq.workflow.jobs.JobFailedException;

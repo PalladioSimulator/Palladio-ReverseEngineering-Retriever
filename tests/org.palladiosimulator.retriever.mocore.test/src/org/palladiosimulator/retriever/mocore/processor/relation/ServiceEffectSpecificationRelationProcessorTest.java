@@ -1,6 +1,5 @@
 package org.palladiosimulator.retriever.mocore.processor.relation;
 
-import org.palladiosimulator.retriever.mocore.processor.relation.ServiceEffectSpecificationRelationProcessor;
 import org.palladiosimulator.retriever.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.retriever.mocore.surrogate.element.Component;
 import org.palladiosimulator.retriever.mocore.surrogate.element.Interface;

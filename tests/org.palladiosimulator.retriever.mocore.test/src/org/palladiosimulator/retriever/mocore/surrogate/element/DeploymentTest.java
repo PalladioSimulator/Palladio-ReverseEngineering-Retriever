@@ -2,7 +2,6 @@ package org.palladiosimulator.retriever.mocore.surrogate.element;
 
 import org.palladiosimulator.pcm.resourceenvironment.ResourceContainer;
 import org.palladiosimulator.pcm.resourceenvironment.ResourceenvironmentFactory;
-import org.palladiosimulator.retriever.mocore.surrogate.element.Deployment;
 
 import tools.mdsd.mocore.framework.surrogate.ElementTest;
 import tools.mdsd.mocore.utility.IdentifierGenerator;

@@ -3,7 +3,6 @@ package org.palladiosimulator.retriever.mocore.surrogate.element;
 import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
 import org.palladiosimulator.pcm.repository.BasicComponent;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
-import org.palladiosimulator.retriever.mocore.surrogate.element.Component;
 
 import tools.mdsd.mocore.framework.surrogate.ElementTest;
 import tools.mdsd.mocore.utility.IdentifierGenerator;

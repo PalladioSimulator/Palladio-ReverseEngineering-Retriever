@@ -21,7 +21,6 @@ import org.palladiosimulator.pcm.repository.OperationProvidedRole;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.system.System;
-import org.palladiosimulator.retriever.mocore.workflow.MoCoReJob;
 
 import de.uka.ipd.sdq.workflow.blackboard.Blackboard;
 

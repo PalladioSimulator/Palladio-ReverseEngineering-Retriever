@@ -7,8 +7,6 @@ import org.palladiosimulator.retriever.mocore.surrogate.element.AtomicComponent;
 import org.palladiosimulator.retriever.mocore.surrogate.element.Component;
 import org.palladiosimulator.retriever.mocore.surrogate.element.Composite;
 import org.palladiosimulator.retriever.mocore.surrogate.element.Interface;
-import org.palladiosimulator.retriever.mocore.surrogate.relation.CompositeRequirementDelegationRelation;
-import org.palladiosimulator.retriever.mocore.surrogate.relation.InterfaceRequirementRelation;
 
 import tools.mdsd.mocore.framework.surrogate.RelationTest;
 

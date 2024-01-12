@@ -2,7 +2,6 @@ package org.palladiosimulator.retriever.mocore.surrogate.relation;
 
 import org.palladiosimulator.retriever.mocore.surrogate.element.Component;
 import org.palladiosimulator.retriever.mocore.surrogate.element.Interface;
-import org.palladiosimulator.retriever.mocore.surrogate.relation.InterfaceRequirementRelation;
 
 import tools.mdsd.mocore.framework.surrogate.RelationTest;
 

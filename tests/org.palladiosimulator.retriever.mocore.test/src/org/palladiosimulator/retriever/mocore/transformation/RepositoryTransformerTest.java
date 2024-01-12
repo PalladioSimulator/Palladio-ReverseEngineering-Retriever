@@ -21,7 +21,6 @@ import org.palladiosimulator.retriever.mocore.surrogate.relation.InterfaceProvis
 import org.palladiosimulator.retriever.mocore.surrogate.relation.InterfaceRequirementRelation;
 import org.palladiosimulator.retriever.mocore.surrogate.relation.ServiceEffectSpecificationRelation;
 import org.palladiosimulator.retriever.mocore.surrogate.relation.SignatureProvisionRelation;
-import org.palladiosimulator.retriever.mocore.transformation.RepositoryTransformer;
 
 import tools.mdsd.mocore.framework.transformation.TransformerTest;
 

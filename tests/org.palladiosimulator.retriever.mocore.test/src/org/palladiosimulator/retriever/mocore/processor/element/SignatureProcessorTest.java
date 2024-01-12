@@ -8,7 +8,6 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIf;
-import org.palladiosimulator.retriever.mocore.processor.element.SignatureProcessor;
 import org.palladiosimulator.retriever.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.retriever.mocore.surrogate.element.Signature;
 import org.palladiosimulator.retriever.mocore.surrogate.relation.SignatureProvisionRelation;

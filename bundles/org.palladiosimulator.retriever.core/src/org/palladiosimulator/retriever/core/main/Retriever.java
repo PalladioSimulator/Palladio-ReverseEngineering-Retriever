@@ -23,8 +23,8 @@ import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
 import org.palladiosimulator.retriever.extraction.engine.DockerParser;
 import org.palladiosimulator.retriever.extraction.engine.PCMInstanceCreator;
-import org.palladiosimulator.retriever.extraction.engine.Rule;
 import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
+import org.palladiosimulator.retriever.extraction.engine.Rule;
 
 /**
  * Retriever identifies PCM elements like components and interfaces inside source code via rules

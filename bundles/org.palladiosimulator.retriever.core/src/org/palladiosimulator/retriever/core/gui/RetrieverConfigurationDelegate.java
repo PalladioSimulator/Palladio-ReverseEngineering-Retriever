@@ -3,8 +3,8 @@ package org.palladiosimulator.retriever.core.gui;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.palladiosimulator.retriever.core.configuration.RetrieverWorkflowConfiguration;
 import org.palladiosimulator.retriever.core.configuration.RetrieverConfigurationImpl;
+import org.palladiosimulator.retriever.core.configuration.RetrieverWorkflowConfiguration;
 import org.palladiosimulator.retriever.core.workflow.RetrieverJob;
 
 import de.uka.ipd.sdq.workflow.Workflow;

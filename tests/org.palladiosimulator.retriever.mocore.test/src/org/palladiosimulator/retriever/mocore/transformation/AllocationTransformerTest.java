@@ -11,7 +11,6 @@ import org.palladiosimulator.retriever.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.retriever.mocore.surrogate.element.Component;
 import org.palladiosimulator.retriever.mocore.surrogate.element.Deployment;
 import org.palladiosimulator.retriever.mocore.surrogate.relation.ComponentAllocationRelation;
-import org.palladiosimulator.retriever.mocore.transformation.AllocationTransformer;
 
 import tools.mdsd.mocore.framework.transformation.TransformerTest;
 

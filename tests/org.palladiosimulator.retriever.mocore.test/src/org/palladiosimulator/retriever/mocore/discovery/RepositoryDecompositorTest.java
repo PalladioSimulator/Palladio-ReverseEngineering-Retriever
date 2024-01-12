@@ -11,7 +11,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositoryFactory;
 import org.palladiosimulator.pcm.repository.Repository;
-import org.palladiosimulator.retriever.mocore.discovery.RepositoryDecompositor;
 import org.palladiosimulator.retriever.mocore.surrogate.element.AtomicComponent;
 
 import tools.mdsd.mocore.framework.discovery.Discoverer;

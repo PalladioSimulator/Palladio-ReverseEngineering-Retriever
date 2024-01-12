@@ -3,9 +3,6 @@ package org.palladiosimulator.retriever.mocore.surrogate.relation;
 import org.palladiosimulator.retriever.mocore.surrogate.element.Component;
 import org.palladiosimulator.retriever.mocore.surrogate.element.Interface;
 import org.palladiosimulator.retriever.mocore.surrogate.element.Signature;
-import org.palladiosimulator.retriever.mocore.surrogate.relation.ComponentSignatureProvisionRelation;
-import org.palladiosimulator.retriever.mocore.surrogate.relation.InterfaceProvisionRelation;
-import org.palladiosimulator.retriever.mocore.surrogate.relation.SignatureProvisionRelation;
 
 import tools.mdsd.mocore.framework.surrogate.RelationTest;
 

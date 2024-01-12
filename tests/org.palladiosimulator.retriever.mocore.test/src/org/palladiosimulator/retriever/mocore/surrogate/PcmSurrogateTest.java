@@ -1,7 +1,5 @@
 package org.palladiosimulator.retriever.mocore.surrogate;
 
-import org.palladiosimulator.retriever.mocore.surrogate.PcmSurrogate;
-
 import tools.mdsd.mocore.framework.surrogate.ModelTest;
 import tools.mdsd.mocore.framework.surrogate.Relation;
 import tools.mdsd.mocore.utility.SimpleElement;

@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
-import org.palladiosimulator.retriever.mocore.orchestration.PcmOrchestrator;
 import org.palladiosimulator.retriever.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.retriever.mocore.surrogate.element.Component;
 import org.palladiosimulator.retriever.mocore.surrogate.element.Deployment;

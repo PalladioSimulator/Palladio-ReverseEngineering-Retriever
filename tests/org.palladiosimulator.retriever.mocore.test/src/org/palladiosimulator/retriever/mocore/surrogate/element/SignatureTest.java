@@ -2,7 +2,6 @@ package org.palladiosimulator.retriever.mocore.surrogate.element;
 
 import org.palladiosimulator.pcm.repository.OperationSignature;
 import org.palladiosimulator.pcm.repository.RepositoryFactory;
-import org.palladiosimulator.retriever.mocore.surrogate.element.Signature;
 
 import tools.mdsd.mocore.framework.surrogate.ElementTest;
 import tools.mdsd.mocore.utility.IdentifierGenerator;

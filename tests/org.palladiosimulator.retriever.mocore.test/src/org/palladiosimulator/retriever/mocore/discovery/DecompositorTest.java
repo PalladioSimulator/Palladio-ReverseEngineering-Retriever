@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 
 import org.junit.jupiter.api.Test;
-import org.palladiosimulator.retriever.mocore.discovery.Decompositor;
 
 import tools.mdsd.mocore.framework.discovery.Discoverer;
 

@@ -17,6 +17,7 @@ import org.palladiosimulator.retriever.mocore.surrogate.element.LinkResourceSpec
 import org.palladiosimulator.retriever.mocore.surrogate.relation.LinkResourceSpecificationRelation;
 
 import com.google.common.collect.HashMultimap;
+
 import tools.mdsd.mocore.framework.transformation.Transformer;
 
 public class ResourceEnvironmentTransformer implements Transformer<PcmSurrogate, ResourceEnvironment> {

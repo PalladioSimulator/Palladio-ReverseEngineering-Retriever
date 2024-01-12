@@ -1,7 +1,6 @@
 package org.palladiosimulator.retriever.mocore.surrogate.relation;
 
 import org.palladiosimulator.retriever.mocore.surrogate.element.Deployment;
-import org.palladiosimulator.retriever.mocore.surrogate.relation.DeploymentDeploymentRelation;
 
 import tools.mdsd.mocore.framework.surrogate.RelationTest;
 

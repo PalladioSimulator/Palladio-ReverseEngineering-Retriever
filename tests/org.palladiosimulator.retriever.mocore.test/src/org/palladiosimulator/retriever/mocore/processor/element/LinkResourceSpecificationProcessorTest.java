@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIf;
-import org.palladiosimulator.retriever.mocore.processor.element.LinkResourceSpecificationProcessor;
 import org.palladiosimulator.retriever.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.retriever.mocore.surrogate.element.LinkResourceSpecification;
 import org.palladiosimulator.retriever.mocore.surrogate.relation.LinkResourceSpecificationRelation;

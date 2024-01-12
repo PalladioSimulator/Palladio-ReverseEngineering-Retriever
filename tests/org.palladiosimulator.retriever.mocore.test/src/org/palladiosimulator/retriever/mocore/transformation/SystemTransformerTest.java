@@ -14,7 +14,6 @@ import org.palladiosimulator.retriever.mocore.surrogate.element.Interface;
 import org.palladiosimulator.retriever.mocore.surrogate.relation.ComponentAssemblyRelation;
 import org.palladiosimulator.retriever.mocore.surrogate.relation.InterfaceProvisionRelation;
 import org.palladiosimulator.retriever.mocore.surrogate.relation.InterfaceRequirementRelation;
-import org.palladiosimulator.retriever.mocore.transformation.SystemTransformer;
 
 import tools.mdsd.mocore.framework.transformation.TransformerTest;
 

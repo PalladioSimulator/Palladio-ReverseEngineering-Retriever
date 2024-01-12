@@ -8,8 +8,8 @@ import org.palladiosimulator.retriever.core.configuration.RetrieverBlackboardKey
 import org.palladiosimulator.retriever.core.service.Analyst;
 import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
 import org.palladiosimulator.retriever.extraction.engine.Discoverer;
-import org.palladiosimulator.retriever.extraction.engine.Rule;
 import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
+import org.palladiosimulator.retriever.extraction.engine.Rule;
 import org.palladiosimulator.retriever.mocore.workflow.MoCoReJob;
 import org.palladiosimulator.somox.ast2seff.jobs.Ast2SeffJob;
 

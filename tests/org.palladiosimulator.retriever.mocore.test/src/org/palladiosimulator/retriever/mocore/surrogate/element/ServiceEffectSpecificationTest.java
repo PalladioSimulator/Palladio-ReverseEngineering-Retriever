@@ -1,7 +1,6 @@
 package org.palladiosimulator.retriever.mocore.surrogate.element;
 
 import org.palladiosimulator.pcm.seff.ResourceDemandingSEFF;
-import org.palladiosimulator.retriever.mocore.surrogate.element.ServiceEffectSpecification;
 import org.palladiosimulator.retriever.mocore.utility.ElementFactory;
 
 import tools.mdsd.mocore.framework.surrogate.ElementTest;

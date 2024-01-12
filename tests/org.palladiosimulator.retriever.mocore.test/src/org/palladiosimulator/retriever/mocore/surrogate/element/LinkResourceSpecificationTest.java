@@ -1,7 +1,6 @@
 package org.palladiosimulator.retriever.mocore.surrogate.element;
 
 import org.palladiosimulator.pcm.resourceenvironment.CommunicationLinkResourceSpecification;
-import org.palladiosimulator.retriever.mocore.surrogate.element.LinkResourceSpecification;
 
 import tools.mdsd.mocore.framework.surrogate.ElementTest;
 

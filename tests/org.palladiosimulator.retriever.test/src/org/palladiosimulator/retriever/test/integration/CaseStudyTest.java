@@ -40,8 +40,8 @@ import org.palladiosimulator.pcm.system.System;
 import org.palladiosimulator.retriever.core.configuration.RetrieverConfigurationImpl;
 import org.palladiosimulator.retriever.core.workflow.RetrieverJob;
 import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
-import org.palladiosimulator.retriever.extraction.engine.Rule;
 import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
+import org.palladiosimulator.retriever.extraction.engine.Rule;
 import org.palladiosimulator.retriever.extraction.engine.ServiceConfiguration;
 
 import com.google.common.collect.Sets;

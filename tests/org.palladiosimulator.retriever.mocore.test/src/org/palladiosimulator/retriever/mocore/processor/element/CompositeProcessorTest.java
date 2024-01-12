@@ -1,6 +1,5 @@
 package org.palladiosimulator.retriever.mocore.processor.element;
 
-import org.palladiosimulator.retriever.mocore.processor.element.CompositeProcessor;
 import org.palladiosimulator.retriever.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.retriever.mocore.surrogate.element.Composite;
 

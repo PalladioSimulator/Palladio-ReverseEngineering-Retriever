@@ -13,7 +13,6 @@ import org.palladiosimulator.retriever.mocore.surrogate.element.Deployment;
 import org.palladiosimulator.retriever.mocore.surrogate.element.LinkResourceSpecification;
 import org.palladiosimulator.retriever.mocore.surrogate.relation.DeploymentDeploymentRelation;
 import org.palladiosimulator.retriever.mocore.surrogate.relation.LinkResourceSpecificationRelation;
-import org.palladiosimulator.retriever.mocore.transformation.ResourceEnvironmentTransformer;
 
 import tools.mdsd.mocore.framework.transformation.TransformerTest;
 

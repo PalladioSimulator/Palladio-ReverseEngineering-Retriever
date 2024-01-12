@@ -1,6 +1,5 @@
 package org.palladiosimulator.retriever.mocore.processor.relation;
 
-import org.palladiosimulator.retriever.mocore.processor.relation.LinkResourceSpecificationRelationProcessor;
 import org.palladiosimulator.retriever.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.retriever.mocore.surrogate.element.Deployment;
 import org.palladiosimulator.retriever.mocore.surrogate.element.LinkResourceSpecification;

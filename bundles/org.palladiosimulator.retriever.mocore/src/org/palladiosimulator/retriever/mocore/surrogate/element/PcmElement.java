@@ -2,9 +2,8 @@ package org.palladiosimulator.retriever.mocore.surrogate.element;
 
 import java.util.Objects;
 
-import tools.mdsd.mocore.framework.surrogate.Element;
-
 import de.uka.ipd.sdq.identifier.Identifier;
+import tools.mdsd.mocore.framework.surrogate.Element;
 
 public abstract class PcmElement<T extends Identifier> extends Element<T> {
     protected PcmElement(T value, boolean isPlaceholder) {
