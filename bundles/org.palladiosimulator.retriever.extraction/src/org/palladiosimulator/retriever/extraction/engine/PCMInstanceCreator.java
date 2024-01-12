@@ -31,7 +31,7 @@ import org.palladiosimulator.pcm.repository.OperationRequiredRole;
 import org.palladiosimulator.pcm.repository.ParameterModifier;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.seff.ResourceDemandingSEFF;
-import org.palladiosimulator.retriever.extraction.blackboard.RuleEngineBlackboard;
+import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
 import org.palladiosimulator.retriever.extraction.commonalities.Component;
 import org.palladiosimulator.retriever.extraction.commonalities.Composite;
 import org.palladiosimulator.retriever.extraction.commonalities.Operation;
@@ -43,12 +43,12 @@ import org.palladiosimulator.retriever.extraction.commonalities.PCMDetectionResu
 public class PCMInstanceCreator {
     private static final Logger LOG = Logger.getLogger(PCMInstanceCreator.class);
 
-    private static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.java";
+    private static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverers.java";
 
     private static final String REPO_NAME = "Software Architecture Repository";
     private final FluentRepositoryFactory create;
     private final Repo repository;
-    private final RuleEngineBlackboard blackboard;
+    private final RetrieverBlackboard blackboard;
     private final Map<String, CompositeDataTypeCreator> existingDataTypesMap;
     private final Map<String, DataType> existingCollectionDataTypes;
     private final Map<Component, CompositeComponentCreator> componentCompositeCreators;
@@ -56,7 +56,7 @@ public class PCMInstanceCreator {
     private final Map<Composite, CompositeComponentCreator> compositeCreators;
     private final Map<OperationInterface, org.palladiosimulator.pcm.repository.OperationInterface> pcmInterfaces;
 
-    public PCMInstanceCreator(RuleEngineBlackboard blackboard) {
+    public PCMInstanceCreator(RetrieverBlackboard blackboard) {
         existingDataTypesMap = new HashMap<>();
         existingCollectionDataTypes = new HashMap<>();
         this.componentCompositeCreators = new HashMap<>();

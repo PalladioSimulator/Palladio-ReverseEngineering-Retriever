@@ -20,14 +20,14 @@ import org.palladiosimulator.generator.fluent.system.api.ISystem;
 import org.palladiosimulator.generator.fluent.system.factory.FluentSystemFactory;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
-import org.palladiosimulator.retriever.extraction.blackboard.RuleEngineBlackboard;
+import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
 import org.palladiosimulator.retriever.extraction.engine.DockerParser;
 import org.palladiosimulator.retriever.extraction.engine.PCMInstanceCreator;
 import org.palladiosimulator.retriever.extraction.engine.Rule;
-import org.palladiosimulator.retriever.extraction.engine.RuleEngineConfiguration;
+import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
 
 /**
- * The rule engine identifies PCM elements like components and interfaces inside source code via
+ * Retriever identifies PCM elements like components and interfaces inside source code via
  * rules specified by a user before. The output of this procedure is a
  * SourceCodeDecoratorRepositoryModel and a PCMRepository model. For this, the engine needs a
  * project directory, an output directory, a Java model and a IRule file.
@@ -35,12 +35,12 @@ import org.palladiosimulator.retriever.extraction.engine.RuleEngineConfiguration
  * To use the engine, invoke executeWith(projectPath, outPath, model, rules). To simplify the use,
  * the engine provides the public methods loadRules() and loadModel().
  */
-public class RuleEngineAnalyzer {
-    private final RuleEngineBlackboard blackboard;
+public class Retriever {
+    private final RetrieverBlackboard blackboard;
 
     private static Repository pcm;
 
-    public RuleEngineAnalyzer(RuleEngineBlackboard blackboard) {
+    public Retriever(RetrieverBlackboard blackboard) {
         this.blackboard = blackboard;
     }
 
@@ -53,22 +53,22 @@ public class RuleEngineAnalyzer {
         return pcm;
     }
 
-    public void analyze(RuleEngineConfiguration ruleEngineConfiguration, IProgressMonitor progressMonitor)
-            throws RuleEngineException {
+    public void analyze(RetrieverConfiguration configuration, IProgressMonitor progressMonitor)
+            throws RetrieverException {
 
         try {
-            final URI in = CommonPlugin.asLocalURI(ruleEngineConfiguration.getInputFolder());
+            final URI in = CommonPlugin.asLocalURI(configuration.getInputFolder());
             final Path inPath = Paths.get(in.devicePath());
 
-            final URI out = CommonPlugin.asLocalURI(ruleEngineConfiguration.getOutputFolder());
+            final URI out = CommonPlugin.asLocalURI(configuration.getOutputFolder());
             final Path outPath = Paths.get(out.devicePath());
 
-            final Set<Rule> rules = ruleEngineConfiguration.getConfig(Rule.class)
+            final Set<Rule> rules = configuration.getConfig(Rule.class)
                 .getSelected();
 
             executeWith(inPath, outPath, rules, blackboard);
         } catch (Exception e) {
-            throw new RuleEngineException("Analysis did not complete successfully", e);
+            throw new RetrieverException("Analysis did not complete successfully", e);
         }
     }
 
@@ -98,9 +98,9 @@ public class RuleEngineAnalyzer {
      * @param rules
      *            the rules
      * @param blackboard
-     *            the rule engine blackboard, containing (among other things) the discovered files
+     *            the Retriever blackboard, containing (among other things) the discovered files
      */
-    private static void executeWith(Path projectPath, Path outPath, Set<Rule> rules, RuleEngineBlackboard blackboard) {
+    private static void executeWith(Path projectPath, Path outPath, Set<Rule> rules, RetrieverBlackboard blackboard) {
         // Creates a PCM repository with systems, components, interfaces and roles
 
         // Parses the docker-compose file to get a mapping between microservice names and
@@ -143,7 +143,7 @@ public class RuleEngineAnalyzer {
         }
 
         // Persist the repository at ./pcm.repository
-        blackboard.addPartition(RuleEngineBlackboard.KEY_REPOSITORY, pcm);
+        blackboard.addPartition(RetrieverBlackboard.KEY_REPOSITORY, pcm);
         ModelSaver.saveRepository(pcm, outPath.toString(), "pcm");
     }
 

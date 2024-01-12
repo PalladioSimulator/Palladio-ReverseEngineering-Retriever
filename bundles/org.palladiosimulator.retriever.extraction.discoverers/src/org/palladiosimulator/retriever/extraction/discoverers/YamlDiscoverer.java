@@ -16,9 +16,10 @@ import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.CommonPlugin;
-import org.palladiosimulator.retriever.extraction.blackboard.RuleEngineBlackboard;
+import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
 import org.palladiosimulator.retriever.extraction.discoverers.wrappers.YamlMapper;
-import org.palladiosimulator.retriever.extraction.engine.RuleEngineConfiguration;
+import org.palladiosimulator.retriever.extraction.engine.Discoverer;
+import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 
@@ -30,12 +31,12 @@ import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 public class YamlDiscoverer implements Discoverer {
 
-    public static final String DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.yaml";
+    public static final String DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverers.yaml";
     public static final String MAPPER_PARTITION_KEY = DISCOVERER_ID + ".mappers";
 
     @Override
-    public IBlackboardInteractingJob<RuleEngineBlackboard> create(final RuleEngineConfiguration configuration,
-            final RuleEngineBlackboard blackboard) {
+    public IBlackboardInteractingJob<RetrieverBlackboard> create(final RetrieverConfiguration configuration,
+            final RetrieverBlackboard blackboard) {
         return new AbstractBlackboardInteractingJob<>() {
 
             @Override

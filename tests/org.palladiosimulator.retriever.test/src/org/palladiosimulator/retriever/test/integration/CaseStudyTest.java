@@ -37,11 +37,11 @@ import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.resourceenvironment.ResourceEnvironment;
 import org.palladiosimulator.pcm.system.System;
-import org.palladiosimulator.retriever.core.configuration.RuleEngineConfigurationImpl;
-import org.palladiosimulator.retriever.core.workflow.RuleEngineJob;
-import org.palladiosimulator.retriever.extraction.blackboard.RuleEngineBlackboard;
+import org.palladiosimulator.retriever.core.configuration.RetrieverConfigurationImpl;
+import org.palladiosimulator.retriever.core.workflow.RetrieverJob;
+import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
 import org.palladiosimulator.retriever.extraction.engine.Rule;
-import org.palladiosimulator.retriever.extraction.engine.RuleEngineConfiguration;
+import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
 import org.palladiosimulator.retriever.extraction.engine.ServiceConfiguration;
 
 import com.google.common.collect.Sets;
@@ -50,7 +50,7 @@ import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
 import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 @TestInstance(Lifecycle.PER_CLASS)
-abstract class RuleEngineTest {
+abstract class CaseStudyTest {
     public static final URI TEST_DIR = CommonPlugin
         .asLocalURI(URI.createFileURI(URI.decode(new File("res").getAbsolutePath())));
 
@@ -65,8 +65,8 @@ abstract class RuleEngineTest {
     // Seperate instances for every child test
     private final Logger logger = Logger.getLogger(this.getClass());
 
-    private final RuleEngineConfiguration config = new RuleEngineConfigurationImpl();
-    private final RuleEngineJob ruleEngine;
+    private final RetrieverConfiguration config = new RetrieverConfigurationImpl();
+    private final RetrieverJob retrieverJob;
     private final boolean executedSuccessfully;
     private Repository repository;
     private System system;
@@ -75,15 +75,14 @@ abstract class RuleEngineTest {
     private final Set<Rule> rules;
 
     /**
-     * Tests the basic functionality of the RuleEngineAnalyzer. Requires it to execute without an
-     * exception and produce an output file.
+     * Sets up a generic case study test for Retriever.
      *
      * @param projectDirectory
      *            the name of the project directory that will be analyzed
      * @param rules
      *            the rules to execute
      */
-    protected RuleEngineTest(String projectDirectory, Rule... rules) {
+    protected CaseStudyTest(String projectDirectory, Rule... rules) {
         this.rules = Set.of(rules);
 
         outDir = TEST_DIR.appendSegment("out")
@@ -98,11 +97,11 @@ abstract class RuleEngineTest {
             ruleConfig.select(rule);
         }
 
-        ruleEngine = new RuleEngineJob(config);
+        retrieverJob = new RetrieverJob(config);
 
         boolean executedSuccessfully;
         try {
-            ruleEngine.execute(new NullProgressMonitor());
+            retrieverJob.execute(new NullProgressMonitor());
             executedSuccessfully = true;
         } catch (JobFailedException | UserCanceledException e) {
             logger.error(e);
@@ -114,7 +113,7 @@ abstract class RuleEngineTest {
     // Assertion utilities
 
     private void assertSuccessfulExecution() {
-        assertTrue(executedSuccessfully, "Failed to run RuleEngine!");
+        assertTrue(executedSuccessfully, "Failed to run Retriever!");
     }
 
     public void assertMaxParameterCount(int expectedMaxParameterCount, String interfaceName, String operationName) {
@@ -263,7 +262,7 @@ abstract class RuleEngineTest {
 
     // Getters
 
-    public RuleEngineConfiguration getConfig() {
+    public RetrieverConfiguration getConfig() {
         assertSuccessfulExecution();
         return config;
     }
@@ -334,9 +333,9 @@ abstract class RuleEngineTest {
             .reduce(new HashSet<>(), Sets::union);
     }
 
-    public RuleEngineBlackboard getBlackboard() {
+    public RetrieverBlackboard getBlackboard() {
         assertSuccessfulExecution();
-        return ruleEngine.getBlackboard();
+        return retrieverJob.getBlackboard();
     }
 
     public Set<Rule> getRules() {
@@ -354,14 +353,14 @@ abstract class RuleEngineTest {
     // Resource loading
 
     protected enum Artifacts {
-        RULEENGINE, MOCORE,
+        RETRIEVER, MOCORE,
     }
 
     protected void loadArtifacts(Artifacts artifacts) {
         assertSuccessfulExecution();
 
         switch (artifacts) {
-        case RULEENGINE:
+        case RETRIEVER:
             repository = ModelLoader.loadRepository(outDir.appendSegment("pcm.repository")
                 .toString());
             system = null;
@@ -390,10 +389,10 @@ abstract class RuleEngineTest {
 
     // Template methods
 
-    void testRuleEngineRepository() {
+    void testRetrieverRepository() {
     }
 
-    void testRuleEngineSeff() {
+    void testRetrieverSeff() {
     }
 
     void testMoCoReRepository() {
@@ -414,15 +413,15 @@ abstract class RuleEngineTest {
     // Tests
 
     @Test
-    void ruleEngineRepository() {
-        loadArtifacts(Artifacts.RULEENGINE);
-        testRuleEngineRepository();
+    void retrieverRepository() {
+        loadArtifacts(Artifacts.RETRIEVER);
+        testRetrieverRepository();
     }
 
     @Test
-    void ruleEngineSeff() {
-        loadArtifacts(Artifacts.RULEENGINE);
-        testRuleEngineSeff();
+    void retrieverSeff() {
+        loadArtifacts(Artifacts.RETRIEVER);
+        testRetrieverSeff();
     }
 
     @Test

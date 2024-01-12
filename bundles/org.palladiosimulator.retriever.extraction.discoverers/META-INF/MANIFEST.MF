@@ -16,4 +16,5 @@ Require-Bundle: org.palladiosimulator.pcm,
  com.github.jsqlparser,
  org.yaml.snakeyaml,
  org.json,
- org.apache.commons.csv
+ org.apache.commons.csv,
+ org.palladiosimulator.retriever.core

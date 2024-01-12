@@ -1,11 +1,11 @@
-# A GitHub Action that allows to run the RuleEngine on arbitrary GitHub repositories.
+# A GitHub Action that allows to run Retriever on arbitrary GitHub repositories.
 
-name: "Run RuleEngine"
+name: "Run Retriever"
 description: |
   'Reverse-engineers a project''s source into a Palladio Component Model.
-  Uploads the PCM as an artifact called `ruleengine`.
+  Uploads the PCM as an artifact called `retriever`.
   Within that artifact, the PCM is located at the input `source_path`,
-  e.g. for `source_path=MyProject/Repository` the output is `[ruleengine]/MyProject/Repository/repository.pcm`.'
+  e.g. for `source_path=MyProject/Repository` the output is `[retriever]/MyProject/Repository/repository.pcm`.'
 
 inputs:
   source_path:
@@ -15,7 +15,7 @@ inputs:
   rules:
     description: "The rules to reverse-engineer with, as a comma-separated list"
     required: true
-    default: "SPRING,MAVEN"
+    default: "org.palladiosimulator.retriever.extraction.rules.SpringRules,org.palladiosimulator.retriever.extraction.rules.MavenRules"
 
 runs:
   using: "composite"
@@ -31,12 +31,12 @@ runs:
       run: |
         TMP_DIR=$(mktemp -d)
         echo "tmp_dir=$TMP_DIR" >> $GITHUB_ENV
-        mkdir $TMP_DIR/ruleengine_out
+        mkdir $TMP_DIR/retriever_out
 
     - name: Gather Git Repository Info
       shell: bash
       run: |
-        GIT_INFO_FILE=${{ env.tmp_dir }}/ruleengine_out/git_info.txt
+        GIT_INFO_FILE=${{ env.tmp_dir }}/retriever_out/git_info.txt
         echo "GIT_INFO_FILE=$GIT_INFO_FILE" >> $GITHUB_ENV
         {
           echo "Git repository information:"
@@ -52,9 +52,9 @@ runs:
     - name: Gather Specific System Information with Neofetch
       shell: bash
       run: |
-        SYSTEM_INFO_FILE=${{ env.tmp_dir }}/ruleengine_out/system_info.txt
+        SYSTEM_INFO_FILE=${{ env.tmp_dir }}/retriever_out/system_info.txt
         echo "SYSTEM_INFO_FILE=$SYSTEM_INFO_FILE" >> $GITHUB_ENV
-        echo "SYSTEM_INFO_FILE=${{ env.tmp_dir }}/ruleengine_out/system_info.txt" >> $GITHUB_ENV
+        echo "SYSTEM_INFO_FILE=${{ env.tmp_dir }}/retriever_out/system_info.txt" >> $GITHUB_ENV
         {
           echo "system information:"
           neofetch os distro kernel cpu gpu memory --stdout
@@ -68,7 +68,7 @@ runs:
     - name: Run cloc analysis
       shell: bash
       run: |
-        CLOC_INFO_FILE=${{ env.tmp_dir }}/ruleengine_out/cloc.txt
+        CLOC_INFO_FILE=${{ env.tmp_dir }}/retriever_out/cloc.txt
         echo "CLOC_INFO_FILE=$CLOC_INFO_FILE" >> $GITHUB_ENV
         {
           echo "cloc analysis output:"
@@ -85,47 +85,47 @@ runs:
         ACTION_VERSION=$(echo ${{ github.action_path }} | cut -d / -f 8- -)
         echo "action_version=$ACTION_VERSION" >>  $GITHUB_ENV
 
-    - name: Download latest RuleEngine
+    - name: Download latest Retriever
       if: env.action_version == 'master'
       shell: bash
       run: |
-        curl -s ${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/releases/latest \
+        curl -s ${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/latest \
           | grep -E 'browser_download_url' \
           | grep linux \
           | grep x86_64 \
           | grep -Eo 'https://[^\"]*' \
-          | xargs wget -O "${{ env.tmp_dir }}/ruleengine.zip"
+          | xargs wget -O "${{ env.tmp_dir }}/retriever.zip"
 
-    - name: Download RuleEngine
+    - name: Download Retriever
       if: env.action_version != 'master'
       shell: bash
-      # Downloads the RuleEngine with the same version that this action has
+      # Downloads Retriever with the same version that this action has
       # (not necessarily the most recent one!).
       run: |
-        curl -s ${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-RuleEngine/releases/tags/${{ env.action_version }} \
+        curl -s ${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/tags/${{ env.action_version }} \
           | grep -E 'browser_download_url' \
           | grep linux \
           | grep x86_64 \
           | grep -Eo 'https://[^\"]*' \
-          | xargs wget -O "${{ env.tmp_dir }}/ruleengine.zip"
+          | xargs wget -O "${{ env.tmp_dir }}/retriever.zip"
 
-    - name: Extract RuleEngine
+    - name: Extract Retriever
       shell: bash
       working-directory: ${{ env.tmp_dir }}
-      run: unzip ruleengine.zip -d ruleengine
+      run: unzip retriever.zip -d retriever
 
-    - name: Execute RuleEngine
+    - name: Execute Retriever
       shell: bash
-      working-directory: ${{ env.tmp_dir }}/ruleengine
+      working-directory: ${{ env.tmp_dir }}/retriever
       env:
-        RULEENGINE_COMMAND: './eclipse -i "${{ github.workspace }}/${{ inputs.source_path }}" -o "${{ env.tmp_dir }}/ruleengine_out" -r "${{ inputs.rules }}"'
+        RETRIEVER_COMMAND: './eclipse -i "${{ github.workspace }}/${{ inputs.source_path }}" -o "${{ env.tmp_dir }}/retriever_out" -r "${{ inputs.rules }}"'
       run: |
-        TIMING_INFO_FILE=${{ env.tmp_dir }}/ruleengine_out/timing.txt
+        TIMING_INFO_FILE=${{ env.tmp_dir }}/retriever_out/timing.txt
         echo "TIMING_INFO_FILE=$TIMING_INFO_FILE" >> $GITHUB_ENV
-        /usr/bin/time -p -o "$TIMING_INFO_FILE" $RULEENGINE_COMMAND
+        /usr/bin/time -p -o "$TIMING_INFO_FILE" $RETRIEVER_COMMAND
         # Read and reformat the timing information
         {
-          echo "RuleEngine execution time:"
+          echo "Retriever execution time:"
           while IFS= read -r line; do
             case "$line" in
               real*) echo "Total Elapsed Time (seconds): ${line#* }" ;;
@@ -147,7 +147,7 @@ runs:
           cat $CLOC_INFO_FILE
           echo
           cat $TIMING_INFO_FILE
-        } > ${{ env.tmp_dir }}/ruleengine_out/report.txt
+        } > ${{ env.tmp_dir }}/retriever_out/report.txt
         # Delete the original files
         rm -f $GIT_INFO_FILE $SYSTEM_INFO_FILE $CLOC_INFO_FILE $TIMING_INFO_FILE
 
@@ -157,15 +157,15 @@ runs:
       working-directory: ${{ env.tmp_dir }}
       run: |
         mkdir -p tmp/${{ inputs.source_path }}
-        mv ruleengine_out/* tmp/${{ inputs.source_path }}
-        mv tmp/* ruleengine_out
+        mv retriever_out/* tmp/${{ inputs.source_path }}
+        mv tmp/* retriever_out
         rmdir tmp
 
     - name: Upload analysis results
       uses: actions/upload-artifact@v3
       with:
-        name: ruleengine
-        path: ${{ env.tmp_dir }}/ruleengine_out
+        name: retriever
+        path: ${{ env.tmp_dir }}/retriever_out
 
     - name: Prepare Eclipse logs for upload
       if: failure()
@@ -173,7 +173,7 @@ runs:
       working-directory: ${{ env.tmp_dir }}
       run: |
         mkdir -p eclipse_logs/${{ inputs.source_path }}
-        mv ruleengine/configuration/*.log ruleengine/workspace/.metadata/.log eclipse_logs/${{ inputs.source_path }}
+        mv retriever/configuration/*.log retriever/workspace/.metadata/.log eclipse_logs/${{ inputs.source_path }}
 
     - name: Upload Eclipse logs
       if: failure()

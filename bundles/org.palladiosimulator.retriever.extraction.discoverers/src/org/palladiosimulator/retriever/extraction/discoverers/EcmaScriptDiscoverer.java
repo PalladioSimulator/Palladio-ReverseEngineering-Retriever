@@ -15,8 +15,9 @@ import org.eclipse.emf.common.CommonPlugin;
 import org.openjdk.nashorn.api.scripting.NashornException;
 import org.openjdk.nashorn.api.tree.CompilationUnitTree;
 import org.openjdk.nashorn.api.tree.Parser;
-import org.palladiosimulator.retriever.extraction.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.retriever.extraction.engine.RuleEngineConfiguration;
+import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
+import org.palladiosimulator.retriever.extraction.engine.Discoverer;
+import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;
@@ -26,11 +27,11 @@ import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
 public class EcmaScriptDiscoverer implements Discoverer {
 
-    private static final String DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.ecmascript";
+    private static final String DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverers.ecmascript";
 
     @Override
-    public IBlackboardInteractingJob<RuleEngineBlackboard> create(final RuleEngineConfiguration configuration,
-            final RuleEngineBlackboard blackboard) {
+    public IBlackboardInteractingJob<RetrieverBlackboard> create(final RetrieverConfiguration configuration,
+            final RetrieverBlackboard blackboard) {
         return new AbstractBlackboardInteractingJob<>() {
 
             @Override

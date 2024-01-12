@@ -1,4 +1,4 @@
-package org.palladiosimulator.retriever.extraction.discoverers;
+package org.palladiosimulator.retriever.core.service;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -8,6 +8,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.Platform;
+import org.palladiosimulator.retriever.extraction.engine.Discoverer;
 import org.palladiosimulator.retriever.extraction.engine.ServiceCollection;
 
 public class DiscovererCollection implements ServiceCollection<Discoverer> {

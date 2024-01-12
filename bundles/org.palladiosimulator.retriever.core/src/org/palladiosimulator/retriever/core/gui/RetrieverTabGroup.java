@@ -9,13 +9,13 @@ import org.eclipse.debug.ui.ILaunchConfigurationTab;
 
 import de.uka.ipd.sdq.workflow.launchconfig.tabs.DebugEnabledCommonTab;
 
-public class RuleEngineTabGroup extends AbstractLaunchConfigurationTabGroup {
+public class RetrieverTabGroup extends AbstractLaunchConfigurationTabGroup {
 
     @Override
     public void createTabs(final ILaunchConfigurationDialog dialog, final String mode) {
         final List<ILaunchConfigurationTab> tabs = new ArrayList<>();
 
-        tabs.add(new RuleEngineIoTab());
+        tabs.add(new RetrieverTab());
         tabs.add(new DebugEnabledCommonTab());
 
         setTabs(tabs.toArray(new ILaunchConfigurationTab[0]));

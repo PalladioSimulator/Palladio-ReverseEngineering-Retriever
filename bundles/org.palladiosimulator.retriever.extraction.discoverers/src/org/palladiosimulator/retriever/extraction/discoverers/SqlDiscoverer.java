@@ -13,8 +13,9 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.CommonPlugin;
-import org.palladiosimulator.retriever.extraction.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.retriever.extraction.engine.RuleEngineConfiguration;
+import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
+import org.palladiosimulator.retriever.extraction.engine.Discoverer;
+import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;
@@ -27,11 +28,11 @@ import net.sf.jsqlparser.statement.Statement;
 
 public class SqlDiscoverer implements Discoverer {
 
-    public static final String DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.sql";
+    public static final String DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverers.sql";
 
     @Override
-    public IBlackboardInteractingJob<RuleEngineBlackboard> create(final RuleEngineConfiguration configuration,
-            final RuleEngineBlackboard blackboard) {
+    public IBlackboardInteractingJob<RetrieverBlackboard> create(final RetrieverConfiguration configuration,
+            final RetrieverBlackboard blackboard) {
         return new AbstractBlackboardInteractingJob<>() {
 
             @Override

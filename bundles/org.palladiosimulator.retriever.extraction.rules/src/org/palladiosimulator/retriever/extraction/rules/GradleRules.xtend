@@ -1,19 +1,19 @@
 package org.palladiosimulator.retriever.extraction.rules
 
-import org.palladiosimulator.retriever.extraction.blackboard.RuleEngineBlackboard
 import java.nio.file.Path;
 import java.util.HashSet
 import org.eclipse.jdt.core.dom.CompilationUnit
 import java.util.Set
 import org.palladiosimulator.retriever.extraction.engine.Rule
+import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard
 
 class GradleRules implements Rule {
 
 	static final String RULE_ID = "org.palladiosimulator.retriever.extraction.rules.gradle";
-	static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.java";
+	static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverers.java";
 	static final String GRADLE_FILE_NAME = "build.gradle";
 
-	override processRules(RuleEngineBlackboard blackboard, Path path) {
+	override processRules(RetrieverBlackboard blackboard, Path path) {
 		if (path !== null && path.fileName.toString().equals(GRADLE_FILE_NAME)) {
 
 			// Add all file system children as associated compilation units

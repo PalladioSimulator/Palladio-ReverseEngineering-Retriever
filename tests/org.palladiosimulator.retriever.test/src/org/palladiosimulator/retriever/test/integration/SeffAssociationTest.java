@@ -13,11 +13,11 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.pcm.seff.ServiceEffectSpecification;
-import org.palladiosimulator.retriever.extraction.blackboard.RuleEngineBlackboard;
+import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
 import org.palladiosimulator.retriever.extraction.discoverers.JavaDiscoverer;
 import org.palladiosimulator.retriever.extraction.rules.SpringRules;
 
-public class SeffAssociationTest extends RuleEngineTest {
+public class SeffAssociationTest extends CaseStudyTest {
 
     SeffAssociationTest() {
         super("SpringProject", new SpringRules());
@@ -28,7 +28,7 @@ public class SeffAssociationTest extends RuleEngineTest {
      */
     @Test
     void allAssociationsReferToMethods() {
-        RuleEngineBlackboard blackboard = getBlackboard();
+        RetrieverBlackboard blackboard = getBlackboard();
         Map<ASTNode, ServiceEffectSpecification> associations = blackboard.getSeffAssociations();
 
         for (Map.Entry<ASTNode, ServiceEffectSpecification> association : associations.entrySet()) {
@@ -46,8 +46,8 @@ public class SeffAssociationTest extends RuleEngineTest {
     }
 
     @Override
-    void testRuleEngineSeff() {
-        RuleEngineBlackboard blackboard = getBlackboard();
+    void testRetrieverSeff() {
+        RetrieverBlackboard blackboard = getBlackboard();
 
         @SuppressWarnings("unchecked")
         MethodDeclaration methodDeclaration = blackboard

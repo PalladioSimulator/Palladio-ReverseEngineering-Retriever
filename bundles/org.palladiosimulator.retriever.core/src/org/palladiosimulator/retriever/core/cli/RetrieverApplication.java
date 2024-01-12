@@ -16,16 +16,16 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
-import org.palladiosimulator.retriever.core.configuration.RuleEngineConfigurationImpl;
+import org.palladiosimulator.retriever.core.configuration.RetrieverConfigurationImpl;
+import org.palladiosimulator.retriever.core.service.DiscovererCollection;
 import org.palladiosimulator.retriever.core.service.RuleCollection;
-import org.palladiosimulator.retriever.core.workflow.RuleEngineJob;
-import org.palladiosimulator.retriever.extraction.discoverers.Discoverer;
-import org.palladiosimulator.retriever.extraction.discoverers.DiscovererCollection;
+import org.palladiosimulator.retriever.core.workflow.RetrieverJob;
+import org.palladiosimulator.retriever.extraction.engine.Discoverer;
 import org.palladiosimulator.retriever.extraction.engine.Rule;
-import org.palladiosimulator.retriever.extraction.engine.RuleEngineConfiguration;
+import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
 import org.palladiosimulator.retriever.extraction.engine.ServiceConfiguration;
 
-public class RuleEngineApplication implements IApplication {
+public class RetrieverApplication implements IApplication {
 
     private static Options createOptions(Set<String> availableRuleIDs) {
         final Options options = new Options();
@@ -77,7 +77,7 @@ public class RuleEngineApplication implements IApplication {
             printHelp(options);
         }
 
-        RuleEngineConfiguration configuration = new RuleEngineConfigurationImpl();
+        RetrieverConfiguration configuration = new RetrieverConfigurationImpl();
 
         try {
             configuration.setInputFolder(URI.createFileURI(URI.decode(Paths.get(cmd.getOptionValue("i"))
@@ -123,7 +123,7 @@ public class RuleEngineApplication implements IApplication {
             ruleConfig.select(rule);
         }
 
-        new RuleEngineJob(configuration).execute(new NullProgressMonitor());
+        new RetrieverJob(configuration).execute(new NullProgressMonitor());
 
         return 0;
     }

@@ -11,24 +11,24 @@ import java.util.Set
 import java.util.function.Function
 import org.apache.log4j.Logger
 import org.jdom2.Document
-import org.palladiosimulator.retriever.extraction.blackboard.RuleEngineBlackboard
 import org.palladiosimulator.retriever.extraction.engine.Rule
 import org.palladiosimulator.retriever.extraction.rules.util.SpringHelper
 import org.palladiosimulator.retriever.extraction.rules.data.GatewayRoute
+import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard
 
 class SpringZuulRules implements Rule {
 	static final Logger LOG = Logger.getLogger(SpringZuulRules)
 
 	public static final String RULE_ID = "org.palladiosimulator.retriever.extraction.rules.spring.zuul"
-	public static final String YAML_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.yaml"
+	public static final String YAML_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverers.yaml"
 	public static final String YAML_MAPPERS_KEY = YAML_DISCOVERER_ID + ".mappers"
-	public static final String XML_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.xml"
-	public static final String PROPERTIES_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.properties"
+	public static final String XML_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverers.xml"
+	public static final String PROPERTIES_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverers.properties"
 	public static final String ECMASCRIPT_RULE_ID = "org.palladiosimulator.retriever.extraction.rules.ecmascript"
 	public static final String ECMASCRIPT_ROUTES_ID = "org.palladiosimulator.retriever.extraction.rules.ecmascript.routes"
 	public static final String ECMASCRIPT_HOSTNAMES_ID = "org.palladiosimulator.retriever.extraction.rules.ecmascript.hostnames"
 
-	override processRules(RuleEngineBlackboard blackboard, Path path) {
+	override processRules(RetrieverBlackboard blackboard, Path path) {
 		val rawYamls = blackboard.getPartition(YAML_DISCOVERER_ID) as Map<Path, Iterable<Map<String, Object>>>
 		val yamlMappers = blackboard.getPartition(YAML_MAPPERS_KEY) as Map<Path, Function<String, Optional<String>>>
 		val poms = blackboard.getDiscoveredFiles(XML_DISCOVERER_ID, typeof(Document))

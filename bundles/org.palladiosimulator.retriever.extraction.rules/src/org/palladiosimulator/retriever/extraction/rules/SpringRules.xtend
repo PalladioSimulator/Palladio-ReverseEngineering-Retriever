@@ -1,7 +1,6 @@
 package org.palladiosimulator.retriever.extraction.rules
 
 import static org.palladiosimulator.retriever.extraction.engine.RuleHelper.*
-import org.palladiosimulator.retriever.extraction.blackboard.RuleEngineBlackboard
 import java.nio.file.Path
 import org.eclipse.jdt.core.dom.CompilationUnit
 import java.util.Map;
@@ -21,20 +20,21 @@ import java.util.Set
 import org.palladiosimulator.retriever.extraction.engine.Rule
 import org.palladiosimulator.retriever.extraction.rules.util.SpringHelper
 import org.palladiosimulator.retriever.extraction.rules.util.RESTHelper
+import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard
 
 class SpringRules implements Rule {
 	static final Logger LOG = Logger.getLogger(SpringRules)
 
 	public static final String RULE_ID = "org.palladiosimulator.retriever.extraction.rules.spring"
-	public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.java"
-	public static final String YAML_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.yaml"
+	public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverers.java"
+	public static final String YAML_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverers.yaml"
 	public static final String YAML_MAPPERS_KEY = YAML_DISCOVERER_ID + ".mappers"
-	public static final String XML_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.xml"
-	public static final String PROPERTIES_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.properties"
+	public static final String XML_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverers.xml"
+	public static final String PROPERTIES_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverers.properties"
 	public static final String ZUUL_RULE_ID = "org.palladiosimulator.retriever.extraction.rules.spring.zuul";
 	public static final String CLOUD_GATEWAY_RULE_ID = "org.palladiosimulator.retriever.extraction.rules.spring.cloudgateway";
 
-	override processRules(RuleEngineBlackboard blackboard, Path path) {
+	override processRules(RetrieverBlackboard blackboard, Path path) {
 		val unit = blackboard.getDiscoveredFiles(JAVA_DISCOVERER_ID, typeof(CompilationUnit)).get(path)
 		if(unit === null) return;
 
@@ -129,7 +129,7 @@ class SpringRules implements Rule {
 		return result;
 	}
 
-	def processRuleForCompUnit(RuleEngineBlackboard blackboard, CompilationUnit unit, String applicationName,
+	def processRuleForCompUnit(RetrieverBlackboard blackboard, CompilationUnit unit, String applicationName,
 		String contextPath, Map<String, String> contextVariables) {
 		val pcmDetector = blackboard.getPCMDetector
 		if(pcmDetector === null) return;

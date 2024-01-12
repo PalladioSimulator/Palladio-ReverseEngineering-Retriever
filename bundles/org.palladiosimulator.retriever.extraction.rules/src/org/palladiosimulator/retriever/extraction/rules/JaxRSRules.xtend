@@ -1,6 +1,5 @@
 package org.palladiosimulator.retriever.extraction.rules
 
-import org.palladiosimulator.retriever.extraction.blackboard.RuleEngineBlackboard
 import java.nio.file.Path
 import org.eclipse.jdt.core.dom.CompilationUnit
 import static org.palladiosimulator.retriever.extraction.engine.RuleHelper.*
@@ -12,18 +11,19 @@ import java.util.Optional
 import org.palladiosimulator.retriever.extraction.rules.util.RESTHelper
 import java.util.Map
 import org.palladiosimulator.retriever.extraction.commonalities.HTTPMethod
+import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard
 
 class JaxRSRules implements Rule {
 
 	public static final String RULE_ID = "org.palladiosimulator.retriever.extraction.rules.jax_rs"
 
-	public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.java"
+	public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverers.java"
 
 	static final Map<String, HTTPMethod> SERVLET_METHODS = Map.of("doGet", HTTPMethod.GET, "doPost", HTTPMethod.POST,
 		"doDelete", HTTPMethod.DELETE, "doPut", HTTPMethod.PUT, "handleGETRequest", HTTPMethod.GET, "handlePOSTRequest",
 		HTTPMethod.POST, "handleDELETERequest", HTTPMethod.DELETE, "handlePUTRequest", HTTPMethod.PUT);
 
-	override processRules(RuleEngineBlackboard blackboard, Path path) {
+	override processRules(RetrieverBlackboard blackboard, Path path) {
 		val unit = blackboard.getDiscoveredFiles(JAVA_DISCOVERER_ID, typeof(CompilationUnit)).get(path)
 
 		if(unit === null) return;
@@ -31,7 +31,7 @@ class JaxRSRules implements Rule {
 		processRuleForCompUnit(blackboard, unit)
 	}
 
-	def processRuleForCompUnit(RuleEngineBlackboard blackboard, CompilationUnit unit) {
+	def processRuleForCompUnit(RetrieverBlackboard blackboard, CompilationUnit unit) {
 		val pcmDetector = blackboard.getPCMDetector()
 		if (pcmDetector === null) {
 			return
@@ -98,7 +98,7 @@ class JaxRSRules implements Rule {
 		}
 	}
 
-	def detectDefault(RuleEngineBlackboard blackboard, CompilationUnit unit) {
+	def detectDefault(RetrieverBlackboard blackboard, CompilationUnit unit) {
 		val pcmDetector = blackboard.getPCMDetector()
 		val identifier = new CompUnitOrName(unit)
 

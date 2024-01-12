@@ -4,7 +4,7 @@ import org.eclipse.emf.common.util.URI;
 
 import de.uka.ipd.sdq.workflow.extension.ExtendableJobConfiguration;
 
-public interface RuleEngineConfiguration extends ExtendableJobConfiguration {
+public interface RetrieverConfiguration extends ExtendableJobConfiguration {
 
     URI getInputFolder();
 

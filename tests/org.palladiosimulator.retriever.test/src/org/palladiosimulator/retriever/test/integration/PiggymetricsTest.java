@@ -4,14 +4,14 @@ import org.junit.jupiter.api.Disabled;
 import org.palladiosimulator.retriever.extraction.rules.SpringRules;
 
 @Disabled("TODO: Currently broken")
-public class PiggymetricsTest extends RuleEngineTest {
+public class PiggymetricsTest extends CaseStudyTest {
 
     protected PiggymetricsTest() {
         super("external/piggymetrics-spring.version.2.0.3", new SpringRules());
     }
 
     @Override
-    void testRuleEngineRepository() {
+    void testRetrieverRepository() {
         // TODO: Temporarily disabled due to rule changes.
         if (getClass() != null)
             return;

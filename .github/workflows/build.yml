@@ -3,7 +3,7 @@ name: Build Pipeline
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
-  Palladio-ReverseEngineering-SoMoX-RuleEngine:
+  Palladio-ReverseEngineering-Retriever:
     uses: PalladioSimulator/Palladio-Build-ActionsPipeline/.github/workflows/build.yml@v3.4
     with:
       use-display-output: true

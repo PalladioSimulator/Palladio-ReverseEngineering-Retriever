@@ -13,8 +13,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.palladiosimulator.pcm.repository.Repository;
-import org.palladiosimulator.retriever.extraction.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.retriever.extraction.engine.RuleEngineConfiguration;
+import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
+import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
 import org.palladiosimulator.view.plantuml.generator.PcmComponentDiagramGenerator;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
@@ -22,15 +22,15 @@ import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;
 import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
 import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
-public class PlantUmlJob extends AbstractBlackboardInteractingJob<RuleEngineBlackboard> {
+public class PlantUmlJob extends AbstractBlackboardInteractingJob<RetrieverBlackboard> {
 
     private static final Logger LOG = Logger.getLogger(PlantUmlJob.class);
 
-    private static final String NAME = "Rule Engine PlantUML Generation";
+    private static final String NAME = "Retriever PlantUML Generation";
 
-    private final RuleEngineConfiguration configuration;
+    private final RetrieverConfiguration configuration;
 
-    public PlantUmlJob(RuleEngineConfiguration configuration, RuleEngineBlackboard blackboard) {
+    public PlantUmlJob(RetrieverConfiguration configuration, RetrieverBlackboard blackboard) {
         super.setBlackboard(blackboard);
         this.configuration = Objects.requireNonNull(configuration);
     }
@@ -42,7 +42,7 @@ public class PlantUmlJob extends AbstractBlackboardInteractingJob<RuleEngineBlac
     @Override
     public void execute(IProgressMonitor arg0) throws JobFailedException, UserCanceledException {
         PcmComponentDiagramGenerator generator = new PcmComponentDiagramGenerator(
-                (Repository) getBlackboard().getPartition(RuleEngineBlackboard.KEY_REPOSITORY));
+                (Repository) getBlackboard().getPartition(RetrieverBlackboard.KEY_REPOSITORY));
         String plantUmlSource = "@startuml\n" + generator.getDiagramText() + "\n@enduml\n";
 
         if (configuration.getOutputFolder()

@@ -2,14 +2,14 @@ package org.palladiosimulator.retriever.test.integration;
 
 import org.palladiosimulator.retriever.extraction.rules.JaxRSRules;
 
-public class JaxRsTest extends RuleEngineTest {
+public class JaxRsTest extends CaseStudyTest {
 
     protected JaxRsTest() {
         super("JaxRsProject", new JaxRSRules());
     }
 
     @Override
-    void testRuleEngineRepository() {
+    void testRetrieverRepository() {
         assertComponentExists("jax_rs_AWebService");
     }
 }

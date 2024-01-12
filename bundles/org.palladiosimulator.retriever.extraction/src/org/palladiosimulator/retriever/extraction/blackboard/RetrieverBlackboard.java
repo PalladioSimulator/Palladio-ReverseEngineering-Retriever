@@ -17,7 +17,7 @@ import org.palladiosimulator.retriever.extraction.engine.PCMDetector;
 
 import de.uka.ipd.sdq.workflow.blackboard.Blackboard;
 
-public class RuleEngineBlackboard extends Blackboard<Object> {
+public class RetrieverBlackboard extends Blackboard<Object> {
 
     public static final String KEY_REPOSITORY = "org.palladiosimulator.retriever.repository";
     public static final String KEY_SEFF_ASSOCIATIONS = "org.palladiosimulator.retriever.seff_associations";
@@ -28,7 +28,7 @@ public class RuleEngineBlackboard extends Blackboard<Object> {
     private final Set<String> discovererIDs;
     private PCMDetector pcmDetector;
 
-    public RuleEngineBlackboard() {
+    public RetrieverBlackboard() {
         super();
         repositoryComponentLocations = new HashMap<>();
         systemAssociations = new HashMap<>();

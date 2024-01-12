@@ -3,23 +3,23 @@ package org.palladiosimulator.retriever.core.workflow;
 import java.util.Objects;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.palladiosimulator.retriever.core.main.RuleEngineAnalyzer;
-import org.palladiosimulator.retriever.core.main.RuleEngineException;
-import org.palladiosimulator.retriever.extraction.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.retriever.extraction.engine.RuleEngineConfiguration;
+import org.palladiosimulator.retriever.core.main.Retriever;
+import org.palladiosimulator.retriever.core.main.RetrieverException;
+import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
+import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;
 import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
 import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
-public class RuleEngineBlackboardInteractingJob extends AbstractBlackboardInteractingJob<RuleEngineBlackboard> {
+public class RetrieverBlackboardInteractingJob extends AbstractBlackboardInteractingJob<RetrieverBlackboard> {
 
-    private static final String NAME = "Rule Engine Blackboard Interacting";
+    private static final String NAME = "Retriever Blackboard Interacting Job";
 
-    private final RuleEngineConfiguration configuration;
+    private final RetrieverConfiguration configuration;
 
-    public RuleEngineBlackboardInteractingJob(RuleEngineConfiguration configuration, RuleEngineBlackboard blackboard) {
+    public RetrieverBlackboardInteractingJob(RetrieverConfiguration configuration, RetrieverBlackboard blackboard) {
         super.setBlackboard(blackboard);
         this.configuration = Objects.requireNonNull(configuration);
     }
@@ -31,8 +31,8 @@ public class RuleEngineBlackboardInteractingJob extends AbstractBlackboardIntera
     @Override
     public void execute(IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
         try {
-            new RuleEngineAnalyzer(getBlackboard()).analyze(configuration, monitor);
-        } catch (final RuleEngineException e) {
+            new Retriever(getBlackboard()).analyze(configuration, monitor);
+        } catch (final RetrieverException e) {
             throw new JobFailedException(NAME + " Failed", e);
         }
     }

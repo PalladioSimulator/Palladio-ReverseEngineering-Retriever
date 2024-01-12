@@ -6,7 +6,7 @@ import org.palladiosimulator.retriever.extraction.engine.Service;
 
 /**
  * The defining interface of the org.palladiosimulator.retriever.extraction.analyst extension point.
- * Implement this interface to extend the rule engine by an additional analyst that can then process
+ * Implement this interface to extend Retriever by an additional analyst that can then process
  * the generated model.
  *
  * @author Florian Bossert

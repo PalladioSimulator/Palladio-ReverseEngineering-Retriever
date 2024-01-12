@@ -4,8 +4,8 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.palladiosimulator.retriever.extraction.blackboard.RuleEngineBlackboard;
-import org.palladiosimulator.retriever.extraction.engine.RuleEngineConfiguration;
+import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
+import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;
@@ -22,8 +22,8 @@ public class PerformanceAnalyst implements Analyst {
     private static final String ANALYST_ID = "org.palladiosimulator.retriever.core.service.performance_analyst";
 
     @Override
-    public IBlackboardInteractingJob<RuleEngineBlackboard> create(RuleEngineConfiguration configuration,
-            RuleEngineBlackboard blackboard) {
+    public IBlackboardInteractingJob<RetrieverBlackboard> create(RetrieverConfiguration configuration,
+            RetrieverBlackboard blackboard) {
         return new AbstractBlackboardInteractingJob<>() {
             @Override
             public void cleanup(final IProgressMonitor monitor) throws CleanupFailedException {

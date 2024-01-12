@@ -2,7 +2,6 @@ package org.palladiosimulator.retriever.extraction.rules
 
 import org.openjdk.nashorn.api.tree.CompilationUnitTree
 import java.nio.file.Path
-import org.palladiosimulator.retriever.extraction.blackboard.RuleEngineBlackboard
 import java.util.Map
 import java.util.HashSet
 import java.util.Set
@@ -25,12 +24,13 @@ import java.util.Optional
 import org.palladiosimulator.retriever.extraction.commonalities.CompUnitOrName
 import org.palladiosimulator.retriever.extraction.engine.Rule
 import org.palladiosimulator.retriever.extraction.rules.data.GatewayRoute
+import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard
 
 class EcmaScriptRules implements Rule {
 
 	public static final String RULE_ID = "org.palladiosimulator.retriever.extraction.rules.ecmascript"
 
-	public static final String ECMASCRIPT_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverer.ecmascript"
+	public static final String ECMASCRIPT_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverers.ecmascript"
 	public static final String HOSTNAMES_ID = "org.palladiosimulator.retriever.extraction.rules.ecmascript.hostnames"
 	public static final String GATEWAY_ROUTES_ID = "org.palladiosimulator.retriever.extraction.rules.ecmascript.routes"
 
@@ -44,7 +44,7 @@ class EcmaScriptRules implements Rule {
 	static final String VARIABLE_PREFIX = ":"
 	static final String BLANK = ""
 
-	override processRules(RuleEngineBlackboard blackboard, Path path) {
+	override processRules(RetrieverBlackboard blackboard, Path path) {
 		val compilationUnits = blackboard.getDiscoveredFiles(ECMASCRIPT_DISCOVERER_ID, typeof(CompilationUnitTree))
 		val compilationUnit = compilationUnits.get(path)
 		if(compilationUnit === null) return
@@ -77,7 +77,7 @@ class EcmaScriptRules implements Rule {
 			}
 		}
 
-		val pcmDetector = blackboard.PCMDetector
+		val pcmDetector = blackboard.getPCMDetector
 		val httpRequests = findAllHttpRequests(blackboard, compilationUnit)
 		for (key : httpRequests.keySet) {
 			for (url : httpRequests.get(key)) {
@@ -91,7 +91,7 @@ class EcmaScriptRules implements Rule {
 		}
 	}
 
-	def findAllHttpRequests(RuleEngineBlackboard blackboard, CompilationUnitTree unit) {
+	def findAllHttpRequests(RetrieverBlackboard blackboard, CompilationUnitTree unit) {
 		val source = unit.getSourceName().substring(0, unit.getSourceName().lastIndexOf(SEPARATOR) + 1)
 		val assignments = findVariableAssignments(unit)
 		val requests = join(findFunctionCallsWithUrls(unit), findFunctionDeclarationsWithUrls(unit),

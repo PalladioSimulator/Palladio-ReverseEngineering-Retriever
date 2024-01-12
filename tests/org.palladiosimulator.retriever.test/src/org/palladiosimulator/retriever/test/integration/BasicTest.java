@@ -19,24 +19,24 @@ import org.palladiosimulator.pcm.repository.Parameter;
 import org.palladiosimulator.pcm.repository.PrimitiveDataType;
 import org.palladiosimulator.pcm.repository.PrimitiveTypeEnum;
 import org.palladiosimulator.pcm.repository.Repository;
-import org.palladiosimulator.retriever.core.main.RuleEngineException;
-import org.palladiosimulator.retriever.core.workflow.RuleEngineJob;
-import org.palladiosimulator.retriever.extraction.blackboard.RuleEngineBlackboard;
+import org.palladiosimulator.retriever.core.main.RetrieverException;
+import org.palladiosimulator.retriever.core.workflow.RetrieverJob;
+import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
 import org.palladiosimulator.retriever.extraction.engine.Rule;
-import org.palladiosimulator.retriever.extraction.engine.RuleEngineConfiguration;
+import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
 import org.palladiosimulator.retriever.extraction.rules.JaxRSRules;
 
 import de.uka.ipd.sdq.workflow.jobs.JobFailedException;
 import de.uka.ipd.sdq.workflow.jobs.UserCanceledException;
 
-public class BasicTest extends RuleEngineTest {
+public class BasicTest extends CaseStudyTest {
 
     private static final String PROJECT_NAME = "BasicProject";
     private static final Rule[] RULES = { new JaxRSRules() };
 
     protected BasicTest() {
         super(PROJECT_NAME, RULES);
-        loadArtifacts(Artifacts.RULEENGINE);
+        loadArtifacts(Artifacts.RETRIEVER);
     }
 
     private OperationInterface getConflictingMethods(List<Interface> interfaces) {
@@ -52,7 +52,7 @@ public class BasicTest extends RuleEngineTest {
     }
 
     /**
-     * Tests the basic functionality of the RuleEngineAnalyzer. Requires it to execute without an
+     * Tests the basic functionality of Retriever. Requires it to execute without an
      * exception and produce an output file.
      */
     @Test
@@ -80,12 +80,12 @@ public class BasicTest extends RuleEngineTest {
     }
 
     /**
-     * The RuleEngine produced inconsistent results if executed multiple times. Arguments and
+     * Retriever produced inconsistent results if executed multiple times. Arguments and
      * methods appear multiple times. This probably has something to do with (discouraged) static
      * states somewhere in the stack.
      *
      * @throws ModelAnalyzerException
-     *             forwarded from RuleEngineAnalyzer. Should cause the test to fail.
+     *             forwarded from Retriever. Should cause the test to fail.
      * @throws UserCanceledException
      *             should not happen since no user is in the loop.
      * @throws JobFailedException
@@ -93,7 +93,7 @@ public class BasicTest extends RuleEngineTest {
      */
     @Disabled("FIXME: Reliance on outdated JaxRS rule")
     @Test
-    void testRepeatability() throws RuleEngineException, JobFailedException, UserCanceledException {
+    void testRepeatability() throws RetrieverException, JobFailedException, UserCanceledException {
         OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
         int firstIntArgCount = 0;
         for (final OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
@@ -104,14 +104,14 @@ public class BasicTest extends RuleEngineTest {
             }
         }
 
-        // Run the RuleEngine again on the same project
-        RuleEngineConfiguration ruleEngineConfig = getConfig();
-        ruleEngineConfig.setOutputFolder(ruleEngineConfig.getOutputFolder()
+        // Run Retriever again on the same project
+        RetrieverConfiguration retrieverConfig = getConfig();
+        retrieverConfig.setOutputFolder(retrieverConfig.getOutputFolder()
             .appendSegment("repeated"));
-        final RuleEngineJob ruleEngine = new RuleEngineJob(ruleEngineConfig);
-        ruleEngine.execute(new NullProgressMonitor());
-        final Repository repo = (Repository) ruleEngine.getBlackboard()
-            .getPartition(RuleEngineBlackboard.KEY_REPOSITORY);
+        final RetrieverJob retrieverJob = new RetrieverJob(retrieverConfig);
+        retrieverJob.execute(new NullProgressMonitor());
+        final Repository repo = (Repository) retrieverJob.getBlackboard()
+            .getPartition(RetrieverBlackboard.KEY_REPOSITORY);
 
         conflictingMethods = getConflictingMethods(repo.getInterfaces__Repository());
 

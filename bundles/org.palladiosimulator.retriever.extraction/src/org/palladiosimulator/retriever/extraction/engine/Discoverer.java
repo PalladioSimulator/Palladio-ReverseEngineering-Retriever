@@ -1,4 +1,4 @@
-package org.palladiosimulator.retriever.extraction.discoverers;
+package org.palladiosimulator.retriever.extraction.engine;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
-import org.palladiosimulator.retriever.extraction.engine.Service;
 
 public interface Discoverer extends Service {
     static Stream<Path> find(final Path root, final String suffix, final Logger logger) {

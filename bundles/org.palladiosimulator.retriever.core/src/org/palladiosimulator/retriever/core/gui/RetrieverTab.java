@@ -17,13 +17,13 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
-import org.palladiosimulator.retriever.core.configuration.RuleEngineConfigurationImpl;
+import org.palladiosimulator.retriever.core.configuration.RetrieverConfigurationImpl;
 import org.palladiosimulator.retriever.core.service.Analyst;
 import org.palladiosimulator.retriever.core.service.AnalystCollection;
+import org.palladiosimulator.retriever.core.service.DiscovererCollection;
 import org.palladiosimulator.retriever.core.service.EmptyCollection;
 import org.palladiosimulator.retriever.core.service.RuleCollection;
-import org.palladiosimulator.retriever.extraction.discoverers.Discoverer;
-import org.palladiosimulator.retriever.extraction.discoverers.DiscovererCollection;
+import org.palladiosimulator.retriever.extraction.engine.Discoverer;
 import org.palladiosimulator.retriever.extraction.engine.Rule;
 import org.palladiosimulator.retriever.extraction.engine.ServiceCollection;
 import org.palladiosimulator.retriever.extraction.engine.ServiceConfiguration;
@@ -32,11 +32,11 @@ import de.uka.ipd.sdq.workflow.launchconfig.ImageRegistryHelper;
 import de.uka.ipd.sdq.workflow.launchconfig.LaunchConfigPlugin;
 import de.uka.ipd.sdq.workflow.launchconfig.tabs.TabHelper;
 
-public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
+public class RetrieverTab extends AbstractLaunchConfigurationTab {
 
-    public static final String NAME = "Rule Engine IO";
-    public static final String PLUGIN_ID = "org.palladiosimulator.retriever.core.gui.LaunchRuleEngineAnalyzer";
-    private static final String FILENAME_TAB_IMAGE_PATH = "icons/RuleEngine_16x16.gif";
+    public static final String NAME = "Retriever";
+    public static final String PLUGIN_ID = "org.palladiosimulator.retriever.core.gui.LaunchRetriever";
+    private static final String FILENAME_TAB_IMAGE_PATH = "icons/Retriever_16x16.gif";
 
     private final String defaultPath;
     private final ModifyListener modifyListener;
@@ -47,7 +47,7 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     private final ServiceConfigurationView<Rule> ruleConfigView;
     private final ServiceConfigurationView<Analyst> analystConfigView;
 
-    public RuleEngineIoTab() {
+    public RetrieverTab() {
         // Create the default path of this Eclipse application
         defaultPath = Paths.get(".")
             .toAbsolutePath()
@@ -65,26 +65,26 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         try {
             discovererCollection = new DiscovererCollection();
         } catch (CoreException e) {
-            Logger.getLogger(RuleEngineIoTab.class)
+            Logger.getLogger(RetrieverTab.class)
                 .error("Exception occurred while discovering discoverers!");
             discovererCollection = new EmptyCollection<>();
         }
         ServiceConfiguration<Discoverer> discovererConfig = new ServiceConfiguration<>(discovererCollection,
-                RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_DISCOVERERS,
-                RuleEngineConfigurationImpl.RULE_ENGINE_DISCOVERER_CONFIG_PREFIX);
+                RetrieverConfigurationImpl.RULE_ENGINE_SELECTED_DISCOVERERS,
+                RetrieverConfigurationImpl.RULE_ENGINE_DISCOVERER_CONFIG_PREFIX);
         discovererConfigManager = new ServiceConfigurationManager<>(discovererConfig);
 
         ServiceCollection<Rule> ruleCollection = null;
         try {
             ruleCollection = new RuleCollection();
         } catch (CoreException e) {
-            Logger.getLogger(RuleEngineIoTab.class)
+            Logger.getLogger(RetrieverTab.class)
                 .error("Exception occurred while discovering rules!");
             ruleCollection = new EmptyCollection<>();
         }
         ServiceConfiguration<Rule> ruleConfig = new ServiceConfiguration<>(ruleCollection,
-                RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_RULES,
-                RuleEngineConfigurationImpl.RULE_ENGINE_RULE_CONFIG_PREFIX);
+                RetrieverConfigurationImpl.RULE_ENGINE_SELECTED_RULES,
+                RetrieverConfigurationImpl.RULE_ENGINE_RULE_CONFIG_PREFIX);
         ruleConfig.addDependencyProvider(discovererConfig);
         ruleConfigView = new ServiceConfigurationView<>(ruleConfig, modifyListener);
 
@@ -92,13 +92,13 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
         try {
             analystCollection = new AnalystCollection();
         } catch (CoreException e) {
-            Logger.getLogger(RuleEngineIoTab.class)
+            Logger.getLogger(RetrieverTab.class)
                 .error("Exception occurred while discovering analysts!");
             analystCollection = new EmptyCollection<>();
         }
         ServiceConfiguration<Analyst> analystConfig = new ServiceConfiguration<>(analystCollection,
-                RuleEngineConfigurationImpl.RULE_ENGINE_SELECTED_ANALYSTS,
-                RuleEngineConfigurationImpl.RULE_ENGINE_ANALYST_CONFIG_PREFIX);
+                RetrieverConfigurationImpl.RULE_ENGINE_SELECTED_ANALYSTS,
+                RetrieverConfigurationImpl.RULE_ENGINE_ANALYST_CONFIG_PREFIX);
         analystConfig.addDependencyProvider(discovererConfig);
         analystConfig.addDependencyProvider(ruleConfig);
         analystConfigView = new ServiceConfigurationView<>(analystConfig, modifyListener);
@@ -178,8 +178,8 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
     @Override
     public void initializeFrom(ILaunchConfiguration configuration) {
-        setText(configuration, in, RuleEngineConfigurationImpl.RULE_ENGINE_INPUT_PATH);
-        setText(configuration, out, RuleEngineConfigurationImpl.RULE_ENGINE_OUTPUT_PATH);
+        setText(configuration, in, RetrieverConfigurationImpl.RULE_ENGINE_INPUT_PATH);
+        setText(configuration, out, RetrieverConfigurationImpl.RULE_ENGINE_OUTPUT_PATH);
 
         discovererConfigManager.initializeFrom(configuration);
         ruleConfigView.initializeFrom(configuration);
@@ -197,8 +197,8 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
 
     @Override
     public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-        setAttribute(configuration, RuleEngineConfigurationImpl.RULE_ENGINE_INPUT_PATH, in);
-        setAttribute(configuration, RuleEngineConfigurationImpl.RULE_ENGINE_OUTPUT_PATH, out);
+        setAttribute(configuration, RetrieverConfigurationImpl.RULE_ENGINE_INPUT_PATH, in);
+        setAttribute(configuration, RetrieverConfigurationImpl.RULE_ENGINE_OUTPUT_PATH, out);
         discovererConfigManager.performApply(configuration);
         ruleConfigView.performApply(configuration);
         analystConfigView.performApply(configuration);
@@ -220,10 +220,10 @@ public class RuleEngineIoTab extends AbstractLaunchConfigurationTab {
     @Override
     public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
         setText(in, defaultPath);
-        setAttribute(configuration, RuleEngineConfigurationImpl.RULE_ENGINE_INPUT_PATH, in);
+        setAttribute(configuration, RetrieverConfigurationImpl.RULE_ENGINE_INPUT_PATH, in);
 
         setText(out, defaultPath);
-        setAttribute(configuration, RuleEngineConfigurationImpl.RULE_ENGINE_OUTPUT_PATH, out);
+        setAttribute(configuration, RetrieverConfigurationImpl.RULE_ENGINE_OUTPUT_PATH, out);
 
         discovererConfigManager.setDefaults(configuration);
         ruleConfigView.setDefaults(configuration);

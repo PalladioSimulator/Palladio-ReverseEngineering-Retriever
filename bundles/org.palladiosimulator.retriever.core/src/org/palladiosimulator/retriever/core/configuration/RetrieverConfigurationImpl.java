@@ -9,20 +9,20 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.common.util.URI;
 import org.palladiosimulator.retriever.core.service.Analyst;
 import org.palladiosimulator.retriever.core.service.AnalystCollection;
+import org.palladiosimulator.retriever.core.service.DiscovererCollection;
 import org.palladiosimulator.retriever.core.service.EmptyCollection;
 import org.palladiosimulator.retriever.core.service.RuleCollection;
-import org.palladiosimulator.retriever.extraction.discoverers.Discoverer;
-import org.palladiosimulator.retriever.extraction.discoverers.DiscovererCollection;
+import org.palladiosimulator.retriever.extraction.engine.Discoverer;
 import org.palladiosimulator.retriever.extraction.engine.Rule;
-import org.palladiosimulator.retriever.extraction.engine.RuleEngineConfiguration;
+import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
 import org.palladiosimulator.retriever.extraction.engine.Service;
 import org.palladiosimulator.retriever.extraction.engine.ServiceCollection;
 import org.palladiosimulator.retriever.extraction.engine.ServiceConfiguration;
 
 import de.uka.ipd.sdq.workflow.configuration.AbstractComposedJobConfiguration;
 
-public class RuleEngineConfigurationImpl extends AbstractComposedJobConfiguration implements RuleEngineConfiguration {
-    private static final Logger LOG = Logger.getLogger(RuleEngineConfigurationImpl.class);
+public class RetrieverConfigurationImpl extends AbstractComposedJobConfiguration implements RetrieverConfiguration {
+    private static final Logger LOG = Logger.getLogger(RetrieverConfigurationImpl.class);
 
     private static final String CONFIG_PREFIX = "org.palladiosimulator.retriever.core.configuration.";
     public static final String RULE_ENGINE_INPUT_PATH = "input.path";
@@ -41,11 +41,11 @@ public class RuleEngineConfigurationImpl extends AbstractComposedJobConfiguratio
 
     private final Map<String, Object> attributes;
 
-    public RuleEngineConfigurationImpl() {
+    public RetrieverConfigurationImpl() {
         this(new HashMap<>());
     }
 
-    public RuleEngineConfigurationImpl(Map<String, Object> attributes) {
+    public RetrieverConfigurationImpl(Map<String, Object> attributes) {
         this.attributes = Objects.requireNonNull(attributes);
         this.serviceConfigs = new HashMap<>();
 

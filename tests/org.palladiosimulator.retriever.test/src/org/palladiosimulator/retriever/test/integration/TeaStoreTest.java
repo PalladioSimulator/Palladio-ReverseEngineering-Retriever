@@ -4,14 +4,14 @@ import org.junit.jupiter.api.Disabled;
 import org.palladiosimulator.retriever.extraction.rules.SpringRules;
 
 @Disabled("TODO: Currently broken")
-public class TeaStoreTest extends RuleEngineTest {
+public class TeaStoreTest extends CaseStudyTest {
 
     protected TeaStoreTest() {
         super("external/TeaStore-1.4.1", new SpringRules());
     }
 
     @Override
-    void testRuleEngineRepository() {
+    void testRetrieverRepository() {
         // TODO: Temporarily disabled due to rule changes.
         if (getClass() != null)
             return;

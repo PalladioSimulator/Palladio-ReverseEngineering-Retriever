@@ -4,14 +4,14 @@ import org.junit.jupiter.api.Disabled;
 import org.palladiosimulator.retriever.extraction.rules.SpringRules;
 
 @Disabled("TODO: Currently broken")
-public class PetclinicTest extends RuleEngineTest {
+public class PetclinicTest extends CaseStudyTest {
 
     protected PetclinicTest() {
         super("external/spring-petclinic-microservices-2.3.6", new SpringRules());
     }
 
     @Override
-    void testRuleEngineRepository() {
+    void testRetrieverRepository() {
         // TODO: Temporarily disabled due to rule changes.
         if (getClass() != null)
             return;
