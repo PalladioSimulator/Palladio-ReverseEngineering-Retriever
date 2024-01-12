@@ -27,9 +27,9 @@ public class CompositeProvisionDelegationRelationProcessorTest extends
     @DisabledIf(TEST_API_ONLY_METHOD_NAME)
     public void testRefineWithValidRelationAddsCorrectImplications() {
         // Test data
-        PcmSurrogate model = createEmptyModel();
-        CompositeProvisionDelegationRelationProcessor processor = createProcessor(model);
-        CompositeProvisionDelegationRelation relation = createUniqueReplaceable();
+        final PcmSurrogate model = this.createEmptyModel();
+        final CompositeProvisionDelegationRelationProcessor processor = this.createProcessor(model);
+        final CompositeProvisionDelegationRelation relation = this.createUniqueReplaceable();
 
         // Assertions: Pre-execution
         assertTrue(processor.getImplications()
@@ -37,7 +37,7 @@ public class CompositeProvisionDelegationRelationProcessorTest extends
 
         // Execution
         processor.refine(relation);
-        Set<Replaceable> implications = new HashSet<>(processor.getImplications());
+        final Set<Replaceable> implications = new HashSet<>(processor.getImplications());
 
         // Assertions: Post-execution
         assertTrue(implications.remove(relation.getSource()));
@@ -45,12 +45,12 @@ public class CompositeProvisionDelegationRelationProcessorTest extends
 
         // Implicit CompositionRelation between source & destination component
         assertEquals(1, implications.size());
-        Replaceable implication = implications.stream()
+        final Replaceable implication = implications.stream()
             .findFirst()
             .orElseThrow();
         assertEquals(CompositionRelation.class, implication.getClass());
 
-        CompositionRelation implicitComposition = (CompositionRelation) implication;
+        final CompositionRelation implicitComposition = (CompositionRelation) implication;
         assertTrue(implicitComposition.isPlaceholder());
         assertTrue(implicitComposition.getSource()
             .equals(relation.getSource()
@@ -61,35 +61,36 @@ public class CompositeProvisionDelegationRelationProcessorTest extends
     }
 
     @Override
-    protected CompositeProvisionDelegationRelation createRelation(InterfaceProvisionRelation source,
-            InterfaceProvisionRelation destination, boolean isPlaceholder) {
+    protected CompositeProvisionDelegationRelation createRelation(final InterfaceProvisionRelation source,
+            final InterfaceProvisionRelation destination, final boolean isPlaceholder) {
         return new CompositeProvisionDelegationRelation(source, destination, isPlaceholder);
     }
 
     @Override
     protected InterfaceProvisionRelation getUniqueNonPlaceholderSourceEntity() {
-        Composite source = Composite.getUniquePlaceholder();
+        final Composite source = Composite.getUniquePlaceholder();
         return new InterfaceProvisionRelation(source, RELATION_INTERFACE, false);
     }
 
     @Override
-    protected InterfaceProvisionRelation getPlaceholderOfSourceEntity(InterfaceProvisionRelation source) {
+    protected InterfaceProvisionRelation getPlaceholderOfSourceEntity(final InterfaceProvisionRelation source) {
         return new InterfaceProvisionRelation(source.getSource(), source.getDestination(), true);
     }
 
     @Override
     protected InterfaceProvisionRelation getUniqueNonPlaceholderDestinationEntity() {
-        Component<?> source = Component.getUniquePlaceholder();
+        final Component<?> source = Component.getUniquePlaceholder();
         return new InterfaceProvisionRelation(source, RELATION_INTERFACE, false);
     }
 
     @Override
-    protected InterfaceProvisionRelation getPlaceholderOfDestinationEntity(InterfaceProvisionRelation destination) {
+    protected InterfaceProvisionRelation getPlaceholderOfDestinationEntity(
+            final InterfaceProvisionRelation destination) {
         return new InterfaceProvisionRelation(destination.getSource(), destination.getDestination(), true);
     }
 
     @Override
-    protected CompositeProvisionDelegationRelationProcessor createProcessor(PcmSurrogate model) {
+    protected CompositeProvisionDelegationRelationProcessor createProcessor(final PcmSurrogate model) {
         return new CompositeProvisionDelegationRelationProcessor(model);
     }
 

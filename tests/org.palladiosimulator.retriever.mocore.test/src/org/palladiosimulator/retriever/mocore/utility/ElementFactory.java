@@ -26,54 +26,54 @@ public final class ElementFactory {
         throw new IllegalStateException("Cannot instantiate utility class.");
     }
 
-    public static Signature createUniqueSignature(boolean isPlaceholder) {
-        String identifier = IdentifierGenerator.getUniqueIdentifier();
-        OperationSignature value = RepositoryFactory.eINSTANCE.createOperationSignature();
+    public static Signature createUniqueSignature(final boolean isPlaceholder) {
+        final String identifier = IdentifierGenerator.getUniqueIdentifier();
+        final OperationSignature value = RepositoryFactory.eINSTANCE.createOperationSignature();
         value.setEntityName(identifier);
         return new Signature(value, isPlaceholder);
     }
 
-    public static Interface createUniqueInterface(boolean isPlaceholder) {
-        String identifier = IdentifierGenerator.getUniqueIdentifier();
-        OperationInterface value = new FluentRepositoryFactory().newOperationInterface()
+    public static Interface createUniqueInterface(final boolean isPlaceholder) {
+        final String identifier = IdentifierGenerator.getUniqueIdentifier();
+        final OperationInterface value = new FluentRepositoryFactory().newOperationInterface()
             .withName(identifier)
             .build();
         return new Interface(value, isPlaceholder);
     }
 
-    public static Component<?> createUniqueComponent(boolean isPlaceholder) {
-        String identifier = IdentifierGenerator.getUniqueIdentifier();
-        BasicComponent value = new FluentRepositoryFactory().newBasicComponent()
+    public static Component<?> createUniqueComponent(final boolean isPlaceholder) {
+        final String identifier = IdentifierGenerator.getUniqueIdentifier();
+        final BasicComponent value = new FluentRepositoryFactory().newBasicComponent()
             .withName(identifier)
             .build();
         return new AtomicComponent(value, isPlaceholder);
     }
 
-    public static Composite createUniqueComposite(boolean isPlaceholder) {
-        String identifier = IdentifierGenerator.getUniqueIdentifier();
-        RepositoryComponent value = new FluentRepositoryFactory().newCompositeComponent()
+    public static Composite createUniqueComposite(final boolean isPlaceholder) {
+        final String identifier = IdentifierGenerator.getUniqueIdentifier();
+        final RepositoryComponent value = new FluentRepositoryFactory().newCompositeComponent()
             .withName(identifier)
             .build();
         return new Composite((CompositeComponent) value, isPlaceholder);
     }
 
-    public static Deployment createUniqueDeployment(boolean isPlaceholder) {
-        String identifier = IdentifierGenerator.getUniqueIdentifier();
-        ResourceContainer value = ResourceenvironmentFactory.eINSTANCE.createResourceContainer();
+    public static Deployment createUniqueDeployment(final boolean isPlaceholder) {
+        final String identifier = IdentifierGenerator.getUniqueIdentifier();
+        final ResourceContainer value = ResourceenvironmentFactory.eINSTANCE.createResourceContainer();
         value.setEntityName(identifier);
         return new Deployment(value, isPlaceholder);
     }
 
-    public static LinkResourceSpecification createUniqueLinkResourceSpecification(boolean isPlaceholder) {
-        String identifier = IdentifierGenerator.getUniqueIdentifier();
-        CommunicationLinkResourceSpecification value = ResourceenvironmentFactory.eINSTANCE
+    public static LinkResourceSpecification createUniqueLinkResourceSpecification(final boolean isPlaceholder) {
+        final String identifier = IdentifierGenerator.getUniqueIdentifier();
+        final CommunicationLinkResourceSpecification value = ResourceenvironmentFactory.eINSTANCE
             .createCommunicationLinkResourceSpecification();
         value.setId(identifier);
         return new LinkResourceSpecification(value, isPlaceholder);
     }
 
-    public static ServiceEffectSpecification createUniqueServiceEffectSpecification(boolean isPlaceholder) {
-        ServiceEffectSpecification placeholderSpecification = ServiceEffectSpecification.getUniquePlaceholder();
+    public static ServiceEffectSpecification createUniqueServiceEffectSpecification(final boolean isPlaceholder) {
+        final ServiceEffectSpecification placeholderSpecification = ServiceEffectSpecification.getUniquePlaceholder();
         return new ServiceEffectSpecification(placeholderSpecification.getValue(), isPlaceholder);
     }
 }

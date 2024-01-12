@@ -15,36 +15,37 @@ import tools.mdsd.mocore.framework.transformation.Transformer;
 
 public class AllocationTransformer implements Transformer<PcmSurrogate, Allocation> {
     @Override
-    public Allocation transform(PcmSurrogate model) {
-        System system = new SystemTransformer().transform(model);
-        ResourceEnvironment resourceEnvironment = new ResourceEnvironmentTransformer().transform(model);
+    public Allocation transform(final PcmSurrogate model) {
+        final System system = new SystemTransformer().transform(model);
+        final ResourceEnvironment resourceEnvironment = new ResourceEnvironmentTransformer().transform(model);
         return this.transform(model, system, resourceEnvironment);
     }
 
-    public Allocation transform(PcmSurrogate model, System system, ResourceEnvironment resourceEnvironment) {
-        FluentAllocationFactory allocationFactory = new FluentAllocationFactory();
-        IAllocationAddition fluentAllocation = allocationFactory.newAllocation()
+    public Allocation transform(final PcmSurrogate model, final System system,
+            final ResourceEnvironment resourceEnvironment) {
+        final FluentAllocationFactory allocationFactory = new FluentAllocationFactory();
+        final IAllocationAddition fluentAllocation = allocationFactory.newAllocation()
             .withSystem(system)
             .withResourceEnvironment(resourceEnvironment);
 
         // Add allocation contexts to allocation
-        List<ComponentAllocationRelation> relations = model.getByType(ComponentAllocationRelation.class);
-        for (ComponentAllocationRelation relation : relations) {
+        final List<ComponentAllocationRelation> relations = model.getByType(ComponentAllocationRelation.class);
+        for (final ComponentAllocationRelation relation : relations) {
             // Get and add context (creator) for specific allocation relation
-            AllocationContextCreator contextCreator = getCreator(allocationFactory, relation);
+            final AllocationContextCreator contextCreator = this.getCreator(allocationFactory, relation);
             fluentAllocation.addToAllocation(contextCreator);
         }
 
         return fluentAllocation.createAllocationNow();
     }
 
-    private AllocationContextCreator getCreator(FluentAllocationFactory fluentFactory,
-            ComponentAllocationRelation relation) {
-        AllocationContextCreator contextCreator = fluentFactory.newAllocationContext();
+    private AllocationContextCreator getCreator(final FluentAllocationFactory fluentFactory,
+            final ComponentAllocationRelation relation) {
+        final AllocationContextCreator contextCreator = fluentFactory.newAllocationContext();
 
         // Use name of entities to fetch up-to-date entities from system and resource environment
-        String assemblyContextName = SystemTransformer.getAssemblyContextName(relation.getSource());
-        String deploymentEntityName = relation.getDestination()
+        final String assemblyContextName = SystemTransformer.getAssemblyContextName(relation.getSource());
+        final String deploymentEntityName = relation.getDestination()
             .getValue()
             .getEntityName();
         contextCreator.withAssemblyContext(assemblyContextName)

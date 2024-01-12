@@ -21,14 +21,14 @@ public class SystemTransformerTest extends TransformerTest<SystemTransformer, Pc
     @Test
     public void testTransformSingleComponent() {
         // Test data
-        SystemTransformer transformer = createTransformer();
-        PcmSurrogate model = createEmptyModel();
-        Component<?> component = Component.getUniquePlaceholder();
+        final SystemTransformer transformer = this.createTransformer();
+        final PcmSurrogate model = this.createEmptyModel();
+        final Component<?> component = Component.getUniquePlaceholder();
 
         model.add(component);
 
         // Execution
-        System system = transformer.transform(model);
+        final System system = transformer.transform(model);
 
         // Assertion
         assertNotNull(system);
@@ -37,19 +37,19 @@ public class SystemTransformerTest extends TransformerTest<SystemTransformer, Pc
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    public void testTransformSingleAssemblyRelation(boolean isPlaceholderAssembly) {
+    public void testTransformSingleAssemblyRelation(final boolean isPlaceholderAssembly) {
         // Test data
-        SystemTransformer transformer = createTransformer();
-        PcmSurrogate model = createEmptyModel();
+        final SystemTransformer transformer = this.createTransformer();
+        final PcmSurrogate model = this.createEmptyModel();
 
-        Component<?> provider = Component.getUniquePlaceholder();
-        Component<?> consumer = Component.getUniquePlaceholder();
-        Interface providerConsumerInterface = Interface.getUniquePlaceholder();
-        InterfaceProvisionRelation provisionRelation = new InterfaceProvisionRelation(provider,
+        final Component<?> provider = Component.getUniquePlaceholder();
+        final Component<?> consumer = Component.getUniquePlaceholder();
+        final Interface providerConsumerInterface = Interface.getUniquePlaceholder();
+        final InterfaceProvisionRelation provisionRelation = new InterfaceProvisionRelation(provider,
                 providerConsumerInterface, false);
-        InterfaceRequirementRelation requirementRelation = new InterfaceRequirementRelation(consumer,
+        final InterfaceRequirementRelation requirementRelation = new InterfaceRequirementRelation(consumer,
                 providerConsumerInterface, false);
-        ComponentAssemblyRelation assemblyRelation = new ComponentAssemblyRelation(provisionRelation,
+        final ComponentAssemblyRelation assemblyRelation = new ComponentAssemblyRelation(provisionRelation,
                 requirementRelation, isPlaceholderAssembly);
 
         model.add(provider);
@@ -60,7 +60,7 @@ public class SystemTransformerTest extends TransformerTest<SystemTransformer, Pc
         model.add(assemblyRelation);
 
         // Execution
-        System system = transformer.transform(model);
+        final System system = transformer.transform(model);
 
         // Assertion
         assertNotNull(system);

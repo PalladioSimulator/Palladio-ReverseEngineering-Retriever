@@ -12,13 +12,14 @@ import tools.mdsd.mocore.framework.processor.Processor;
 public class InterfaceProcessor extends Processor<PcmSurrogate, Interface> {
     private static final String PLACEHOLDER_COMPONENT_NAME_PATTERN = "%s Provider";
 
-    public InterfaceProcessor(PcmSurrogate model) {
+    public InterfaceProcessor(final PcmSurrogate model) {
         super(model, Interface.class);
     }
 
     @Override
-    protected void refine(Interface discovery) {
-        List<InterfaceProvisionRelation> providesRelations = getModel().getByType(InterfaceProvisionRelation.class);
+    protected void refine(final Interface discovery) {
+        final List<InterfaceProvisionRelation> providesRelations = this.getModel()
+            .getByType(InterfaceProvisionRelation.class);
         providesRelations.removeIf(relation -> !relation.getDestination()
             .equals(discovery));
 
@@ -26,12 +27,12 @@ public class InterfaceProcessor extends Processor<PcmSurrogate, Interface> {
         // -> If no provision relation exists yet, add a placeholder provider and relation to the
         // model.
         if (providesRelations.isEmpty()) {
-            String interfaceName = discovery.getValue()
+            final String interfaceName = discovery.getValue()
                 .getEntityName();
-            String componentName = String.format(PLACEHOLDER_COMPONENT_NAME_PATTERN, interfaceName);
-            Component<?> component = Component.getNamedPlaceholder(componentName);
-            InterfaceProvisionRelation relation = new InterfaceProvisionRelation(component, discovery, true);
-            addImplication(relation);
+            final String componentName = String.format(PLACEHOLDER_COMPONENT_NAME_PATTERN, interfaceName);
+            final Component<?> component = Component.getNamedPlaceholder(componentName);
+            final InterfaceProvisionRelation relation = new InterfaceProvisionRelation(component, discovery, true);
+            this.addImplication(relation);
         }
     }
 

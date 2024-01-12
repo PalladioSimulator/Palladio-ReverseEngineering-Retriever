@@ -52,7 +52,7 @@ public final class PcmEvaluationUtility {
         throw new IllegalStateException("Utility class cannot be instantiated.");
     }
 
-    public static boolean representSame(DataType type, DataType otherType) {
+    public static boolean representSame(final DataType type, final DataType otherType) {
         boolean equalType;
         if (type instanceof Identifier && otherType instanceof Identifier) {
             equalType = Objects.equals(((Identifier) type).getId(), ((Identifier) otherType).getId());
@@ -62,43 +62,44 @@ public final class PcmEvaluationUtility {
         return equalType;
     }
 
-    public static boolean representSame(Parameter parameter, Parameter otherParameter) {
-        boolean equalName = Objects.equals(parameter.getParameterName(), otherParameter.getParameterName());
-        boolean equalType = representSame(parameter.getDataType__Parameter(), otherParameter.getDataType__Parameter());
+    public static boolean representSame(final Parameter parameter, final Parameter otherParameter) {
+        final boolean equalName = Objects.equals(parameter.getParameterName(), otherParameter.getParameterName());
+        final boolean equalType = representSame(parameter.getDataType__Parameter(),
+                otherParameter.getDataType__Parameter());
         return equalName && equalType;
     }
 
-    public static boolean representSame(OperationSignature signature,
-            org.palladiosimulator.pcm.repository.Signature otherSignature) {
+    public static boolean representSame(final OperationSignature signature,
+            final org.palladiosimulator.pcm.repository.Signature otherSignature) {
         if (otherSignature instanceof OperationSignature) {
             return representSame(signature, (OperationSignature) otherSignature);
         }
         return false;
     }
 
-    public static boolean representSame(OperationSignature signature, OperationSignature otherSignature) {
-        boolean equalName = Objects.equals(signature.getEntityName(), otherSignature.getEntityName());
-        boolean equalReturn = representSame(signature.getReturnType__OperationSignature(),
+    public static boolean representSame(final OperationSignature signature, final OperationSignature otherSignature) {
+        final boolean equalName = Objects.equals(signature.getEntityName(), otherSignature.getEntityName());
+        final boolean equalReturn = representSame(signature.getReturnType__OperationSignature(),
                 otherSignature.getReturnType__OperationSignature());
-        boolean equalParameters = areCollectionsEqual(signature.getParameters__OperationSignature(),
+        final boolean equalParameters = areCollectionsEqual(signature.getParameters__OperationSignature(),
                 otherSignature.getParameters__OperationSignature(), PcmEvaluationUtility::representSame);
         return equalName && equalReturn && equalParameters;
     }
 
-    public static boolean representSame(OperationInterface interFace, Interface otherInterFace) {
+    public static boolean representSame(final OperationInterface interFace, final Interface otherInterFace) {
         if (otherInterFace instanceof OperationInterface) {
             return representSame(interFace, (OperationInterface) otherInterFace);
         }
         return false;
     }
 
-    public static boolean representSame(OperationInterface interFace, OperationInterface otherInterFace) {
-        boolean equalName = Objects.equals(interFace.getEntityName(), otherInterFace.getEntityName());
+    public static boolean representSame(final OperationInterface interFace, final OperationInterface otherInterFace) {
+        final boolean equalName = Objects.equals(interFace.getEntityName(), otherInterFace.getEntityName());
         // TODO Check characterization & protocol => Is there a palladio equal check?
         return equalName;
     }
 
-    public static boolean representSame(RepositoryComponent component, RepositoryComponent otherComponent) {
+    public static boolean representSame(final RepositoryComponent component, final RepositoryComponent otherComponent) {
         if (otherComponent instanceof BasicComponent && component instanceof BasicComponent) {
             return representSame((BasicComponent) component, (BasicComponent) otherComponent);
         } else if (otherComponent instanceof CompositeComponent && component instanceof CompositeComponent) {
@@ -107,58 +108,58 @@ public final class PcmEvaluationUtility {
         return false;
     }
 
-    public static boolean representSame(BasicComponent component, BasicComponent otherComponent) {
-        boolean equalName = Objects.equals(component.getEntityName(), otherComponent.getEntityName());
-        boolean equalType = Objects.equals(component.getComponentType(), otherComponent.getComponentType());
+    public static boolean representSame(final BasicComponent component, final BasicComponent otherComponent) {
+        final boolean equalName = Objects.equals(component.getEntityName(), otherComponent.getEntityName());
+        final boolean equalType = Objects.equals(component.getComponentType(), otherComponent.getComponentType());
         // TODO Check parameter usage => Is there a palladio equal check?
         return equalName && equalType;
     }
 
-    public static boolean representSame(CompositeComponent component, CompositeComponent otherComponent) {
-        boolean equalName = Objects.equals(component.getEntityName(), otherComponent.getEntityName());
-        boolean equalType = Objects.equals(component.getComponentType(), otherComponent.getComponentType());
+    public static boolean representSame(final CompositeComponent component, final CompositeComponent otherComponent) {
+        final boolean equalName = Objects.equals(component.getEntityName(), otherComponent.getEntityName());
+        final boolean equalType = Objects.equals(component.getComponentType(), otherComponent.getComponentType());
         // TODO Check parameter usage => Is there a palladio equal check?
         return equalName && equalType;
     }
 
-    public static boolean representSame(ResourceContainer container, ResourceContainer otherContainer) {
-        boolean equalName = Objects.equals(container.getEntityName(), otherContainer.getEntityName());
+    public static boolean representSame(final ResourceContainer container, final ResourceContainer otherContainer) {
+        final boolean equalName = Objects.equals(container.getEntityName(), otherContainer.getEntityName());
         // TODO ResourceSpecifications are removed from old container on copy. Consequently,
         // comparing it is not
         // possible.
         return equalName;
     }
 
-    public static boolean representSame(ResourceDemandingSEFF seff,
-            org.palladiosimulator.pcm.seff.ServiceEffectSpecification otherSeff) {
+    public static boolean representSame(final ResourceDemandingSEFF seff,
+            final org.palladiosimulator.pcm.seff.ServiceEffectSpecification otherSeff) {
         if (otherSeff instanceof ResourceDemandingSEFF) {
             return representSame(seff, (ResourceDemandingSEFF) otherSeff);
         }
         return false;
     }
 
-    public static boolean representSame(ResourceDemandingSEFF seff, ResourceDemandingSEFF otherSeff) {
-        boolean equalIdentifier = Objects.equals(seff.getId(), otherSeff.getId());
-        boolean equalTypeIdentifier = Objects.equals(seff.getSeffTypeID(), otherSeff.getSeffTypeID());
-        boolean equalSteps = areCollectionsEqualIgnoringOrder(mapToIdentifier(seff.getSteps_Behaviour()),
+    public static boolean representSame(final ResourceDemandingSEFF seff, final ResourceDemandingSEFF otherSeff) {
+        final boolean equalIdentifier = Objects.equals(seff.getId(), otherSeff.getId());
+        final boolean equalTypeIdentifier = Objects.equals(seff.getSeffTypeID(), otherSeff.getSeffTypeID());
+        final boolean equalSteps = areCollectionsEqualIgnoringOrder(mapToIdentifier(seff.getSteps_Behaviour()),
                 mapToIdentifier(otherSeff.getSteps_Behaviour()));
-        boolean equalInternalBehaviors = areCollectionsEqualIgnoringOrder(
+        final boolean equalInternalBehaviors = areCollectionsEqualIgnoringOrder(
                 mapToIdentifier(seff.getResourceDemandingInternalBehaviours()),
                 mapToIdentifier(otherSeff.getResourceDemandingInternalBehaviours()));
-        boolean equalLoopAction = Objects.equals(
+        final boolean equalLoopAction = Objects.equals(
                 mapToIdentifier(seff.getAbstractLoopAction_ResourceDemandingBehaviour()),
                 mapToIdentifier(otherSeff.getAbstractLoopAction_ResourceDemandingBehaviour()));
-        boolean equalBranchTransition = Objects.equals(
+        final boolean equalBranchTransition = Objects.equals(
                 mapToIdentifier(seff.getAbstractBranchTransition_ResourceDemandingBehaviour()),
                 mapToIdentifier(otherSeff.getAbstractBranchTransition_ResourceDemandingBehaviour()));
         return equalIdentifier && equalTypeIdentifier && equalSteps && equalInternalBehaviors && equalLoopAction
                 && equalBranchTransition;
     }
 
-    public static Optional<ResourceContainer> getRepresentative(ResourceEnvironment resourceEnvironment,
-            Deployment container) {
-        List<ResourceContainer> containers = resourceEnvironment.getResourceContainer_ResourceEnvironment();
-        for (ResourceContainer environmentContainer : containers) {
+    public static Optional<ResourceContainer> getRepresentative(final ResourceEnvironment resourceEnvironment,
+            final Deployment container) {
+        final List<ResourceContainer> containers = resourceEnvironment.getResourceContainer_ResourceEnvironment();
+        for (final ResourceContainer environmentContainer : containers) {
             if (representSame(container.getValue(), environmentContainer)) {
                 return Optional.of(environmentContainer);
             }
@@ -166,9 +167,10 @@ public final class PcmEvaluationUtility {
         return Optional.empty();
     }
 
-    public static Optional<RepositoryComponent> getRepresentative(Repository repository, Component<?> component) {
-        List<RepositoryComponent> components = repository.getComponents__Repository();
-        for (RepositoryComponent repositoryComponent : components) {
+    public static Optional<RepositoryComponent> getRepresentative(final Repository repository,
+            final Component<?> component) {
+        final List<RepositoryComponent> components = repository.getComponents__Repository();
+        for (final RepositoryComponent repositoryComponent : components) {
             if (representSame(component.getValue(), repositoryComponent)) {
                 return Optional.of(repositoryComponent);
             }
@@ -176,10 +178,10 @@ public final class PcmEvaluationUtility {
         return Optional.empty();
     }
 
-    public static Optional<OperationInterface> getRepresentative(Repository repository,
-            org.palladiosimulator.retriever.mocore.surrogate.element.Interface interFace) {
-        List<Interface> interfaces = repository.getInterfaces__Repository();
-        for (Interface repositoryInterface : interfaces) {
+    public static Optional<OperationInterface> getRepresentative(final Repository repository,
+            final org.palladiosimulator.retriever.mocore.surrogate.element.Interface interFace) {
+        final List<Interface> interfaces = repository.getInterfaces__Repository();
+        for (final Interface repositoryInterface : interfaces) {
             if (representSame(interFace.getValue(), repositoryInterface)) {
                 return Optional.of((OperationInterface) repositoryInterface);
             }
@@ -187,14 +189,14 @@ public final class PcmEvaluationUtility {
         return Optional.empty();
     }
 
-    public static boolean containsRepresentative(Repository repository, Component<?> component) {
+    public static boolean containsRepresentative(final Repository repository, final Component<?> component) {
         return getRepresentative(repository, component).isPresent();
     }
 
-    public static boolean containsRepresentative(Repository repository, CompositionRelation composition) {
-        CompositeComponent wrappedComposite = composition.getSource()
+    public static boolean containsRepresentative(final Repository repository, final CompositionRelation composition) {
+        final CompositeComponent wrappedComposite = composition.getSource()
             .getValue();
-        RepositoryComponent wrappedChild = composition.getDestination()
+        final RepositoryComponent wrappedChild = composition.getDestination()
             .getValue();
         return repository.getComponents__Repository()
             .stream()
@@ -209,17 +211,19 @@ public final class PcmEvaluationUtility {
                 .equals(wrappedChild.getEntityName()));
     }
 
-    public static boolean containsRepresentative(Repository repository,
-            org.palladiosimulator.retriever.mocore.surrogate.element.Interface interFace) {
+    public static boolean containsRepresentative(final Repository repository,
+            final org.palladiosimulator.retriever.mocore.surrogate.element.Interface interFace) {
         return getRepresentative(repository, interFace).isPresent();
     }
 
-    public static boolean containsRepresentative(Repository repository, InterfaceProvisionRelation interfaceProvision) {
-        OperationInterface wrappedInterface = interfaceProvision.getDestination()
+    public static boolean containsRepresentative(final Repository repository,
+            final InterfaceProvisionRelation interfaceProvision) {
+        final OperationInterface wrappedInterface = interfaceProvision.getDestination()
             .getValue();
-        Optional<RepositoryComponent> optionalComponent = getRepresentative(repository, interfaceProvision.getSource());
+        final Optional<RepositoryComponent> optionalComponent = getRepresentative(repository,
+                interfaceProvision.getSource());
         if (optionalComponent.isPresent()) {
-            List<ProvidedRole> roles = optionalComponent.get()
+            final List<ProvidedRole> roles = optionalComponent.get()
                 .getProvidedRoles_InterfaceProvidingEntity();
             return roles.stream()
                 .filter(role -> role instanceof OperationProvidedRole)
@@ -231,14 +235,14 @@ public final class PcmEvaluationUtility {
         }
     }
 
-    public static boolean containsRepresentative(Repository repository,
-            InterfaceRequirementRelation interfaceRequirement) {
-        OperationInterface wrappedInterface = interfaceRequirement.getDestination()
+    public static boolean containsRepresentative(final Repository repository,
+            final InterfaceRequirementRelation interfaceRequirement) {
+        final OperationInterface wrappedInterface = interfaceRequirement.getDestination()
             .getValue();
-        Optional<RepositoryComponent> optionalComponent = getRepresentative(repository,
+        final Optional<RepositoryComponent> optionalComponent = getRepresentative(repository,
                 interfaceRequirement.getSource());
         if (optionalComponent.isPresent()) {
-            List<RequiredRole> roles = optionalComponent.get()
+            final List<RequiredRole> roles = optionalComponent.get()
                 .getRequiredRoles_InterfaceRequiringEntity();
             return roles.stream()
                 .filter(role -> role instanceof OperationRequiredRole)
@@ -250,8 +254,9 @@ public final class PcmEvaluationUtility {
         }
     }
 
-    public static boolean containsRepresentative(Repository repository, SignatureProvisionRelation signatureProvision) {
-        Optional<OperationInterface> optionalOperationInterface = getRepresentative(repository,
+    public static boolean containsRepresentative(final Repository repository,
+            final SignatureProvisionRelation signatureProvision) {
+        final Optional<OperationInterface> optionalOperationInterface = getRepresentative(repository,
                 signatureProvision.getDestination());
         return optionalOperationInterface.isPresent() && optionalOperationInterface.get()
             .getSignatures__OperationInterface()
@@ -260,23 +265,23 @@ public final class PcmEvaluationUtility {
                 .getValue(), signature));
     }
 
-    public static boolean containsRepresentative(Repository repository,
-            ServiceEffectSpecificationRelation seffProvision) {
-        Component<?> provider = seffProvision.getSource()
+    public static boolean containsRepresentative(final Repository repository,
+            final ServiceEffectSpecificationRelation seffProvision) {
+        final Component<?> provider = seffProvision.getSource()
             .getSource()
             .getSource();
-        Signature signature = seffProvision.getSource()
+        final Signature signature = seffProvision.getSource()
             .getDestination()
             .getSource();
-        ServiceEffectSpecification seff = seffProvision.getDestination();
+        final ServiceEffectSpecification seff = seffProvision.getDestination();
 
-        Optional<RepositoryComponent> optionalComponent = getRepresentative(repository, provider);
+        final Optional<RepositoryComponent> optionalComponent = getRepresentative(repository, provider);
         if (optionalComponent.isPresent() && optionalComponent.get() instanceof BasicComponent) {
-            BasicComponent component = (BasicComponent) optionalComponent.get();
-            for (org.palladiosimulator.pcm.seff.ServiceEffectSpecification componentSeff : component
+            final BasicComponent component = (BasicComponent) optionalComponent.get();
+            for (final org.palladiosimulator.pcm.seff.ServiceEffectSpecification componentSeff : component
                 .getServiceEffectSpecifications__BasicComponent()) {
                 if (representSame(seff.getValue(), componentSeff)) {
-                    ResourceDemandingSEFF componentRdSeff = (ResourceDemandingSEFF) componentSeff;
+                    final ResourceDemandingSEFF componentRdSeff = (ResourceDemandingSEFF) componentSeff;
                     return representSame(provider.getValue(),
                             componentRdSeff.getBasicComponent_ServiceEffectSpecification())
                             && representSame(signature.getValue(), componentRdSeff.getDescribedService__SEFF())
@@ -290,18 +295,19 @@ public final class PcmEvaluationUtility {
         return false;
     }
 
-    public static boolean containsRepresentative(ResourceEnvironment resourceEnvironment, Deployment container) {
+    public static boolean containsRepresentative(final ResourceEnvironment resourceEnvironment,
+            final Deployment container) {
         return getRepresentative(resourceEnvironment, container).isPresent();
     }
 
-    public static boolean containsRepresentative(ResourceEnvironment resourceEnvironment,
-            DeploymentDeploymentRelation link) {
-        List<LinkingResource> linkingResources = resourceEnvironment.getLinkingResources__ResourceEnvironment();
-        for (LinkingResource linkingResource : linkingResources) {
-            List<ResourceContainer> linkedContainers = new LinkedList<>(
+    public static boolean containsRepresentative(final ResourceEnvironment resourceEnvironment,
+            final DeploymentDeploymentRelation link) {
+        final List<LinkingResource> linkingResources = resourceEnvironment.getLinkingResources__ResourceEnvironment();
+        for (final LinkingResource linkingResource : linkingResources) {
+            final List<ResourceContainer> linkedContainers = new LinkedList<>(
                     linkingResource.getConnectedResourceContainers_LinkingResource());
             boolean containsContainers = true;
-            for (Deployment deployment : List.of(link.getSource(), link.getDestination())) {
+            for (final Deployment deployment : List.of(link.getSource(), link.getDestination())) {
                 containsContainers = containsContainers
                         && linkedContainers.removeIf(element -> representSame(deployment.getValue(), element));
             }
@@ -312,17 +318,17 @@ public final class PcmEvaluationUtility {
         return false;
     }
 
-    public static boolean containsRepresentative(ResourceEnvironment resourceEnvironment,
-            LinkResourceSpecification relationSpecification, Collection<Deployment> deployments) {
-        CommunicationLinkResourceSpecification specification = relationSpecification.getValue();
-        List<LinkingResource> linkingResources = resourceEnvironment.getLinkingResources__ResourceEnvironment();
-        for (LinkingResource linkingResource : linkingResources) {
-            List<ResourceContainer> linkedContainers = new LinkedList<>(
+    public static boolean containsRepresentative(final ResourceEnvironment resourceEnvironment,
+            final LinkResourceSpecification relationSpecification, final Collection<Deployment> deployments) {
+        final CommunicationLinkResourceSpecification specification = relationSpecification.getValue();
+        final List<LinkingResource> linkingResources = resourceEnvironment.getLinkingResources__ResourceEnvironment();
+        for (final LinkingResource linkingResource : linkingResources) {
+            final List<ResourceContainer> linkedContainers = new LinkedList<>(
                     linkingResource.getConnectedResourceContainers_LinkingResource());
-            CommunicationLinkResourceSpecification linkSpecification = linkingResource
+            final CommunicationLinkResourceSpecification linkSpecification = linkingResource
                 .getCommunicationLinkResourceSpecifications_LinkingResource();
             boolean containsContainers = true;
-            for (Deployment deployment : deployments) {
+            for (final Deployment deployment : deployments) {
                 containsContainers = containsContainers
                         && linkedContainers.removeIf(element -> representSame(deployment.getValue(), element));
             }
@@ -336,15 +342,15 @@ public final class PcmEvaluationUtility {
         return false;
     }
 
-    public static boolean containsRepresentative(Allocation allocation,
-            ComponentAllocationRelation allocationRelation) {
-        Component<?> component = allocationRelation.getSource();
-        Deployment deployment = allocationRelation.getDestination();
+    public static boolean containsRepresentative(final Allocation allocation,
+            final ComponentAllocationRelation allocationRelation) {
+        final Component<?> component = allocationRelation.getSource();
+        final Deployment deployment = allocationRelation.getDestination();
 
-        List<AllocationContext> allocationContexts = allocation.getAllocationContexts_Allocation();
-        for (AllocationContext allocationContext : allocationContexts) {
+        final List<AllocationContext> allocationContexts = allocation.getAllocationContexts_Allocation();
+        for (final AllocationContext allocationContext : allocationContexts) {
             if (representSame(deployment.getValue(), allocationContext.getResourceContainer_AllocationContext())) {
-                AssemblyContext assemblyContext = allocationContext.getAssemblyContext_AllocationContext();
+                final AssemblyContext assemblyContext = allocationContext.getAssemblyContext_AllocationContext();
                 if (representSame(component.getValue(), assemblyContext.getEncapsulatedComponent__AssemblyContext())) {
                     return true;
                 }
@@ -353,9 +359,9 @@ public final class PcmEvaluationUtility {
         return false;
     }
 
-    public static boolean containsRepresentative(System system, Component<?> component) {
-        List<AssemblyContext> assemblyContexts = system.getAssemblyContexts__ComposedStructure();
-        for (AssemblyContext assemblyContext : assemblyContexts) {
+    public static boolean containsRepresentative(final System system, final Component<?> component) {
+        final List<AssemblyContext> assemblyContexts = system.getAssemblyContexts__ComposedStructure();
+        for (final AssemblyContext assemblyContext : assemblyContexts) {
             if (representSame(component.getValue(), assemblyContext.getEncapsulatedComponent__AssemblyContext())) {
                 return true;
             }
@@ -363,33 +369,34 @@ public final class PcmEvaluationUtility {
         return false;
     }
 
-    public static boolean containsRepresentative(System system, ComponentAssemblyRelation assemblyRelation) {
-        RepositoryComponent provider = assemblyRelation.getSource()
+    public static boolean containsRepresentative(final System system,
+            final ComponentAssemblyRelation assemblyRelation) {
+        final RepositoryComponent provider = assemblyRelation.getSource()
             .getSource()
             .getValue();
-        RepositoryComponent consumer = assemblyRelation.getDestination()
+        final RepositoryComponent consumer = assemblyRelation.getDestination()
             .getSource()
             .getValue();
-        OperationInterface providerConsumerInterface = assemblyRelation.getSource()
+        final OperationInterface providerConsumerInterface = assemblyRelation.getSource()
             .getDestination()
             .getValue();
 
-        List<AssemblyConnector> assemblyConnectors = system.getConnectors__ComposedStructure()
+        final List<AssemblyConnector> assemblyConnectors = system.getConnectors__ComposedStructure()
             .stream()
             .filter(connector -> connector instanceof AssemblyConnector)
             .map(connector -> (AssemblyConnector) connector)
             .collect(Collectors.toList());
-        for (AssemblyConnector connector : assemblyConnectors) {
-            RepositoryComponent connectorProvider = connector.getProvidingAssemblyContext_AssemblyConnector()
+        for (final AssemblyConnector connector : assemblyConnectors) {
+            final RepositoryComponent connectorProvider = connector.getProvidingAssemblyContext_AssemblyConnector()
                 .getEncapsulatedComponent__AssemblyContext();
-            RepositoryComponent connectorConsumer = connector.getRequiringAssemblyContext_AssemblyConnector()
+            final RepositoryComponent connectorConsumer = connector.getRequiringAssemblyContext_AssemblyConnector()
                 .getEncapsulatedComponent__AssemblyContext();
-            OperationInterface connectorProviderConsumerInterface = connector.getProvidedRole_AssemblyConnector()
+            final OperationInterface connectorProviderConsumerInterface = connector.getProvidedRole_AssemblyConnector()
                 .getProvidedInterface__OperationProvidedRole();
 
-            boolean sameProvider = representSame(provider, connectorProvider);
-            boolean sameConsumer = representSame(consumer, connectorConsumer);
-            boolean sameInterface = representSame(providerConsumerInterface, connectorProviderConsumerInterface);
+            final boolean sameProvider = representSame(provider, connectorProvider);
+            final boolean sameConsumer = representSame(consumer, connectorConsumer);
+            final boolean sameInterface = representSame(providerConsumerInterface, connectorProviderConsumerInterface);
             if (sameProvider && sameConsumer && sameInterface) {
                 return true;
             }
@@ -397,16 +404,16 @@ public final class PcmEvaluationUtility {
         return false;
     }
 
-    private static <T> boolean areCollectionsEqual(Collection<T> collection, Collection<T> otherCollection,
-            BiFunction<T, T, Boolean> comparisonFunction) {
+    private static <T> boolean areCollectionsEqual(final Collection<T> collection, final Collection<T> otherCollection,
+            final BiFunction<T, T, Boolean> comparisonFunction) {
         if (collection.isEmpty() && otherCollection.isEmpty()) {
             return true;
         } else if (collection.size() != otherCollection.size()) {
             return false;
         }
 
-        List<T> list = new LinkedList<>(collection);
-        List<T> otherList = new LinkedList<>(otherCollection);
+        final List<T> list = new LinkedList<>(collection);
+        final List<T> otherList = new LinkedList<>(otherCollection);
         for (int i = 0; i < list.size(); i++) {
             if (!comparisonFunction.apply(list.get(i), otherList.get(i))) {
                 return false;
@@ -415,16 +422,16 @@ public final class PcmEvaluationUtility {
         return true;
     }
 
-    private static <T> boolean areCollectionsEqualIgnoringOrder(Collection<T> collection,
-            Collection<T> otherCollection) {
+    private static <T> boolean areCollectionsEqualIgnoringOrder(final Collection<T> collection,
+            final Collection<T> otherCollection) {
         return collection.containsAll(otherCollection) && otherCollection.containsAll(collection);
     }
 
-    private static <T extends Identifier> String mapToIdentifier(T element) {
+    private static <T extends Identifier> String mapToIdentifier(final T element) {
         return element != null ? element.getId() : null;
     }
 
-    private static List<String> mapToIdentifier(Collection<? extends Identifier> collection) {
+    private static List<String> mapToIdentifier(final Collection<? extends Identifier> collection) {
         return collection.stream()
             .dropWhile(element -> element == null)
             .map(Identifier::getId)

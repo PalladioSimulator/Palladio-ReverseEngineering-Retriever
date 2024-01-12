@@ -14,24 +14,24 @@ public class PCMDetectionResult {
     private final Set<Composite> composites;
     private final Map<OperationInterface, List<Operation>> operationInterfaces;
 
-    public PCMDetectionResult(Map<CompUnitOrName, ComponentBuilder> components,
-            Map<String, CompositeBuilder> composites, ProvisionsBuilder compositeProvisions,
-            RequirementsBuilder compositeRequirements) {
+    public PCMDetectionResult(final Map<CompUnitOrName, ComponentBuilder> components,
+            final Map<String, CompositeBuilder> composites, final ProvisionsBuilder compositeProvisions,
+            final RequirementsBuilder compositeRequirements) {
 
         // Collect globally visible provisions
-        Set<Component> temporaryComponents = PCMDetectionResult.createComponents(components, compositeProvisions,
+        final Set<Component> temporaryComponents = PCMDetectionResult.createComponents(components, compositeProvisions,
                 compositeRequirements, Set.of());
-        Set<Component> connectedComponents = PCMDetectionResult.collectConnectedComponents(temporaryComponents,
+        final Set<Component> connectedComponents = PCMDetectionResult.collectConnectedComponents(temporaryComponents,
                 composites, compositeProvisions, compositeRequirements);
-        Set<Composite> temporaryComposites = PCMDetectionResult.createCompositeComponents(connectedComponents,
+        final Set<Composite> temporaryComposites = PCMDetectionResult.createCompositeComponents(connectedComponents,
                 composites, compositeProvisions, compositeRequirements, Set.of());
-        Set<OperationInterface> visibleProvisions = PCMDetectionResult.collectVisibleProvisions(connectedComponents,
-                temporaryComposites);
+        final Set<OperationInterface> visibleProvisions = PCMDetectionResult
+            .collectVisibleProvisions(connectedComponents, temporaryComposites);
 
         // TODO: Do not rebuild everything, that is theoretically not necessary since provisions do
         // not change.
 
-        Map<CompUnitOrName, ComponentBuilder> connectedComponentBuilders = connectedComponents.stream()
+        final Map<CompUnitOrName, ComponentBuilder> connectedComponentBuilders = connectedComponents.stream()
             .map(Component::identifier)
             .map(components::get)
             .collect(Collectors.toMap(ComponentBuilder::identifier, x -> x));
@@ -41,28 +41,28 @@ public class PCMDetectionResult {
                 compositeRequirements, visibleProvisions);
         this.composites = PCMDetectionResult.createCompositeComponents(this.components, composites, compositeProvisions,
                 compositeRequirements, visibleProvisions);
-        this.operationInterfaces = createOperationInterfaces();
+        this.operationInterfaces = this.createOperationInterfaces();
     }
 
-    private static Set<Component> collectConnectedComponents(Set<Component> temporaryComponents,
-            Map<String, CompositeBuilder> composites, ProvisionsBuilder compositeProvisions,
-            RequirementsBuilder compositeRequirements) {
-        CompositeBuilder metaCompositeBuilder = new CompositeBuilder("Meta Composite");
-        for (CompositeBuilder composite : composites.values()) {
-            for (ComponentBuilder part : composite.getParts()) {
+    private static Set<Component> collectConnectedComponents(final Set<Component> temporaryComponents,
+            final Map<String, CompositeBuilder> composites, final ProvisionsBuilder compositeProvisions,
+            final RequirementsBuilder compositeRequirements) {
+        final CompositeBuilder metaCompositeBuilder = new CompositeBuilder("Meta Composite");
+        for (final CompositeBuilder composite : composites.values()) {
+            for (final ComponentBuilder part : composite.getParts()) {
                 metaCompositeBuilder.addPart(part);
             }
         }
-        Composite metaComposite = metaCompositeBuilder.construct(temporaryComponents,
+        final Composite metaComposite = metaCompositeBuilder.construct(temporaryComponents,
                 new RequirementsBuilder().create(Set.of(), Set.of()), new ProvisionsBuilder().create(Set.of()),
                 Set.of());
         return metaComposite.parts();
     }
 
-    private static Set<Component> createComponents(Map<CompUnitOrName, ComponentBuilder> components,
-            ProvisionsBuilder compositeProvisions, RequirementsBuilder compositeRequirements,
-            Set<OperationInterface> visibleProvisions) {
-        List<OperationInterface> allDependencies = new LinkedList<>();
+    private static Set<Component> createComponents(final Map<CompUnitOrName, ComponentBuilder> components,
+            final ProvisionsBuilder compositeProvisions, final RequirementsBuilder compositeRequirements,
+            final Set<OperationInterface> visibleProvisions) {
+        final List<OperationInterface> allDependencies = new LinkedList<>();
         // TODO: Aren't the dependencies of free components missing here? Is that alright?
         allDependencies.addAll(compositeRequirements.toList());
         allDependencies.addAll(compositeProvisions.toList());
@@ -73,23 +73,23 @@ public class PCMDetectionResult {
             .collect(Collectors.toSet());
     }
 
-    private static Set<Composite> createCompositeComponents(Set<Component> freeComponents,
-            Map<String, CompositeBuilder> composites, ProvisionsBuilder compositeProvisions,
-            RequirementsBuilder compositeRequirements, Set<OperationInterface> visibleProvisions) {
+    private static Set<Composite> createCompositeComponents(final Set<Component> freeComponents,
+            final Map<String, CompositeBuilder> composites, final ProvisionsBuilder compositeProvisions,
+            final RequirementsBuilder compositeRequirements, final Set<OperationInterface> visibleProvisions) {
 
         // Construct composites.
         Set<Composite> constructedComposites = new HashSet<>();
-        List<Composite> allComposites = composites.values()
+        final List<Composite> allComposites = composites.values()
             .stream()
             .map(x -> x.construct(freeComponents, compositeRequirements.create(visibleProvisions, visibleProvisions),
                     compositeProvisions.create(visibleProvisions), visibleProvisions))
             .collect(Collectors.toList());
 
         // Remove redundant composites.
-        Set<Composite> redundantComposites = new HashSet<>();
+        final Set<Composite> redundantComposites = new HashSet<>();
         for (int i = 0; i < allComposites.size(); ++i) {
-            Composite subject = allComposites.get(i);
-            long subsetCount = allComposites.subList(i + 1, allComposites.size())
+            final Composite subject = allComposites.get(i);
+            final long subsetCount = allComposites.subList(i + 1, allComposites.size())
                 .stream()
                 .filter(x -> subject.isSubsetOf(x) || x.isSubsetOf(subject))
                 .count();
@@ -112,21 +112,21 @@ public class PCMDetectionResult {
         return constructedComposites;
     }
 
-    private static Set<OperationInterface> collectVisibleProvisions(Set<Component> components,
-            Set<Composite> composites) {
+    private static Set<OperationInterface> collectVisibleProvisions(final Set<Component> components,
+            final Set<Composite> composites) {
         // Collect globally visible provisions
-        Set<OperationInterface> provisions = new HashSet<>();
+        final Set<OperationInterface> provisions = new HashSet<>();
         // 1. Collect composite provisions
         composites.stream()
             .flatMap(x -> x.provisions()
                 .stream())
             .forEach(provisions::add);
         // 2. Collect bare components
-        Set<Component> containedComponents = composites.stream()
+        final Set<Component> containedComponents = composites.stream()
             .flatMap(x -> x.parts()
                 .stream())
             .collect(Collectors.toSet());
-        Set<Component> bareComponents = components.stream()
+        final Set<Component> bareComponents = components.stream()
             .filter(x -> !containedComponents.contains(x))
             .collect(Collectors.toSet());
         // 3. Collect bare component provisions
@@ -142,19 +142,23 @@ public class PCMDetectionResult {
 
     private Map<OperationInterface, List<Operation>> createOperationInterfaces() {
         // TODO: This has to include composite interfaces as well
-        List<Map<OperationInterface, List<Operation>>> constructedOperationInterfaces = getComponents().stream()
+        final List<Map<OperationInterface, List<Operation>>> constructedOperationInterfaces = this.getComponents()
+            .stream()
             .map(x -> x.provisions()
                 .simplified())
             .collect(Collectors.toList());
-        getComponents().stream()
+        this.getComponents()
+            .stream()
             .map(x -> x.requirements()
                 .simplified())
             .forEach(x -> constructedOperationInterfaces.add(x));
-        getCompositeComponents().stream()
+        this.getCompositeComponents()
+            .stream()
             .flatMap(x -> x.provisions()
                 .stream())
             .forEach(x -> constructedOperationInterfaces.add(x.simplified()));
-        getCompositeComponents().stream()
+        this.getCompositeComponents()
+            .stream()
             .flatMap(x -> x.requirements()
                 .stream())
             .forEach(x -> constructedOperationInterfaces.add(x.simplified()));
@@ -162,14 +166,14 @@ public class PCMDetectionResult {
     }
 
     public Set<Component> getComponents() {
-        return components;
+        return this.components;
     }
 
     public Set<Composite> getCompositeComponents() {
-        return composites;
+        return this.composites;
     }
 
     public Map<OperationInterface, List<Operation>> getOperationInterfaces() {
-        return operationInterfaces;
+        return this.operationInterfaces;
     }
 }

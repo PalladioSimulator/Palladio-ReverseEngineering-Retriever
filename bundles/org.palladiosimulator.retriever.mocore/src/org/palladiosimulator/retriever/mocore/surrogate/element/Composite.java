@@ -5,13 +5,13 @@ import org.palladiosimulator.pcm.repository.CompositeComponent;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 
 public class Composite extends Component<CompositeComponent> {
-    public Composite(CompositeComponent value, boolean isPlaceholder) {
+    public Composite(final CompositeComponent value, final boolean isPlaceholder) {
         super(value, isPlaceholder);
     }
 
     public static Composite getUniquePlaceholder() {
-        String identifier = "Placeholder_" + getUniqueValue();
-        RepositoryComponent value = new FluentRepositoryFactory().newCompositeComponent()
+        final String identifier = "Placeholder_" + getUniqueValue();
+        final RepositoryComponent value = new FluentRepositoryFactory().newCompositeComponent()
             .withName(identifier)
             .build();
         return new Composite((CompositeComponent) value, true);

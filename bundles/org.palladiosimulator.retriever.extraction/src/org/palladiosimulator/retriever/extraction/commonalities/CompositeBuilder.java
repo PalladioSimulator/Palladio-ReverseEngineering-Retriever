@@ -18,48 +18,48 @@ import org.palladiosimulator.retriever.extraction.engine.MapMerger;
 
 public class CompositeBuilder {
 
-    private String name;
-    private Set<ComponentBuilder> explicitParts = new HashSet<>();
+    private final String name;
+    private final Set<ComponentBuilder> explicitParts = new HashSet<>();
 
-    public CompositeBuilder(String name) {
+    public CompositeBuilder(final String name) {
         this.name = name;
     }
 
-    public void addPart(ComponentBuilder componentBuilder) {
-        explicitParts.add(componentBuilder);
+    public void addPart(final ComponentBuilder componentBuilder) {
+        this.explicitParts.add(componentBuilder);
     }
 
-    public boolean hasPart(CompUnitOrName identifier) {
-        return explicitParts.stream()
+    public boolean hasPart(final CompUnitOrName identifier) {
+        return this.explicitParts.stream()
             .anyMatch(part -> part.identifier()
                 .equals(identifier));
     }
 
     public Collection<ComponentBuilder> getParts() {
-        return Set.copyOf(explicitParts);
+        return Set.copyOf(this.explicitParts);
     }
 
-    public Composite construct(Collection<Component> allComponents, Requirements compositeRequirements,
-            Provisions compositeProvisions, Collection<OperationInterface> visibleProvisions) {
-        Logger.getLogger(getClass())
-            .warn("Constructing composite component " + name);
+    public Composite construct(final Collection<Component> allComponents, final Requirements compositeRequirements,
+            final Provisions compositeProvisions, final Collection<OperationInterface> visibleProvisions) {
+        Logger.getLogger(this.getClass())
+            .warn("Constructing composite component " + this.name);
 
-        List<OperationInterface> allDependencies = new LinkedList<>();
-        for (OperationInterface requirement : compositeRequirements) {
+        final List<OperationInterface> allDependencies = new LinkedList<>();
+        for (final OperationInterface requirement : compositeRequirements) {
             allDependencies.add(requirement);
         }
-        for (OperationInterface provision : compositeProvisions) {
+        for (final OperationInterface provision : compositeProvisions) {
             allDependencies.add(provision);
         }
 
         // Create and add all explicit parts.
-        Set<Component> parts = explicitParts.stream()
+        final Set<Component> parts = this.explicitParts.stream()
             .map(x -> x.create(allDependencies, visibleProvisions))
             .collect(Collectors.toSet());
 
-        Set<Component> remainingComponents = new HashSet<>(allComponents);
+        final Set<Component> remainingComponents = new HashSet<>(allComponents);
         remainingComponents.removeAll(parts);
-        Set<OperationInterface> internalInterfaces = new HashSet<>();
+        final Set<OperationInterface> internalInterfaces = new HashSet<>();
 
         int previousPartCount = 0;
         int previousInternalInterfaceCount = 0;
@@ -73,21 +73,21 @@ public class CompositeBuilder {
                     internalInterfaces);
         } while (parts.size() > previousPartCount && internalInterfaces.size() > previousInternalInterfaceCount);
 
-        List<OperationInterface> requirements = new ArrayList<>();
-        List<Map<OperationInterface, List<OperationInterface>>> provisions = new ArrayList<>();
+        final List<OperationInterface> requirements = new ArrayList<>();
+        final List<Map<OperationInterface, List<OperationInterface>>> provisions = new ArrayList<>();
 
-        for (Component part : parts) {
+        for (final Component part : parts) {
             requirements.addAll(part.requirements()
                 .get());
             provisions.add(part.provisions()
                 .getGrouped());
         }
 
-        Set<OperationInterface> externalRequirements = requirements.stream()
+        final Set<OperationInterface> externalRequirements = requirements.stream()
             .filter(x -> compositeRequirements.containsEntire(x))
             .collect(Collectors.toSet());
 
-        Set<OperationInterface> externalProvisions = MapMerger.merge(provisions)
+        final Set<OperationInterface> externalProvisions = MapMerger.merge(provisions)
             .entrySet()
             .stream()
             .filter(entry -> entry.getValue()
@@ -96,24 +96,24 @@ public class CompositeBuilder {
             .map(entry -> entry.getKey())
             .collect(Collectors.toSet());
 
-        return new Composite(name, parts, externalRequirements, externalProvisions, internalInterfaces);
+        return new Composite(this.name, parts, externalRequirements, externalProvisions, internalInterfaces);
     }
 
     // Writes to remainingComopnents, parts, and internalInterfaces.
-    private static void propagateProvisions(Set<Component> remainingComponents,
-            final Requirements compositeRequirements, final Provisions compositeProvisions, Set<Component> parts,
-            Set<OperationInterface> internalInterfaces) {
+    private static void propagateProvisions(final Set<Component> remainingComponents,
+            final Requirements compositeRequirements, final Provisions compositeProvisions, final Set<Component> parts,
+            final Set<OperationInterface> internalInterfaces) {
 
-        List<Component> newParts = new LinkedList<>();
-        for (Component providingPart : parts) {
-            List<OperationInterface> traversedInterfaces = findRequiringComponents(remainingComponents,
+        final List<Component> newParts = new LinkedList<>();
+        for (final Component providingPart : parts) {
+            final List<OperationInterface> traversedInterfaces = findRequiringComponents(remainingComponents,
                     compositeRequirements, compositeProvisions, newParts, providingPart);
 
-            Queue<OperationInterface> sortedInterfaces = new PriorityQueue<>(traversedInterfaces);
+            final Queue<OperationInterface> sortedInterfaces = new PriorityQueue<>(traversedInterfaces);
             while (!sortedInterfaces.isEmpty()) {
-                OperationInterface iface = sortedInterfaces.poll();
+                final OperationInterface iface = sortedInterfaces.poll();
                 boolean isRoot = true;
-                for (OperationInterface rootInterface : internalInterfaces) {
+                for (final OperationInterface rootInterface : internalInterfaces) {
                     if (iface.isPartOf(rootInterface)) {
                         isRoot = false;
                         break;
@@ -133,20 +133,20 @@ public class CompositeBuilder {
     }
 
     // Writes to remainingComopnents, parts, and internalInterfaces.
-    private static void propagateRequirements(Set<Component> remainingComponents,
-            final Requirements compositeRequirements, final Provisions compositeProvisions, Set<Component> parts,
-            Set<OperationInterface> internalInterfaces) {
+    private static void propagateRequirements(final Set<Component> remainingComponents,
+            final Requirements compositeRequirements, final Provisions compositeProvisions, final Set<Component> parts,
+            final Set<OperationInterface> internalInterfaces) {
 
-        List<Component> newParts = new LinkedList<>();
-        for (Component requiringPart : parts) {
-            List<OperationInterface> traversedInterfaces = findProvidingComponents(remainingComponents,
+        final List<Component> newParts = new LinkedList<>();
+        for (final Component requiringPart : parts) {
+            final List<OperationInterface> traversedInterfaces = findProvidingComponents(remainingComponents,
                     compositeRequirements, compositeProvisions, newParts, requiringPart);
 
-            Queue<OperationInterface> sortedInterfaces = new PriorityQueue<>(traversedInterfaces);
+            final Queue<OperationInterface> sortedInterfaces = new PriorityQueue<>(traversedInterfaces);
             while (!sortedInterfaces.isEmpty()) {
-                OperationInterface iface = sortedInterfaces.poll();
+                final OperationInterface iface = sortedInterfaces.poll();
                 boolean isRoot = true;
-                for (OperationInterface rootInterface : internalInterfaces) {
+                for (final OperationInterface rootInterface : internalInterfaces) {
                     if (iface.isPartOf(rootInterface)) {
                         isRoot = false;
                         break;
@@ -166,11 +166,11 @@ public class CompositeBuilder {
     }
 
     // May remove components from remainingComponents.
-    private static List<OperationInterface> findRequiringComponents(Set<Component> remainingComponents,
-            final Requirements compositeRequirements, final Provisions compositeProvisions, List<Component> newParts,
-            final Component providingComponent) {
+    private static List<OperationInterface> findRequiringComponents(final Set<Component> remainingComponents,
+            final Requirements compositeRequirements, final Provisions compositeProvisions,
+            final List<Component> newParts, final Component providingComponent) {
 
-        Stack<OperationInterface> provisions = new Stack<>();
+        final Stack<OperationInterface> provisions = new Stack<>();
         providingComponent.provisions()
             .get()
             .stream()
@@ -180,10 +180,10 @@ public class CompositeBuilder {
             .filter(x -> !compositeProvisions.containsEntire(x))
             .forEach(provisions::add);
 
-        List<OperationInterface> traversedOperations = new ArrayList<>();
+        final List<OperationInterface> traversedOperations = new ArrayList<>();
         while (!provisions.isEmpty()) {
-            OperationInterface provision = provisions.pop();
-            Set<Component> requiringComponents = remainingComponents.stream()
+            final OperationInterface provision = provisions.pop();
+            final Set<Component> requiringComponents = remainingComponents.stream()
                 .filter(x -> x.requirements()
                     .containsPartOf(provision))
                 .filter(x -> !providingComponent.equals(x))
@@ -201,11 +201,11 @@ public class CompositeBuilder {
     }
 
     // May remove components from remainingComponents.
-    private static List<OperationInterface> findProvidingComponents(Set<Component> remainingComponents,
-            final Requirements compositeRequirements, final Provisions compositeProvisions, List<Component> newParts,
-            final Component requiringComponent) {
+    private static List<OperationInterface> findProvidingComponents(final Set<Component> remainingComponents,
+            final Requirements compositeRequirements, final Provisions compositeProvisions,
+            final List<Component> newParts, final Component requiringComponent) {
 
-        Stack<OperationInterface> requirements = new Stack<>();
+        final Stack<OperationInterface> requirements = new Stack<>();
         requiringComponent.requirements()
             .get()
             .stream()
@@ -215,10 +215,10 @@ public class CompositeBuilder {
             .filter(x -> !compositeProvisions.containsEntire(x))
             .forEach(requirements::add);
 
-        List<OperationInterface> traversedOperations = new ArrayList<>();
+        final List<OperationInterface> traversedOperations = new ArrayList<>();
         while (!requirements.isEmpty()) {
-            OperationInterface requirement = requirements.pop();
-            Set<Component> providingComponents = remainingComponents.stream()
+            final OperationInterface requirement = requirements.pop();
+            final Set<Component> providingComponents = remainingComponents.stream()
                 .filter(x -> x.provisions()
                     .containsPartOf(requirement))
                 .filter(x -> !requiringComponent.equals(x))
@@ -237,21 +237,18 @@ public class CompositeBuilder {
 
     @Override
     public int hashCode() {
-        return Objects.hash(explicitParts, name);
+        return Objects.hash(this.explicitParts, this.name);
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if ((obj == null) || (this.getClass() != obj.getClass())) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        CompositeBuilder other = (CompositeBuilder) obj;
-        return Objects.equals(explicitParts, other.explicitParts) && Objects.equals(name, other.name);
+        final CompositeBuilder other = (CompositeBuilder) obj;
+        return Objects.equals(this.explicitParts, other.explicitParts) && Objects.equals(this.name, other.name);
     }
 }

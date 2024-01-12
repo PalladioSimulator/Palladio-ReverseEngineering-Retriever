@@ -20,9 +20,9 @@ public abstract class ComponentProcessorTest<T extends Component<?>>
     @DisabledIf(TEST_API_ONLY_METHOD_NAME)
     public void testRefineWithValidElementAddsCorrectImplications() {
         // Test data
-        PcmSurrogate model = createEmptyModel();
-        ComponentProcessor<T> processor = createProcessor(model);
-        T element = createUniqueReplaceable();
+        final PcmSurrogate model = this.createEmptyModel();
+        final ComponentProcessor<T> processor = this.createProcessor(model);
+        final T element = this.createUniqueReplaceable();
 
         // Assertions: Pre-execution
         assertTrue(processor.getImplications()
@@ -30,15 +30,15 @@ public abstract class ComponentProcessorTest<T extends Component<?>>
 
         // Execution
         processor.refine(element);
-        Set<Replaceable> implications = processor.getImplications();
+        final Set<Replaceable> implications = processor.getImplications();
 
         // Assertions: Post-execution
         assertEquals(1, implications.size());
-        Replaceable implication = implications.stream()
+        final Replaceable implication = implications.stream()
             .findFirst()
             .orElseThrow();
         assertEquals(ComponentAllocationRelation.class, implication.getClass());
-        ComponentAllocationRelation relation = (ComponentAllocationRelation) implication;
+        final ComponentAllocationRelation relation = (ComponentAllocationRelation) implication;
         assertEquals(element, relation.getSource());
         assertTrue(relation.isPlaceholder());
         assertTrue(relation.getDestination()

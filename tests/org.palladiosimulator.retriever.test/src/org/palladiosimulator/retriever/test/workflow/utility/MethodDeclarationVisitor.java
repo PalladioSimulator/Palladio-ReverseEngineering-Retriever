@@ -11,19 +11,19 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 public final class MethodDeclarationVisitor extends ASTVisitor {
     private final List<MethodDeclaration> declarations = new ArrayList<>();
 
-    public static List<MethodDeclaration> perform(ASTNode node) {
-        MethodDeclarationVisitor visitor = new MethodDeclarationVisitor();
+    public static List<MethodDeclaration> perform(final ASTNode node) {
+        final MethodDeclarationVisitor visitor = new MethodDeclarationVisitor();
         node.accept(visitor);
         return visitor.getMethods();
     }
 
     @Override
     public boolean visit(final MethodDeclaration method) {
-        declarations.add(method);
+        this.declarations.add(method);
         return super.visit(method);
     }
 
     public List<MethodDeclaration> getMethods() {
-        return Collections.unmodifiableList(declarations);
+        return Collections.unmodifiableList(this.declarations);
     }
 }

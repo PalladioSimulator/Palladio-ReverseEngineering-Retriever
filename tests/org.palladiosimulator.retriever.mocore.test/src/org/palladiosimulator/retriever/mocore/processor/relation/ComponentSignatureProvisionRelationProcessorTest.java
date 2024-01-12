@@ -15,35 +15,36 @@ public class ComponentSignatureProvisionRelationProcessorTest extends
     private static final Interface RELATION_INTERFACE = Interface.getUniquePlaceholder();
 
     @Override
-    protected ComponentSignatureProvisionRelation createRelation(InterfaceProvisionRelation source,
-            SignatureProvisionRelation destination, boolean isPlaceholder) {
+    protected ComponentSignatureProvisionRelation createRelation(final InterfaceProvisionRelation source,
+            final SignatureProvisionRelation destination, final boolean isPlaceholder) {
         return new ComponentSignatureProvisionRelation(source, destination, isPlaceholder);
     }
 
     @Override
     protected InterfaceProvisionRelation getUniqueNonPlaceholderSourceEntity() {
-        Component<?> source = Component.getUniquePlaceholder();
+        final Component<?> source = Component.getUniquePlaceholder();
         return new InterfaceProvisionRelation(source, RELATION_INTERFACE, false);
     }
 
     @Override
-    protected InterfaceProvisionRelation getPlaceholderOfSourceEntity(InterfaceProvisionRelation source) {
+    protected InterfaceProvisionRelation getPlaceholderOfSourceEntity(final InterfaceProvisionRelation source) {
         return new InterfaceProvisionRelation(source.getSource(), source.getDestination(), true);
     }
 
     @Override
     protected SignatureProvisionRelation getUniqueNonPlaceholderDestinationEntity() {
-        Signature signature = Signature.getUniquePlaceholder();
+        final Signature signature = Signature.getUniquePlaceholder();
         return new SignatureProvisionRelation(signature, RELATION_INTERFACE, false);
     }
 
     @Override
-    protected SignatureProvisionRelation getPlaceholderOfDestinationEntity(SignatureProvisionRelation destination) {
+    protected SignatureProvisionRelation getPlaceholderOfDestinationEntity(
+            final SignatureProvisionRelation destination) {
         return new SignatureProvisionRelation(destination.getSource(), destination.getDestination(), true);
     }
 
     @Override
-    protected ComponentSignatureProvisionRelationProcessor createProcessor(PcmSurrogate model) {
+    protected ComponentSignatureProvisionRelationProcessor createProcessor(final PcmSurrogate model) {
         return new ComponentSignatureProvisionRelationProcessor(model);
     }
 

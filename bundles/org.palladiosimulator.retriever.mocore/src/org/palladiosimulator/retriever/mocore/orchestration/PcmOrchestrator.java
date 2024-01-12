@@ -24,7 +24,7 @@ import org.palladiosimulator.retriever.mocore.surrogate.PcmSurrogate;
 import tools.mdsd.mocore.framework.orchestration.Orchestrator;
 
 public class PcmOrchestrator extends Orchestrator<PcmSurrogate> {
-    public PcmOrchestrator(PcmSurrogate model) {
+    public PcmOrchestrator(final PcmSurrogate model) {
         super(model, new SignatureProcessor(model), new InterfaceProcessor(model), new DeploymentProcessor(model),
                 new LinkResourceSpecificationProcessor(model), new ServiceEffectSpecificationProcessor(model),
                 new SignatureProvisionRelationProcessor(model), new InterfaceProvisionRelationProcessor(model),

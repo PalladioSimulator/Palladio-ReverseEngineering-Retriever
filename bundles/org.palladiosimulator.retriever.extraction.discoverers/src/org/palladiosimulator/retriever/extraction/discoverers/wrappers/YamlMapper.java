@@ -7,20 +7,20 @@ import java.util.function.Function;
 public class YamlMapper implements Function<String, Optional<Object>> {
     private final Iterable<Object> subfiles;
 
-    public YamlMapper(Iterable<Object> content) {
+    public YamlMapper(final Iterable<Object> content) {
         this.subfiles = content;
     }
 
     @Override
-    public Optional<Object> apply(String fullKey) {
-        String[] segments = fullKey.split("\\.");
+    public Optional<Object> apply(final String fullKey) {
+        final String[] segments = fullKey.split("\\.");
 
-        for (Object subfile : subfiles) {
+        for (final Object subfile : this.subfiles) {
 
             boolean failed = false;
             Object currentNode = subfile;
-            for (String segment : segments) {
-                Optional<Object> nextNode = load(segment, currentNode);
+            for (final String segment : segments) {
+                final Optional<Object> nextNode = this.load(segment, currentNode);
                 if (nextNode.isEmpty()) {
                     failed = true;
                     break;
@@ -36,9 +36,9 @@ public class YamlMapper implements Function<String, Optional<Object>> {
         return Optional.empty();
     }
 
-    private Optional<Object> load(String key, Object yamlObject) {
-        if (yamlObject instanceof Map map) {
-            Object value = map.get(key);
+    private Optional<Object> load(final String key, final Object yamlObject) {
+        if (yamlObject instanceof final Map map) {
+            final Object value = map.get(key);
             return Optional.ofNullable(value);
         }
         return Optional.empty();

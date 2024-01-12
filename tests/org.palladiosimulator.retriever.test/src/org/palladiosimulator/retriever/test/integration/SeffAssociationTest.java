@@ -28,11 +28,11 @@ public class SeffAssociationTest extends CaseStudyTest {
      */
     @Test
     void allAssociationsReferToMethods() {
-        RetrieverBlackboard blackboard = getBlackboard();
-        Map<ASTNode, ServiceEffectSpecification> associations = blackboard.getSeffAssociations();
+        final RetrieverBlackboard blackboard = this.getBlackboard();
+        final Map<ASTNode, ServiceEffectSpecification> associations = blackboard.getSeffAssociations();
 
-        for (Map.Entry<ASTNode, ServiceEffectSpecification> association : associations.entrySet()) {
-            ASTNode astNode = association.getKey();
+        for (final Map.Entry<ASTNode, ServiceEffectSpecification> association : associations.entrySet()) {
+            final ASTNode astNode = association.getKey();
             assertTrue(astNode instanceof MethodDeclaration,
                     "All ASTNodes in the SEFF/AST associations must be MethodDeclarations");
             // SEFF names may have a "$N" suffix after the signature name, where N is a positive
@@ -47,10 +47,10 @@ public class SeffAssociationTest extends CaseStudyTest {
 
     @Override
     void testRetrieverSeff() {
-        RetrieverBlackboard blackboard = getBlackboard();
+        final RetrieverBlackboard blackboard = this.getBlackboard();
 
         @SuppressWarnings("unchecked")
-        MethodDeclaration methodDeclaration = blackboard
+        final MethodDeclaration methodDeclaration = blackboard
             .getDiscoveredFiles(JavaDiscoverer.DISCOVERER_ID, CompilationUnit.class)
             .values()
             .stream()
@@ -67,7 +67,7 @@ public class SeffAssociationTest extends CaseStudyTest {
             .findAny()
             .orElseGet(() -> fail("AController::aMethod must be present in AST"));
 
-        Map<ASTNode, ServiceEffectSpecification> associations = blackboard.getSeffAssociations();
+        final Map<ASTNode, ServiceEffectSpecification> associations = blackboard.getSeffAssociations();
 
         // Assume that the SPRING rule detects constructors of components.
         assertTrue(associations.containsKey(methodDeclaration),

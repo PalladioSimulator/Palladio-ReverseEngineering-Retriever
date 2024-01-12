@@ -10,6 +10,6 @@ public class JaxRsTest extends CaseStudyTest {
 
     @Override
     void testRetrieverRepository() {
-        assertComponentExists("jax_rs_AWebService");
+        this.assertComponentExists("jax_rs_AWebService");
     }
 }

@@ -30,9 +30,9 @@ public class DeploymentDeploymentRelationProcessorTest extends
     @DisabledIf(TEST_API_ONLY_METHOD_NAME)
     public void testRefineWithValidElementAddsCorrectImplications() {
         // Test data
-        PcmSurrogate model = createEmptyModel();
-        DeploymentDeploymentRelationProcessor processor = createProcessor(model);
-        DeploymentDeploymentRelation relation = createUniqueReplaceable();
+        final PcmSurrogate model = this.createEmptyModel();
+        final DeploymentDeploymentRelationProcessor processor = this.createProcessor(model);
+        final DeploymentDeploymentRelation relation = this.createUniqueReplaceable();
 
         // Assertions: Pre-execution
         assertTrue(processor.getImplications()
@@ -40,7 +40,7 @@ public class DeploymentDeploymentRelationProcessorTest extends
 
         // Execution
         processor.refine(relation);
-        Set<Replaceable> implications = new HashSet<>(processor.getImplications());
+        final Set<Replaceable> implications = new HashSet<>(processor.getImplications());
 
         // Assertions: Post-execution
         assertTrue(implications.remove(relation.getSource()));
@@ -49,11 +49,11 @@ public class DeploymentDeploymentRelationProcessorTest extends
 
         //// Implicit LinkResourceSpecificationRelation
         assertEquals(1, implications.size());
-        Replaceable implication = implications.stream()
+        final Replaceable implication = implications.stream()
             .findFirst()
             .orElseThrow();
         assertEquals(LinkResourceSpecificationRelation.class, implication.getClass());
-        LinkResourceSpecificationRelation implicitSpecification = (LinkResourceSpecificationRelation) implication;
+        final LinkResourceSpecificationRelation implicitSpecification = (LinkResourceSpecificationRelation) implication;
         assertEquals(relation, implicitSpecification.getDestination());
         assertTrue(implicitSpecification.isPlaceholder());
         assertTrue(implicitSpecification.getSource()
@@ -64,21 +64,22 @@ public class DeploymentDeploymentRelationProcessorTest extends
     @DisabledIf(TEST_API_ONLY_METHOD_NAME)
     public void testRefineDoesNotAddAssemblyIfParallelExists() {
         // Test data
-        PcmSurrogate model = createEmptyModel();
-        DeploymentDeploymentRelationProcessor processor = createProcessor(model);
-        DeploymentDeploymentRelation relation = createUniqueReplaceable();
+        final PcmSurrogate model = this.createEmptyModel();
+        final DeploymentDeploymentRelationProcessor processor = this.createProcessor(model);
+        final DeploymentDeploymentRelation relation = this.createUniqueReplaceable();
 
-        Component<?> provider = Component.getUniquePlaceholder();
-        Component<?> consumer = Component.getUniquePlaceholder();
-        Interface interfc = Interface.getUniquePlaceholder();
-        InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider, interfc, false);
-        InterfaceRequirementRelation interfaceRequirement = new InterfaceRequirementRelation(consumer, interfc, false);
-        ComponentAssemblyRelation assembly = new ComponentAssemblyRelation(interfaceProvision, interfaceRequirement,
+        final Component<?> provider = Component.getUniquePlaceholder();
+        final Component<?> consumer = Component.getUniquePlaceholder();
+        final Interface interfc = Interface.getUniquePlaceholder();
+        final InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider, interfc, false);
+        final InterfaceRequirementRelation interfaceRequirement = new InterfaceRequirementRelation(consumer, interfc,
                 false);
+        final ComponentAssemblyRelation assembly = new ComponentAssemblyRelation(interfaceProvision,
+                interfaceRequirement, false);
 
-        ComponentAllocationRelation providerAllocation = new ComponentAllocationRelation(provider, relation.getSource(),
-                false);
-        ComponentAllocationRelation consumerAllocation = new ComponentAllocationRelation(consumer,
+        final ComponentAllocationRelation providerAllocation = new ComponentAllocationRelation(provider,
+                relation.getSource(), false);
+        final ComponentAllocationRelation consumerAllocation = new ComponentAllocationRelation(consumer,
                 relation.getDestination(), false);
 
         model.add(assembly);
@@ -91,7 +92,7 @@ public class DeploymentDeploymentRelationProcessorTest extends
 
         // Execution
         processor.refine(relation);
-        Set<Replaceable> implications = new HashSet<>(processor.getImplications());
+        final Set<Replaceable> implications = new HashSet<>(processor.getImplications());
 
         // Assertions: Post-execution
         assertTrue(implications.remove(relation.getSource()));
@@ -109,21 +110,22 @@ public class DeploymentDeploymentRelationProcessorTest extends
     @DisabledIf(TEST_API_ONLY_METHOD_NAME)
     public void testRefineDoesNotAddAssemblyIfInverseExists() {
         // Test data
-        PcmSurrogate model = createEmptyModel();
-        DeploymentDeploymentRelationProcessor processor = createProcessor(model);
-        DeploymentDeploymentRelation relation = createUniqueReplaceable();
+        final PcmSurrogate model = this.createEmptyModel();
+        final DeploymentDeploymentRelationProcessor processor = this.createProcessor(model);
+        final DeploymentDeploymentRelation relation = this.createUniqueReplaceable();
 
-        Component<?> provider = Component.getUniquePlaceholder();
-        Component<?> consumer = Component.getUniquePlaceholder();
-        Interface interfc = Interface.getUniquePlaceholder();
-        InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider, interfc, false);
-        InterfaceRequirementRelation interfaceRequirement = new InterfaceRequirementRelation(consumer, interfc, false);
-        ComponentAssemblyRelation assembly = new ComponentAssemblyRelation(interfaceProvision, interfaceRequirement,
+        final Component<?> provider = Component.getUniquePlaceholder();
+        final Component<?> consumer = Component.getUniquePlaceholder();
+        final Interface interfc = Interface.getUniquePlaceholder();
+        final InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider, interfc, false);
+        final InterfaceRequirementRelation interfaceRequirement = new InterfaceRequirementRelation(consumer, interfc,
                 false);
+        final ComponentAssemblyRelation assembly = new ComponentAssemblyRelation(interfaceProvision,
+                interfaceRequirement, false);
 
-        ComponentAllocationRelation providerAllocation = new ComponentAllocationRelation(consumer, relation.getSource(),
-                false);
-        ComponentAllocationRelation consumerAllocation = new ComponentAllocationRelation(provider,
+        final ComponentAllocationRelation providerAllocation = new ComponentAllocationRelation(consumer,
+                relation.getSource(), false);
+        final ComponentAllocationRelation consumerAllocation = new ComponentAllocationRelation(provider,
                 relation.getDestination(), false);
 
         model.add(assembly);
@@ -136,7 +138,7 @@ public class DeploymentDeploymentRelationProcessorTest extends
 
         // Execution
         processor.refine(relation);
-        Set<Replaceable> implications = new HashSet<>(processor.getImplications());
+        final Set<Replaceable> implications = new HashSet<>(processor.getImplications());
 
         // Assertions: Post-execution
         assertTrue(implications.remove(relation.getSource()));
@@ -154,13 +156,13 @@ public class DeploymentDeploymentRelationProcessorTest extends
     @Test
     public void testProcessReplacesIndirectPlaceholder() {
         // Test data
-        PcmSurrogate model = createEmptyModel();
-        DeploymentDeploymentRelationProcessor processor = createProcessor(model);
-        Deployment source = getUniqueNonPlaceholderSourceEntity();
-        Deployment destination = getUniqueNonPlaceholderDestinationEntity();
-        Deployment destinationPlaceholder = getPlaceholderOfDestinationEntity(destination);
-        DeploymentDeploymentRelation relation = createRelation(source, destination, true);
-        DeploymentDeploymentRelation placeholder = createRelation(source, destinationPlaceholder, true);
+        final PcmSurrogate model = this.createEmptyModel();
+        final DeploymentDeploymentRelationProcessor processor = this.createProcessor(model);
+        final Deployment source = this.getUniqueNonPlaceholderSourceEntity();
+        final Deployment destination = this.getUniqueNonPlaceholderDestinationEntity();
+        final Deployment destinationPlaceholder = this.getPlaceholderOfDestinationEntity(destination);
+        final DeploymentDeploymentRelation relation = this.createRelation(source, destination, true);
+        final DeploymentDeploymentRelation placeholder = this.createRelation(source, destinationPlaceholder, true);
 
         // Execution & Assertions to add placeholder
         model.add(placeholder);
@@ -176,7 +178,7 @@ public class DeploymentDeploymentRelationProcessorTest extends
 
         // Execution to replace placeholder
         processor.process(relation);
-        Set<Replaceable> implications = processor.getImplications();
+        final Set<Replaceable> implications = processor.getImplications();
 
         // Assertions - Model State
         assertTrue(model.contains(placeholder));
@@ -198,13 +200,13 @@ public class DeploymentDeploymentRelationProcessorTest extends
     @DisabledIf(TEST_API_ONLY_METHOD_NAME)
     public void testReplaceIndirectPlaceholdersSameSource() {
         // Test data
-        PcmSurrogate model = createEmptyModel();
-        DeploymentDeploymentRelationProcessor processor = createProcessor(model);
-        Deployment source = getUniqueNonPlaceholderSourceEntity();
-        Deployment destination = getUniqueNonPlaceholderDestinationEntity();
-        Deployment destinationPlaceholder = getPlaceholderOfDestinationEntity(destination);
-        DeploymentDeploymentRelation relation = createRelation(source, destination, true);
-        DeploymentDeploymentRelation placeholder = createRelation(source, destinationPlaceholder, true);
+        final PcmSurrogate model = this.createEmptyModel();
+        final DeploymentDeploymentRelationProcessor processor = this.createProcessor(model);
+        final Deployment source = this.getUniqueNonPlaceholderSourceEntity();
+        final Deployment destination = this.getUniqueNonPlaceholderDestinationEntity();
+        final Deployment destinationPlaceholder = this.getPlaceholderOfDestinationEntity(destination);
+        final DeploymentDeploymentRelation relation = this.createRelation(source, destination, true);
+        final DeploymentDeploymentRelation placeholder = this.createRelation(source, destinationPlaceholder, true);
 
         // Execution & Assertions to add placeholder
         model.add(placeholder);
@@ -220,7 +222,7 @@ public class DeploymentDeploymentRelationProcessorTest extends
 
         // Execution to replace placeholder
         processor.replaceIndirectPlaceholders(relation);
-        Set<Replaceable> implications = processor.getImplications();
+        final Set<Replaceable> implications = processor.getImplications();
 
         // Assertions - Model State
         assertTrue(model.contains(placeholder));
@@ -242,13 +244,13 @@ public class DeploymentDeploymentRelationProcessorTest extends
     @DisabledIf(TEST_API_ONLY_METHOD_NAME)
     public void testReplaceIndirectPlaceholdersSameDestination() {
         // Test data
-        PcmSurrogate model = createEmptyModel();
-        DeploymentDeploymentRelationProcessor processor = createProcessor(model);
-        Deployment source = getUniqueNonPlaceholderSourceEntity();
-        Deployment sourcePlaceholder = getPlaceholderOfSourceEntity(source);
-        Deployment destination = getUniqueNonPlaceholderDestinationEntity();
-        DeploymentDeploymentRelation relation = createRelation(source, destination, true);
-        DeploymentDeploymentRelation placeholder = createRelation(sourcePlaceholder, destination, true);
+        final PcmSurrogate model = this.createEmptyModel();
+        final DeploymentDeploymentRelationProcessor processor = this.createProcessor(model);
+        final Deployment source = this.getUniqueNonPlaceholderSourceEntity();
+        final Deployment sourcePlaceholder = this.getPlaceholderOfSourceEntity(source);
+        final Deployment destination = this.getUniqueNonPlaceholderDestinationEntity();
+        final DeploymentDeploymentRelation relation = this.createRelation(source, destination, true);
+        final DeploymentDeploymentRelation placeholder = this.createRelation(sourcePlaceholder, destination, true);
 
         // Execution & Assertions to add placeholder
         model.add(placeholder);
@@ -264,7 +266,7 @@ public class DeploymentDeploymentRelationProcessorTest extends
 
         // Execution to replace placeholder
         processor.replaceIndirectPlaceholders(relation);
-        Set<Replaceable> implications = processor.getImplications();
+        final Set<Replaceable> implications = processor.getImplications();
 
         // Assertions - Model State
         assertTrue(model.contains(placeholder));
@@ -282,8 +284,8 @@ public class DeploymentDeploymentRelationProcessorTest extends
     }
 
     @Override
-    protected DeploymentDeploymentRelation createRelation(Deployment source, Deployment destination,
-            boolean isPlaceholder) {
+    protected DeploymentDeploymentRelation createRelation(final Deployment source, final Deployment destination,
+            final boolean isPlaceholder) {
         return new DeploymentDeploymentRelation(source, destination, isPlaceholder);
     }
 
@@ -293,22 +295,22 @@ public class DeploymentDeploymentRelationProcessorTest extends
     }
 
     @Override
-    protected Deployment getPlaceholderOfSourceEntity(Deployment source) {
+    protected Deployment getPlaceholderOfSourceEntity(final Deployment source) {
         return new Deployment(source.getValue(), true);
     }
 
     @Override
     protected Deployment getUniqueNonPlaceholderDestinationEntity() {
-        return getUniqueNonPlaceholderSourceEntity();
+        return this.getUniqueNonPlaceholderSourceEntity();
     }
 
     @Override
-    protected Deployment getPlaceholderOfDestinationEntity(Deployment destination) {
-        return getPlaceholderOfSourceEntity(destination);
+    protected Deployment getPlaceholderOfDestinationEntity(final Deployment destination) {
+        return this.getPlaceholderOfSourceEntity(destination);
     }
 
     @Override
-    protected DeploymentDeploymentRelationProcessor createProcessor(PcmSurrogate model) {
+    protected DeploymentDeploymentRelationProcessor createProcessor(final PcmSurrogate model) {
         return new DeploymentDeploymentRelationProcessor(model);
     }
 

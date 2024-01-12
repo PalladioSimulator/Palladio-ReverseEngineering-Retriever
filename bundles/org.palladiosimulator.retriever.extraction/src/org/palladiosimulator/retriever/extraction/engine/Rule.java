@@ -20,19 +20,19 @@ public interface Rule extends Service {
     public abstract boolean isBuildRule();
 
     @Override
-    default IBlackboardInteractingJob<RetrieverBlackboard> create(RetrieverConfiguration configuration,
-            RetrieverBlackboard blackboard) {
-        Rule rule = this;
-        return new AbstractBlackboardInteractingJob<RetrieverBlackboard>() {
+    default IBlackboardInteractingJob<RetrieverBlackboard> create(final RetrieverConfiguration configuration,
+            final RetrieverBlackboard blackboard) {
+        final Rule rule = this;
+        return new AbstractBlackboardInteractingJob<>() {
             @Override
-            public void execute(IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
-                for (Path path : blackboard.getDiscoveredPaths()) {
+            public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
+                for (final Path path : blackboard.getDiscoveredPaths()) {
                     rule.processRules(blackboard, path);
                 }
             }
 
             @Override
-            public void cleanup(IProgressMonitor monitor) throws CleanupFailedException {
+            public void cleanup(final IProgressMonitor monitor) throws CleanupFailedException {
             }
 
             @Override

@@ -22,8 +22,8 @@ public class PerformanceAnalyst implements Analyst {
     private static final String ANALYST_ID = "org.palladiosimulator.retriever.core.service.performance_analyst";
 
     @Override
-    public IBlackboardInteractingJob<RetrieverBlackboard> create(RetrieverConfiguration configuration,
-            RetrieverBlackboard blackboard) {
+    public IBlackboardInteractingJob<RetrieverBlackboard> create(final RetrieverConfiguration configuration,
+            final RetrieverBlackboard blackboard) {
         return new AbstractBlackboardInteractingJob<>() {
             @Override
             public void cleanup(final IProgressMonitor monitor) throws CleanupFailedException {

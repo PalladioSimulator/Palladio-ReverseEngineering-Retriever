@@ -16,7 +16,7 @@ public class CompositeRequirementDelegationRelationTest extends
 
     @Test
     public void testConstructorWithEqualSourceAndDestinationRelation() {
-        InterfaceRequirementRelation entity = getUniqueSourceEntity();
+        final InterfaceRequirementRelation entity = this.getUniqueSourceEntity();
 
         assertThrows(IllegalArgumentException.class,
                 () -> new CompositeRequirementDelegationRelation(entity, entity, false));
@@ -24,11 +24,11 @@ public class CompositeRequirementDelegationRelationTest extends
 
     @Test
     public void testConstructorWithoutSourceCompositeComponent() {
-        AtomicComponent sourceComponent = AtomicComponent.getUniquePlaceholder();
-        Composite destinationComponent = Composite.getUniquePlaceholder();
-        InterfaceRequirementRelation source = new InterfaceRequirementRelation(sourceComponent, RELATION_INTERFACE,
-                true);
-        InterfaceRequirementRelation destination = new InterfaceRequirementRelation(destinationComponent,
+        final AtomicComponent sourceComponent = AtomicComponent.getUniquePlaceholder();
+        final Composite destinationComponent = Composite.getUniquePlaceholder();
+        final InterfaceRequirementRelation source = new InterfaceRequirementRelation(sourceComponent,
+                RELATION_INTERFACE, true);
+        final InterfaceRequirementRelation destination = new InterfaceRequirementRelation(destinationComponent,
                 RELATION_INTERFACE, true);
 
         assertThrows(IllegalArgumentException.class,
@@ -37,10 +37,10 @@ public class CompositeRequirementDelegationRelationTest extends
 
     @Test
     public void testConstructorWithDifferentRequirementInterfaces() {
-        InterfaceRequirementRelation source = getUniqueSourceEntity();
-        Component<?> destinationComponent = AtomicComponent.getUniquePlaceholder();
-        Interface destinationInterface = Interface.getUniquePlaceholder();
-        InterfaceRequirementRelation destination = new InterfaceRequirementRelation(destinationComponent,
+        final InterfaceRequirementRelation source = this.getUniqueSourceEntity();
+        final Component<?> destinationComponent = AtomicComponent.getUniquePlaceholder();
+        final Interface destinationInterface = Interface.getUniquePlaceholder();
+        final InterfaceRequirementRelation destination = new InterfaceRequirementRelation(destinationComponent,
                 destinationInterface, true);
 
         assertThrows(IllegalArgumentException.class,
@@ -48,20 +48,20 @@ public class CompositeRequirementDelegationRelationTest extends
     }
 
     @Override
-    protected CompositeRequirementDelegationRelation createRelation(InterfaceRequirementRelation source,
-            InterfaceRequirementRelation destination, boolean isPlaceholder) {
+    protected CompositeRequirementDelegationRelation createRelation(final InterfaceRequirementRelation source,
+            final InterfaceRequirementRelation destination, final boolean isPlaceholder) {
         return new CompositeRequirementDelegationRelation(source, destination, isPlaceholder);
     }
 
     @Override
     protected InterfaceRequirementRelation getUniqueSourceEntity() {
-        Composite source = Composite.getUniquePlaceholder();
+        final Composite source = Composite.getUniquePlaceholder();
         return new InterfaceRequirementRelation(source, RELATION_INTERFACE, true);
     }
 
     @Override
     protected InterfaceRequirementRelation getUniqueDestinationEntity() {
-        Component<?> source = AtomicComponent.getUniquePlaceholder();
+        final Component<?> source = AtomicComponent.getUniquePlaceholder();
         return new InterfaceRequirementRelation(source, RELATION_INTERFACE, true);
     }
 }

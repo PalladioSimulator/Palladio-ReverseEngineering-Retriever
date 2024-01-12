@@ -5,7 +5,7 @@ import org.palladiosimulator.retriever.mocore.surrogate.element.AtomicComponent;
 
 public class AtomicComponentProcessorTest extends ComponentProcessorTest<AtomicComponent> {
     @Override
-    protected AtomicComponentProcessor createProcessor(PcmSurrogate model) {
+    protected AtomicComponentProcessor createProcessor(final PcmSurrogate model) {
         return new AtomicComponentProcessor(model);
     }
 

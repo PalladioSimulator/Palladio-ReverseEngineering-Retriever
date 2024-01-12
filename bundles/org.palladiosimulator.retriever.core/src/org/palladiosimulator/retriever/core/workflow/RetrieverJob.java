@@ -19,61 +19,63 @@ import de.uka.ipd.sdq.workflow.jobs.ParallelJob;
 
 public class RetrieverJob extends AbstractExtendableJob<RetrieverBlackboard> {
 
-    public RetrieverJob(RetrieverConfiguration configuration) {
+    public RetrieverJob(final RetrieverConfiguration configuration) {
         super.setBlackboard(new RetrieverBlackboard());
 
-        super.addAll(createDiscovererJobs(configuration));
+        super.addAll(this.createDiscovererJobs(configuration));
 
-        super.addAll(createRuleJobs(configuration));
+        super.addAll(this.createRuleJobs(configuration));
 
-        super.addAll(createBuildRulesJob(configuration));
+        super.addAll(this.createBuildRulesJob(configuration));
 
-        super.add(new RetrieverBlackboardInteractingJob(configuration, getBlackboard()));
+        super.add(new RetrieverBlackboardInteractingJob(configuration, this.getBlackboard()));
 
-        super.addAll(createAnalystJobs(configuration));
+        super.addAll(this.createAnalystJobs(configuration));
 
         // Generate service effect specifications based on AST nodes and merge them into repository
-        super.add(new Ast2SeffJob(getBlackboard(), RetrieverBlackboardKeys.RULE_ENGINE_BLACKBOARD_KEY_SEFF_ASSOCIATIONS,
+        super.add(new Ast2SeffJob(this.getBlackboard(),
+                RetrieverBlackboardKeys.RULE_ENGINE_BLACKBOARD_KEY_SEFF_ASSOCIATIONS,
                 RetrieverBlackboardKeys.RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY));
-        super.add(new SeffMergerJob(myBlackboard, RetrieverBlackboardKeys.RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY,
+        super.add(new SeffMergerJob(this.myBlackboard, RetrieverBlackboardKeys.RULE_ENGINE_AST2SEFF_OUTPUT_REPOSITORY,
                 RetrieverBlackboardKeys.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY));
 
         // Refine model and create final repository, system, allocation, & resource environment
-        super.add(new MoCoReJob(getBlackboard(), RetrieverBlackboardKeys.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY,
+        super.add(new MoCoReJob(this.getBlackboard(), RetrieverBlackboardKeys.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY,
                 RetrieverBlackboardKeys.RULE_ENGINE_MOCORE_OUTPUT_REPOSITORY,
                 RetrieverBlackboardKeys.RULE_ENGINE_MOCORE_OUTPUT_SYSTEM,
                 RetrieverBlackboardKeys.RULE_ENGINE_MOCORE_OUTPUT_ALLOCATION,
                 RetrieverBlackboardKeys.RULE_ENGINE_MOCORE_OUTPUT_RESOURCE_ENVIRONMENT));
 
         // Merge data & failure types into output repository
-        super.add(new TypeMergerJob(getBlackboard(), RetrieverBlackboardKeys.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY,
+        super.add(new TypeMergerJob(this.getBlackboard(), RetrieverBlackboardKeys.RULE_ENGINE_BLACKBOARD_KEY_REPOSITORY,
                 RetrieverBlackboardKeys.RULE_ENGINE_MOCORE_OUTPUT_REPOSITORY));
 
         // Persist repository, system, allocation, & resource environment model from blackboard into
         // file system
-        super.add(new PersistenceJob(getBlackboard(), configuration.getInputFolder(), configuration.getOutputFolder(),
-                RetrieverBlackboardKeys.RULE_ENGINE_MOCORE_OUTPUT_REPOSITORY,
+        super.add(new PersistenceJob(this.getBlackboard(), configuration.getInputFolder(),
+                configuration.getOutputFolder(), RetrieverBlackboardKeys.RULE_ENGINE_MOCORE_OUTPUT_REPOSITORY,
                 RetrieverBlackboardKeys.RULE_ENGINE_MOCORE_OUTPUT_SYSTEM,
                 RetrieverBlackboardKeys.RULE_ENGINE_MOCORE_OUTPUT_ALLOCATION,
                 RetrieverBlackboardKeys.RULE_ENGINE_MOCORE_OUTPUT_RESOURCE_ENVIRONMENT));
 
-        super.add(new PlantUmlJob(configuration, getBlackboard()));
+        super.add(new PlantUmlJob(configuration, this.getBlackboard()));
     }
 
-    private List<ParallelJob> createRuleJobs(RetrieverConfiguration configuration) {
-        List<ParallelJob> jobs = new ArrayList<>();
+    private List<ParallelJob> createRuleJobs(final RetrieverConfiguration configuration) {
+        final List<ParallelJob> jobs = new ArrayList<>();
 
-        for (Collection<Rule> step : configuration.getConfig(Rule.class)
+        for (final Collection<Rule> step : configuration.getConfig(Rule.class)
             .getExecutionOrder()) {
-            ParallelJob parentJob = new ParallelJob();
-            for (Rule rule : step) {
+            final ParallelJob parentJob = new ParallelJob();
+            for (final Rule rule : step) {
                 // Assume only build rules depend on build rules.
                 if (rule.isBuildRule()) {
                     continue;
                 }
-                IBlackboardInteractingJob<RetrieverBlackboard> ruleJob = rule.create(configuration, myBlackboard);
+                final IBlackboardInteractingJob<RetrieverBlackboard> ruleJob = rule.create(configuration,
+                        this.myBlackboard);
                 parentJob.add(ruleJob);
-                logger.info("Adding rule job \"" + ruleJob.getName() + "\"");
+                this.logger.info("Adding rule job \"" + ruleJob.getName() + "\"");
             }
             jobs.add(parentJob);
         }
@@ -81,20 +83,21 @@ public class RetrieverJob extends AbstractExtendableJob<RetrieverBlackboard> {
         return jobs;
     }
 
-    private List<ParallelJob> createBuildRulesJob(RetrieverConfiguration configuration) {
-        List<ParallelJob> jobs = new ArrayList<>();
+    private List<ParallelJob> createBuildRulesJob(final RetrieverConfiguration configuration) {
+        final List<ParallelJob> jobs = new ArrayList<>();
 
-        for (Collection<Rule> step : configuration.getConfig(Rule.class)
+        for (final Collection<Rule> step : configuration.getConfig(Rule.class)
             .getExecutionOrder()) {
-            ParallelJob parentJob = new ParallelJob();
-            for (Rule rule : step) {
+            final ParallelJob parentJob = new ParallelJob();
+            for (final Rule rule : step) {
                 // Assume only build rules depend on build rules.
                 if (!rule.isBuildRule()) {
                     continue;
                 }
-                IBlackboardInteractingJob<RetrieverBlackboard> ruleJob = rule.create(configuration, myBlackboard);
+                final IBlackboardInteractingJob<RetrieverBlackboard> ruleJob = rule.create(configuration,
+                        this.myBlackboard);
                 parentJob.add(ruleJob);
-                logger.info("Adding build rule job \"" + ruleJob.getName() + "\"");
+                this.logger.info("Adding build rule job \"" + ruleJob.getName() + "\"");
             }
             jobs.add(parentJob);
         }
@@ -102,17 +105,17 @@ public class RetrieverJob extends AbstractExtendableJob<RetrieverBlackboard> {
         return jobs;
     }
 
-    private List<ParallelJob> createDiscovererJobs(RetrieverConfiguration configuration) {
-        List<ParallelJob> jobs = new ArrayList<>();
+    private List<ParallelJob> createDiscovererJobs(final RetrieverConfiguration configuration) {
+        final List<ParallelJob> jobs = new ArrayList<>();
 
-        for (Collection<Discoverer> step : configuration.getConfig(Discoverer.class)
+        for (final Collection<Discoverer> step : configuration.getConfig(Discoverer.class)
             .getExecutionOrder()) {
-            ParallelJob parentJob = new ParallelJob();
-            for (Discoverer discoverer : step) {
-                IBlackboardInteractingJob<RetrieverBlackboard> discovererJob = discoverer.create(configuration,
-                        myBlackboard);
+            final ParallelJob parentJob = new ParallelJob();
+            for (final Discoverer discoverer : step) {
+                final IBlackboardInteractingJob<RetrieverBlackboard> discovererJob = discoverer.create(configuration,
+                        this.myBlackboard);
                 parentJob.add(discovererJob);
-                logger.info("Adding discoverer job \"" + discovererJob.getName() + "\"");
+                this.logger.info("Adding discoverer job \"" + discovererJob.getName() + "\"");
             }
             jobs.add(parentJob);
         }
@@ -120,16 +123,17 @@ public class RetrieverJob extends AbstractExtendableJob<RetrieverBlackboard> {
         return jobs;
     }
 
-    private List<ParallelJob> createAnalystJobs(RetrieverConfiguration configuration) {
-        List<ParallelJob> jobs = new ArrayList<>();
+    private List<ParallelJob> createAnalystJobs(final RetrieverConfiguration configuration) {
+        final List<ParallelJob> jobs = new ArrayList<>();
 
-        for (Collection<Analyst> step : configuration.getConfig(Analyst.class)
+        for (final Collection<Analyst> step : configuration.getConfig(Analyst.class)
             .getExecutionOrder()) {
-            ParallelJob parentJob = new ParallelJob();
-            for (Analyst analyst : step) {
-                IBlackboardInteractingJob<RetrieverBlackboard> analystJob = analyst.create(configuration, myBlackboard);
+            final ParallelJob parentJob = new ParallelJob();
+            for (final Analyst analyst : step) {
+                final IBlackboardInteractingJob<RetrieverBlackboard> analystJob = analyst.create(configuration,
+                        this.myBlackboard);
                 parentJob.add(analystJob);
-                logger.info("Adding analyst job \"" + analystJob.getName() + "\"");
+                this.logger.info("Adding analyst job \"" + analystJob.getName() + "\"");
             }
             jobs.add(parentJob);
         }

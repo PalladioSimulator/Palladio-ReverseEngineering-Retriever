@@ -10,20 +10,20 @@ public class ComponentAssemblyRelationTest
     private static final Interface RELATION_DESTINATION = Interface.getUniquePlaceholder();
 
     @Override
-    protected ComponentAssemblyRelation createRelation(InterfaceProvisionRelation source,
-            InterfaceRequirementRelation destination, boolean isPlaceholder) {
+    protected ComponentAssemblyRelation createRelation(final InterfaceProvisionRelation source,
+            final InterfaceRequirementRelation destination, final boolean isPlaceholder) {
         return new ComponentAssemblyRelation(source, destination, isPlaceholder);
     }
 
     @Override
     protected InterfaceProvisionRelation getUniqueSourceEntity() {
-        Component<?> source = Component.getUniquePlaceholder();
+        final Component<?> source = Component.getUniquePlaceholder();
         return new InterfaceProvisionRelation(source, RELATION_DESTINATION, true);
     }
 
     @Override
     protected InterfaceRequirementRelation getUniqueDestinationEntity() {
-        Component<?> source = Component.getUniquePlaceholder();
+        final Component<?> source = Component.getUniquePlaceholder();
         return new InterfaceRequirementRelation(source, RELATION_DESTINATION, true);
     }
 }

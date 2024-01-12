@@ -9,39 +9,36 @@ import java.util.Objects;
 public class ProvisionsBuilder {
     private final List<OperationInterface> provisions = new LinkedList<>();
 
-    public void add(OperationInterface... provisions) {
+    public void add(final OperationInterface... provisions) {
         this.add(List.of(provisions));
     }
 
-    public void add(Collection<OperationInterface> provisions) {
+    public void add(final Collection<OperationInterface> provisions) {
         this.provisions.addAll(provisions);
     }
 
-    public Provisions create(Collection<OperationInterface> allDependencies) {
-        return new Provisions(provisions, allDependencies);
+    public Provisions create(final Collection<OperationInterface> allDependencies) {
+        return new Provisions(this.provisions, allDependencies);
     }
 
     public List<OperationInterface> toList() {
-        return Collections.unmodifiableList(provisions);
+        return Collections.unmodifiableList(this.provisions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(provisions);
+        return Objects.hash(this.provisions);
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if ((obj == null) || (this.getClass() != obj.getClass())) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        ProvisionsBuilder other = (ProvisionsBuilder) obj;
-        return Objects.equals(provisions, other.provisions);
+        final ProvisionsBuilder other = (ProvisionsBuilder) obj;
+        return Objects.equals(this.provisions, other.provisions);
     }
 }

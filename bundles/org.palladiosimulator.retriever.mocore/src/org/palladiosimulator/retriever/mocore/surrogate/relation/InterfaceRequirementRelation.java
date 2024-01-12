@@ -7,12 +7,13 @@ import tools.mdsd.mocore.framework.surrogate.Relation;
 import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
 public class InterfaceRequirementRelation extends Relation<Component<?>, Interface> {
-    public InterfaceRequirementRelation(Component<?> source, Interface destination, boolean isPlaceholder) {
+    public InterfaceRequirementRelation(final Component<?> source, final Interface destination,
+            final boolean isPlaceholder) {
         super(source, destination, isPlaceholder);
     }
 
     @Override
-    public <U extends Replaceable> InterfaceRequirementRelation replace(U original, U replacement) {
+    public <U extends Replaceable> InterfaceRequirementRelation replace(final U original, final U replacement) {
         if (!this.includes(original)) {
             // TODO Add message to exception
             throw new IllegalArgumentException();
@@ -20,8 +21,8 @@ public class InterfaceRequirementRelation extends Relation<Component<?>, Interfa
         if (this.equals(original)) {
             return (InterfaceRequirementRelation) replacement;
         }
-        Component<?> source = getSourceReplacement(original, replacement);
-        Interface destination = getDestinationReplacement(original, replacement);
+        final Component<?> source = this.getSourceReplacement(original, replacement);
+        final Interface destination = this.getDestinationReplacement(original, replacement);
         return new InterfaceRequirementRelation(source, destination, this.isPlaceholder());
     }
 }

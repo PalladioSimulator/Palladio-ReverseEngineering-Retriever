@@ -7,7 +7,7 @@ import tools.mdsd.mocore.framework.surrogate.ElementTest;
 
 public class ServiceEffectSpecificationTest extends ElementTest<ServiceEffectSpecification, ResourceDemandingSEFF> {
     @Override
-    protected ServiceEffectSpecification createElement(ResourceDemandingSEFF value, boolean isPlaceholder) {
+    protected ServiceEffectSpecification createElement(final ResourceDemandingSEFF value, final boolean isPlaceholder) {
         return new ServiceEffectSpecification(value, isPlaceholder);
     }
 
@@ -19,11 +19,11 @@ public class ServiceEffectSpecificationTest extends ElementTest<ServiceEffectSpe
 
     @Override
     protected ServiceEffectSpecification getUniqueNonPlaceholder() {
-        return new ServiceEffectSpecification(getUniqueValue(), false);
+        return new ServiceEffectSpecification(this.getUniqueValue(), false);
     }
 
     @Override
-    protected ServiceEffectSpecification getPlaceholderOf(ServiceEffectSpecification replaceable) {
+    protected ServiceEffectSpecification getPlaceholderOf(final ServiceEffectSpecification replaceable) {
         return new ServiceEffectSpecification(replaceable.getValue(), true);
     }
 }

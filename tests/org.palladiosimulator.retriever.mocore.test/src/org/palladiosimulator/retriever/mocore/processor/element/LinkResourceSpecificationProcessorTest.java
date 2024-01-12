@@ -20,9 +20,9 @@ public class LinkResourceSpecificationProcessorTest
     @DisabledIf(TEST_API_ONLY_METHOD_NAME)
     public void testRefineWithValidElementAddsCorrectImplications() {
         // Test data
-        PcmSurrogate model = createEmptyModel();
-        LinkResourceSpecificationProcessor processor = createProcessor(model);
-        LinkResourceSpecification element = createUniqueReplaceable();
+        final PcmSurrogate model = this.createEmptyModel();
+        final LinkResourceSpecificationProcessor processor = this.createProcessor(model);
+        final LinkResourceSpecification element = this.createUniqueReplaceable();
 
         // Assertions: Pre-execution
         assertTrue(processor.getImplications()
@@ -30,15 +30,15 @@ public class LinkResourceSpecificationProcessorTest
 
         // Execution
         processor.refine(element);
-        Set<Replaceable> implications = processor.getImplications();
+        final Set<Replaceable> implications = processor.getImplications();
 
         // Assertions: Post-execution
         assertEquals(1, implications.size());
-        Replaceable implication = implications.stream()
+        final Replaceable implication = implications.stream()
             .findFirst()
             .orElseThrow();
         assertEquals(LinkResourceSpecificationRelation.class, implication.getClass());
-        LinkResourceSpecificationRelation relation = (LinkResourceSpecificationRelation) implication;
+        final LinkResourceSpecificationRelation relation = (LinkResourceSpecificationRelation) implication;
         assertEquals(element, relation.getSource());
         assertTrue(relation.isPlaceholder());
         assertTrue(relation.getDestination()
@@ -52,7 +52,7 @@ public class LinkResourceSpecificationProcessorTest
     }
 
     @Override
-    protected LinkResourceSpecificationProcessor createProcessor(PcmSurrogate model) {
+    protected LinkResourceSpecificationProcessor createProcessor(final PcmSurrogate model) {
         return new LinkResourceSpecificationProcessor(model);
     }
 

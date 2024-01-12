@@ -12,24 +12,24 @@ import org.palladiosimulator.retriever.mocore.surrogate.relation.LinkResourceSpe
 import tools.mdsd.mocore.framework.processor.Processor;
 
 public class LinkResourceSpecificationProcessor extends Processor<PcmSurrogate, LinkResourceSpecification> {
-    public LinkResourceSpecificationProcessor(PcmSurrogate model) {
+    public LinkResourceSpecificationProcessor(final PcmSurrogate model) {
         super(model, LinkResourceSpecification.class);
     }
 
     @Override
-    protected void refine(LinkResourceSpecification discovery) {
-        List<LinkResourceSpecificationRelation> relations = this.getModel()
+    protected void refine(final LinkResourceSpecification discovery) {
+        final List<LinkResourceSpecificationRelation> relations = this.getModel()
             .getByType(LinkResourceSpecificationRelation.class);
         relations.removeIf(relation -> !Objects.equals(relation.getSource(), discovery));
 
         if (relations.isEmpty()) {
-            Deployment sourcePlaceholder = Deployment.getUniquePlaceholder();
-            Deployment destinationPlaceholder = Deployment.getUniquePlaceholder();
-            DeploymentDeploymentRelation deploymentRelation = new DeploymentDeploymentRelation(sourcePlaceholder,
+            final Deployment sourcePlaceholder = Deployment.getUniquePlaceholder();
+            final Deployment destinationPlaceholder = Deployment.getUniquePlaceholder();
+            final DeploymentDeploymentRelation deploymentRelation = new DeploymentDeploymentRelation(sourcePlaceholder,
                     destinationPlaceholder, true);
-            LinkResourceSpecificationRelation implicitRelation = new LinkResourceSpecificationRelation(discovery,
+            final LinkResourceSpecificationRelation implicitRelation = new LinkResourceSpecificationRelation(discovery,
                     deploymentRelation, true);
-            addImplication(implicitRelation);
+            this.addImplication(implicitRelation);
         }
     }
 }

@@ -6,7 +6,7 @@ import org.palladiosimulator.retriever.mocore.surrogate.relation.ComponentAlloca
 import tools.mdsd.mocore.framework.processor.RelationProcessor;
 
 public class ComponentAllocationRelationProcessor extends RelationProcessor<PcmSurrogate, ComponentAllocationRelation> {
-    public ComponentAllocationRelationProcessor(PcmSurrogate model) {
+    public ComponentAllocationRelationProcessor(final PcmSurrogate model) {
         super(model, ComponentAllocationRelation.class);
     }
 }

@@ -19,19 +19,20 @@ public class TypeMergerJob implements IBlackboardInteractingJob<Blackboard<Objec
     private final String sourceTypeRepositoryKey;
     private final String destinationTypeRepositoryKey;
 
-    public TypeMergerJob(Blackboard<Object> blackboard, String sourceTypeRepositoryKey,
-            String destinationTypeRepositoryKey) {
+    public TypeMergerJob(final Blackboard<Object> blackboard, final String sourceTypeRepositoryKey,
+            final String destinationTypeRepositoryKey) {
         this.blackboard = Objects.requireNonNull(blackboard);
         this.sourceTypeRepositoryKey = sourceTypeRepositoryKey;
         this.destinationTypeRepositoryKey = destinationTypeRepositoryKey;
     }
 
     @Override
-    public void execute(IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
+    public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
         // Fetch input from blackboard
         monitor.subTask("Retrieving source and destination repository from blackboard");
-        Repository sourceRepository = (Repository) this.blackboard.getPartition(this.sourceTypeRepositoryKey);
-        Repository destinationRepository = (Repository) this.blackboard.getPartition(this.destinationTypeRepositoryKey);
+        final Repository sourceRepository = (Repository) this.blackboard.getPartition(this.sourceTypeRepositoryKey);
+        final Repository destinationRepository = (Repository) this.blackboard
+            .getPartition(this.destinationTypeRepositoryKey);
 
         // Move types from source to destination repository
         monitor.subTask("Merging types from source into destination repository");
@@ -43,7 +44,7 @@ public class TypeMergerJob implements IBlackboardInteractingJob<Blackboard<Objec
     }
 
     @Override
-    public void cleanup(IProgressMonitor monitor) throws CleanupFailedException {
+    public void cleanup(final IProgressMonitor monitor) throws CleanupFailedException {
         // No cleanup required for the job
     }
 
@@ -53,7 +54,7 @@ public class TypeMergerJob implements IBlackboardInteractingJob<Blackboard<Objec
     }
 
     @Override
-    public void setBlackboard(Blackboard<Object> blackboard) {
+    public void setBlackboard(final Blackboard<Object> blackboard) {
         this.blackboard = Objects.requireNonNull(blackboard);
     }
 }

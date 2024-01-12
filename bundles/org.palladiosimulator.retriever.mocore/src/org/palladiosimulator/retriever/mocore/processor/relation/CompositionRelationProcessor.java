@@ -6,7 +6,7 @@ import org.palladiosimulator.retriever.mocore.surrogate.relation.CompositionRela
 import tools.mdsd.mocore.framework.processor.RelationProcessor;
 
 public class CompositionRelationProcessor extends RelationProcessor<PcmSurrogate, CompositionRelation> {
-    public CompositionRelationProcessor(PcmSurrogate model) {
+    public CompositionRelationProcessor(final PcmSurrogate model) {
         super(model, CompositionRelation.class);
     }
 }

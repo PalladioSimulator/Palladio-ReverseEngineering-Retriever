@@ -12,8 +12,8 @@ import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 public class LinkResourceSpecificationRelationProcessorTest extends
         RelationProcessorTest<LinkResourceSpecificationRelationProcessor, PcmSurrogate, LinkResourceSpecificationRelation, LinkResourceSpecification, DeploymentDeploymentRelation> {
     @Override
-    protected LinkResourceSpecificationRelation createRelation(LinkResourceSpecification source,
-            DeploymentDeploymentRelation destination, boolean isPlaceholder) {
+    protected LinkResourceSpecificationRelation createRelation(final LinkResourceSpecification source,
+            final DeploymentDeploymentRelation destination, final boolean isPlaceholder) {
         return new LinkResourceSpecificationRelation(source, destination, isPlaceholder);
     }
 
@@ -23,7 +23,7 @@ public class LinkResourceSpecificationRelationProcessorTest extends
     }
 
     @Override
-    protected LinkResourceSpecification getPlaceholderOfSourceEntity(LinkResourceSpecification source) {
+    protected LinkResourceSpecification getPlaceholderOfSourceEntity(final LinkResourceSpecification source) {
         return new LinkResourceSpecification(source.getValue(), true);
     }
 
@@ -34,12 +34,13 @@ public class LinkResourceSpecificationRelationProcessorTest extends
     }
 
     @Override
-    protected DeploymentDeploymentRelation getPlaceholderOfDestinationEntity(DeploymentDeploymentRelation destination) {
+    protected DeploymentDeploymentRelation getPlaceholderOfDestinationEntity(
+            final DeploymentDeploymentRelation destination) {
         return new DeploymentDeploymentRelation(destination.getSource(), destination.getDestination(), true);
     }
 
     @Override
-    protected LinkResourceSpecificationRelationProcessor createProcessor(PcmSurrogate model) {
+    protected LinkResourceSpecificationRelationProcessor createProcessor(final PcmSurrogate model) {
         return new LinkResourceSpecificationRelationProcessor(model);
     }
 

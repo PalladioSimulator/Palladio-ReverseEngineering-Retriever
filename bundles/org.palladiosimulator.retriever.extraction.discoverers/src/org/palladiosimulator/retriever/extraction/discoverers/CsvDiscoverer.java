@@ -45,20 +45,21 @@ public class CsvDiscoverer implements Discoverer {
             public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
-                setBlackboard(Objects.requireNonNull(blackboard));
+                this.setBlackboard(Objects.requireNonNull(blackboard));
                 final Map<Path, List<CSVRecord>> csvs = new HashMap<>();
-                Discoverer.find(root, ".csv", logger)
+                Discoverer.find(root, ".csv", this.logger)
                     .forEach(p -> {
                         final List<CSVRecord> records = new LinkedList<>();
                         try (Reader reader = new FileReader(p.toFile())) {
                             DEFAULT.parse(reader)
                                 .forEach(records::add);
                         } catch (final IllegalStateException | IOException e) {
-                            logger.error(String.format("%s could not be read correctly.", p), e);
+                            this.logger.error(String.format("%s could not be read correctly.", p), e);
                         }
                         csvs.put(p, records);
                     });
-                getBlackboard().putDiscoveredFiles(DISCOVERER_ID, csvs);
+                this.getBlackboard()
+                    .putDiscoveredFiles(DISCOVERER_ID, csvs);
             }
 
             @Override

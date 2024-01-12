@@ -41,19 +41,20 @@ public class PropertiesDiscoverer implements Discoverer {
             public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
-                setBlackboard(Objects.requireNonNull(blackboard));
+                this.setBlackboard(Objects.requireNonNull(blackboard));
                 final Map<Path, Object> propertyFiles = new HashMap<>();
-                Discoverer.find(root, ".properties", logger)
+                Discoverer.find(root, ".properties", this.logger)
                     .forEach(p -> {
                         try (Reader reader = new FileReader(p.toFile())) {
-                            Properties properties = new Properties();
+                            final Properties properties = new Properties();
                             properties.load(reader);
                             propertyFiles.put(p, properties);
                         } catch (final IOException | IllegalArgumentException e) {
-                            logger.error(String.format("%s could not be read correctly.", p), e);
+                            this.logger.error(String.format("%s could not be read correctly.", p), e);
                         }
                     });
-                getBlackboard().putDiscoveredFiles(DISCOVERER_ID, propertyFiles);
+                this.getBlackboard()
+                    .putDiscoveredFiles(DISCOVERER_ID, propertyFiles);
             }
 
             @Override

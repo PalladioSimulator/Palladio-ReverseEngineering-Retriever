@@ -7,7 +7,7 @@ import tools.mdsd.mocore.framework.processor.RelationProcessor;
 
 public class ComponentSignatureProvisionRelationProcessor
         extends RelationProcessor<PcmSurrogate, ComponentSignatureProvisionRelation> {
-    public ComponentSignatureProvisionRelationProcessor(PcmSurrogate model) {
+    public ComponentSignatureProvisionRelationProcessor(final PcmSurrogate model) {
         super(model, ComponentSignatureProvisionRelation.class);
     }
 }

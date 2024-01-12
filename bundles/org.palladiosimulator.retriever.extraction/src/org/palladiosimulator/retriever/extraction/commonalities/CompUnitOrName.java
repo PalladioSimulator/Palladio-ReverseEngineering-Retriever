@@ -13,36 +13,36 @@ public class CompUnitOrName {
     private final Optional<CompilationUnit> compilationUnit;
     private final String name;
 
-    public CompUnitOrName(String name) {
+    public CompUnitOrName(final String name) {
         this.compilationUnit = Optional.empty();
         this.name = name;
     }
 
-    public CompUnitOrName(CompilationUnit compilationUnit) {
+    public CompUnitOrName(final CompilationUnit compilationUnit) {
         this.compilationUnit = Optional.of(compilationUnit);
         this.name = toName(compilationUnit);
     }
 
     public boolean isUnit() {
-        return compilationUnit.isPresent();
+        return this.compilationUnit.isPresent();
     }
 
     public Optional<CompilationUnit> compilationUnit() {
-        return compilationUnit;
+        return this.compilationUnit;
     }
 
     public String name() {
-        return name;
+        return this.name;
     }
 
-    private static String toName(CompilationUnit compilationUnit) {
+    private static String toName(final CompilationUnit compilationUnit) {
         @SuppressWarnings("unchecked")
-        List<AbstractTypeDeclaration> types = (List<AbstractTypeDeclaration>) compilationUnit.types();
+        final List<AbstractTypeDeclaration> types = compilationUnit.types();
         if (types.isEmpty()) {
             return "void";
         }
-        AbstractTypeDeclaration firstTypeDecl = types.get(0);
-        ITypeBinding binding = firstTypeDecl.resolveBinding();
+        final AbstractTypeDeclaration firstTypeDecl = types.get(0);
+        final ITypeBinding binding = firstTypeDecl.resolveBinding();
         if (binding == null) {
             return firstTypeDecl.getName()
                 .getFullyQualifiedName();
@@ -52,21 +52,18 @@ public class CompUnitOrName {
 
     @Override
     public int hashCode() {
-        return Objects.hash(compilationUnit, name);
+        return Objects.hash(this.compilationUnit, this.name);
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if ((obj == null) || (this.getClass() != obj.getClass())) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        CompUnitOrName other = (CompUnitOrName) obj;
-        return Objects.equals(compilationUnit, other.compilationUnit) && Objects.equals(name, other.name);
+        final CompUnitOrName other = (CompUnitOrName) obj;
+        return Objects.equals(this.compilationUnit, other.compilationUnit) && Objects.equals(this.name, other.name);
     }
 }

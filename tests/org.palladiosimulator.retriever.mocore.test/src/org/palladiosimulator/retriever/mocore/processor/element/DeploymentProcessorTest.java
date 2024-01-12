@@ -14,9 +14,9 @@ public class DeploymentProcessorTest extends ProcessorTest<DeploymentProcessor, 
     @DisabledIf(TEST_API_ONLY_METHOD_NAME)
     public void testRefineWithValidElementAddsCorrectImplications() {
         // Test data
-        PcmSurrogate model = createEmptyModel();
-        DeploymentProcessor processor = createProcessor(model);
-        Deployment element = createUniqueReplaceable();
+        final PcmSurrogate model = this.createEmptyModel();
+        final DeploymentProcessor processor = this.createProcessor(model);
+        final Deployment element = this.createUniqueReplaceable();
 
         // Assertions: Pre-execution
         assertTrue(processor.getImplications()
@@ -31,7 +31,7 @@ public class DeploymentProcessorTest extends ProcessorTest<DeploymentProcessor, 
     }
 
     @Override
-    protected DeploymentProcessor createProcessor(PcmSurrogate model) {
+    protected DeploymentProcessor createProcessor(final PcmSurrogate model) {
         return new DeploymentProcessor(model);
     }
 

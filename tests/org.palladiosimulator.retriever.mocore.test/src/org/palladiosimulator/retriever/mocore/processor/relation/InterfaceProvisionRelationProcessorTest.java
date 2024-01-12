@@ -11,8 +11,8 @@ import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 public class InterfaceProvisionRelationProcessorTest extends
         RelationProcessorTest<InterfaceProvisionRelationProcessor, PcmSurrogate, InterfaceProvisionRelation, Component<?>, Interface> {
     @Override
-    protected InterfaceProvisionRelation createRelation(Component<?> source, Interface destination,
-            boolean isPlaceholder) {
+    protected InterfaceProvisionRelation createRelation(final Component<?> source, final Interface destination,
+            final boolean isPlaceholder) {
         return new InterfaceProvisionRelation(source, destination, isPlaceholder);
     }
 
@@ -22,7 +22,7 @@ public class InterfaceProvisionRelationProcessorTest extends
     }
 
     @Override
-    protected Component<?> getPlaceholderOfSourceEntity(Component<?> source) {
+    protected Component<?> getPlaceholderOfSourceEntity(final Component<?> source) {
         return new Component<>(source.getValue(), true);
     }
 
@@ -32,12 +32,12 @@ public class InterfaceProvisionRelationProcessorTest extends
     }
 
     @Override
-    protected Interface getPlaceholderOfDestinationEntity(Interface destination) {
+    protected Interface getPlaceholderOfDestinationEntity(final Interface destination) {
         return new Interface(destination.getValue(), true);
     }
 
     @Override
-    protected InterfaceProvisionRelationProcessor createProcessor(PcmSurrogate model) {
+    protected InterfaceProvisionRelationProcessor createProcessor(final PcmSurrogate model) {
         return new InterfaceProvisionRelationProcessor(model);
     }
 

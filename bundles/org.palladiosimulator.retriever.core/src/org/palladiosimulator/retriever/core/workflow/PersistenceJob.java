@@ -28,8 +28,9 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
     private final String outputFolder;
     private final String projectName;
 
-    public PersistenceJob(Blackboard<Object> blackboard, URI inputFolder, URI outputFolder, String repositoryKey,
-            String systemKey, String allocationKey, String resourceEnvironmentKey) {
+    public PersistenceJob(final Blackboard<Object> blackboard, final URI inputFolder, final URI outputFolder,
+            final String repositoryKey, final String systemKey, final String allocationKey,
+            final String resourceEnvironmentKey) {
         this.blackboard = Objects.requireNonNull(blackboard);
 
         this.repositoryKey = Objects.requireNonNull(repositoryKey);
@@ -50,26 +51,26 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
     }
 
     @Override
-    public void execute(IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
+    public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
         // Fetch input from blackboard
         monitor.subTask("Retrieving job input from blackboard");
-        Repository repository = (Repository) this.blackboard.getPartition(repositoryKey);
-        System system = (System) this.blackboard.getPartition(systemKey);
-        ResourceEnvironment resourceEnvironment = (ResourceEnvironment) this.blackboard
-            .getPartition(resourceEnvironmentKey);
-        Allocation allocation = (Allocation) this.blackboard.getPartition(allocationKey);
+        final Repository repository = (Repository) this.blackboard.getPartition(this.repositoryKey);
+        final System system = (System) this.blackboard.getPartition(this.systemKey);
+        final ResourceEnvironment resourceEnvironment = (ResourceEnvironment) this.blackboard
+            .getPartition(this.resourceEnvironmentKey);
+        final Allocation allocation = (Allocation) this.blackboard.getPartition(this.allocationKey);
 
         // Make blackboard models persistent by saving them as files
         monitor.subTask("Persisting models");
-        ModelSaver.saveRepository(repository, outputFolder, projectName);
-        ModelSaver.saveSystem(system, outputFolder, projectName);
-        ModelSaver.saveResourceEnvironment(resourceEnvironment, outputFolder, projectName);
-        ModelSaver.saveAllocation(allocation, outputFolder, projectName);
+        ModelSaver.saveRepository(repository, this.outputFolder, this.projectName);
+        ModelSaver.saveSystem(system, this.outputFolder, this.projectName);
+        ModelSaver.saveResourceEnvironment(resourceEnvironment, this.outputFolder, this.projectName);
+        ModelSaver.saveAllocation(allocation, this.outputFolder, this.projectName);
         monitor.done();
     }
 
     @Override
-    public void cleanup(IProgressMonitor monitor) throws CleanupFailedException {
+    public void cleanup(final IProgressMonitor monitor) throws CleanupFailedException {
         // No cleanup required for the job
     }
 
@@ -79,7 +80,7 @@ public class PersistenceJob implements IBlackboardInteractingJob<Blackboard<Obje
     }
 
     @Override
-    public void setBlackboard(Blackboard<Object> blackboard) {
+    public void setBlackboard(final Blackboard<Object> blackboard) {
         this.blackboard = Objects.requireNonNull(blackboard);
     }
 }

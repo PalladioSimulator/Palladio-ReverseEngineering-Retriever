@@ -13,15 +13,16 @@ public interface OperationInterface extends Comparable<OperationInterface> {
      */
     String getInterface();
 
-    default boolean isPartOf(OperationInterface other) {
-        return getName().isPartOf(other.getName()
-            .toString());
+    default boolean isPartOf(final OperationInterface other) {
+        return this.getName()
+            .isPartOf(other.getName()
+                .toString());
     }
 
     @Override
-    default int compareTo(OperationInterface other) {
-        boolean isSubset = this.isPartOf(other);
-        boolean isSuperset = other.isPartOf(this);
+    default int compareTo(final OperationInterface other) {
+        final boolean isSubset = this.isPartOf(other);
+        final boolean isSuperset = other.isPartOf(this);
         if (isSubset && isSuperset) {
             return 0; // equal
         } else if (isSubset) {
@@ -30,7 +31,8 @@ public interface OperationInterface extends Comparable<OperationInterface> {
             return -1;
         }
 
-        return getName().toString()
+        return this.getName()
+            .toString()
             .compareTo(other.getName()
                 .toString()); // disjoint
     }

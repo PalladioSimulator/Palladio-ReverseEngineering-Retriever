@@ -43,19 +43,20 @@ public class JsonDiscoverer implements Discoverer {
             public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
-                setBlackboard(Objects.requireNonNull(blackboard));
+                this.setBlackboard(Objects.requireNonNull(blackboard));
                 final Map<Path, JSONObject> jsons = new HashMap<>();
-                Discoverer.find(root, ".json", logger)
+                Discoverer.find(root, ".json", this.logger)
                     .forEach(p -> {
                         try (BufferedReader reader = new BufferedReader(new FileReader(p.toFile()))) {
-                            String jsonSource = reader.lines()
+                            final String jsonSource = reader.lines()
                                 .collect(Collectors.joining(System.lineSeparator()));
                             jsons.put(p, new JSONObject(jsonSource));
                         } catch (ClassCastException | IOException | JSONException e) {
-                            logger.error(String.format("%s could not be read correctly.", p), e);
+                            this.logger.error(String.format("%s could not be read correctly.", p), e);
                         }
                     });
-                getBlackboard().putDiscoveredFiles(DISCOVERER_ID, jsons);
+                this.getBlackboard()
+                    .putDiscoveredFiles(DISCOVERER_ID, jsons);
             }
 
             @Override

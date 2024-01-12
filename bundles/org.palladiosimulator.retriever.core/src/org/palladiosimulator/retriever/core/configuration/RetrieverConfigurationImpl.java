@@ -45,47 +45,47 @@ public class RetrieverConfigurationImpl extends AbstractComposedJobConfiguration
         this(new HashMap<>());
     }
 
-    public RetrieverConfigurationImpl(Map<String, Object> attributes) {
+    public RetrieverConfigurationImpl(final Map<String, Object> attributes) {
         this.attributes = Objects.requireNonNull(attributes);
         this.serviceConfigs = new HashMap<>();
 
         ServiceCollection<Discoverer> discovererCollection = null;
         try {
             discovererCollection = new DiscovererCollection();
-        } catch (CoreException e) {
+        } catch (final CoreException e) {
             LOG.error("Exception occurred while discovering discoverers!");
             discovererCollection = new EmptyCollection<>();
         }
-        ServiceConfiguration<Discoverer> discovererConfig = new ServiceConfiguration<>(discovererCollection,
+        final ServiceConfiguration<Discoverer> discovererConfig = new ServiceConfiguration<>(discovererCollection,
                 RULE_ENGINE_SELECTED_DISCOVERERS, RULE_ENGINE_DISCOVERER_CONFIG_PREFIX);
-        serviceConfigs.put(Discoverer.class, discovererConfig);
+        this.serviceConfigs.put(Discoverer.class, discovererConfig);
 
         ServiceCollection<Rule> ruleCollection = null;
         try {
             ruleCollection = new RuleCollection();
-        } catch (CoreException e) {
+        } catch (final CoreException e) {
             LOG.error("Exception occurred while discovering rules!");
             ruleCollection = new EmptyCollection<>();
         }
-        ServiceConfiguration<Rule> ruleConfig = new ServiceConfiguration<>(ruleCollection, RULE_ENGINE_SELECTED_RULES,
-                RULE_ENGINE_RULE_CONFIG_PREFIX);
+        final ServiceConfiguration<Rule> ruleConfig = new ServiceConfiguration<>(ruleCollection,
+                RULE_ENGINE_SELECTED_RULES, RULE_ENGINE_RULE_CONFIG_PREFIX);
         ruleConfig.addDependencyProvider(discovererConfig);
-        serviceConfigs.put(Rule.class, ruleConfig);
+        this.serviceConfigs.put(Rule.class, ruleConfig);
 
         ServiceCollection<Analyst> analystCollection = null;
         try {
             analystCollection = new AnalystCollection();
-        } catch (CoreException e) {
+        } catch (final CoreException e) {
             LOG.error("Exception occurred while discovering analysts!");
             analystCollection = new EmptyCollection<>();
         }
-        ServiceConfiguration<Analyst> analystConfig = new ServiceConfiguration<>(analystCollection,
+        final ServiceConfiguration<Analyst> analystConfig = new ServiceConfiguration<>(analystCollection,
                 RULE_ENGINE_SELECTED_ANALYSTS, RULE_ENGINE_ANALYST_CONFIG_PREFIX);
         analystConfig.addDependencyProvider(discovererConfig);
         analystConfig.addDependencyProvider(ruleConfig);
-        serviceConfigs.put(Analyst.class, analystConfig);
+        this.serviceConfigs.put(Analyst.class, analystConfig);
 
-        applyAttributeMap(attributes);
+        this.applyAttributeMap(attributes);
     }
 
     public void applyAttributeMap(final Map<String, Object> attributeMap) {
@@ -94,57 +94,57 @@ public class RetrieverConfigurationImpl extends AbstractComposedJobConfiguration
         }
 
         if (attributeMap.get(RULE_ENGINE_INPUT_PATH) != null) {
-            setInputFolder(URI.createURI((String) attributeMap.get(RULE_ENGINE_INPUT_PATH)));
+            this.setInputFolder(URI.createURI((String) attributeMap.get(RULE_ENGINE_INPUT_PATH)));
         }
         if (attributeMap.get(RULE_ENGINE_OUTPUT_PATH) != null) {
-            setOutputFolder(URI.createURI((String) attributeMap.get(RULE_ENGINE_OUTPUT_PATH)));
+            this.setOutputFolder(URI.createURI((String) attributeMap.get(RULE_ENGINE_OUTPUT_PATH)));
         }
 
-        for (ServiceConfiguration<? extends Service> serviceConfig : serviceConfigs.values()) {
+        for (final ServiceConfiguration<? extends Service> serviceConfig : this.serviceConfigs.values()) {
             serviceConfig.applyAttributeMap(attributeMap);
         }
     }
 
     @Override
     public Map<String, Object> getAttributes() {
-        return attributes;
+        return this.attributes;
     }
 
     @Override
     public URI getInputFolder() {
-        return inputFolder;
+        return this.inputFolder;
     }
 
     @Override
     public URI getOutputFolder() {
-        return outputFolder;
+        return this.outputFolder;
     }
 
     @Override
-    public void setInputFolder(URI inputFolder) {
+    public void setInputFolder(final URI inputFolder) {
         this.inputFolder = inputFolder;
     }
 
     @Override
-    public void setOutputFolder(URI outputFolder) {
+    public void setOutputFolder(final URI outputFolder) {
         this.outputFolder = outputFolder;
     }
 
     @Override
-    public <T extends Service> ServiceConfiguration<T> getConfig(Class<T> serviceClass) {
+    public <T extends Service> ServiceConfiguration<T> getConfig(final Class<T> serviceClass) {
         // serviceConfig only contains legal mappings
         @SuppressWarnings("unchecked")
-        ServiceConfiguration<T> serviceConfig = (ServiceConfiguration<T>) serviceConfigs.get(serviceClass);
+        final ServiceConfiguration<T> serviceConfig = (ServiceConfiguration<T>) this.serviceConfigs.get(serviceClass);
         return serviceConfig;
     }
 
     public Map<String, Object> toMap() {
         final Map<String, Object> result = new HashMap<>();
 
-        result.put(RULE_ENGINE_INPUT_PATH, getInputFolder());
-        result.put(RULE_ENGINE_OUTPUT_PATH, getOutputFolder());
+        result.put(RULE_ENGINE_INPUT_PATH, this.getInputFolder());
+        result.put(RULE_ENGINE_OUTPUT_PATH, this.getOutputFolder());
 
-        for (ServiceConfiguration<? extends Service> serviceConfig : serviceConfigs.values()) {
+        for (final ServiceConfiguration<? extends Service> serviceConfig : this.serviceConfigs.values()) {
             result.putAll(serviceConfig.toMap());
         }
 

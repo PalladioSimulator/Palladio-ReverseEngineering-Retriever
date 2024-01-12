@@ -10,18 +10,18 @@ import tools.mdsd.mocore.framework.surrogate.RelationTest;
 public class ServiceEffectSpecificationRelationTest extends
         RelationTest<ServiceEffectSpecificationRelation, ComponentSignatureProvisionRelation, ServiceEffectSpecification> {
     @Override
-    protected ServiceEffectSpecificationRelation createRelation(ComponentSignatureProvisionRelation source,
-            ServiceEffectSpecification destination, boolean isPlaceholder) {
+    protected ServiceEffectSpecificationRelation createRelation(final ComponentSignatureProvisionRelation source,
+            final ServiceEffectSpecification destination, final boolean isPlaceholder) {
         return new ServiceEffectSpecificationRelation(source, destination, isPlaceholder);
     }
 
     @Override
     protected ComponentSignatureProvisionRelation getUniqueSourceEntity() {
-        Component<?> component = Component.getUniquePlaceholder();
-        Interface interfsc = Interface.getUniquePlaceholder();
-        Signature signature = Signature.getUniquePlaceholder();
-        InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(component, interfsc, true);
-        SignatureProvisionRelation signatureProvision = new SignatureProvisionRelation(signature, interfsc, true);
+        final Component<?> component = Component.getUniquePlaceholder();
+        final Interface interfsc = Interface.getUniquePlaceholder();
+        final Signature signature = Signature.getUniquePlaceholder();
+        final InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(component, interfsc, true);
+        final SignatureProvisionRelation signatureProvision = new SignatureProvisionRelation(signature, interfsc, true);
         return new ComponentSignatureProvisionRelation(interfaceProvision, signatureProvision, false);
     }
 

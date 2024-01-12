@@ -7,13 +7,13 @@ import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
 public class LinkResourceSpecificationRelation
         extends Relation<LinkResourceSpecification, DeploymentDeploymentRelation> {
-    public LinkResourceSpecificationRelation(LinkResourceSpecification source, DeploymentDeploymentRelation destination,
-            boolean isPlaceholder) {
+    public LinkResourceSpecificationRelation(final LinkResourceSpecification source,
+            final DeploymentDeploymentRelation destination, final boolean isPlaceholder) {
         super(source, destination, isPlaceholder);
     }
 
     @Override
-    public <U extends Replaceable> LinkResourceSpecificationRelation replace(U original, U replacement) {
+    public <U extends Replaceable> LinkResourceSpecificationRelation replace(final U original, final U replacement) {
         if (!this.includes(original)) {
             // TODO Add message to exception
             throw new IllegalArgumentException();
@@ -21,8 +21,8 @@ public class LinkResourceSpecificationRelation
         if (this.equals(original)) {
             return (LinkResourceSpecificationRelation) replacement;
         }
-        LinkResourceSpecification source = getSourceReplacement(original, replacement);
-        DeploymentDeploymentRelation destination = getDestinationReplacement(original, replacement);
+        final LinkResourceSpecification source = this.getSourceReplacement(original, replacement);
+        final DeploymentDeploymentRelation destination = this.getDestinationReplacement(original, replacement);
         return new LinkResourceSpecificationRelation(source, destination, this.isPlaceholder());
     }
 }

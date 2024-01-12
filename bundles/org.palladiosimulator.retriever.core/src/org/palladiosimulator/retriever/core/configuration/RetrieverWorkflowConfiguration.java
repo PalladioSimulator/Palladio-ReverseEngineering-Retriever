@@ -16,14 +16,14 @@ public class RetrieverWorkflowConfiguration extends AbstractWorkflowBasedRunConf
 
     @Override
     public void setDefaults() {
-        configuration = new RetrieverConfigurationImpl();
+        this.configuration = new RetrieverConfigurationImpl();
     }
 
     public RetrieverConfiguration getRetrieverConfiguration() {
-        return configuration;
+        return this.configuration;
     }
 
-    public void setRetrieverConfiguration(RetrieverConfiguration configuration) {
+    public void setRetrieverConfiguration(final RetrieverConfiguration configuration) {
         this.configuration = configuration;
     }
 

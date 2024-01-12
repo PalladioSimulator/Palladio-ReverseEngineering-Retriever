@@ -18,43 +18,44 @@ public class Provisions implements Iterable<OperationInterface> {
     private final Set<OperationInterface> provisions;
     private final Map<OperationInterface, List<OperationInterface>> groupedProvisions;
 
-    public Provisions(Collection<OperationInterface> provisions, Collection<OperationInterface> allDependencies) {
+    public Provisions(final Collection<OperationInterface> provisions,
+            final Collection<OperationInterface> allDependencies) {
         this.provisions = Collections.unmodifiableSet(new HashSet<>(provisions));
         this.groupedProvisions = DependencyUtils.groupDependencies(provisions, allDependencies);
     }
 
     public Set<OperationInterface> get() {
-        return provisions;
+        return this.provisions;
     }
 
     public Map<OperationInterface, List<OperationInterface>> getGrouped() {
-        return groupedProvisions;
+        return this.groupedProvisions;
     }
 
-    public boolean containsPartOf(OperationInterface iface) {
-        return provisions.stream()
+    public boolean containsPartOf(final OperationInterface iface) {
+        return this.provisions.stream()
             .anyMatch(x -> x.isPartOf(iface));
     }
 
-    public boolean containsEntire(OperationInterface iface) {
-        return provisions.stream()
+    public boolean containsEntire(final OperationInterface iface) {
+        return this.provisions.stream()
             .anyMatch(x -> iface.isPartOf(x));
     }
 
     @Override
     public Iterator<OperationInterface> iterator() {
-        return provisions.iterator();
+        return this.provisions.iterator();
     }
 
     public Map<OperationInterface, List<Operation>> simplified() {
-        List<Map<OperationInterface, List<Operation>>> simplifiedInterfaces = new LinkedList<>();
-        for (OperationInterface root : groupedProvisions.keySet()) {
-            List<Operation> simplifiedRoot = new ArrayList<>(root.simplified()
+        final List<Map<OperationInterface, List<Operation>>> simplifiedInterfaces = new LinkedList<>();
+        for (final OperationInterface root : this.groupedProvisions.keySet()) {
+            final List<Operation> simplifiedRoot = new ArrayList<>(root.simplified()
                 .values()
                 .stream()
                 .flatMap(x -> x.stream())
                 .collect(Collectors.toList()));
-            for (OperationInterface member : groupedProvisions.get(root)) {
+            for (final OperationInterface member : this.groupedProvisions.get(root)) {
                 simplifiedRoot.addAll(member.simplified()
                     .values()
                     .stream()
@@ -70,30 +71,27 @@ public class Provisions implements Iterable<OperationInterface> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(provisions);
+        return Objects.hash(this.provisions);
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if ((obj == null) || (this.getClass() != obj.getClass())) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        Provisions other = (Provisions) obj;
-        return Objects.equals(provisions, other.provisions);
+        final Provisions other = (Provisions) obj;
+        return Objects.equals(this.provisions, other.provisions);
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        Map<OperationInterface, List<Operation>> simplified = simplified();
+        final StringBuilder builder = new StringBuilder();
+        final Map<OperationInterface, List<Operation>> simplified = this.simplified();
 
-        for (OperationInterface iface : simplified.keySet()) {
+        for (final OperationInterface iface : simplified.keySet()) {
             builder.append(iface.getName());
             simplified.get(iface)
                 .forEach(x -> builder.append("\n\t")

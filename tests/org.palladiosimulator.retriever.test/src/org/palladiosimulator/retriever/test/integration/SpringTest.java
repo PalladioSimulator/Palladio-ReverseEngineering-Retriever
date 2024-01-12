@@ -10,6 +10,6 @@ public class SpringTest extends CaseStudyTest {
 
     @Override
     void testRetrieverRepository() {
-        assertComponentExists("spring_AController");
+        this.assertComponentExists("spring_AController");
     }
 }

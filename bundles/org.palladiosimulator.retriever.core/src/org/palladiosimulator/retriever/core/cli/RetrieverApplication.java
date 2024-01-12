@@ -27,7 +27,7 @@ import org.palladiosimulator.retriever.extraction.engine.ServiceConfiguration;
 
 public class RetrieverApplication implements IApplication {
 
-    private static Options createOptions(Set<String> availableRuleIDs) {
+    private static Options createOptions(final Set<String> availableRuleIDs) {
         final Options options = new Options();
         options
             .addRequiredOption("i", "input-directory", true,
@@ -54,10 +54,10 @@ public class RetrieverApplication implements IApplication {
     }
 
     @Override
-    public Object start(IApplicationContext context) throws Exception {
+    public Object start(final IApplicationContext context) throws Exception {
 
-        Set<Rule> availableRules = new RuleCollection().getServices();
-        Set<String> availableRuleIDs = availableRules.stream()
+        final Set<Rule> availableRules = new RuleCollection().getServices();
+        final Set<String> availableRuleIDs = availableRules.stream()
             .map(Rule::getID)
             .collect(Collectors.toSet());
 
@@ -77,7 +77,7 @@ public class RetrieverApplication implements IApplication {
             printHelp(options);
         }
 
-        RetrieverConfiguration configuration = new RetrieverConfigurationImpl();
+        final RetrieverConfiguration configuration = new RetrieverConfigurationImpl();
 
         try {
             configuration.setInputFolder(URI.createFileURI(URI.decode(Paths.get(cmd.getOptionValue("i"))
@@ -101,25 +101,25 @@ public class RetrieverApplication implements IApplication {
 
         // Enable all discoverers, in case a selected rule depends on them.
         // TODO: This is unnecessary once rule dependencies are in place
-        ServiceConfiguration<Discoverer> discovererConfig = configuration.getConfig(Discoverer.class);
-        for (Discoverer discoverer : new DiscovererCollection().getServices()) {
+        final ServiceConfiguration<Discoverer> discovererConfig = configuration.getConfig(Discoverer.class);
+        for (final Discoverer discoverer : new DiscovererCollection().getServices()) {
             discovererConfig.select(discoverer);
         }
 
-        ServiceConfiguration<Rule> ruleConfig = configuration.getConfig(Rule.class);
+        final ServiceConfiguration<Rule> ruleConfig = configuration.getConfig(Rule.class);
         // Extract and check rules
-        Set<String> requestedRuleIDs = Arrays.stream(cmd.getOptionValue("r")
+        final Set<String> requestedRuleIDs = Arrays.stream(cmd.getOptionValue("r")
             .split(","))
             .map(String::strip)
             .collect(Collectors.toSet());
-        Set<Rule> rules = availableRules.stream()
+        final Set<Rule> rules = availableRules.stream()
             .filter(x -> requestedRuleIDs.contains(x.getID()))
             .collect(Collectors.toSet());
         if (rules.isEmpty()) {
             System.err.println("Invalid rules: " + cmd.getOptionValue("r"));
             return -1;
         }
-        for (Rule rule : rules) {
+        for (final Rule rule : rules) {
             ruleConfig.select(rule);
         }
 

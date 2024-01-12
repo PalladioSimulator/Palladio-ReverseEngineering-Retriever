@@ -28,14 +28,14 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
     @Test
     public void testTransformSingleComponent() {
         // Test data
-        RepositoryTransformer transformer = createTransformer();
-        PcmSurrogate model = createEmptyModel();
-        AtomicComponent component = AtomicComponent.getUniquePlaceholder();
+        final RepositoryTransformer transformer = this.createTransformer();
+        final PcmSurrogate model = this.createEmptyModel();
+        final AtomicComponent component = AtomicComponent.getUniquePlaceholder();
 
         model.add(component);
 
         // Execution
-        Repository repository = transformer.transform(model);
+        final Repository repository = transformer.transform(model);
 
         // Assertion
         assertNotNull(repository);
@@ -45,14 +45,14 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
     @Test
     public void testTransformSingleEmptyComposite() {
         // Test data
-        RepositoryTransformer transformer = createTransformer();
-        PcmSurrogate model = createEmptyModel();
-        Composite composite = Composite.getUniquePlaceholder();
+        final RepositoryTransformer transformer = this.createTransformer();
+        final PcmSurrogate model = this.createEmptyModel();
+        final Composite composite = Composite.getUniquePlaceholder();
 
         model.add(composite);
 
         // Execution
-        Repository repository = transformer.transform(model);
+        final Repository repository = transformer.transform(model);
 
         // Assertion
         assertNotNull(repository);
@@ -62,18 +62,18 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
     @Test
     public void testTransformCompositeWithAtomicComponentChild() {
         // Test data
-        RepositoryTransformer transformer = createTransformer();
-        PcmSurrogate model = createEmptyModel();
-        Composite composite = Composite.getUniquePlaceholder();
-        AtomicComponent component = AtomicComponent.getUniquePlaceholder();
-        CompositionRelation compositionRelation = new CompositionRelation(composite, component, false);
+        final RepositoryTransformer transformer = this.createTransformer();
+        final PcmSurrogate model = this.createEmptyModel();
+        final Composite composite = Composite.getUniquePlaceholder();
+        final AtomicComponent component = AtomicComponent.getUniquePlaceholder();
+        final CompositionRelation compositionRelation = new CompositionRelation(composite, component, false);
 
         model.add(composite);
         model.add(component);
         model.add(compositionRelation);
 
         // Execution
-        Repository repository = transformer.transform(model);
+        final Repository repository = transformer.transform(model);
 
         // Assertion
         assertNotNull(repository);
@@ -85,18 +85,18 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
     @Test
     public void testTransformCompositeWithCompositeChild() {
         // Test data
-        RepositoryTransformer transformer = createTransformer();
-        PcmSurrogate model = createEmptyModel();
-        Composite composite = Composite.getUniquePlaceholder();
-        Composite child = Composite.getUniquePlaceholder();
-        CompositionRelation compositionRelation = new CompositionRelation(composite, child, false);
+        final RepositoryTransformer transformer = this.createTransformer();
+        final PcmSurrogate model = this.createEmptyModel();
+        final Composite composite = Composite.getUniquePlaceholder();
+        final Composite child = Composite.getUniquePlaceholder();
+        final CompositionRelation compositionRelation = new CompositionRelation(composite, child, false);
 
         model.add(composite);
         model.add(child);
         model.add(compositionRelation);
 
         // Execution
-        Repository repository = transformer.transform(model);
+        final Repository repository = transformer.transform(model);
 
         // Assertion
         assertNotNull(repository);
@@ -108,14 +108,14 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
     @Test
     public void testTransformCompositeWithMultilevelChildren() {
         // Test data
-        RepositoryTransformer transformer = createTransformer();
-        PcmSurrogate model = createEmptyModel();
-        Composite compositeLevelZero = Composite.getUniquePlaceholder();
-        Composite compositeLevelOne = Composite.getUniquePlaceholder();
-        AtomicComponent component = AtomicComponent.getUniquePlaceholder();
-        CompositionRelation compositionRelationFst = new CompositionRelation(compositeLevelZero, compositeLevelOne,
-                false);
-        CompositionRelation compositionRelationSnd = new CompositionRelation(compositeLevelOne, component, false);
+        final RepositoryTransformer transformer = this.createTransformer();
+        final PcmSurrogate model = this.createEmptyModel();
+        final Composite compositeLevelZero = Composite.getUniquePlaceholder();
+        final Composite compositeLevelOne = Composite.getUniquePlaceholder();
+        final AtomicComponent component = AtomicComponent.getUniquePlaceholder();
+        final CompositionRelation compositionRelationFst = new CompositionRelation(compositeLevelZero,
+                compositeLevelOne, false);
+        final CompositionRelation compositionRelationSnd = new CompositionRelation(compositeLevelOne, component, false);
 
         model.add(compositeLevelZero);
         model.add(compositeLevelOne);
@@ -124,7 +124,7 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
         model.add(compositionRelationSnd);
 
         // Execution
-        Repository repository = transformer.transform(model);
+        final Repository repository = transformer.transform(model);
 
         // Assertion
         assertNotNull(repository);
@@ -138,14 +138,14 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
     @Test
     public void testTransformSingleInterface() {
         // Test data
-        RepositoryTransformer transformer = createTransformer();
-        PcmSurrogate model = createEmptyModel();
-        Interface element = Interface.getUniquePlaceholder();
+        final RepositoryTransformer transformer = this.createTransformer();
+        final PcmSurrogate model = this.createEmptyModel();
+        final Interface element = Interface.getUniquePlaceholder();
 
         model.add(element);
 
         // Execution
-        Repository repository = transformer.transform(model);
+        final Repository repository = transformer.transform(model);
 
         // Assertion
         assertNotNull(repository);
@@ -154,21 +154,21 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    public void testTransformInterfaceProvision(boolean isPlaceholderRelation) {
+    public void testTransformInterfaceProvision(final boolean isPlaceholderRelation) {
         // Test data
-        RepositoryTransformer transformer = createTransformer();
-        PcmSurrogate model = createEmptyModel();
-        Component<?> provider = Component.getUniquePlaceholder();
-        Interface providerInterface = Interface.getUniquePlaceholder();
-        InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider, providerInterface,
-                isPlaceholderRelation);
+        final RepositoryTransformer transformer = this.createTransformer();
+        final PcmSurrogate model = this.createEmptyModel();
+        final Component<?> provider = Component.getUniquePlaceholder();
+        final Interface providerInterface = Interface.getUniquePlaceholder();
+        final InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider,
+                providerInterface, isPlaceholderRelation);
 
         model.add(provider);
         model.add(providerInterface);
         model.add(interfaceProvision);
 
         // Execution
-        Repository repository = transformer.transform(model);
+        final Repository repository = transformer.transform(model);
 
         // Assertion
         assertNotNull(repository);
@@ -179,13 +179,13 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    public void testTransformInterfaceRequirement(boolean isPlaceholderRelation) {
+    public void testTransformInterfaceRequirement(final boolean isPlaceholderRelation) {
         // Test data
-        RepositoryTransformer transformer = createTransformer();
-        PcmSurrogate model = createEmptyModel();
-        Component<?> consumer = Component.getUniquePlaceholder();
-        Interface consumerInterface = Interface.getUniquePlaceholder();
-        InterfaceRequirementRelation interfaceRequirement = new InterfaceRequirementRelation(consumer,
+        final RepositoryTransformer transformer = this.createTransformer();
+        final PcmSurrogate model = this.createEmptyModel();
+        final Component<?> consumer = Component.getUniquePlaceholder();
+        final Interface consumerInterface = Interface.getUniquePlaceholder();
+        final InterfaceRequirementRelation interfaceRequirement = new InterfaceRequirementRelation(consumer,
                 consumerInterface, isPlaceholderRelation);
 
         model.add(consumer);
@@ -193,7 +193,7 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
         model.add(interfaceRequirement);
 
         // Execution
-        Repository repository = transformer.transform(model);
+        final Repository repository = transformer.transform(model);
 
         // Assertion
         assertNotNull(repository);
@@ -204,17 +204,17 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    public void testTransformSignatureProvision(boolean isPlaceholderRelation) {
+    public void testTransformSignatureProvision(final boolean isPlaceholderRelation) {
         // Test data
-        RepositoryTransformer transformer = createTransformer();
-        PcmSurrogate model = createEmptyModel();
-        Component<?> provider = Component.getUniquePlaceholder();
-        Interface providerInterface = Interface.getUniquePlaceholder();
-        InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider, providerInterface,
-                false);
-        Signature signature = Signature.getUniquePlaceholder();
-        SignatureProvisionRelation signatureProvision = new SignatureProvisionRelation(signature, providerInterface,
-                isPlaceholderRelation);
+        final RepositoryTransformer transformer = this.createTransformer();
+        final PcmSurrogate model = this.createEmptyModel();
+        final Component<?> provider = Component.getUniquePlaceholder();
+        final Interface providerInterface = Interface.getUniquePlaceholder();
+        final InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider,
+                providerInterface, false);
+        final Signature signature = Signature.getUniquePlaceholder();
+        final SignatureProvisionRelation signatureProvision = new SignatureProvisionRelation(signature,
+                providerInterface, isPlaceholderRelation);
 
         model.add(provider);
         model.add(providerInterface);
@@ -223,7 +223,7 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
         model.add(signatureProvision);
 
         // Execution
-        Repository repository = transformer.transform(model);
+        final Repository repository = transformer.transform(model);
 
         // Assertion
         assertNotNull(repository);
@@ -235,21 +235,21 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    public void testTransformComponentSignatureProvisionWithSeff(boolean isPlaceholderRelation) {
+    public void testTransformComponentSignatureProvisionWithSeff(final boolean isPlaceholderRelation) {
         // Test data
-        RepositoryTransformer transformer = createTransformer();
-        PcmSurrogate model = createEmptyModel();
-        Component<?> provider = Component.getUniquePlaceholder();
-        Interface providerInterface = Interface.getUniquePlaceholder();
-        InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider, providerInterface,
-                false);
-        Signature signature = Signature.getUniquePlaceholder();
-        SignatureProvisionRelation signatureProvision = new SignatureProvisionRelation(signature, providerInterface,
-                false);
-        ComponentSignatureProvisionRelation componentSignatureProvisionRelation = new ComponentSignatureProvisionRelation(
+        final RepositoryTransformer transformer = this.createTransformer();
+        final PcmSurrogate model = this.createEmptyModel();
+        final Component<?> provider = Component.getUniquePlaceholder();
+        final Interface providerInterface = Interface.getUniquePlaceholder();
+        final InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(provider,
+                providerInterface, false);
+        final Signature signature = Signature.getUniquePlaceholder();
+        final SignatureProvisionRelation signatureProvision = new SignatureProvisionRelation(signature,
+                providerInterface, false);
+        final ComponentSignatureProvisionRelation componentSignatureProvisionRelation = new ComponentSignatureProvisionRelation(
                 interfaceProvision, signatureProvision, false);
-        ServiceEffectSpecification seff = ServiceEffectSpecification.getUniquePlaceholder();
-        ServiceEffectSpecificationRelation seffRelation = new ServiceEffectSpecificationRelation(
+        final ServiceEffectSpecification seff = ServiceEffectSpecification.getUniquePlaceholder();
+        final ServiceEffectSpecificationRelation seffRelation = new ServiceEffectSpecificationRelation(
                 componentSignatureProvisionRelation, seff, isPlaceholderRelation);
 
         model.add(provider);
@@ -262,7 +262,7 @@ public class RepositoryTransformerTest extends TransformerTest<RepositoryTransfo
         model.add(seffRelation);
 
         // Execution
-        Repository repository = transformer.transform(model);
+        final Repository repository = transformer.transform(model);
 
         // Assertion
         assertNotNull(repository);

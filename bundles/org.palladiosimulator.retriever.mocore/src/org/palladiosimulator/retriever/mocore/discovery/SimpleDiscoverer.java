@@ -13,7 +13,7 @@ import tools.mdsd.mocore.framework.surrogate.Replaceable;
  *            the type of {@link Replaceable} the discoverer provides
  */
 public class SimpleDiscoverer<T extends Replaceable> extends Discoverer<T> {
-    public SimpleDiscoverer(Set<T> discoveries, Class<T> discoveryType) {
+    public SimpleDiscoverer(final Set<T> discoveries, final Class<T> discoveryType) {
         super(discoveries, discoveryType);
     }
 }

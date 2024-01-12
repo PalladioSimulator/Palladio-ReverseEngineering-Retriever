@@ -4,13 +4,13 @@ import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositor
 import org.palladiosimulator.pcm.repository.OperationInterface;
 
 public class Interface extends PcmElement<OperationInterface> {
-    public Interface(OperationInterface value, boolean isPlaceholder) {
+    public Interface(final OperationInterface value, final boolean isPlaceholder) {
         super(value, isPlaceholder);
     }
 
     public static Interface getUniquePlaceholder() {
-        String identifier = "Placeholder_" + getUniqueValue();
-        OperationInterface value = new FluentRepositoryFactory().newOperationInterface()
+        final String identifier = "Placeholder_" + getUniqueValue();
+        final OperationInterface value = new FluentRepositoryFactory().newOperationInterface()
             .withName(identifier)
             .build();
         return new Interface(value, true);

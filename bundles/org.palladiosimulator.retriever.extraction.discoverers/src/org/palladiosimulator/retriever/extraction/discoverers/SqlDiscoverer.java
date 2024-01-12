@@ -43,17 +43,18 @@ public class SqlDiscoverer implements Discoverer {
             public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
-                setBlackboard(Objects.requireNonNull(blackboard));
+                this.setBlackboard(Objects.requireNonNull(blackboard));
                 final Map<Path, Statement> sqls = new HashMap<>();
-                Discoverer.find(root, ".sql", logger)
+                Discoverer.find(root, ".sql", this.logger)
                     .forEach(p -> {
                         try (Reader reader = new FileReader(p.toFile())) {
                             sqls.put(p, CCJSqlParserUtil.parse(reader));
                         } catch (final IOException | JSQLParserException e) {
-                            logger.error(String.format("%s could not be read correctly.", p), e);
+                            this.logger.error(String.format("%s could not be read correctly.", p), e);
                         }
                     });
-                getBlackboard().putDiscoveredFiles(DISCOVERER_ID, sqls);
+                this.getBlackboard()
+                    .putDiscoveredFiles(DISCOVERER_ID, sqls);
             }
 
             @Override

@@ -22,19 +22,19 @@ public final class DependencyUtils {
      * Group all dependencies in {@code dependencies} by finding their common ancestors. Ensure that
      * no other dependency (not in {@code dependencies}, but in {@code allDependencies}) is included
      * into a group by accident.
-     * 
+     *
      * @param <T>
      *            only for ease of calling
      */
     public static <T extends OperationInterface> Map<OperationInterface, List<OperationInterface>> groupDependencies(
-            Collection<T> dependencies, Collection<OperationInterface> allDependencies) {
-        Map<OperationInterface, List<OperationInterface>> groupedDependencies = new HashMap<>();
-        Queue<OperationInterface> sortedDependencies = new PriorityQueue<>(dependencies);
+            final Collection<T> dependencies, final Collection<OperationInterface> allDependencies) {
+        final Map<OperationInterface, List<OperationInterface>> groupedDependencies = new HashMap<>();
+        final Queue<OperationInterface> sortedDependencies = new PriorityQueue<>(dependencies);
 
         while (!sortedDependencies.isEmpty()) {
-            OperationInterface grouplessDependency = sortedDependencies.poll();
+            final OperationInterface grouplessDependency = sortedDependencies.poll();
             boolean isRoot = true;
-            for (OperationInterface rootInterface : groupedDependencies.keySet()) {
+            for (final OperationInterface rootInterface : groupedDependencies.keySet()) {
                 if (grouplessDependency.isPartOf(rootInterface)) {
                     groupedDependencies.get(rootInterface)
                         .add(grouplessDependency);
@@ -43,8 +43,8 @@ public final class DependencyUtils {
                 }
             }
             if (isRoot) {
-                for (OperationInterface rootInterface : groupedDependencies.keySet()) {
-                    Optional<String> commonInterfaceName = grouplessDependency.getName()
+                for (final OperationInterface rootInterface : groupedDependencies.keySet()) {
+                    final Optional<String> commonInterfaceName = grouplessDependency.getName()
                         .getCommonInterface(rootInterface.getName());
                     boolean containsOtherDependency = false;
 
@@ -52,10 +52,10 @@ public final class DependencyUtils {
                         continue;
                     }
 
-                    OperationInterface commonInterface = new EntireInterface(rootInterface.getName()
+                    final OperationInterface commonInterface = new EntireInterface(rootInterface.getName()
                         .createInterface(commonInterfaceName.get()));
 
-                    for (OperationInterface dependency : allDependencies) {
+                    for (final OperationInterface dependency : allDependencies) {
                         // Check all foreign dependencies
                         if (!dependencies.contains(dependency)) {
                             // If a foreign dependency is part of the new common interface, it must
@@ -66,7 +66,8 @@ public final class DependencyUtils {
 
                     if (!containsOtherDependency) {
                         // De-duplicate interfaces.
-                        Set<OperationInterface> interfaces = new HashSet<>(groupedDependencies.remove(rootInterface));
+                        final Set<OperationInterface> interfaces = new HashSet<>(
+                                groupedDependencies.remove(rootInterface));
                         interfaces.add(commonInterface);
                         interfaces.add(rootInterface);
                         interfaces.add(grouplessDependency);

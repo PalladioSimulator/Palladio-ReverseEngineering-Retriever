@@ -6,7 +6,7 @@ import org.palladiosimulator.retriever.mocore.surrogate.relation.SignatureProvis
 import tools.mdsd.mocore.framework.processor.RelationProcessor;
 
 public class SignatureProvisionRelationProcessor extends RelationProcessor<PcmSurrogate, SignatureProvisionRelation> {
-    public SignatureProvisionRelationProcessor(PcmSurrogate model) {
+    public SignatureProvisionRelationProcessor(final PcmSurrogate model) {
         super(model, SignatureProvisionRelation.class);
     }
 }

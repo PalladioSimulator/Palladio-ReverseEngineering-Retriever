@@ -8,14 +8,14 @@ import tools.mdsd.mocore.utility.IdentifierGenerator;
 
 public class AtomicComponentTest extends ElementTest<AtomicComponent, BasicComponent> {
     @Override
-    protected AtomicComponent createElement(BasicComponent value, boolean isPlaceholder) {
+    protected AtomicComponent createElement(final BasicComponent value, final boolean isPlaceholder) {
         return new AtomicComponent(value, isPlaceholder);
     }
 
     @Override
     protected BasicComponent getUniqueValue() {
-        String identifier = IdentifierGenerator.getUniqueIdentifier();
-        BasicComponent value = new FluentRepositoryFactory().newBasicComponent()
+        final String identifier = IdentifierGenerator.getUniqueIdentifier();
+        final BasicComponent value = new FluentRepositoryFactory().newBasicComponent()
             .withName(identifier)
             .build();
         return value;
@@ -23,11 +23,11 @@ public class AtomicComponentTest extends ElementTest<AtomicComponent, BasicCompo
 
     @Override
     protected AtomicComponent getUniqueNonPlaceholder() {
-        return new AtomicComponent(getUniqueValue(), false);
+        return new AtomicComponent(this.getUniqueValue(), false);
     }
 
     @Override
-    protected AtomicComponent getPlaceholderOf(AtomicComponent replaceable) {
+    protected AtomicComponent getPlaceholderOf(final AtomicComponent replaceable) {
         return new AtomicComponent(replaceable.getValue(), true);
     }
 }

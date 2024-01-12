@@ -21,12 +21,12 @@ public class ResourceEnvironmentTransformerTest
     @Test
     public void testTransformIndependentPlaceholderContainers() {
         // Test data
-        ResourceEnvironmentTransformer transformer = createTransformer();
-        PcmSurrogate model = createEmptyModel();
-        Deployment fstDeployment = Deployment.getUniquePlaceholder();
-        Deployment sndDeployment = Deployment.getUniquePlaceholder();
-        Deployment trdDeployment = Deployment.getUniquePlaceholder();
-        Deployment fthDeployment = Deployment.getUniquePlaceholder();
+        final ResourceEnvironmentTransformer transformer = this.createTransformer();
+        final PcmSurrogate model = this.createEmptyModel();
+        final Deployment fstDeployment = Deployment.getUniquePlaceholder();
+        final Deployment sndDeployment = Deployment.getUniquePlaceholder();
+        final Deployment trdDeployment = Deployment.getUniquePlaceholder();
+        final Deployment fthDeployment = Deployment.getUniquePlaceholder();
 
         model.add(fstDeployment);
         model.add(sndDeployment);
@@ -34,7 +34,7 @@ public class ResourceEnvironmentTransformerTest
         model.add(fthDeployment);
 
         // Execution
-        ResourceEnvironment environment = transformer.transform(model);
+        final ResourceEnvironment environment = transformer.transform(model);
 
         // Assertion
         assertNotNull(environment);
@@ -47,23 +47,23 @@ public class ResourceEnvironmentTransformerTest
     @Test
     public void testTransformConnectedPlaceholderContainers() {
         // Test data
-        ResourceEnvironmentTransformer transformer = createTransformer();
-        PcmSurrogate model = createEmptyModel();
-        Deployment fstDeployment = Deployment.getUniquePlaceholder();
-        Deployment sndDeployment = Deployment.getUniquePlaceholder();
-        Deployment trdDeployment = Deployment.getUniquePlaceholder();
+        final ResourceEnvironmentTransformer transformer = this.createTransformer();
+        final PcmSurrogate model = this.createEmptyModel();
+        final Deployment fstDeployment = Deployment.getUniquePlaceholder();
+        final Deployment sndDeployment = Deployment.getUniquePlaceholder();
+        final Deployment trdDeployment = Deployment.getUniquePlaceholder();
 
-        DeploymentDeploymentRelation fstLinkRelation = new DeploymentDeploymentRelation(fstDeployment, sndDeployment,
-                false);
-        DeploymentDeploymentRelation sndLinkRelation = new DeploymentDeploymentRelation(sndDeployment, trdDeployment,
-                true);
+        final DeploymentDeploymentRelation fstLinkRelation = new DeploymentDeploymentRelation(fstDeployment,
+                sndDeployment, false);
+        final DeploymentDeploymentRelation sndLinkRelation = new DeploymentDeploymentRelation(sndDeployment,
+                trdDeployment, true);
 
-        LinkResourceSpecification fstLinkSpecification = LinkResourceSpecification.getUniquePlaceholder();
-        LinkResourceSpecificationRelation fstLinkSpecificationRelation = new LinkResourceSpecificationRelation(
+        final LinkResourceSpecification fstLinkSpecification = LinkResourceSpecification.getUniquePlaceholder();
+        final LinkResourceSpecificationRelation fstLinkSpecificationRelation = new LinkResourceSpecificationRelation(
                 fstLinkSpecification, fstLinkRelation, false);
 
-        LinkResourceSpecification sndLinkSpecification = LinkResourceSpecification.getUniquePlaceholder();
-        LinkResourceSpecificationRelation sndLinkSpecificationRelation = new LinkResourceSpecificationRelation(
+        final LinkResourceSpecification sndLinkSpecification = LinkResourceSpecification.getUniquePlaceholder();
+        final LinkResourceSpecificationRelation sndLinkSpecificationRelation = new LinkResourceSpecificationRelation(
                 sndLinkSpecification, sndLinkRelation, true);
 
         model.add(fstDeployment);
@@ -75,7 +75,7 @@ public class ResourceEnvironmentTransformerTest
         model.add(sndLinkSpecificationRelation);
 
         // Execution
-        ResourceEnvironment environment = transformer.transform(model);
+        final ResourceEnvironment environment = transformer.transform(model);
 
         // Assertion
         assertNotNull(environment);

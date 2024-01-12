@@ -42,7 +42,7 @@ public class JavaDiscoverer implements Discoverer {
             public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
-                setBlackboard(Objects.requireNonNull(blackboard));
+                this.setBlackboard(Objects.requireNonNull(blackboard));
                 final Map<Path, CompilationUnit> compilationUnits = new HashMap<>();
                 final ASTParser parser = ASTParser.newParser(AST.getJLSLatest());
                 parser.setKind(ASTParser.K_COMPILATION_UNIT);
@@ -53,10 +53,10 @@ public class JavaDiscoverer implements Discoverer {
                 parser.setCompilerOptions(
                         Map.of(JavaCore.COMPILER_SOURCE, latestJavaVersion, JavaCore.COMPILER_COMPLIANCE,
                                 latestJavaVersion, JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, latestJavaVersion));
-                final String[] classpathEntries = Discoverer.find(root, ".jar", logger)
+                final String[] classpathEntries = Discoverer.find(root, ".jar", this.logger)
                     .map(Path::toString)
                     .toArray(String[]::new);
-                final String[] sourceFilePaths = Discoverer.find(root, ".java", logger)
+                final String[] sourceFilePaths = Discoverer.find(root, ".java", this.logger)
                     .map(Path::toString)
                     .toArray(String[]::new);
                 try {
@@ -69,9 +69,10 @@ public class JavaDiscoverer implements Discoverer {
                                 }
                             }, monitor);
                 } catch (IllegalArgumentException | IllegalStateException e) {
-                    logger.error(String.format("No Java files in %s could be transposed.", root), e);
+                    this.logger.error(String.format("No Java files in %s could be transposed.", root), e);
                 }
-                getBlackboard().putDiscoveredFiles(DISCOVERER_ID, compilationUnits);
+                this.getBlackboard()
+                    .putDiscoveredFiles(DISCOVERER_ID, compilationUnits);
             }
 
             @Override

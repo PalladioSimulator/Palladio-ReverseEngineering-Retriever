@@ -12,24 +12,24 @@ import tools.mdsd.mocore.framework.processor.RelationProcessor;
 
 public class InterfaceRequirementRelationProcessor
         extends RelationProcessor<PcmSurrogate, InterfaceRequirementRelation> {
-    public InterfaceRequirementRelationProcessor(PcmSurrogate model) {
+    public InterfaceRequirementRelationProcessor(final PcmSurrogate model) {
         super(model, InterfaceRequirementRelation.class);
     }
 
     @Override
-    protected void refine(InterfaceRequirementRelation discovery) {
-        Interface commonInterface = discovery.getDestination();
+    protected void refine(final InterfaceRequirementRelation discovery) {
+        final Interface commonInterface = discovery.getDestination();
 
         // Get all requirements from model & filter for same interface as in discovery
-        List<InterfaceProvisionRelation> provisionRelations = this.getModel()
+        final List<InterfaceProvisionRelation> provisionRelations = this.getModel()
             .getByType(InterfaceProvisionRelation.class);
         provisionRelations.removeIf(relation -> !relation.getDestination()
             .equals(commonInterface));
 
         // Create component assembly placeholder for pairs of provision & requirement relations
-        for (InterfaceProvisionRelation provisionRelation : provisionRelations) {
-            ComponentAssemblyRelation assemblyRelation = new ComponentAssemblyRelation(provisionRelation, discovery,
-                    true);
+        for (final InterfaceProvisionRelation provisionRelation : provisionRelations) {
+            final ComponentAssemblyRelation assemblyRelation = new ComponentAssemblyRelation(provisionRelation,
+                    discovery, true);
             this.addImplication(assemblyRelation);
         }
 

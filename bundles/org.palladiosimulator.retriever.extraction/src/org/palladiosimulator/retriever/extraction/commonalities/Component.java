@@ -7,7 +7,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 /**
  * Components are {@code CompilationUnits}. They provide and require interfaces.
- * 
+ *
  * @see CompilationUnit
  * @author Florian Bossert
  */
@@ -16,63 +16,62 @@ public class Component {
     private final Requirements requirements;
     private final Provisions provisions;
 
-    public Component(CompUnitOrName compUnitOrName, Requirements requirements, Provisions provisions) {
+    public Component(final CompUnitOrName compUnitOrName, final Requirements requirements,
+            final Provisions provisions) {
         this.compUnitOrName = compUnitOrName;
         this.requirements = requirements;
         this.provisions = provisions;
     }
 
     public Requirements requirements() {
-        return requirements;
+        return this.requirements;
     }
 
     public Provisions provisions() {
-        return provisions;
+        return this.provisions;
     }
 
     public Optional<CompilationUnit> compilationUnit() {
-        return compUnitOrName.compilationUnit();
+        return this.compUnitOrName.compilationUnit();
     }
 
     public String name() {
-        return compUnitOrName.name();
+        return this.compUnitOrName.name();
     }
 
     public CompUnitOrName identifier() {
-        return compUnitOrName;
+        return this.compUnitOrName;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(compUnitOrName, provisions, requirements);
+        return Objects.hash(this.compUnitOrName, this.provisions, this.requirements);
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if ((obj == null) || (this.getClass() != obj.getClass())) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        Component other = (Component) obj;
-        return Objects.equals(compUnitOrName, other.compUnitOrName) && Objects.equals(provisions, other.provisions)
-                && Objects.equals(requirements, other.requirements);
+        final Component other = (Component) obj;
+        return Objects.equals(this.compUnitOrName, other.compUnitOrName)
+                && Objects.equals(this.provisions, other.provisions)
+                && Objects.equals(this.requirements, other.requirements);
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         builder.append("Name: ");
-        builder.append(name());
+        builder.append(this.name());
         builder.append("\nRequirements:\n\t");
-        builder.append(requirements.toString()
+        builder.append(this.requirements.toString()
             .replace("\n", "\n\t"));
         builder.append("\nProvisions:\n\t");
-        builder.append(provisions.toString()
+        builder.append(this.provisions.toString()
             .replace("\n", "\n\t"));
 
         return builder.toString();

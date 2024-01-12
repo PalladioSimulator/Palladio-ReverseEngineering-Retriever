@@ -12,8 +12,8 @@ public class Composite {
     private final Set<OperationInterface> requirements;
     private final Set<OperationInterface> provisions;
 
-    public Composite(String name, Set<Component> parts, Set<OperationInterface> requirements,
-            Set<OperationInterface> provisions, Set<OperationInterface> internalInterfaces) {
+    public Composite(final String name, final Set<Component> parts, final Set<OperationInterface> requirements,
+            final Set<OperationInterface> provisions, final Set<OperationInterface> internalInterfaces) {
         this.name = name;
         this.parts = parts;
         this.internalInterfaces = internalInterfaces;
@@ -22,70 +22,68 @@ public class Composite {
     }
 
     public String name() {
-        return name;
+        return this.name;
     }
 
     public Set<OperationInterface> requirements() {
-        return requirements;
+        return this.requirements;
     }
 
     public Set<OperationInterface> provisions() {
-        return provisions;
+        return this.provisions;
     }
 
     public Set<Component> parts() {
-        return Collections.unmodifiableSet(parts);
+        return Collections.unmodifiableSet(this.parts);
     }
 
     public Set<OperationInterface> internalInterfaces() {
-        return Collections.unmodifiableSet(internalInterfaces);
+        return Collections.unmodifiableSet(this.internalInterfaces);
     }
 
     public boolean isSubsetOf(final Composite other) {
         return other.parts()
-            .containsAll(parts);
+            .containsAll(this.parts);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(internalInterfaces, name, parts, provisions, requirements);
+        return Objects.hash(this.internalInterfaces, this.name, this.parts, this.provisions, this.requirements);
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if ((obj == null) || (this.getClass() != obj.getClass())) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        Composite other = (Composite) obj;
-        return Objects.equals(internalInterfaces, other.internalInterfaces) && Objects.equals(name, other.name)
-                && Objects.equals(parts, other.parts) && Objects.equals(provisions, other.provisions)
-                && Objects.equals(requirements, other.requirements);
+        final Composite other = (Composite) obj;
+        return Objects.equals(this.internalInterfaces, other.internalInterfaces)
+                && Objects.equals(this.name, other.name) && Objects.equals(this.parts, other.parts)
+                && Objects.equals(this.provisions, other.provisions)
+                && Objects.equals(this.requirements, other.requirements);
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         builder.append("Name: ");
-        builder.append(name);
+        builder.append(this.name);
         builder.append("\nRequirements:\n\t");
-        builder.append(requirements.toString()
+        builder.append(this.requirements.toString()
             .replace("\n", "\n\t"));
         builder.append("\nProvisions:\n\t");
-        builder.append(provisions.toString()
+        builder.append(this.provisions.toString()
             .replace("\n", "\n\t"));
         builder.append("\nInternal interfaces:\n");
-        internalInterfaces.forEach(x -> builder.append('\t')
+        this.internalInterfaces.forEach(x -> builder.append('\t')
             .append(x.toString()
                 .replace("\n", "\n\t"))
             .append('\n'));
         builder.append("\nParts:\n");
-        parts.forEach(x -> builder.append('\t')
+        this.parts.forEach(x -> builder.append('\t')
             .append(x.toString()
                 .replace("\n", "\n\t"))
             .append('\n'));

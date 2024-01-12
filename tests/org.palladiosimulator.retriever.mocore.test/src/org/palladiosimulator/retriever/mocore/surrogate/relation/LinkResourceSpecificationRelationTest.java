@@ -8,8 +8,8 @@ import tools.mdsd.mocore.framework.surrogate.RelationTest;
 public class LinkResourceSpecificationRelationTest extends
         RelationTest<LinkResourceSpecificationRelation, LinkResourceSpecification, DeploymentDeploymentRelation> {
     @Override
-    protected LinkResourceSpecificationRelation createRelation(LinkResourceSpecification source,
-            DeploymentDeploymentRelation destination, boolean isPlaceholder) {
+    protected LinkResourceSpecificationRelation createRelation(final LinkResourceSpecification source,
+            final DeploymentDeploymentRelation destination, final boolean isPlaceholder) {
         return new LinkResourceSpecificationRelation(source, destination, isPlaceholder);
     }
 

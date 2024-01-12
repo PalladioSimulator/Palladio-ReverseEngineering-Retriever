@@ -7,8 +7,8 @@ import tools.mdsd.mocore.framework.surrogate.RelationTest;
 public class DeploymentDeploymentRelationTest
         extends RelationTest<DeploymentDeploymentRelation, Deployment, Deployment> {
     @Override
-    protected DeploymentDeploymentRelation createRelation(Deployment source, Deployment destination,
-            boolean isPlaceholder) {
+    protected DeploymentDeploymentRelation createRelation(final Deployment source, final Deployment destination,
+            final boolean isPlaceholder) {
         return new DeploymentDeploymentRelation(source, destination, isPlaceholder);
     }
 

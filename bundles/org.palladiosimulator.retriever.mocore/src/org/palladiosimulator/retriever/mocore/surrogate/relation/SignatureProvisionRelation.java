@@ -7,12 +7,13 @@ import tools.mdsd.mocore.framework.surrogate.Relation;
 import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
 public class SignatureProvisionRelation extends Relation<Signature, Interface> {
-    public SignatureProvisionRelation(Signature source, Interface destination, boolean isPlaceholder) {
+    public SignatureProvisionRelation(final Signature source, final Interface destination,
+            final boolean isPlaceholder) {
         super(source, destination, isPlaceholder);
     }
 
     @Override
-    public <U extends Replaceable> SignatureProvisionRelation replace(U original, U replacement) {
+    public <U extends Replaceable> SignatureProvisionRelation replace(final U original, final U replacement) {
         if (!this.includes(original)) {
             // TODO Add message to exception
             throw new IllegalArgumentException();
@@ -20,8 +21,8 @@ public class SignatureProvisionRelation extends Relation<Signature, Interface> {
         if (this.equals(original)) {
             return (SignatureProvisionRelation) replacement;
         }
-        Signature source = getSourceReplacement(original, replacement);
-        Interface destination = getDestinationReplacement(original, replacement);
+        final Signature source = this.getSourceReplacement(original, replacement);
+        final Interface destination = this.getDestinationReplacement(original, replacement);
         return new SignatureProvisionRelation(source, destination, this.isPlaceholder());
     }
 }

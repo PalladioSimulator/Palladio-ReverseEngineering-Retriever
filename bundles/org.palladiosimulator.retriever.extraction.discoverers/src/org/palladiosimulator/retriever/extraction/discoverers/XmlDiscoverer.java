@@ -43,14 +43,14 @@ public class XmlDiscoverer implements Discoverer {
             public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
-                setBlackboard(Objects.requireNonNull(blackboard));
+                this.setBlackboard(Objects.requireNonNull(blackboard));
                 final Map<Path, Document> xmls = new HashMap<>();
-                Discoverer.find(root, ".xml", logger)
+                Discoverer.find(root, ".xml", this.logger)
                     .forEach(p -> {
                         try (Reader reader = new FileReader(p.toFile())) {
                             xmls.put(p, new SAXBuilder().build(reader));
                         } catch (IOException | JDOMException e) {
-                            logger.error(String.format("%s could not be read correctly.", p), e);
+                            this.logger.error(String.format("%s could not be read correctly.", p), e);
                         }
                     });
 
@@ -61,7 +61,8 @@ public class XmlDiscoverer implements Discoverer {
                         .toString()
                         .equalsIgnoreCase("pom.xml"))
                     .forEach(p -> poms.put(p, xmls.get(p)));
-                getBlackboard().putDiscoveredFiles(DISCOVERER_ID, poms);
+                this.getBlackboard()
+                    .putDiscoveredFiles(DISCOVERER_ID, poms);
             }
 
             @Override

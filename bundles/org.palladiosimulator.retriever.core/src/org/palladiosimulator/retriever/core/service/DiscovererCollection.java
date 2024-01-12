@@ -20,13 +20,13 @@ public class DiscovererCollection implements ServiceCollection<Discoverer> {
             .getConfigurationElementsFor(EXTENSION_POINT)) {
             final Object o = extension.createExecutableExtension("class");
             if (o instanceof Discoverer) {
-                discoverer.add((Discoverer) o);
+                this.discoverer.add((Discoverer) o);
             }
         }
     }
 
     @Override
     public Set<Discoverer> getServices() {
-        return Collections.unmodifiableSet(discoverer);
+        return Collections.unmodifiableSet(this.discoverer);
     }
 }

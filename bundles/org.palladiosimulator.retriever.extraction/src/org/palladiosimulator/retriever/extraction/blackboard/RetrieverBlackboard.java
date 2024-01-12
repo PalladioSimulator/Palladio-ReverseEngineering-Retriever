@@ -30,80 +30,80 @@ public class RetrieverBlackboard extends Blackboard<Object> {
 
     public RetrieverBlackboard() {
         super();
-        repositoryComponentLocations = new HashMap<>();
-        systemAssociations = new HashMap<>();
-        systemPaths = new HashMap<>();
-        discovererIDs = new HashSet<>();
-        pcmDetector = new PCMDetector();
-        addPartition(KEY_SEFF_ASSOCIATIONS, new HashMap<>());
+        this.repositoryComponentLocations = new HashMap<>();
+        this.systemAssociations = new HashMap<>();
+        this.systemPaths = new HashMap<>();
+        this.discovererIDs = new HashSet<>();
+        this.pcmDetector = new PCMDetector();
+        this.addPartition(KEY_SEFF_ASSOCIATIONS, new HashMap<>());
     }
 
-    public CompilationUnit putRepositoryComponentLocation(RepositoryComponent repoComp,
-            CompilationUnit compilationUnit) {
-        return repositoryComponentLocations.put(repoComp, compilationUnit);
+    public CompilationUnit putRepositoryComponentLocation(final RepositoryComponent repoComp,
+            final CompilationUnit compilationUnit) {
+        return this.repositoryComponentLocations.put(repoComp, compilationUnit);
     }
 
     public Map<RepositoryComponent, CompilationUnit> getRepositoryComponentLocations() {
-        return Collections.unmodifiableMap(repositoryComponentLocations);
+        return Collections.unmodifiableMap(this.repositoryComponentLocations);
     }
 
-    public void setPCMDetector(PCMDetector pcmDetector) {
+    public void setPCMDetector(final PCMDetector pcmDetector) {
         this.pcmDetector = pcmDetector;
     }
 
     public PCMDetector getPCMDetector() {
-        return pcmDetector;
+        return this.pcmDetector;
     }
 
-    public void addSystemAssociations(Path path, Set<CompilationUnit> compilationUnits) {
-        systemAssociations.put(path, Collections.unmodifiableSet(compilationUnits));
+    public void addSystemAssociations(final Path path, final Set<CompilationUnit> compilationUnits) {
+        this.systemAssociations.put(path, Collections.unmodifiableSet(compilationUnits));
     }
 
     public Map<Path, Set<CompilationUnit>> getSystemAssociations() {
-        return Collections.unmodifiableMap(systemAssociations);
+        return Collections.unmodifiableMap(this.systemAssociations);
     }
 
-    public void putSystemPath(System system, Path path) {
-        systemPaths.put(system, path);
+    public void putSystemPath(final System system, final Path path) {
+        this.systemPaths.put(system, path);
     }
 
-    public void putSeffAssociation(ASTNode astNode, ServiceEffectSpecification seff) {
+    public void putSeffAssociation(final ASTNode astNode, final ServiceEffectSpecification seff) {
         @SuppressWarnings("unchecked")
-        Map<ASTNode, ServiceEffectSpecification> seffAssociations = (Map<ASTNode, ServiceEffectSpecification>) getPartition(
-                KEY_SEFF_ASSOCIATIONS);
+        final Map<ASTNode, ServiceEffectSpecification> seffAssociations = (Map<ASTNode, ServiceEffectSpecification>) this
+            .getPartition(KEY_SEFF_ASSOCIATIONS);
         seffAssociations.put(astNode, seff);
     }
 
-    public ServiceEffectSpecification getSeffAssociation(ASTNode astNode) {
+    public ServiceEffectSpecification getSeffAssociation(final ASTNode astNode) {
         @SuppressWarnings("unchecked")
-        Map<ASTNode, ServiceEffectSpecification> seffAssociations = (Map<ASTNode, ServiceEffectSpecification>) getPartition(
-                KEY_SEFF_ASSOCIATIONS);
+        final Map<ASTNode, ServiceEffectSpecification> seffAssociations = (Map<ASTNode, ServiceEffectSpecification>) this
+            .getPartition(KEY_SEFF_ASSOCIATIONS);
         return seffAssociations.get(astNode);
     }
 
     public Map<ASTNode, ServiceEffectSpecification> getSeffAssociations() {
         @SuppressWarnings("unchecked")
-        Map<ASTNode, ServiceEffectSpecification> seffAssociations = (Map<ASTNode, ServiceEffectSpecification>) getPartition(
-                KEY_SEFF_ASSOCIATIONS);
+        final Map<ASTNode, ServiceEffectSpecification> seffAssociations = (Map<ASTNode, ServiceEffectSpecification>) this
+            .getPartition(KEY_SEFF_ASSOCIATIONS);
         return Collections.unmodifiableMap(seffAssociations);
     }
 
-    public <T> void putDiscoveredFiles(String discovererID, Map<Path, T> pathsToFiles) {
-        discovererIDs.add(discovererID);
-        addPartition(discovererID, pathsToFiles);
+    public <T> void putDiscoveredFiles(final String discovererID, final Map<Path, T> pathsToFiles) {
+        this.discovererIDs.add(discovererID);
+        this.addPartition(discovererID, pathsToFiles);
     }
 
-    public <T> Map<Path, T> getDiscoveredFiles(String discovererID, Class<T> fileClass) {
-        Object partition = getPartition(discovererID);
+    public <T> Map<Path, T> getDiscoveredFiles(final String discovererID, final Class<T> fileClass) {
+        final Object partition = this.getPartition(discovererID);
         if (!(partition instanceof Map)) {
             return new HashMap<>();
         }
         @SuppressWarnings("unchecked") // Not unchecked.
-        Map<Object, Object> map = (Map<Object, Object>) partition;
+        final Map<Object, Object> map = (Map<Object, Object>) partition;
         if (map.isEmpty()) {
             return new HashMap<>();
         }
-        boolean allEntriesHaveCorrectType = map.entrySet()
+        final boolean allEntriesHaveCorrectType = map.entrySet()
             .stream()
             .allMatch(entry -> entry.getKey() instanceof Path && fileClass.isInstance(entry.getValue()));
         if (!allEntriesHaveCorrectType) {
@@ -115,10 +115,10 @@ public class RetrieverBlackboard extends Blackboard<Object> {
     }
 
     public Set<Path> getDiscoveredPaths() {
-        Set<Path> discoveredPaths = new HashSet<>();
-        for (String discovererID : discovererIDs) {
+        final Set<Path> discoveredPaths = new HashSet<>();
+        for (final String discovererID : this.discovererIDs) {
             @SuppressWarnings("unchecked") // Local data structure, this assumption is an invariant.
-            Map<Path, Object> partition = (Map<Path, Object>) getPartition(discovererID);
+            final Map<Path, Object> partition = (Map<Path, Object>) this.getPartition(discovererID);
             discoveredPaths.addAll(partition.keySet());
         }
         return discoveredPaths;

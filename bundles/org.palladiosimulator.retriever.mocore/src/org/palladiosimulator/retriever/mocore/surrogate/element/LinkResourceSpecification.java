@@ -4,15 +4,15 @@ import org.palladiosimulator.pcm.resourceenvironment.CommunicationLinkResourceSp
 import org.palladiosimulator.pcm.resourceenvironment.ResourceenvironmentFactory;
 
 public class LinkResourceSpecification extends PcmElement<CommunicationLinkResourceSpecification> {
-    public LinkResourceSpecification(CommunicationLinkResourceSpecification value, boolean isPlaceholder) {
+    public LinkResourceSpecification(final CommunicationLinkResourceSpecification value, final boolean isPlaceholder) {
         super(value, isPlaceholder);
     }
 
     public static LinkResourceSpecification getUniquePlaceholder() {
-        String identifier = "Placeholder_" + getUniqueValue();
-        double failureProbability = 0D;
+        final String identifier = "Placeholder_" + getUniqueValue();
+        final double failureProbability = 0D;
 
-        CommunicationLinkResourceSpecification value = ResourceenvironmentFactory.eINSTANCE
+        final CommunicationLinkResourceSpecification value = ResourceenvironmentFactory.eINSTANCE
             .createCommunicationLinkResourceSpecification();
         value.setId(identifier);
         value.setFailureProbability(failureProbability);

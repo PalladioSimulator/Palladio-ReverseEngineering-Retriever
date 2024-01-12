@@ -9,14 +9,15 @@ import tools.mdsd.mocore.utility.IdentifierGenerator;
 
 public class ComponentTest extends ElementTest<Component<RepositoryComponent>, RepositoryComponent> {
     @Override
-    protected Component<RepositoryComponent> createElement(RepositoryComponent value, boolean isPlaceholder) {
+    protected Component<RepositoryComponent> createElement(final RepositoryComponent value,
+            final boolean isPlaceholder) {
         return new Component<>(value, isPlaceholder);
     }
 
     @Override
     protected RepositoryComponent getUniqueValue() {
-        String identifier = IdentifierGenerator.getUniqueIdentifier();
-        BasicComponent value = new FluentRepositoryFactory().newBasicComponent()
+        final String identifier = IdentifierGenerator.getUniqueIdentifier();
+        final BasicComponent value = new FluentRepositoryFactory().newBasicComponent()
             .withName(identifier)
             .build();
         return value;
@@ -24,11 +25,11 @@ public class ComponentTest extends ElementTest<Component<RepositoryComponent>, R
 
     @Override
     protected Component<RepositoryComponent> getUniqueNonPlaceholder() {
-        return new Component<>(getUniqueValue(), false);
+        return new Component<>(this.getUniqueValue(), false);
     }
 
     @Override
-    protected Component<RepositoryComponent> getPlaceholderOf(Component<RepositoryComponent> replaceable) {
+    protected Component<RepositoryComponent> getPlaceholderOf(final Component<RepositoryComponent> replaceable) {
         return new Component<>(replaceable.getValue(), true);
     }
 }

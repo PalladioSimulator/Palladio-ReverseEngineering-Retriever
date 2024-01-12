@@ -7,7 +7,7 @@ import tools.mdsd.mocore.framework.processor.RelationProcessor;
 
 public class LinkResourceSpecificationRelationProcessor
         extends RelationProcessor<PcmSurrogate, LinkResourceSpecificationRelation> {
-    public LinkResourceSpecificationRelationProcessor(PcmSurrogate model) {
+    public LinkResourceSpecificationRelationProcessor(final PcmSurrogate model) {
         super(model, LinkResourceSpecificationRelation.class);
     }
 }

@@ -30,30 +30,30 @@ public class ComponentAssemblyRelationProcessorTest extends
     @DisabledIf(TEST_API_ONLY_METHOD_NAME)
     public void testRefinementRemovesParallelAssemblyPlaceholder() {
         // Test data
-        PcmSurrogate model = createEmptyModel();
-        ComponentAssemblyRelationProcessor processor = createProcessor(model);
+        final PcmSurrogate model = this.createEmptyModel();
+        final ComponentAssemblyRelationProcessor processor = this.createProcessor(model);
 
-        InterfaceProvisionRelation interfaceProvision = getUniqueNonPlaceholderSourceEntity();
-        InterfaceRequirementRelation interfaceRequirement = getUniqueNonPlaceholderDestinationEntity();
-        ComponentAssemblyRelation relation = createRelation(interfaceProvision, interfaceRequirement, false);
+        final InterfaceProvisionRelation interfaceProvision = this.getUniqueNonPlaceholderSourceEntity();
+        final InterfaceRequirementRelation interfaceRequirement = this.getUniqueNonPlaceholderDestinationEntity();
+        final ComponentAssemblyRelation relation = this.createRelation(interfaceProvision, interfaceRequirement, false);
 
-        Deployment providingContainer = Deployment.getUniquePlaceholder();
-        Deployment requiringContainer = Deployment.getUniquePlaceholder();
-        ComponentAllocationRelation providingAllocation = new ComponentAllocationRelation(
+        final Deployment providingContainer = Deployment.getUniquePlaceholder();
+        final Deployment requiringContainer = Deployment.getUniquePlaceholder();
+        final ComponentAllocationRelation providingAllocation = new ComponentAllocationRelation(
                 interfaceProvision.getSource(), providingContainer, false);
-        ComponentAllocationRelation requiringAllocation = new ComponentAllocationRelation(
+        final ComponentAllocationRelation requiringAllocation = new ComponentAllocationRelation(
                 interfaceRequirement.getSource(), requiringContainer, false);
 
-        InterfaceProvisionRelation placeholderProvision = getPlaceholderOfSourceEntity(
-                getUniqueNonPlaceholderSourceEntity());
-        InterfaceRequirementRelation placeholderRequirement = getPlaceholderOfDestinationEntity(
-                getUniqueNonPlaceholderDestinationEntity());
-        ComponentAllocationRelation placeholderProvidingAllocation = new ComponentAllocationRelation(
+        final InterfaceProvisionRelation placeholderProvision = this
+            .getPlaceholderOfSourceEntity(this.getUniqueNonPlaceholderSourceEntity());
+        final InterfaceRequirementRelation placeholderRequirement = this
+            .getPlaceholderOfDestinationEntity(this.getUniqueNonPlaceholderDestinationEntity());
+        final ComponentAllocationRelation placeholderProvidingAllocation = new ComponentAllocationRelation(
                 placeholderProvision.getSource(), providingContainer, false);
-        ComponentAllocationRelation placeholderRequiringAllocation = new ComponentAllocationRelation(
+        final ComponentAllocationRelation placeholderRequiringAllocation = new ComponentAllocationRelation(
                 placeholderRequirement.getSource(), requiringContainer, false);
-        ComponentAssemblyRelation placeholderRelation = createRelation(placeholderProvision, placeholderRequirement,
-                true);
+        final ComponentAssemblyRelation placeholderRelation = this.createRelation(placeholderProvision,
+                placeholderRequirement, true);
 
         // Add containers, placeholder assembly & allocations to model
         model.add(providingContainer);
@@ -84,7 +84,7 @@ public class ComponentAssemblyRelationProcessorTest extends
 
         // Execution
         processor.refine(relation);
-        Set<Replaceable> implications = new HashSet<>(processor.getImplications());
+        final Set<Replaceable> implications = new HashSet<>(processor.getImplications());
 
         // Assertions: Post-execution
         assertFalse(model.contains(placeholderProvision.getSource()));
@@ -106,18 +106,18 @@ public class ComponentAssemblyRelationProcessorTest extends
     @DisabledIf(TEST_API_ONLY_METHOD_NAME)
     public void testRefinementAddsImplicitDeploymentRelation() {
         // Test data
-        PcmSurrogate model = createEmptyModel();
-        ComponentAssemblyRelationProcessor processor = createProcessor(model);
+        final PcmSurrogate model = this.createEmptyModel();
+        final ComponentAssemblyRelationProcessor processor = this.createProcessor(model);
 
-        InterfaceProvisionRelation interfaceProvision = getUniqueNonPlaceholderSourceEntity();
-        InterfaceRequirementRelation interfaceRequirement = getUniqueNonPlaceholderDestinationEntity();
-        ComponentAssemblyRelation relation = createRelation(interfaceProvision, interfaceRequirement, false);
+        final InterfaceProvisionRelation interfaceProvision = this.getUniqueNonPlaceholderSourceEntity();
+        final InterfaceRequirementRelation interfaceRequirement = this.getUniqueNonPlaceholderDestinationEntity();
+        final ComponentAssemblyRelation relation = this.createRelation(interfaceProvision, interfaceRequirement, false);
 
-        Deployment providingContainer = Deployment.getUniquePlaceholder();
-        Deployment requiringContainer = Deployment.getUniquePlaceholder();
-        ComponentAllocationRelation providingAllocation = new ComponentAllocationRelation(
+        final Deployment providingContainer = Deployment.getUniquePlaceholder();
+        final Deployment requiringContainer = Deployment.getUniquePlaceholder();
+        final ComponentAllocationRelation providingAllocation = new ComponentAllocationRelation(
                 interfaceProvision.getSource(), providingContainer, false);
-        ComponentAllocationRelation requiringAllocation = new ComponentAllocationRelation(
+        final ComponentAllocationRelation requiringAllocation = new ComponentAllocationRelation(
                 interfaceRequirement.getSource(), requiringContainer, false);
 
         // Add containers & allocations to model
@@ -132,52 +132,53 @@ public class ComponentAssemblyRelationProcessorTest extends
 
         // Execution
         processor.refine(relation);
-        Set<Replaceable> implications = new HashSet<>(processor.getImplications());
+        final Set<Replaceable> implications = new HashSet<>(processor.getImplications());
 
         // Assertions: Post-execution
         assertTrue(implications.remove(relation.getSource()));
         assertTrue(implications.remove(relation.getDestination()));
         assertEquals(1, implications.size());
-        Replaceable implication = implications.stream()
+        final Replaceable implication = implications.stream()
             .findFirst()
             .orElseThrow();
         assertEquals(DeploymentDeploymentRelation.class, implication.getClass());
-        DeploymentDeploymentRelation implicitDeploymentLink = (DeploymentDeploymentRelation) implication;
+        final DeploymentDeploymentRelation implicitDeploymentLink = (DeploymentDeploymentRelation) implication;
         assertEquals(providingContainer, implicitDeploymentLink.getSource());
         assertEquals(requiringContainer, implicitDeploymentLink.getDestination());
         assertTrue(implicitDeploymentLink.isPlaceholder());
     }
 
     @Override
-    protected ComponentAssemblyRelation createRelation(InterfaceProvisionRelation source,
-            InterfaceRequirementRelation destination, boolean isPlaceholder) {
+    protected ComponentAssemblyRelation createRelation(final InterfaceProvisionRelation source,
+            final InterfaceRequirementRelation destination, final boolean isPlaceholder) {
         return new ComponentAssemblyRelation(source, destination, isPlaceholder);
     }
 
     @Override
     protected InterfaceProvisionRelation getUniqueNonPlaceholderSourceEntity() {
-        Component<?> source = Component.getUniquePlaceholder();
+        final Component<?> source = Component.getUniquePlaceholder();
         return new InterfaceProvisionRelation(source, RELATION_DESTINATION, false);
     }
 
     @Override
-    protected InterfaceProvisionRelation getPlaceholderOfSourceEntity(InterfaceProvisionRelation source) {
+    protected InterfaceProvisionRelation getPlaceholderOfSourceEntity(final InterfaceProvisionRelation source) {
         return new InterfaceProvisionRelation(source.getSource(), source.getDestination(), true);
     }
 
     @Override
     protected InterfaceRequirementRelation getUniqueNonPlaceholderDestinationEntity() {
-        Component<?> source = Component.getUniquePlaceholder();
+        final Component<?> source = Component.getUniquePlaceholder();
         return new InterfaceRequirementRelation(source, RELATION_DESTINATION, false);
     }
 
     @Override
-    protected InterfaceRequirementRelation getPlaceholderOfDestinationEntity(InterfaceRequirementRelation destination) {
+    protected InterfaceRequirementRelation getPlaceholderOfDestinationEntity(
+            final InterfaceRequirementRelation destination) {
         return new InterfaceRequirementRelation(destination.getSource(), destination.getDestination(), true);
     }
 
     @Override
-    protected ComponentAssemblyRelationProcessor createProcessor(PcmSurrogate model) {
+    protected ComponentAssemblyRelationProcessor createProcessor(final PcmSurrogate model) {
         return new ComponentAssemblyRelationProcessor(model);
     }
 

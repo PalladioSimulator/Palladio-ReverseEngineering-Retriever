@@ -15,13 +15,14 @@ public class RetrieverConfigurationDelegate
         extends AbstractWorkflowBasedLaunchConfigurationDelegate<RetrieverWorkflowConfiguration, Workflow> {
 
     @Override
-    protected IJob createWorkflowJob(RetrieverWorkflowConfiguration config, ILaunch launch) throws CoreException {
+    protected IJob createWorkflowJob(final RetrieverWorkflowConfiguration config, final ILaunch launch)
+            throws CoreException {
         return new RetrieverJob(config.getRetrieverConfiguration());
     }
 
     @Override
-    protected RetrieverWorkflowConfiguration deriveConfiguration(ILaunchConfiguration configuration, String mode)
-            throws CoreException {
+    protected RetrieverWorkflowConfiguration deriveConfiguration(final ILaunchConfiguration configuration,
+            final String mode) throws CoreException {
 
         final RetrieverWorkflowConfiguration analyzerConfiguration = new RetrieverWorkflowConfiguration();
         analyzerConfiguration.setRetrieverConfiguration(new RetrieverConfigurationImpl(configuration.getAttributes()));

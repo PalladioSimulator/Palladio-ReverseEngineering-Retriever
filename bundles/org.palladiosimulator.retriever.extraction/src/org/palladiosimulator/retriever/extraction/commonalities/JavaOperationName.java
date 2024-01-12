@@ -8,56 +8,53 @@ public class JavaOperationName implements OperationName {
     private final String iface;
     private final String method;
 
-    public JavaOperationName(String iface, String method) {
+    public JavaOperationName(final String iface, final String method) {
         this.iface = iface;
         this.method = method;
     }
 
     @Override
-    public Optional<String> forInterface(String baseInterface) {
-        if (!iface.equals(baseInterface) && !baseInterface.startsWith(iface + "#")) {
+    public Optional<String> forInterface(final String baseInterface) {
+        if (!this.iface.equals(baseInterface) && !baseInterface.startsWith(this.iface + "#")) {
             return Optional.empty();
         }
-        return Optional.of(method);
+        return Optional.of(this.method);
     }
 
     @Override
     public List<String> getInterfaces() {
-        return List.of(toString(), iface);
+        return List.of(this.toString(), this.iface);
     }
 
     @Override
     public String getInterface() {
-        return iface;
+        return this.iface;
     }
 
     @Override
-    public InterfaceName createInterface(String name) {
+    public InterfaceName createInterface(final String name) {
         return new JavaInterfaceName(name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(iface, method);
+        return Objects.hash(this.iface, this.method);
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if ((obj == null) || (this.getClass() != obj.getClass())) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        JavaOperationName other = (JavaOperationName) obj;
-        return Objects.equals(iface, other.iface) && Objects.equals(method, other.method);
+        final JavaOperationName other = (JavaOperationName) obj;
+        return Objects.equals(this.iface, other.iface) && Objects.equals(this.method, other.method);
     }
 
     @Override
     public String toString() {
-        return iface + "#" + method;
+        return this.iface + "#" + this.method;
     }
 }

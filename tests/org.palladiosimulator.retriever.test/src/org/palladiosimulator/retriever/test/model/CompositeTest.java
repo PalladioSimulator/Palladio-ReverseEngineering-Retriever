@@ -23,9 +23,9 @@ public class CompositeTest {
 
     @Test
     void emptyComposite() {
-        CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
-        Composite result = compositeBuilder.construct(List.of(), new Requirements(List.of(), List.of(), List.of()),
-                new Provisions(List.of(), List.of()), List.of());
+        final CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
+        final Composite result = compositeBuilder.construct(List.of(),
+                new Requirements(List.of(), List.of(), List.of()), new Provisions(List.of(), List.of()), List.of());
 
         assertTrue(result.parts()
             .isEmpty(), "empty composite should have no parts");
@@ -37,22 +37,22 @@ public class CompositeTest {
 
     @Test
     void singletonComposite() {
-        OperationInterface provision = new Operation(null, new JavaOperationName("Interface", "providedMethod"));
-        EntireInterface requirement = new EntireInterface(new JavaInterfaceName("RequiredInterface"));
+        final OperationInterface provision = new Operation(null, new JavaOperationName("Interface", "providedMethod"));
+        final EntireInterface requirement = new EntireInterface(new JavaInterfaceName("RequiredInterface"));
 
-        ComponentBuilder componentBuilder = new ComponentBuilder(new CompUnitOrName("Component"));
+        final ComponentBuilder componentBuilder = new ComponentBuilder(new CompUnitOrName("Component"));
         componentBuilder.provisions()
             .add(provision);
         componentBuilder.requirements()
             .add(requirement);
 
-        CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
+        final CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
 
-        List<OperationInterface> allDependencies = List.of(provision, requirement);
-        List<OperationInterface> visibleProvisions = List.of(provision);
+        final List<OperationInterface> allDependencies = List.of(provision, requirement);
+        final List<OperationInterface> visibleProvisions = List.of(provision);
 
-        Composite result = compositeBuilder.construct(List.of(),
+        final Composite result = compositeBuilder.construct(List.of(),
                 new Requirements(List.of(), allDependencies, visibleProvisions),
                 new Provisions(List.of(), allDependencies), visibleProvisions);
 
@@ -63,7 +63,7 @@ public class CompositeTest {
         assertTrue(result.provisions()
             .isEmpty(), "this composite should not have provisions");
 
-        Component component = result.parts()
+        final Component component = result.parts()
             .stream()
             .findFirst()
             .get();
@@ -77,22 +77,22 @@ public class CompositeTest {
 
     @Test
     void exposingSingletonComposite() {
-        OperationInterface provision = new Operation(null, new JavaOperationName("Interface", "providedMethod"));
-        EntireInterface requirement = new EntireInterface(new JavaInterfaceName("RequiredInterface"));
+        final OperationInterface provision = new Operation(null, new JavaOperationName("Interface", "providedMethod"));
+        final EntireInterface requirement = new EntireInterface(new JavaInterfaceName("RequiredInterface"));
 
-        ComponentBuilder componentBuilder = new ComponentBuilder(new CompUnitOrName("Component"));
+        final ComponentBuilder componentBuilder = new ComponentBuilder(new CompUnitOrName("Component"));
         componentBuilder.provisions()
             .add(provision);
         componentBuilder.requirements()
             .add(requirement);
 
-        CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
+        final CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
 
-        List<OperationInterface> allDependencies = List.of(provision, requirement);
-        List<OperationInterface> visibleProvisions = List.of(provision);
+        final List<OperationInterface> allDependencies = List.of(provision, requirement);
+        final List<OperationInterface> visibleProvisions = List.of(provision);
 
-        Composite result = compositeBuilder.construct(List.of(),
+        final Composite result = compositeBuilder.construct(List.of(),
                 new Requirements(List.of(requirement), allDependencies, visibleProvisions),
                 new Provisions(List.of(provision), allDependencies), visibleProvisions);
 
@@ -106,31 +106,33 @@ public class CompositeTest {
 
     @Test
     void twoComponentComposite() {
-        OperationInterface provision1 = new Operation(null, new JavaOperationName("InterfaceA", "providedMethodA"));
-        OperationInterface provision2 = new Operation(null, new JavaOperationName("InterfaceB", "providedMethodB"));
-        EntireInterface requirement1 = new EntireInterface(new JavaInterfaceName("RequiredInterfaceA"));
-        EntireInterface requirement2 = new EntireInterface(new JavaInterfaceName("RequiredInterfaceB"));
+        final OperationInterface provision1 = new Operation(null,
+                new JavaOperationName("InterfaceA", "providedMethodA"));
+        final OperationInterface provision2 = new Operation(null,
+                new JavaOperationName("InterfaceB", "providedMethodB"));
+        final EntireInterface requirement1 = new EntireInterface(new JavaInterfaceName("RequiredInterfaceA"));
+        final EntireInterface requirement2 = new EntireInterface(new JavaInterfaceName("RequiredInterfaceB"));
 
-        ComponentBuilder componentBuilder1 = new ComponentBuilder(new CompUnitOrName("Component 1"));
+        final ComponentBuilder componentBuilder1 = new ComponentBuilder(new CompUnitOrName("Component 1"));
         componentBuilder1.provisions()
             .add(provision1);
         componentBuilder1.requirements()
             .add(requirement1);
 
-        ComponentBuilder componentBuilder2 = new ComponentBuilder(new CompUnitOrName("Component 2"));
+        final ComponentBuilder componentBuilder2 = new ComponentBuilder(new CompUnitOrName("Component 2"));
         componentBuilder2.provisions()
             .add(provision2);
         componentBuilder2.requirements()
             .add(requirement2);
 
-        CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
+        final CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder1);
         compositeBuilder.addPart(componentBuilder2);
 
-        List<OperationInterface> allDependencies = List.of(provision1, provision2, requirement1, requirement2);
-        List<OperationInterface> visibleProvisions = List.of(provision1, provision2);
+        final List<OperationInterface> allDependencies = List.of(provision1, provision2, requirement1, requirement2);
+        final List<OperationInterface> visibleProvisions = List.of(provision1, provision2);
 
-        Composite result = compositeBuilder.construct(List.of(),
+        final Composite result = compositeBuilder.construct(List.of(),
                 new Requirements(List.of(requirement1, requirement2), allDependencies, visibleProvisions),
                 new Provisions(List.of(provision1, provision2), allDependencies), visibleProvisions);
 
@@ -144,12 +146,12 @@ public class CompositeTest {
 
     @Test
     void overlappingTwoComponentComposite() {
-        OperationInterface provision = new Operation(null, new JavaOperationName("Interface", "providedMethod"));
-        EntireInterface requirement = new EntireInterface(new JavaInterfaceName("RequiredInterface"));
-        EntireInterface additionalRequirement1 = new EntireInterface(new JavaInterfaceName("RequiredInterfaceA"));
-        EntireInterface additionalRequirement2 = new EntireInterface(new JavaInterfaceName("RequiredInterfaceB"));
+        final OperationInterface provision = new Operation(null, new JavaOperationName("Interface", "providedMethod"));
+        final EntireInterface requirement = new EntireInterface(new JavaInterfaceName("RequiredInterface"));
+        final EntireInterface additionalRequirement1 = new EntireInterface(new JavaInterfaceName("RequiredInterfaceA"));
+        final EntireInterface additionalRequirement2 = new EntireInterface(new JavaInterfaceName("RequiredInterfaceB"));
 
-        ComponentBuilder componentBuilder1 = new ComponentBuilder(new CompUnitOrName("Component 1"));
+        final ComponentBuilder componentBuilder1 = new ComponentBuilder(new CompUnitOrName("Component 1"));
         componentBuilder1.provisions()
             .add(provision);
         componentBuilder1.requirements()
@@ -157,7 +159,7 @@ public class CompositeTest {
         componentBuilder1.requirements()
             .add(additionalRequirement1);
 
-        ComponentBuilder componentBuilder2 = new ComponentBuilder(new CompUnitOrName("Component 2"));
+        final ComponentBuilder componentBuilder2 = new ComponentBuilder(new CompUnitOrName("Component 2"));
         componentBuilder2.provisions()
             .add(provision);
         componentBuilder2.requirements()
@@ -165,15 +167,15 @@ public class CompositeTest {
         componentBuilder2.requirements()
             .add(additionalRequirement2);
 
-        CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
+        final CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder1);
         compositeBuilder.addPart(componentBuilder2);
 
-        List<OperationInterface> allDependencies = List.of(provision, requirement, additionalRequirement1,
+        final List<OperationInterface> allDependencies = List.of(provision, requirement, additionalRequirement1,
                 additionalRequirement2);
-        List<OperationInterface> visibleProvisions = List.of(provision);
+        final List<OperationInterface> visibleProvisions = List.of(provision);
 
-        Composite result = compositeBuilder.construct(List.of(),
+        final Composite result = compositeBuilder.construct(List.of(),
                 new Requirements(List.of(requirement), allDependencies, visibleProvisions),
                 new Provisions(List.of(provision), allDependencies), visibleProvisions);
 
@@ -188,20 +190,20 @@ public class CompositeTest {
     @Test
     void impreciseExposure() {
         // TODO: Re-think this test.
-        OperationInterface provision = new Operation(null, new JavaOperationName("Interface", "providedMethod"));
-        OperationInterface impreciseProvision = new EntireInterface(new JavaInterfaceName("Interface"));
+        final OperationInterface provision = new Operation(null, new JavaOperationName("Interface", "providedMethod"));
+        final OperationInterface impreciseProvision = new EntireInterface(new JavaInterfaceName("Interface"));
 
-        ComponentBuilder componentBuilder = new ComponentBuilder(new CompUnitOrName("Component"));
+        final ComponentBuilder componentBuilder = new ComponentBuilder(new CompUnitOrName("Component"));
         componentBuilder.provisions()
             .add(provision);
 
-        CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
+        final CompositeBuilder compositeBuilder = new CompositeBuilder("CompositeComponent");
         compositeBuilder.addPart(componentBuilder);
 
-        List<OperationInterface> allDependencies = List.of(provision);
-        List<OperationInterface> visibleProvisions = List.of(provision);
+        final List<OperationInterface> allDependencies = List.of(provision);
+        final List<OperationInterface> visibleProvisions = List.of(provision);
 
-        Composite result = compositeBuilder.construct(List.of(),
+        final Composite result = compositeBuilder.construct(List.of(),
                 new Requirements(List.of(), allDependencies, visibleProvisions),
                 new Provisions(List.of(impreciseProvision), allDependencies), visibleProvisions);
 

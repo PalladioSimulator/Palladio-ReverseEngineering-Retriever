@@ -7,8 +7,8 @@ import tools.mdsd.mocore.framework.surrogate.RelationTest;
 
 public class InterfaceProvisionRelationTest extends RelationTest<InterfaceProvisionRelation, Component<?>, Interface> {
     @Override
-    protected InterfaceProvisionRelation createRelation(Component<?> source, Interface destination,
-            boolean isPlaceholder) {
+    protected InterfaceProvisionRelation createRelation(final Component<?> source, final Interface destination,
+            final boolean isPlaceholder) {
         return new InterfaceProvisionRelation(source, destination, isPlaceholder);
     }
 

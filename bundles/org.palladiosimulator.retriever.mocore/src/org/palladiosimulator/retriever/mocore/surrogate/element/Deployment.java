@@ -4,13 +4,13 @@ import org.palladiosimulator.pcm.resourceenvironment.ResourceContainer;
 import org.palladiosimulator.pcm.resourceenvironment.ResourceenvironmentFactory;
 
 public class Deployment extends PcmElement<ResourceContainer> {
-    public Deployment(ResourceContainer value, boolean isPlaceholder) {
+    public Deployment(final ResourceContainer value, final boolean isPlaceholder) {
         super(value, isPlaceholder);
     }
 
     public static Deployment getUniquePlaceholder() {
-        String identifier = "Placeholder_" + getUniqueValue();
-        ResourceContainer value = ResourceenvironmentFactory.eINSTANCE.createResourceContainer();
+        final String identifier = "Placeholder_" + getUniqueValue();
+        final ResourceContainer value = ResourceenvironmentFactory.eINSTANCE.createResourceContainer();
         value.setEntityName(identifier);
         return new Deployment(value, true);
     }

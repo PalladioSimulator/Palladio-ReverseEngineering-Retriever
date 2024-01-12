@@ -9,14 +9,14 @@ import tools.mdsd.mocore.utility.IdentifierGenerator;
 
 public class CompositeTest extends ElementTest<Composite, CompositeComponent> {
     @Override
-    protected Composite createElement(CompositeComponent value, boolean isPlaceholder) {
+    protected Composite createElement(final CompositeComponent value, final boolean isPlaceholder) {
         return new Composite(value, isPlaceholder);
     }
 
     @Override
     protected CompositeComponent getUniqueValue() {
-        String identifier = IdentifierGenerator.getUniqueIdentifier();
-        RepositoryComponent value = new FluentRepositoryFactory().newCompositeComponent()
+        final String identifier = IdentifierGenerator.getUniqueIdentifier();
+        final RepositoryComponent value = new FluentRepositoryFactory().newCompositeComponent()
             .withName(identifier)
             .build();
         return (CompositeComponent) value;
@@ -24,11 +24,11 @@ public class CompositeTest extends ElementTest<Composite, CompositeComponent> {
 
     @Override
     protected Composite getUniqueNonPlaceholder() {
-        return new Composite(getUniqueValue(), false);
+        return new Composite(this.getUniqueValue(), false);
     }
 
     @Override
-    protected Composite getPlaceholderOf(Composite replaceable) {
+    protected Composite getPlaceholderOf(final Composite replaceable) {
         return new Composite(replaceable.getValue(), true);
     }
 }

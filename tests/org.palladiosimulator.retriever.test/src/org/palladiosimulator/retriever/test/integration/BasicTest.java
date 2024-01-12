@@ -36,10 +36,10 @@ public class BasicTest extends CaseStudyTest {
 
     protected BasicTest() {
         super(PROJECT_NAME, RULES);
-        loadArtifacts(Artifacts.RETRIEVER);
+        this.loadArtifacts(Artifacts.RETRIEVER);
     }
 
-    private OperationInterface getConflictingMethods(List<Interface> interfaces) {
+    private OperationInterface getConflictingMethods(final List<Interface> interfaces) {
         OperationInterface conflictingMethods = null;
         for (final Interface iface : interfaces) {
             if ("basic_ConflictingMethods".equals(iface.getEntityName())) {
@@ -57,7 +57,8 @@ public class BasicTest extends CaseStudyTest {
      */
     @Test
     void testExecutesAndProducesFile() {
-        assertTrue(new File(getConfig().getOutputFolder()
+        assertTrue(new File(this.getConfig()
+            .getOutputFolder()
             .appendSegment("pcm.repository")
             .devicePath()).exists());
     }
@@ -65,7 +66,7 @@ public class BasicTest extends CaseStudyTest {
     @Disabled("FIXME: Reliance on outdated JaxRS rule")
     @Test
     void testArray() {
-        final OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
+        final OperationInterface conflictingMethods = this.getConflictingMethods(this.getInterfaces());
         for (final OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (final Parameter param : sig.getParameters__OperationSignature()) {
                 if ("intArray".equals(param.getParameterName())) {
@@ -94,7 +95,7 @@ public class BasicTest extends CaseStudyTest {
     @Disabled("FIXME: Reliance on outdated JaxRS rule")
     @Test
     void testRepeatability() throws RetrieverException, JobFailedException, UserCanceledException {
-        OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
+        OperationInterface conflictingMethods = this.getConflictingMethods(this.getInterfaces());
         int firstIntArgCount = 0;
         for (final OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (final Parameter param : sig.getParameters__OperationSignature()) {
@@ -105,7 +106,7 @@ public class BasicTest extends CaseStudyTest {
         }
 
         // Run Retriever again on the same project
-        RetrieverConfiguration retrieverConfig = getConfig();
+        final RetrieverConfiguration retrieverConfig = this.getConfig();
         retrieverConfig.setOutputFolder(retrieverConfig.getOutputFolder()
             .appendSegment("repeated"));
         final RetrieverJob retrieverJob = new RetrieverJob(retrieverConfig);
@@ -113,7 +114,7 @@ public class BasicTest extends CaseStudyTest {
         final Repository repo = (Repository) retrieverJob.getBlackboard()
             .getPartition(RetrieverBlackboard.KEY_REPOSITORY);
 
-        conflictingMethods = getConflictingMethods(repo.getInterfaces__Repository());
+        conflictingMethods = this.getConflictingMethods(repo.getInterfaces__Repository());
 
         int secondIntArgCount = 0;
         for (final OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
@@ -130,7 +131,7 @@ public class BasicTest extends CaseStudyTest {
     @Disabled("This bug is inherited from Palladio, this can only be fixed after it is fixed there.")
     @Test
     void testShort() {
-        final OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
+        final OperationInterface conflictingMethods = this.getConflictingMethods(this.getInterfaces());
         for (final OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (final Parameter param : sig.getParameters__OperationSignature()) {
                 if ("shortArg".equals(param.getParameterName())) {
@@ -145,7 +146,7 @@ public class BasicTest extends CaseStudyTest {
     @Disabled("FIXME: Reliance on outdated JaxRS rule")
     @Test
     void testVararg() {
-        final OperationInterface conflictingMethods = getConflictingMethods(getInterfaces());
+        final OperationInterface conflictingMethods = this.getConflictingMethods(this.getInterfaces());
         for (final OperationSignature sig : conflictingMethods.getSignatures__OperationInterface()) {
             for (final Parameter param : sig.getParameters__OperationSignature()) {
                 if ("longVararg".equals(param.getParameterName())) {

@@ -7,7 +7,8 @@ import tools.mdsd.mocore.framework.surrogate.RelationTest;
 
 public class CompositionRelationTest extends RelationTest<CompositionRelation, Composite, Component<?>> {
     @Override
-    protected CompositionRelation createRelation(Composite source, Component<?> destination, boolean isPlaceholder) {
+    protected CompositionRelation createRelation(final Composite source, final Component<?> destination,
+            final boolean isPlaceholder) {
         return new CompositionRelation(source, destination, isPlaceholder);
     }
 

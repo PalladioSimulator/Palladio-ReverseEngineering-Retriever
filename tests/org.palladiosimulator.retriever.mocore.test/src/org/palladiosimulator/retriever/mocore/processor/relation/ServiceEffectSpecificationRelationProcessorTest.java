@@ -16,25 +16,25 @@ import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 public class ServiceEffectSpecificationRelationProcessorTest extends
         RelationProcessorTest<ServiceEffectSpecificationRelationProcessor, PcmSurrogate, ServiceEffectSpecificationRelation, ComponentSignatureProvisionRelation, ServiceEffectSpecification> {
     @Override
-    protected ServiceEffectSpecificationRelation createRelation(ComponentSignatureProvisionRelation source,
-            ServiceEffectSpecification destination, boolean isPlaceholder) {
+    protected ServiceEffectSpecificationRelation createRelation(final ComponentSignatureProvisionRelation source,
+            final ServiceEffectSpecification destination, final boolean isPlaceholder) {
         return new ServiceEffectSpecificationRelation(source, destination, isPlaceholder);
     }
 
     @Override
     protected ComponentSignatureProvisionRelation getUniqueNonPlaceholderSourceEntity() {
-        Component<?> component = Component.getUniquePlaceholder();
-        Interface interfsc = Interface.getUniquePlaceholder();
-        Signature signature = Signature.getUniquePlaceholder();
-        InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(component, interfsc, true);
-        SignatureProvisionRelation signatureProvision = new SignatureProvisionRelation(signature, interfsc, true);
+        final Component<?> component = Component.getUniquePlaceholder();
+        final Interface interfsc = Interface.getUniquePlaceholder();
+        final Signature signature = Signature.getUniquePlaceholder();
+        final InterfaceProvisionRelation interfaceProvision = new InterfaceProvisionRelation(component, interfsc, true);
+        final SignatureProvisionRelation signatureProvision = new SignatureProvisionRelation(signature, interfsc, true);
         return new ComponentSignatureProvisionRelation(interfaceProvision, signatureProvision, false);
 
     }
 
     @Override
     protected ComponentSignatureProvisionRelation getPlaceholderOfSourceEntity(
-            ComponentSignatureProvisionRelation source) {
+            final ComponentSignatureProvisionRelation source) {
         return new ComponentSignatureProvisionRelation(source.getSource(), source.getDestination(), true);
     }
 
@@ -44,12 +44,13 @@ public class ServiceEffectSpecificationRelationProcessorTest extends
     }
 
     @Override
-    protected ServiceEffectSpecification getPlaceholderOfDestinationEntity(ServiceEffectSpecification destination) {
+    protected ServiceEffectSpecification getPlaceholderOfDestinationEntity(
+            final ServiceEffectSpecification destination) {
         return new ServiceEffectSpecification(destination.getValue(), true);
     }
 
     @Override
-    protected ServiceEffectSpecificationRelationProcessor createProcessor(PcmSurrogate model) {
+    protected ServiceEffectSpecificationRelationProcessor createProcessor(final PcmSurrogate model) {
         return new ServiceEffectSpecificationRelationProcessor(model);
     }
 

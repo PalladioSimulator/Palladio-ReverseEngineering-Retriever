@@ -10,20 +10,21 @@ import org.palladiosimulator.retriever.mocore.surrogate.relation.ComponentAlloca
 import tools.mdsd.mocore.framework.processor.Processor;
 
 public abstract class ComponentProcessor<T extends Component<?>> extends Processor<PcmSurrogate, T> {
-    public ComponentProcessor(PcmSurrogate model, Class<T> processableType) {
+    public ComponentProcessor(final PcmSurrogate model, final Class<T> processableType) {
         super(model, processableType);
     }
 
     @Override
-    protected void refine(T discovery) {
-        List<ComponentAllocationRelation> deploymentRelations = getModel().getByType(ComponentAllocationRelation.class);
+    protected void refine(final T discovery) {
+        final List<ComponentAllocationRelation> deploymentRelations = this.getModel()
+            .getByType(ComponentAllocationRelation.class);
         deploymentRelations.removeIf(relation -> !relation.getSource()
             .equals(discovery));
 
         if (deploymentRelations.isEmpty()) {
-            Deployment deployment = Deployment.getUniquePlaceholder();
-            ComponentAllocationRelation relation = new ComponentAllocationRelation(discovery, deployment, true);
-            addImplication(relation);
+            final Deployment deployment = Deployment.getUniquePlaceholder();
+            final ComponentAllocationRelation relation = new ComponentAllocationRelation(discovery, deployment, true);
+            this.addImplication(relation);
         }
     }
 }

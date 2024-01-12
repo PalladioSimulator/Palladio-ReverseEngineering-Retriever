@@ -11,8 +11,8 @@ public class CompositeProvisionDelegationRelation
     private static final String ERROR_SAME_RELATION = "Delegations may not exist between equal source and destination.";
     private static final String ERROR_NON_EQUAL_INTERFACES = "Interfaces of the given relations must be equal.";
 
-    public CompositeProvisionDelegationRelation(InterfaceProvisionRelation source,
-            InterfaceProvisionRelation destination, boolean isPlaceholder) {
+    public CompositeProvisionDelegationRelation(final InterfaceProvisionRelation source,
+            final InterfaceProvisionRelation destination, final boolean isPlaceholder) {
         super(source, destination, isPlaceholder);
 
         // Check whether relations are equal
@@ -35,7 +35,7 @@ public class CompositeProvisionDelegationRelation
     }
 
     @Override
-    public <T extends Replaceable> CompositeProvisionDelegationRelation replace(T original, T replacement) {
+    public <T extends Replaceable> CompositeProvisionDelegationRelation replace(final T original, final T replacement) {
         if (!this.includes(original)) {
             // TODO Add message to exception
             throw new IllegalArgumentException();
@@ -43,8 +43,8 @@ public class CompositeProvisionDelegationRelation
         if (this.equals(original)) {
             return (CompositeProvisionDelegationRelation) replacement;
         }
-        InterfaceProvisionRelation source = getSourceReplacement(original, replacement);
-        InterfaceProvisionRelation destination = getDestinationReplacement(original, replacement);
+        final InterfaceProvisionRelation source = this.getSourceReplacement(original, replacement);
+        final InterfaceProvisionRelation destination = this.getDestinationReplacement(original, replacement);
         return new CompositeProvisionDelegationRelation(source, destination, this.isPlaceholder());
     }
 }

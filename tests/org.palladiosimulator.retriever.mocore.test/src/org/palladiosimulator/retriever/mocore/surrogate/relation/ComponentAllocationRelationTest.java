@@ -8,8 +8,8 @@ import tools.mdsd.mocore.framework.surrogate.RelationTest;
 public class ComponentAllocationRelationTest
         extends RelationTest<ComponentAllocationRelation, Component<?>, Deployment> {
     @Override
-    protected ComponentAllocationRelation createRelation(Component<?> source, Deployment destination,
-            boolean isPlaceholder) {
+    protected ComponentAllocationRelation createRelation(final Component<?> source, final Deployment destination,
+            final boolean isPlaceholder) {
         return new ComponentAllocationRelation(source, destination, isPlaceholder);
     }
 

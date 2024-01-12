@@ -6,12 +6,13 @@ import tools.mdsd.mocore.framework.surrogate.Relation;
 import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
 public class DeploymentDeploymentRelation extends Relation<Deployment, Deployment> {
-    public DeploymentDeploymentRelation(Deployment source, Deployment destination, boolean isPlaceholder) {
+    public DeploymentDeploymentRelation(final Deployment source, final Deployment destination,
+            final boolean isPlaceholder) {
         super(source, destination, isPlaceholder);
     }
 
     @Override
-    public <U extends Replaceable> DeploymentDeploymentRelation replace(U original, U replacement) {
+    public <U extends Replaceable> DeploymentDeploymentRelation replace(final U original, final U replacement) {
         if (!this.includes(original)) {
             // TODO Add message to exception
             throw new IllegalArgumentException();
@@ -19,8 +20,8 @@ public class DeploymentDeploymentRelation extends Relation<Deployment, Deploymen
         if (this.equals(original)) {
             return (DeploymentDeploymentRelation) replacement;
         }
-        Deployment source = getSourceReplacement(original, replacement);
-        Deployment destination = getDestinationReplacement(original, replacement);
+        final Deployment source = this.getSourceReplacement(original, replacement);
+        final Deployment destination = this.getDestinationReplacement(original, replacement);
         return new DeploymentDeploymentRelation(source, destination, this.isPlaceholder());
     }
 }

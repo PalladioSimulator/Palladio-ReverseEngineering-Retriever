@@ -35,23 +35,24 @@ public class SeffMergerJob implements IBlackboardInteractingJob<Blackboard<Objec
     private final String sourceSeffRepositoryKey;
     private final String destinationSeffRepositoryKey;
 
-    public SeffMergerJob(Blackboard<Object> blackboard, String sourceSeffRepositoryKey,
-            String destinationSeffRepositoryKey) {
+    public SeffMergerJob(final Blackboard<Object> blackboard, final String sourceSeffRepositoryKey,
+            final String destinationSeffRepositoryKey) {
         this.blackboard = Objects.requireNonNull(blackboard);
         this.sourceSeffRepositoryKey = sourceSeffRepositoryKey;
         this.destinationSeffRepositoryKey = destinationSeffRepositoryKey;
     }
 
     @Override
-    public void execute(IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
+    public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
         // Fetch input from blackboard
         monitor.subTask("Retrieving source and destination repository from blackboard");
-        Repository sourceRepository = (Repository) this.blackboard.getPartition(this.sourceSeffRepositoryKey);
-        Repository destinationRepository = (Repository) this.blackboard.getPartition(this.destinationSeffRepositoryKey);
+        final Repository sourceRepository = (Repository) this.blackboard.getPartition(this.sourceSeffRepositoryKey);
+        final Repository destinationRepository = (Repository) this.blackboard
+            .getPartition(this.destinationSeffRepositoryKey);
 
         // Move seffs from source to destination repository
         monitor.subTask("Merging ServiceEffectSpecificications from source with destination repository");
-        for (RepositoryComponent component : sourceRepository.getComponents__Repository()) {
+        for (final RepositoryComponent component : sourceRepository.getComponents__Repository()) {
             if (!(component instanceof BasicComponent)) {
                 continue;
             }
@@ -59,8 +60,9 @@ public class SeffMergerJob implements IBlackboardInteractingJob<Blackboard<Objec
             // Assumes that each component from source repository has a counterpart with the same
             // name in destination
             // repository. Otherwise, exception is thrown.
-            BasicComponent sourceComponent = (BasicComponent) component;
-            Optional<BasicComponent> destinationComponentOption = destinationRepository.getComponents__Repository()
+            final BasicComponent sourceComponent = (BasicComponent) component;
+            final Optional<BasicComponent> destinationComponentOption = destinationRepository
+                .getComponents__Repository()
                 .stream()
                 .filter(otherComponent -> otherComponent.getEntityName()
                     .equals(sourceComponent.getEntityName()))
@@ -72,15 +74,15 @@ public class SeffMergerJob implements IBlackboardInteractingJob<Blackboard<Objec
                 LOG.warn("Failed to find destination component " + sourceComponent.getEntityName() + "!");
                 continue;
             }
-            BasicComponent destinationComponent = destinationComponentOption.get();
+            final BasicComponent destinationComponent = destinationComponentOption.get();
 
             // Overwrite seffs within destination component
-            List<ServiceEffectSpecification> sourceSeffs = List
+            final List<ServiceEffectSpecification> sourceSeffs = List
                 .copyOf(sourceComponent.getServiceEffectSpecifications__BasicComponent());
-            for (ServiceEffectSpecification sourceSeff : sourceSeffs) {
+            for (final ServiceEffectSpecification sourceSeff : sourceSeffs) {
                 // Retrieve destination signature for seff, throw if signature is not provided by
                 // destination component
-                Optional<OperationSignature> destinationSignatureOption = destinationComponent
+                final Optional<OperationSignature> destinationSignatureOption = destinationComponent
                     .getProvidedRoles_InterfaceProvidingEntity()
                     .stream()
                     .filter(role -> role instanceof OperationProvidedRole)
@@ -98,7 +100,7 @@ public class SeffMergerJob implements IBlackboardInteractingJob<Blackboard<Objec
                         .getEntityName() + " in component " + destinationComponent.getEntityName() + "!");
                     continue;
                 }
-                OperationSignature destinationSignature = destinationSignatureOption.get();
+                final OperationSignature destinationSignature = destinationSignatureOption.get();
 
                 // Set component and signature of source seff to destination elements
                 sourceSeff.setBasicComponent_ServiceEffectSpecification(destinationComponent);
@@ -106,17 +108,17 @@ public class SeffMergerJob implements IBlackboardInteractingJob<Blackboard<Objec
 
                 // Adapt external call actions to new repository -> Swap signatures and required
                 // roles
-                EList<AbstractAction> behaviorSteps = ((ResourceDemandingSEFF) sourceSeff).getSteps_Behaviour();
-                for (AbstractAction action : behaviorSteps) {
+                final EList<AbstractAction> behaviorSteps = ((ResourceDemandingSEFF) sourceSeff).getSteps_Behaviour();
+                for (final AbstractAction action : behaviorSteps) {
                     if (!(action instanceof ExternalCallAction)) {
                         continue;
                     }
-                    ExternalCallAction externalCallAction = (ExternalCallAction) action;
-                    String calledSignatureEntityName = externalCallAction.getCalledService_ExternalService()
+                    final ExternalCallAction externalCallAction = (ExternalCallAction) action;
+                    final String calledSignatureEntityName = externalCallAction.getCalledService_ExternalService()
                         .getEntityName();
 
                     // Fetch called signature from destination repository
-                    Optional<OperationSignature> calledSignatureOption = destinationRepository
+                    final Optional<OperationSignature> calledSignatureOption = destinationRepository
                         .getInterfaces__Repository()
                         .stream()
                         .filter(interFace -> interFace instanceof OperationInterface)
@@ -130,10 +132,10 @@ public class SeffMergerJob implements IBlackboardInteractingJob<Blackboard<Objec
                         LOG.warn("Failed to find called signature for " + calledSignatureEntityName + "!");
                         continue;
                     }
-                    OperationSignature calledSignature = calledSignatureOption.get();
+                    final OperationSignature calledSignature = calledSignatureOption.get();
 
                     // Fetch required role from destination repository
-                    Optional<OperationRequiredRole> requiredRoleOption = destinationComponent
+                    final Optional<OperationRequiredRole> requiredRoleOption = destinationComponent
                         .getRequiredRoles_InterfaceRequiringEntity()
                         .stream()
                         .filter(role -> role instanceof OperationRequiredRole)
@@ -149,14 +151,14 @@ public class SeffMergerJob implements IBlackboardInteractingJob<Blackboard<Objec
                                     .getEntityName() + "#" + calledSignature.getEntityName() + "!");
                         continue;
                     }
-                    OperationRequiredRole requiredRole = requiredRoleOption.get();
+                    final OperationRequiredRole requiredRole = requiredRoleOption.get();
 
                     externalCallAction.setCalledService_ExternalService(calledSignature);
                     externalCallAction.setRole_ExternalService(requiredRole);
                 }
 
                 // Find optional already existing and conflicting seff in destination component
-                Optional<ServiceEffectSpecification> optionalDestinationSeff = destinationComponent
+                final Optional<ServiceEffectSpecification> optionalDestinationSeff = destinationComponent
                     .getServiceEffectSpecifications__BasicComponent()
                     .stream()
                     .filter(destinationSeff -> destinationSeff.getDescribedService__SEFF()
@@ -176,7 +178,7 @@ public class SeffMergerJob implements IBlackboardInteractingJob<Blackboard<Objec
     }
 
     @Override
-    public void cleanup(IProgressMonitor monitor) throws CleanupFailedException {
+    public void cleanup(final IProgressMonitor monitor) throws CleanupFailedException {
         // No cleanup required for the job
     }
 
@@ -186,7 +188,7 @@ public class SeffMergerJob implements IBlackboardInteractingJob<Blackboard<Objec
     }
 
     @Override
-    public void setBlackboard(Blackboard<Object> blackboard) {
+    public void setBlackboard(final Blackboard<Object> blackboard) {
         this.blackboard = Objects.requireNonNull(blackboard);
     }
 }

@@ -7,12 +7,12 @@ import tools.mdsd.mocore.framework.surrogate.Relation;
 import tools.mdsd.mocore.framework.surrogate.Replaceable;
 
 public class CompositionRelation extends Relation<Composite, Component<?>> {
-    public CompositionRelation(Composite source, Component<?> destination, boolean isPlaceholder) {
+    public CompositionRelation(final Composite source, final Component<?> destination, final boolean isPlaceholder) {
         super(source, destination, isPlaceholder);
     }
 
     @Override
-    public <T extends Replaceable> CompositionRelation replace(T original, T replacement) {
+    public <T extends Replaceable> CompositionRelation replace(final T original, final T replacement) {
         if (!this.includes(original)) {
             // TODO Add message to exception
             throw new IllegalArgumentException();
@@ -20,8 +20,8 @@ public class CompositionRelation extends Relation<Composite, Component<?>> {
         if (this.equals(original)) {
             return (CompositionRelation) replacement;
         }
-        Composite source = getSourceReplacement(original, replacement);
-        Component<?> destination = getDestinationReplacement(original, replacement);
+        final Composite source = this.getSourceReplacement(original, replacement);
+        final Component<?> destination = this.getDestinationReplacement(original, replacement);
         return new CompositionRelation(source, destination, this.isPlaceholder());
     }
 }

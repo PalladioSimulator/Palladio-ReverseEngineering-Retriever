@@ -19,10 +19,10 @@ import tools.mdsd.mocore.framework.discovery.Discoverer;
 public class RepositoryDecompositorTest extends DecompositorTest<RepositoryDecompositor, Repository> {
     @Test
     public void testDecomposeEmptyRepository() {
-        RepositoryDecompositor decompositor = createDecompositor();
-        Repository repository = createEmptyRepository();
+        final RepositoryDecompositor decompositor = this.createDecompositor();
+        final Repository repository = this.createEmptyRepository();
 
-        Collection<Discoverer<?>> discoverers = decompositor.decompose(repository);
+        final Collection<Discoverer<?>> discoverers = decompositor.decompose(repository);
         assertEquals(10, discoverers.size());
         discoverers.forEach((discoverer) -> assertTrue(discoverer.getDiscoveries()
             .isEmpty()));
@@ -30,9 +30,9 @@ public class RepositoryDecompositorTest extends DecompositorTest<RepositoryDecom
 
     @Test
     public void testDecomposeUncoupledComponents() {
-        RepositoryDecompositor decompositor = createDecompositor();
-        FluentRepositoryFactory factory = new FluentRepositoryFactory();
-        Repository repository = factory.newRepository()
+        final RepositoryDecompositor decompositor = this.createDecompositor();
+        final FluentRepositoryFactory factory = new FluentRepositoryFactory();
+        final Repository repository = factory.newRepository()
             .addToRepository(factory.newBasicComponent()
                 .withName("Component_1"))
             .addToRepository(factory.newBasicComponent()
@@ -45,16 +45,17 @@ public class RepositoryDecompositorTest extends DecompositorTest<RepositoryDecom
                 .withName("Component_5"))
             .createRepositoryNow();
 
-        Collection<Discoverer<?>> discoverers = decompositor.decompose(repository);
+        final Collection<Discoverer<?>> discoverers = decompositor.decompose(repository);
         assertFalse(discoverers.isEmpty());
 
         // Remove all discoverers except component discoverer
-        List<Discoverer<?>> modifiableDiscoverers = new ArrayList<>(discoverers);
+        final List<Discoverer<?>> modifiableDiscoverers = new ArrayList<>(discoverers);
         modifiableDiscoverers.removeIf((discoverer) -> discoverer.getDiscoveryType() != AtomicComponent.class);
         assertEquals(1, modifiableDiscoverers.size());
 
         // Get and check component discoverer
-        Discoverer<AtomicComponent> componentDiscoverer = (Discoverer<AtomicComponent>) modifiableDiscoverers.iterator()
+        final Discoverer<AtomicComponent> componentDiscoverer = (Discoverer<AtomicComponent>) modifiableDiscoverers
+            .iterator()
             .next();
         assertEquals(5, componentDiscoverer.getDiscoveries()
             .size());
@@ -62,7 +63,7 @@ public class RepositoryDecompositorTest extends DecompositorTest<RepositoryDecom
             final int j = i;
             assertTrue(componentDiscoverer.getDiscoveries()
                 .stream()
-                .anyMatch((AtomicComponent component) -> component.getValue()
+                .anyMatch((final AtomicComponent component) -> component.getValue()
                     .getEntityName()
                     .equals("Component_" + j)));
         }
@@ -78,7 +79,7 @@ public class RepositoryDecompositorTest extends DecompositorTest<RepositoryDecom
 
     @Override
     protected Repository createValidSource() {
-        return createEmptyRepository();
+        return this.createEmptyRepository();
     }
 
     private Repository createEmptyRepository() {

@@ -19,9 +19,9 @@ public class InterfaceProcessorTest extends ProcessorTest<InterfaceProcessor, Pc
     @DisabledIf(TEST_API_ONLY_METHOD_NAME)
     public void testRefineWithValidElementAddsCorrectImplications() {
         // Test data
-        PcmSurrogate model = createEmptyModel();
-        InterfaceProcessor processor = createProcessor(model);
-        Interface element = createUniqueReplaceable();
+        final PcmSurrogate model = this.createEmptyModel();
+        final InterfaceProcessor processor = this.createProcessor(model);
+        final Interface element = this.createUniqueReplaceable();
 
         // Assertions: Pre-execution
         assertTrue(processor.getImplications()
@@ -29,15 +29,15 @@ public class InterfaceProcessorTest extends ProcessorTest<InterfaceProcessor, Pc
 
         // Execution
         processor.refine(element);
-        Set<Replaceable> implications = processor.getImplications();
+        final Set<Replaceable> implications = processor.getImplications();
 
         // Assertions: Post-execution
         assertEquals(1, implications.size());
-        Replaceable implication = implications.stream()
+        final Replaceable implication = implications.stream()
             .findFirst()
             .orElseThrow();
         assertEquals(InterfaceProvisionRelation.class, implication.getClass());
-        InterfaceProvisionRelation relation = (InterfaceProvisionRelation) implication;
+        final InterfaceProvisionRelation relation = (InterfaceProvisionRelation) implication;
         assertEquals(element, relation.getDestination());
         assertTrue(relation.isPlaceholder());
         assertTrue(relation.getSource()
@@ -49,7 +49,7 @@ public class InterfaceProcessorTest extends ProcessorTest<InterfaceProcessor, Pc
     }
 
     @Override
-    protected InterfaceProcessor createProcessor(PcmSurrogate model) {
+    protected InterfaceProcessor createProcessor(final PcmSurrogate model) {
         return new InterfaceProcessor(model);
     }
 

@@ -10,17 +10,18 @@ public class Operation implements OperationInterface {
     private final IMethodBinding binding;
     private final OperationName name;
 
-    public Operation(IMethodBinding binding, OperationName name) {
+    public Operation(final IMethodBinding binding, final OperationName name) {
         this.binding = binding;
         this.name = name;
     }
 
     public IMethodBinding getBinding() {
-        return binding;
+        return this.binding;
     }
 
+    @Override
     public OperationName getName() {
-        return name;
+        return this.name;
     }
 
     @Override
@@ -30,31 +31,29 @@ public class Operation implements OperationInterface {
 
     @Override
     public int hashCode() {
-        return Objects.hash(binding, name);
+        return Objects.hash(this.binding, this.name);
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if ((obj == null) || (this.getClass() != obj.getClass())) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        Operation other = (Operation) obj;
-        return Objects.equals(binding, other.binding) && Objects.equals(name, other.name);
+        final Operation other = (Operation) obj;
+        return Objects.equals(this.binding, other.binding) && Objects.equals(this.name, other.name);
     }
 
     @Override
     public String getInterface() {
-        return name.getInterface();
+        return this.name.getInterface();
     }
 
     @Override
     public String toString() {
-        return getName().toString();
+        return this.getName()
+            .toString();
     }
 }

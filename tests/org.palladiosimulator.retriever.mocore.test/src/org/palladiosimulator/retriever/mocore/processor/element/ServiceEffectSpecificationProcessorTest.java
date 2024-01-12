@@ -19,9 +19,9 @@ public class ServiceEffectSpecificationProcessorTest
     @DisabledIf(TEST_API_ONLY_METHOD_NAME)
     public void testRefineWithValidElementAddsCorrectImplications() {
         // Test data
-        PcmSurrogate model = createEmptyModel();
-        ServiceEffectSpecificationProcessor processor = createProcessor(model);
-        ServiceEffectSpecification element = createUniqueReplaceable();
+        final PcmSurrogate model = this.createEmptyModel();
+        final ServiceEffectSpecificationProcessor processor = this.createProcessor(model);
+        final ServiceEffectSpecification element = this.createUniqueReplaceable();
 
         // Assertions: Pre-execution
         assertTrue(processor.getImplications()
@@ -29,14 +29,14 @@ public class ServiceEffectSpecificationProcessorTest
 
         // Execution
         processor.refine(element);
-        Set<Replaceable> implications = processor.getImplications();
+        final Set<Replaceable> implications = processor.getImplications();
 
         // Assertions: Post-execution
         assertEquals(0, implications.size());
     }
 
     @Override
-    protected ServiceEffectSpecificationProcessor createProcessor(PcmSurrogate model) {
+    protected ServiceEffectSpecificationProcessor createProcessor(final PcmSurrogate model) {
         return new ServiceEffectSpecificationProcessor(model);
     }
 

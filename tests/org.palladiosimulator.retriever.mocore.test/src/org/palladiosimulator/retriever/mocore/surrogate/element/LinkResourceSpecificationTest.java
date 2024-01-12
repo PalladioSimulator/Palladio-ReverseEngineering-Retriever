@@ -7,8 +7,8 @@ import tools.mdsd.mocore.framework.surrogate.ElementTest;
 public class LinkResourceSpecificationTest
         extends ElementTest<LinkResourceSpecification, CommunicationLinkResourceSpecification> {
     @Override
-    protected LinkResourceSpecification createElement(CommunicationLinkResourceSpecification value,
-            boolean isPlaceholder) {
+    protected LinkResourceSpecification createElement(final CommunicationLinkResourceSpecification value,
+            final boolean isPlaceholder) {
         return new LinkResourceSpecification(value, isPlaceholder);
     }
 
@@ -20,11 +20,11 @@ public class LinkResourceSpecificationTest
 
     @Override
     protected LinkResourceSpecification getUniqueNonPlaceholder() {
-        return new LinkResourceSpecification(getUniqueValue(), false);
+        return new LinkResourceSpecification(this.getUniqueValue(), false);
     }
 
     @Override
-    protected LinkResourceSpecification getPlaceholderOf(LinkResourceSpecification replaceable) {
+    protected LinkResourceSpecification getPlaceholderOf(final LinkResourceSpecification replaceable) {
         return new LinkResourceSpecification(replaceable.getValue(), true);
     }
 }

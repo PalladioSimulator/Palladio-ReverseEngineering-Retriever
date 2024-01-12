@@ -11,8 +11,8 @@ import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 public class ComponentAllocationRelationProcessorTest extends
         RelationProcessorTest<ComponentAllocationRelationProcessor, PcmSurrogate, ComponentAllocationRelation, Component<?>, Deployment> {
     @Override
-    protected ComponentAllocationRelation createRelation(Component<?> source, Deployment destination,
-            boolean isPlaceholder) {
+    protected ComponentAllocationRelation createRelation(final Component<?> source, final Deployment destination,
+            final boolean isPlaceholder) {
         return new ComponentAllocationRelation(source, destination, isPlaceholder);
     }
 
@@ -22,7 +22,7 @@ public class ComponentAllocationRelationProcessorTest extends
     }
 
     @Override
-    protected Component<?> getPlaceholderOfSourceEntity(Component<?> source) {
+    protected Component<?> getPlaceholderOfSourceEntity(final Component<?> source) {
         return new Component<>(source.getValue(), true);
     }
 
@@ -32,12 +32,12 @@ public class ComponentAllocationRelationProcessorTest extends
     }
 
     @Override
-    protected Deployment getPlaceholderOfDestinationEntity(Deployment destination) {
+    protected Deployment getPlaceholderOfDestinationEntity(final Deployment destination) {
         return new Deployment(destination.getValue(), true);
     }
 
     @Override
-    protected ComponentAllocationRelationProcessor createProcessor(PcmSurrogate model) {
+    protected ComponentAllocationRelationProcessor createProcessor(final PcmSurrogate model) {
         return new ComponentAllocationRelationProcessor(model);
     }
 

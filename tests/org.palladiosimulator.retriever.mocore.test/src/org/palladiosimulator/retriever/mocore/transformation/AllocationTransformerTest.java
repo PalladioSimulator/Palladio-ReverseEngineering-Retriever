@@ -17,13 +17,13 @@ import tools.mdsd.mocore.framework.transformation.TransformerTest;
 public class AllocationTransformerTest extends TransformerTest<AllocationTransformer, PcmSurrogate, Allocation> {
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    public void testTransformSingleAllocation(boolean isPlaceholderAllocation) {
+    public void testTransformSingleAllocation(final boolean isPlaceholderAllocation) {
         // Test data
-        AllocationTransformer transformer = createTransformer();
-        PcmSurrogate model = createEmptyModel();
-        Component<?> component = Component.getUniquePlaceholder();
-        Deployment deployment = Deployment.getUniquePlaceholder();
-        ComponentAllocationRelation allocationRelation = new ComponentAllocationRelation(component, deployment,
+        final AllocationTransformer transformer = this.createTransformer();
+        final PcmSurrogate model = this.createEmptyModel();
+        final Component<?> component = Component.getUniquePlaceholder();
+        final Deployment deployment = Deployment.getUniquePlaceholder();
+        final ComponentAllocationRelation allocationRelation = new ComponentAllocationRelation(component, deployment,
                 isPlaceholderAllocation);
 
         model.add(component);
@@ -31,7 +31,7 @@ public class AllocationTransformerTest extends TransformerTest<AllocationTransfo
         model.add(allocationRelation);
 
         // Execution
-        Allocation allocation = transformer.transform(model);
+        final Allocation allocation = transformer.transform(model);
 
         // Assertion
         assertNotNull(allocation);

@@ -49,59 +49,59 @@ public class RetrieverTab extends AbstractLaunchConfigurationTab {
 
     public RetrieverTab() {
         // Create the default path of this Eclipse application
-        defaultPath = Paths.get(".")
+        this.defaultPath = Paths.get(".")
             .toAbsolutePath()
             .normalize()
             .toString();
 
         // Create a listener for GUI modification events
-        modifyListener = e -> {
+        this.modifyListener = e -> {
             // e may be null here!
-            setDirty(true);
-            updateLaunchConfigurationDialog();
+            this.setDirty(true);
+            this.updateLaunchConfigurationDialog();
         };
 
         ServiceCollection<Discoverer> discovererCollection = null;
         try {
             discovererCollection = new DiscovererCollection();
-        } catch (CoreException e) {
+        } catch (final CoreException e) {
             Logger.getLogger(RetrieverTab.class)
                 .error("Exception occurred while discovering discoverers!");
             discovererCollection = new EmptyCollection<>();
         }
-        ServiceConfiguration<Discoverer> discovererConfig = new ServiceConfiguration<>(discovererCollection,
+        final ServiceConfiguration<Discoverer> discovererConfig = new ServiceConfiguration<>(discovererCollection,
                 RetrieverConfigurationImpl.RULE_ENGINE_SELECTED_DISCOVERERS,
                 RetrieverConfigurationImpl.RULE_ENGINE_DISCOVERER_CONFIG_PREFIX);
-        discovererConfigManager = new ServiceConfigurationManager<>(discovererConfig);
+        this.discovererConfigManager = new ServiceConfigurationManager<>(discovererConfig);
 
         ServiceCollection<Rule> ruleCollection = null;
         try {
             ruleCollection = new RuleCollection();
-        } catch (CoreException e) {
+        } catch (final CoreException e) {
             Logger.getLogger(RetrieverTab.class)
                 .error("Exception occurred while discovering rules!");
             ruleCollection = new EmptyCollection<>();
         }
-        ServiceConfiguration<Rule> ruleConfig = new ServiceConfiguration<>(ruleCollection,
+        final ServiceConfiguration<Rule> ruleConfig = new ServiceConfiguration<>(ruleCollection,
                 RetrieverConfigurationImpl.RULE_ENGINE_SELECTED_RULES,
                 RetrieverConfigurationImpl.RULE_ENGINE_RULE_CONFIG_PREFIX);
         ruleConfig.addDependencyProvider(discovererConfig);
-        ruleConfigView = new ServiceConfigurationView<>(ruleConfig, modifyListener);
+        this.ruleConfigView = new ServiceConfigurationView<>(ruleConfig, this.modifyListener);
 
         ServiceCollection<Analyst> analystCollection = null;
         try {
             analystCollection = new AnalystCollection();
-        } catch (CoreException e) {
+        } catch (final CoreException e) {
             Logger.getLogger(RetrieverTab.class)
                 .error("Exception occurred while discovering analysts!");
             analystCollection = new EmptyCollection<>();
         }
-        ServiceConfiguration<Analyst> analystConfig = new ServiceConfiguration<>(analystCollection,
+        final ServiceConfiguration<Analyst> analystConfig = new ServiceConfiguration<>(analystCollection,
                 RetrieverConfigurationImpl.RULE_ENGINE_SELECTED_ANALYSTS,
                 RetrieverConfigurationImpl.RULE_ENGINE_ANALYST_CONFIG_PREFIX);
         analystConfig.addDependencyProvider(discovererConfig);
         analystConfig.addDependencyProvider(ruleConfig);
-        analystConfigView = new ServiceConfigurationView<>(analystConfig, modifyListener);
+        this.analystConfigView = new ServiceConfigurationView<>(analystConfig, this.modifyListener);
 
     }
 
@@ -112,57 +112,57 @@ public class RetrieverTab extends AbstractLaunchConfigurationTab {
     }
 
     @Override
-    public void createControl(Composite parent) {
+    public void createControl(final Composite parent) {
         // Create a new Composite to hold the page's controls
-        Composite container = new Composite(parent, SWT.NONE);
-        setControl(container);
+        final Composite container = new Composite(parent, SWT.NONE);
+        this.setControl(container);
         container.setLayout(new GridLayout());
 
         // Create file input area for input
-        in = new Text(container, SWT.SINGLE | SWT.BORDER);
-        TabHelper.createFolderInputSection(container, modifyListener, "File In", in, "File In", getShell(),
-                defaultPath);
+        this.in = new Text(container, SWT.SINGLE | SWT.BORDER);
+        TabHelper.createFolderInputSection(container, this.modifyListener, "File In", this.in, "File In",
+                this.getShell(), this.defaultPath);
 
         // Create file input area for output
-        out = new Text(container, SWT.SINGLE | SWT.BORDER);
-        TabHelper.createFolderInputSection(container, modifyListener, "File Out", out, "File Out", getShell(),
-                defaultPath);
+        this.out = new Text(container, SWT.SINGLE | SWT.BORDER);
+        TabHelper.createFolderInputSection(container, this.modifyListener, "File Out", this.out, "File Out",
+                this.getShell(), this.defaultPath);
 
         // Create tree view for rule and analyst configuration
         // Do not create a view for discoverers, they can always be selected automatically.
         // If a discoverer is added that requires configuration, this view has to be added back.
-        ruleConfigView.createControl(container);
-        analystConfigView.createControl(container);
+        this.ruleConfigView.createControl(container);
+        this.analystConfigView.createControl(container);
     }
 
-    private boolean validateFolderInput(Text widget) {
+    private boolean validateFolderInput(final Text widget) {
         if ((widget == null) || (widget.getText() == null) || widget.getText()
             .isBlank()) {
-            return error("Blank input.");
+            return this.error("Blank input.");
         }
 
         try {
-            URI uri = getURI(widget);
-            Path path = Paths.get(CommonPlugin.asLocalURI(uri)
+            final URI uri = getURI(widget);
+            final Path path = Paths.get(CommonPlugin.asLocalURI(uri)
                 .devicePath());
 
             if (!Files.exists(path)) {
-                return error("The file located by '" + uri + "'does not exist.");
+                return this.error("The file located by '" + uri + "'does not exist.");
             }
-        } catch (Exception e) {
-            return error(e.getLocalizedMessage());
+        } catch (final Exception e) {
+            return this.error(e.getLocalizedMessage());
         }
-        return error(null);
+        return this.error(null);
     }
 
     private boolean error(final String message) {
-        setErrorMessage(message);
+        this.setErrorMessage(message);
         return message == null;
     }
 
-    private static URI getURI(Text widget) {
-        String text = URI.decode(widget.getText());
-        URI uri = URI.createURI(text);
+    private static URI getURI(final Text widget) {
+        final String text = URI.decode(widget.getText());
+        final URI uri = URI.createURI(text);
         if (uri.isPlatform() || uri.isFile()) {
             return uri;
         }
@@ -172,39 +172,40 @@ public class RetrieverTab extends AbstractLaunchConfigurationTab {
     }
 
     @Override
-    public boolean isValid(ILaunchConfiguration launchConfig) {
-        return validateFolderInput(in) && validateFolderInput(out);
+    public boolean isValid(final ILaunchConfiguration launchConfig) {
+        return this.validateFolderInput(this.in) && this.validateFolderInput(this.out);
     }
 
     @Override
-    public void initializeFrom(ILaunchConfiguration configuration) {
-        setText(configuration, in, RetrieverConfigurationImpl.RULE_ENGINE_INPUT_PATH);
-        setText(configuration, out, RetrieverConfigurationImpl.RULE_ENGINE_OUTPUT_PATH);
+    public void initializeFrom(final ILaunchConfiguration configuration) {
+        this.setText(configuration, this.in, RetrieverConfigurationImpl.RULE_ENGINE_INPUT_PATH);
+        this.setText(configuration, this.out, RetrieverConfigurationImpl.RULE_ENGINE_OUTPUT_PATH);
 
-        discovererConfigManager.initializeFrom(configuration);
-        ruleConfigView.initializeFrom(configuration);
-        analystConfigView.initializeFrom(configuration);
+        this.discovererConfigManager.initializeFrom(configuration);
+        this.ruleConfigView.initializeFrom(configuration);
+        this.analystConfigView.initializeFrom(configuration);
     }
 
-    private void setText(ILaunchConfiguration configuration, Text textWidget, String attributeName) {
+    private void setText(final ILaunchConfiguration configuration, final Text textWidget, final String attributeName) {
         try {
             textWidget.setText(configuration.getAttribute(attributeName, ""));
         } catch (final Exception e) {
-            LaunchConfigPlugin.errorLogger(getName(), attributeName, e.getMessage());
-            error(e.getLocalizedMessage());
+            LaunchConfigPlugin.errorLogger(this.getName(), attributeName, e.getMessage());
+            this.error(e.getLocalizedMessage());
         }
     }
 
     @Override
-    public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-        setAttribute(configuration, RetrieverConfigurationImpl.RULE_ENGINE_INPUT_PATH, in);
-        setAttribute(configuration, RetrieverConfigurationImpl.RULE_ENGINE_OUTPUT_PATH, out);
-        discovererConfigManager.performApply(configuration);
-        ruleConfigView.performApply(configuration);
-        analystConfigView.performApply(configuration);
+    public void performApply(final ILaunchConfigurationWorkingCopy configuration) {
+        this.setAttribute(configuration, RetrieverConfigurationImpl.RULE_ENGINE_INPUT_PATH, this.in);
+        this.setAttribute(configuration, RetrieverConfigurationImpl.RULE_ENGINE_OUTPUT_PATH, this.out);
+        this.discovererConfigManager.performApply(configuration);
+        this.ruleConfigView.performApply(configuration);
+        this.analystConfigView.performApply(configuration);
     }
 
-    private void setAttribute(ILaunchConfigurationWorkingCopy configuration, String attributeName, Text textWidget) {
+    private void setAttribute(final ILaunchConfigurationWorkingCopy configuration, final String attributeName,
+            final Text textWidget) {
         try {
             if (textWidget.getText()
                 .isEmpty()) {
@@ -213,28 +214,28 @@ public class RetrieverTab extends AbstractLaunchConfigurationTab {
                 configuration.setAttribute(attributeName, getURI(textWidget).toString());
             }
         } catch (final Exception e) {
-            error(e.getLocalizedMessage());
+            this.error(e.getLocalizedMessage());
         }
     }
 
     @Override
-    public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-        setText(in, defaultPath);
-        setAttribute(configuration, RetrieverConfigurationImpl.RULE_ENGINE_INPUT_PATH, in);
+    public void setDefaults(final ILaunchConfigurationWorkingCopy configuration) {
+        this.setText(this.in, this.defaultPath);
+        this.setAttribute(configuration, RetrieverConfigurationImpl.RULE_ENGINE_INPUT_PATH, this.in);
 
-        setText(out, defaultPath);
-        setAttribute(configuration, RetrieverConfigurationImpl.RULE_ENGINE_OUTPUT_PATH, out);
+        this.setText(this.out, this.defaultPath);
+        this.setAttribute(configuration, RetrieverConfigurationImpl.RULE_ENGINE_OUTPUT_PATH, this.out);
 
-        discovererConfigManager.setDefaults(configuration);
-        ruleConfigView.setDefaults(configuration);
-        analystConfigView.setDefaults(configuration);
+        this.discovererConfigManager.setDefaults(configuration);
+        this.ruleConfigView.setDefaults(configuration);
+        this.analystConfigView.setDefaults(configuration);
     }
 
     private void setText(final Text textWidget, final String attributeName) {
         try {
             textWidget.setText(attributeName);
         } catch (final Exception e) {
-            error(e.getMessage());
+            this.error(e.getMessage());
         }
     }
 

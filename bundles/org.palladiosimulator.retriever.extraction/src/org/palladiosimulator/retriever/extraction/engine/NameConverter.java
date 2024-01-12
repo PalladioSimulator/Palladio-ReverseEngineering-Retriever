@@ -7,8 +7,8 @@ public final class NameConverter {
         throw new IllegalStateException();
     }
 
-    public static String toPCMIdentifier(ITypeBinding name) {
-        String fullName = name.getQualifiedName()
+    public static String toPCMIdentifier(final ITypeBinding name) {
+        final String fullName = name.getQualifiedName()
             .replace(".", "_");
         // Erase type parameters in identifiers
         // TODO is this the right solution?

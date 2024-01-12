@@ -9,8 +9,8 @@ public class ComponentSignatureProvisionRelation
         extends Relation<InterfaceProvisionRelation, SignatureProvisionRelation> {
     private static final String ERROR_UNEQUAL_INTERFACE = "Interfaces of relations have to be equal.";
 
-    public ComponentSignatureProvisionRelation(InterfaceProvisionRelation source,
-            SignatureProvisionRelation destination, boolean isPlaceholder) {
+    public ComponentSignatureProvisionRelation(final InterfaceProvisionRelation source,
+            final SignatureProvisionRelation destination, final boolean isPlaceholder) {
         super(source, destination, isPlaceholder);
         if (!Objects.equals(source.getDestination(), destination.getDestination())) {
             throw new IllegalArgumentException(ERROR_UNEQUAL_INTERFACE);
@@ -18,7 +18,7 @@ public class ComponentSignatureProvisionRelation
     }
 
     @Override
-    public <U extends Replaceable> ComponentSignatureProvisionRelation replace(U original, U replacement) {
+    public <U extends Replaceable> ComponentSignatureProvisionRelation replace(final U original, final U replacement) {
         if (!this.includes(original)) {
             // TODO Add message to exception
             throw new IllegalArgumentException();
@@ -26,8 +26,8 @@ public class ComponentSignatureProvisionRelation
         if (this.equals(original)) {
             return (ComponentSignatureProvisionRelation) replacement;
         }
-        InterfaceProvisionRelation source = getSourceReplacement(original, replacement);
-        SignatureProvisionRelation destination = getDestinationReplacement(original, replacement);
+        final InterfaceProvisionRelation source = this.getSourceReplacement(original, replacement);
+        final SignatureProvisionRelation destination = this.getDestinationReplacement(original, replacement);
         return new ComponentSignatureProvisionRelation(source, destination, this.isPlaceholder());
     }
 }

@@ -11,22 +11,23 @@ public class EntireInterface implements OperationInterface {
     private final Optional<ITypeBinding> binding;
     private final InterfaceName name;
 
-    public EntireInterface(InterfaceName name) {
+    public EntireInterface(final InterfaceName name) {
         this.binding = Optional.empty();
         this.name = name;
     }
 
-    public EntireInterface(ITypeBinding binding, InterfaceName name) {
+    public EntireInterface(final ITypeBinding binding, final InterfaceName name) {
         this.binding = Optional.of(binding);
         this.name = name;
     }
 
     public Optional<ITypeBinding> getBinding() {
-        return binding;
+        return this.binding;
     }
 
+    @Override
     public Name getName() {
-        return name;
+        return this.name;
     }
 
     @Override
@@ -36,32 +37,29 @@ public class EntireInterface implements OperationInterface {
 
     @Override
     public String getInterface() {
-        return name.getInterfaces()
+        return this.name.getInterfaces()
             .get(0);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(binding, name);
+        return Objects.hash(this.binding, this.name);
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if ((obj == null) || (this.getClass() != obj.getClass())) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        EntireInterface other = (EntireInterface) obj;
-        return Objects.equals(binding, other.binding) && Objects.equals(name, other.name);
+        final EntireInterface other = (EntireInterface) obj;
+        return Objects.equals(this.binding, other.binding) && Objects.equals(this.name, other.name);
     }
 
     @Override
     public String toString() {
-        return name.toString();
+        return this.name.toString();
     }
 }

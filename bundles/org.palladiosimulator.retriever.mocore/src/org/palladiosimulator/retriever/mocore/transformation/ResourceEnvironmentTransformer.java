@@ -22,24 +22,25 @@ import tools.mdsd.mocore.framework.transformation.Transformer;
 
 public class ResourceEnvironmentTransformer implements Transformer<PcmSurrogate, ResourceEnvironment> {
     @Override
-    public ResourceEnvironment transform(PcmSurrogate model) {
-        FluentResourceEnvironmentFactory resourceEnvironmentFactory = new FluentResourceEnvironmentFactory();
-        IResourceEnvironment fluentResourceEnvironment = resourceEnvironmentFactory.newResourceEnvironment();
+    public ResourceEnvironment transform(final PcmSurrogate model) {
+        final FluentResourceEnvironmentFactory resourceEnvironmentFactory = new FluentResourceEnvironmentFactory();
+        final IResourceEnvironment fluentResourceEnvironment = resourceEnvironmentFactory.newResourceEnvironment();
 
         // Add resource containers to resource environment
-        for (Deployment deployment : model.getByType(Deployment.class)) {
-            ResourceContainerCreator containerCreator = getContainerCreator(resourceEnvironmentFactory, deployment);
+        for (final Deployment deployment : model.getByType(Deployment.class)) {
+            final ResourceContainerCreator containerCreator = this.getContainerCreator(resourceEnvironmentFactory,
+                    deployment);
             fluentResourceEnvironment.addToResourceEnvironment(containerCreator);
         }
 
-        HashMultimap<LinkResourceSpecification, Deployment> linkSpecificationMap = HashMultimap.create();
-        for (LinkResourceSpecificationRelation linkingRelation : model
+        final HashMultimap<LinkResourceSpecification, Deployment> linkSpecificationMap = HashMultimap.create();
+        for (final LinkResourceSpecificationRelation linkingRelation : model
             .getByType(LinkResourceSpecificationRelation.class)) {
-            Deployment source = linkingRelation.getDestination()
+            final Deployment source = linkingRelation.getDestination()
                 .getSource();
-            Deployment destination = linkingRelation.getDestination()
+            final Deployment destination = linkingRelation.getDestination()
                 .getDestination();
-            LinkResourceSpecification specification = linkingRelation.getSource();
+            final LinkResourceSpecification specification = linkingRelation.getSource();
 
             // The if clause filters non-wrong but trivial A->A container links
             if (!source.equals(destination)) {
@@ -50,20 +51,20 @@ public class ResourceEnvironmentTransformer implements Transformer<PcmSurrogate,
 
         // Add linking resources (specification <-> [deployment <-> deployment]) to resource
         // environment
-        for (LinkResourceSpecification key : linkSpecificationMap.keySet()) {
-            LinkingResourceCreator linkingResourceCreator = getLinkingResourceCreator(resourceEnvironmentFactory,
-                    linkSpecificationMap.get(key));
+        for (final LinkResourceSpecification key : linkSpecificationMap.keySet()) {
+            final LinkingResourceCreator linkingResourceCreator = this
+                .getLinkingResourceCreator(resourceEnvironmentFactory, linkSpecificationMap.get(key));
             fluentResourceEnvironment.addToResourceEnvironment(linkingResourceCreator);
         }
 
         // Create PCM resource environment
-        ResourceEnvironment resourceEnvironment = fluentResourceEnvironment.createResourceEnvironmentNow();
+        final ResourceEnvironment resourceEnvironment = fluentResourceEnvironment.createResourceEnvironmentNow();
 
         // Copy resource specifications from old to new containers
-        for (ResourceContainer container : resourceEnvironment.getResourceContainer_ResourceEnvironment()) {
-            for (Deployment deployment : model.getByType(Deployment.class)) {
+        for (final ResourceContainer container : resourceEnvironment.getResourceContainer_ResourceEnvironment()) {
+            for (final Deployment deployment : model.getByType(Deployment.class)) {
                 // TODO Use container wrapper.equals
-                ResourceContainer wrappedContainer = deployment.getValue();
+                final ResourceContainer wrappedContainer = deployment.getValue();
                 if (container.getEntityName()
                     .equals(wrappedContainer.getEntityName())) {
                     container.getActiveResourceSpecifications_ResourceContainer()
@@ -75,9 +76,10 @@ public class ResourceEnvironmentTransformer implements Transformer<PcmSurrogate,
         }
 
         // Add linking resource specifications to PCM linking resources
-        for (LinkResourceSpecification specification : linkSpecificationMap.keySet()) {
-            Set<Deployment> deployments = linkSpecificationMap.get(specification);
-            for (LinkingResource linkingResource : resourceEnvironment.getLinkingResources__ResourceEnvironment()) {
+        for (final LinkResourceSpecification specification : linkSpecificationMap.keySet()) {
+            final Set<Deployment> deployments = linkSpecificationMap.get(specification);
+            for (final LinkingResource linkingResource : resourceEnvironment
+                .getLinkingResources__ResourceEnvironment()) {
                 if (Objects.equals(getLinkingResourceName(deployments), linkingResource.getEntityName())) {
                     linkingResource
                         .setCommunicationLinkResourceSpecifications_LinkingResource(specification.getValue());
@@ -88,9 +90,9 @@ public class ResourceEnvironmentTransformer implements Transformer<PcmSurrogate,
         return resourceEnvironment;
     }
 
-    protected static String getLinkingResourceName(Collection<Deployment> deployments) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Deployment deployment : deployments) {
+    protected static String getLinkingResourceName(final Collection<Deployment> deployments) {
+        final StringBuilder stringBuilder = new StringBuilder();
+        for (final Deployment deployment : deployments) {
             stringBuilder.append(" " + deployment.getValue()
                 .getEntityName());
         }
@@ -98,26 +100,26 @@ public class ResourceEnvironmentTransformer implements Transformer<PcmSurrogate,
         return stringBuilder.toString();
     }
 
-    private ResourceContainerCreator getContainerCreator(FluentResourceEnvironmentFactory fluentFactory,
-            Deployment deployment) {
-        ResourceContainer wrappedContainer = deployment.getValue();
+    private ResourceContainerCreator getContainerCreator(final FluentResourceEnvironmentFactory fluentFactory,
+            final Deployment deployment) {
+        final ResourceContainer wrappedContainer = deployment.getValue();
 
         // Create a container creator instance w/o processing specifications due to missing
         // fluentApi copy support
-        ResourceContainerCreator containerCreator = fluentFactory.newResourceContainer()
+        final ResourceContainerCreator containerCreator = fluentFactory.newResourceContainer()
             .withName(wrappedContainer.getEntityName());
         return containerCreator;
     }
 
-    private LinkingResourceCreator getLinkingResourceCreator(FluentResourceEnvironmentFactory fluentFactory,
-            Collection<Deployment> deployments) {
+    private LinkingResourceCreator getLinkingResourceCreator(final FluentResourceEnvironmentFactory fluentFactory,
+            final Collection<Deployment> deployments) {
         // Create a linking resource creator w/o specifications due to missing fluentApi copy
         // support
-        String entityName = getLinkingResourceName(deployments);
-        LinkingResourceCreator creator = fluentFactory.newLinkingResource()
+        final String entityName = getLinkingResourceName(deployments);
+        final LinkingResourceCreator creator = fluentFactory.newLinkingResource()
             .withName(entityName);
-        for (Deployment deployment : deployments) {
-            String containerName = deployment.getValue()
+        for (final Deployment deployment : deployments) {
+            final String containerName = deployment.getValue()
                 .getEntityName();
             creator.addLinkedResourceContainer(containerName);
         }

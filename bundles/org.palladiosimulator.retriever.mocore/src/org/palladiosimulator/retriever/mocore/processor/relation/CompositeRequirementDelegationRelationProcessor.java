@@ -12,24 +12,25 @@ import tools.mdsd.mocore.framework.processor.RelationProcessor;
 
 public class CompositeRequirementDelegationRelationProcessor
         extends RelationProcessor<PcmSurrogate, CompositeRequirementDelegationRelation> {
-    public CompositeRequirementDelegationRelationProcessor(PcmSurrogate model) {
+    public CompositeRequirementDelegationRelationProcessor(final PcmSurrogate model) {
         super(model, CompositeRequirementDelegationRelation.class);
     }
 
     @Override
-    protected void refine(CompositeRequirementDelegationRelation discovery) {
-        Composite discoveryComposite = (Composite) discovery.getSource()
+    protected void refine(final CompositeRequirementDelegationRelation discovery) {
+        final Composite discoveryComposite = (Composite) discovery.getSource()
             .getSource();
-        Component<?> discoveryChild = discovery.getDestination()
+        final Component<?> discoveryChild = discovery.getDestination()
             .getSource();
 
         // Check if the sub-component is part of the composite already
-        List<CompositionRelation> compositions = getModel().getByType(CompositionRelation.class);
+        final List<CompositionRelation> compositions = this.getModel()
+            .getByType(CompositionRelation.class);
         compositions.removeIf(relation -> !discoveryComposite.equals(relation.getSource()));
         compositions.removeIf(relation -> !discoveryChild.equals(relation.getDestination()));
         if (compositions.isEmpty()) {
-            CompositionRelation composition = new CompositionRelation(discoveryComposite, discoveryChild, true);
-            addImplication(composition);
+            final CompositionRelation composition = new CompositionRelation(discoveryComposite, discoveryChild, true);
+            this.addImplication(composition);
         }
 
         super.refine(discovery);

@@ -10,20 +10,22 @@ import org.palladiosimulator.retriever.mocore.surrogate.relation.SignatureProvis
 import tools.mdsd.mocore.framework.processor.Processor;
 
 public class SignatureProcessor extends Processor<PcmSurrogate, Signature> {
-    public SignatureProcessor(PcmSurrogate model) {
+    public SignatureProcessor(final PcmSurrogate model) {
         super(model, Signature.class);
     }
 
     @Override
-    protected void refine(Signature discovery) {
+    protected void refine(final Signature discovery) {
         // Add providing interface for signature if none exists
-        List<SignatureProvisionRelation> interfaceRelations = getModel().getByType(SignatureProvisionRelation.class);
+        final List<SignatureProvisionRelation> interfaceRelations = this.getModel()
+            .getByType(SignatureProvisionRelation.class);
         interfaceRelations.removeIf(relation -> !relation.getSource()
             .equals(discovery));
         if (interfaceRelations.isEmpty()) {
-            Interface interfaceElement = Interface.getUniquePlaceholder();
-            SignatureProvisionRelation relation = new SignatureProvisionRelation(discovery, interfaceElement, true);
-            addImplication(relation);
+            final Interface interfaceElement = Interface.getUniquePlaceholder();
+            final SignatureProvisionRelation relation = new SignatureProvisionRelation(discovery, interfaceElement,
+                    true);
+            this.addImplication(relation);
         }
     }
 }

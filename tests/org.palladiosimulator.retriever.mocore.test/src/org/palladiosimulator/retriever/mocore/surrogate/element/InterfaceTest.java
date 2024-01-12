@@ -8,14 +8,14 @@ import tools.mdsd.mocore.utility.IdentifierGenerator;
 
 public class InterfaceTest extends ElementTest<Interface, OperationInterface> {
     @Override
-    protected Interface createElement(OperationInterface value, boolean isPlaceholder) {
+    protected Interface createElement(final OperationInterface value, final boolean isPlaceholder) {
         return new Interface(value, isPlaceholder);
     }
 
     @Override
     protected OperationInterface getUniqueValue() {
-        String identifier = IdentifierGenerator.getUniqueIdentifier();
-        OperationInterface value = new FluentRepositoryFactory().newOperationInterface()
+        final String identifier = IdentifierGenerator.getUniqueIdentifier();
+        final OperationInterface value = new FluentRepositoryFactory().newOperationInterface()
             .withName(identifier)
             .build();
         return value;
@@ -23,11 +23,11 @@ public class InterfaceTest extends ElementTest<Interface, OperationInterface> {
 
     @Override
     protected Interface getUniqueNonPlaceholder() {
-        return new Interface(getUniqueValue(), false);
+        return new Interface(this.getUniqueValue(), false);
     }
 
     @Override
-    protected Interface getPlaceholderOf(Interface replaceable) {
+    protected Interface getPlaceholderOf(final Interface replaceable) {
         return new Interface(replaceable.getValue(), true);
     }
 }

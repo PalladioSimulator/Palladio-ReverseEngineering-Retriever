@@ -47,23 +47,25 @@ public class YamlDiscoverer implements Discoverer {
             public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
-                setBlackboard(Objects.requireNonNull(blackboard));
+                this.setBlackboard(Objects.requireNonNull(blackboard));
                 final Map<Path, Object> yamls = new HashMap<>();
                 final Map<Path, YamlMapper> mappers = new HashMap<>();
-                Stream.concat(Discoverer.find(root, ".yml", logger), Discoverer.find(root, ".yaml", logger))
+                Stream.concat(Discoverer.find(root, ".yml", this.logger), Discoverer.find(root, ".yaml", this.logger))
                     .forEach(p -> {
                         try (Reader reader = new FileReader(p.toFile())) {
-                            List<Object> yamlContents = new ArrayList<>();
+                            final List<Object> yamlContents = new ArrayList<>();
                             new Yaml().loadAll(reader)
                                 .forEach(yamlContents::add);
                             yamls.put(p, yamlContents);
                             mappers.put(p, new YamlMapper(yamlContents));
                         } catch (final IOException | YAMLException e) {
-                            logger.error(String.format("%s could not be read correctly.", p), e);
+                            this.logger.error(String.format("%s could not be read correctly.", p), e);
                         }
                     });
-                getBlackboard().putDiscoveredFiles(DISCOVERER_ID, yamls);
-                getBlackboard().putDiscoveredFiles(MAPPER_PARTITION_KEY, mappers);
+                this.getBlackboard()
+                    .putDiscoveredFiles(DISCOVERER_ID, yamls);
+                this.getBlackboard()
+                    .putDiscoveredFiles(MAPPER_PARTITION_KEY, mappers);
             }
 
             @Override

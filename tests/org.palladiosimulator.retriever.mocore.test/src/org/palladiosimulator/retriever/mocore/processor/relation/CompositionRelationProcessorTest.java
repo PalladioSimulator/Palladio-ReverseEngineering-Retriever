@@ -11,7 +11,8 @@ import tools.mdsd.mocore.framework.processor.RelationProcessorTest;
 public class CompositionRelationProcessorTest extends
         RelationProcessorTest<CompositionRelationProcessor, PcmSurrogate, CompositionRelation, Composite, Component<?>> {
     @Override
-    protected CompositionRelation createRelation(Composite source, Component<?> destination, boolean isPlaceholder) {
+    protected CompositionRelation createRelation(final Composite source, final Component<?> destination,
+            final boolean isPlaceholder) {
         return new CompositionRelation(source, destination, isPlaceholder);
     }
 
@@ -21,7 +22,7 @@ public class CompositionRelationProcessorTest extends
     }
 
     @Override
-    protected Composite getPlaceholderOfSourceEntity(Composite source) {
+    protected Composite getPlaceholderOfSourceEntity(final Composite source) {
         return new Composite(source.getValue(), true);
     }
 
@@ -31,12 +32,12 @@ public class CompositionRelationProcessorTest extends
     }
 
     @Override
-    protected Component<?> getPlaceholderOfDestinationEntity(Component<?> destination) {
+    protected Component<?> getPlaceholderOfDestinationEntity(final Component<?> destination) {
         return new Component<>(destination.getValue(), true);
     }
 
     @Override
-    protected CompositionRelationProcessor createProcessor(PcmSurrogate model) {
+    protected CompositionRelationProcessor createProcessor(final PcmSurrogate model) {
         return new CompositionRelationProcessor(model);
     }
 

@@ -26,8 +26,8 @@ import org.palladiosimulator.retriever.mocore.utility.ElementFactory;
 public class PcmOrchestratorTest {
     @Test
     public void testExistsComponentAfterProcess() {
-        PcmOrchestrator orchestrator = new PcmOrchestrator();
-        Component<?> component = ElementFactory.createUniqueComponent(false);
+        final PcmOrchestrator orchestrator = new PcmOrchestrator();
+        final Component<?> component = ElementFactory.createUniqueComponent(false);
         orchestrator.processDiscovery(component);
         assertTrue(orchestrator.getModel()
             .contains(component));
@@ -35,13 +35,13 @@ public class PcmOrchestratorTest {
 
     @Test
     public void testExistImplicitReplaceablesAfterProcess() {
-        PcmOrchestrator orchestrator = new PcmOrchestrator();
-        Component<?> component = ElementFactory.createUniqueComponent(false);
+        final PcmOrchestrator orchestrator = new PcmOrchestrator();
+        final Component<?> component = ElementFactory.createUniqueComponent(false);
         orchestrator.processDiscovery(component);
 
-        PcmSurrogate model = orchestrator.getModel();
-        List<Deployment> deployments = model.getByType(Deployment.class);
-        Stream<ComponentAllocationRelation> componentDeploymentRelations = model
+        final PcmSurrogate model = orchestrator.getModel();
+        final List<Deployment> deployments = model.getByType(Deployment.class);
+        final Stream<ComponentAllocationRelation> componentDeploymentRelations = model
             .getByType(ComponentAllocationRelation.class)
             .stream();
 
@@ -54,8 +54,8 @@ public class PcmOrchestratorTest {
 
     @Test
     public void testExistsDeploymentAfterProcess() {
-        PcmOrchestrator orchestrator = new PcmOrchestrator();
-        Deployment deployment = ElementFactory.createUniqueDeployment(false);
+        final PcmOrchestrator orchestrator = new PcmOrchestrator();
+        final Deployment deployment = ElementFactory.createUniqueDeployment(false);
         orchestrator.processDiscovery(deployment);
         assertTrue(orchestrator.getModel()
             .contains(deployment));
@@ -64,35 +64,35 @@ public class PcmOrchestratorTest {
     @Test
     public void testChainReplacementOfPlaceholders() {
         // Test data
-        PcmOrchestrator orchestrator = new PcmOrchestrator();
+        final PcmOrchestrator orchestrator = new PcmOrchestrator();
 
         //// Create concrete & placeholder elements
-        Signature concreteSignature = ElementFactory.createUniqueSignature(false);
-        Interface concreteInterface = ElementFactory.createUniqueInterface(false);
-        Component<?> concreteComponent = ElementFactory.createUniqueComponent(false);
-        Deployment concreteDeployment = ElementFactory.createUniqueDeployment(false);
-        Interface placeholderInterface = Interface.getUniquePlaceholder();
-        Component<?> placeholderComponent = Component.getUniquePlaceholder();
-        Deployment placeholderDeployment = Deployment.getUniquePlaceholder();
+        final Signature concreteSignature = ElementFactory.createUniqueSignature(false);
+        final Interface concreteInterface = ElementFactory.createUniqueInterface(false);
+        final Component<?> concreteComponent = ElementFactory.createUniqueComponent(false);
+        final Deployment concreteDeployment = ElementFactory.createUniqueDeployment(false);
+        final Interface placeholderInterface = Interface.getUniquePlaceholder();
+        final Component<?> placeholderComponent = Component.getUniquePlaceholder();
+        final Deployment placeholderDeployment = Deployment.getUniquePlaceholder();
 
         //// Create non-conflicting relations between elements
-        SignatureProvisionRelation placeholderSignatureProvision = new SignatureProvisionRelation(concreteSignature,
-                placeholderInterface, true);
-        InterfaceProvisionRelation placeholderInterfaceProvision = new InterfaceProvisionRelation(placeholderComponent,
-                placeholderInterface, true);
-        ComponentAllocationRelation placeholderAllocation = new ComponentAllocationRelation(placeholderComponent,
+        final SignatureProvisionRelation placeholderSignatureProvision = new SignatureProvisionRelation(
+                concreteSignature, placeholderInterface, true);
+        final InterfaceProvisionRelation placeholderInterfaceProvision = new InterfaceProvisionRelation(
+                placeholderComponent, placeholderInterface, true);
+        final ComponentAllocationRelation placeholderAllocation = new ComponentAllocationRelation(placeholderComponent,
                 placeholderDeployment, true);
-        InterfaceProvisionRelation concreteInterfaceProvision = new InterfaceProvisionRelation(concreteComponent,
+        final InterfaceProvisionRelation concreteInterfaceProvision = new InterfaceProvisionRelation(concreteComponent,
                 concreteInterface, false);
-        ComponentAllocationRelation concreteAllocation = new ComponentAllocationRelation(concreteComponent,
+        final ComponentAllocationRelation concreteAllocation = new ComponentAllocationRelation(concreteComponent,
                 concreteDeployment, false);
 
         //// Create relation leading to chain replacement
-        SignatureProvisionRelation signatureProvisionRelation = new SignatureProvisionRelation(concreteSignature,
+        final SignatureProvisionRelation signatureProvisionRelation = new SignatureProvisionRelation(concreteSignature,
                 concreteInterface, false);
 
         //// Add entities to model
-        PcmSurrogate model = orchestrator.getModel();
+        final PcmSurrogate model = orchestrator.getModel();
         model.add(concreteSignature);
         model.add(concreteInterface);
         model.add(concreteComponent);

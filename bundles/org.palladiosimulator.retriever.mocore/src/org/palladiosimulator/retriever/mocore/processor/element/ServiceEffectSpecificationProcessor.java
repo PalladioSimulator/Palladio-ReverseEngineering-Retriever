@@ -6,12 +6,12 @@ import org.palladiosimulator.retriever.mocore.surrogate.element.ServiceEffectSpe
 import tools.mdsd.mocore.framework.processor.Processor;
 
 public class ServiceEffectSpecificationProcessor extends Processor<PcmSurrogate, ServiceEffectSpecification> {
-    public ServiceEffectSpecificationProcessor(PcmSurrogate model) {
+    public ServiceEffectSpecificationProcessor(final PcmSurrogate model) {
         super(model, ServiceEffectSpecification.class);
     }
 
     @Override
-    protected void refine(ServiceEffectSpecification discovery) {
+    protected void refine(final ServiceEffectSpecification discovery) {
         // TODO Evaluate whether refinement should be done for a single specification element
     }
 }

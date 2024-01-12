@@ -7,8 +7,8 @@ import tools.mdsd.mocore.framework.surrogate.RelationTest;
 
 public class SignatureProvisionRelationTest extends RelationTest<SignatureProvisionRelation, Signature, Interface> {
     @Override
-    protected SignatureProvisionRelation createRelation(Signature source, Interface destination,
-            boolean isPlaceholder) {
+    protected SignatureProvisionRelation createRelation(final Signature source, final Interface destination,
+            final boolean isPlaceholder) {
         return new SignatureProvisionRelation(source, destination, isPlaceholder);
     }
 

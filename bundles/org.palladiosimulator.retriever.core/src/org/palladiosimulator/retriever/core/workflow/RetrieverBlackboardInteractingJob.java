@@ -19,19 +19,20 @@ public class RetrieverBlackboardInteractingJob extends AbstractBlackboardInterac
 
     private final RetrieverConfiguration configuration;
 
-    public RetrieverBlackboardInteractingJob(RetrieverConfiguration configuration, RetrieverBlackboard blackboard) {
+    public RetrieverBlackboardInteractingJob(final RetrieverConfiguration configuration,
+            final RetrieverBlackboard blackboard) {
         super.setBlackboard(blackboard);
         this.configuration = Objects.requireNonNull(configuration);
     }
 
     @Override
-    public void cleanup(IProgressMonitor monitor) throws CleanupFailedException {
+    public void cleanup(final IProgressMonitor monitor) throws CleanupFailedException {
     }
 
     @Override
-    public void execute(IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
+    public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
         try {
-            new Retriever(getBlackboard()).analyze(configuration, monitor);
+            new Retriever(this.getBlackboard()).analyze(this.configuration, monitor);
         } catch (final RetrieverException e) {
             throw new JobFailedException(NAME + " Failed", e);
         }

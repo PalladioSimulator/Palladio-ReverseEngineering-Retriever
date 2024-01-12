@@ -5,7 +5,7 @@ import org.palladiosimulator.retriever.mocore.surrogate.element.Composite;
 
 public class CompositeProcessorTest extends ComponentProcessorTest<Composite> {
     @Override
-    protected CompositeProcessor createProcessor(PcmSurrogate model) {
+    protected CompositeProcessor createProcessor(final PcmSurrogate model) {
         return new CompositeProcessor(model);
     }
 

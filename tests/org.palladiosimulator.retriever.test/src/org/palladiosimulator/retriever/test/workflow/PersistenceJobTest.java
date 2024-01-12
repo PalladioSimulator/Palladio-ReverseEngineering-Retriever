@@ -39,7 +39,7 @@ public class PersistenceJobTest {
 
     @Test
     public void testConstructorWithValidInput() {
-        Blackboard<Object> blackboard = new Blackboard<Object>();
+        final Blackboard<Object> blackboard = new Blackboard<>();
         assertDoesNotThrow(
                 () -> new PersistenceJob(blackboard, INPUT_FOLDER, TEMPORARY_OUTPUT_FOLDER, BLACKBOARD_INPUT_REPOSITORY,
                         BLACKBOARD_INPUT_SYSTEM, BLACKBOARD_INPUT_ALLOCATION, BLACKBOARD_INPUT_RESOURCEENVIRONMENT));
@@ -47,20 +47,20 @@ public class PersistenceJobTest {
 
     @Test
     public void testSaveEmptyModelsToCurrentDirectory() {
-        Blackboard<Object> blackboard = new Blackboard<Object>();
-        PersistenceJob job = new PersistenceJob(blackboard, INPUT_FOLDER, TEMPORARY_OUTPUT_FOLDER,
+        final Blackboard<Object> blackboard = new Blackboard<>();
+        final PersistenceJob job = new PersistenceJob(blackboard, INPUT_FOLDER, TEMPORARY_OUTPUT_FOLDER,
                 BLACKBOARD_INPUT_REPOSITORY, BLACKBOARD_INPUT_SYSTEM, BLACKBOARD_INPUT_ALLOCATION,
                 BLACKBOARD_INPUT_RESOURCEENVIRONMENT);
 
         // Initialize models
-        Repository repository = new FluentRepositoryFactory().newRepository()
+        final Repository repository = new FluentRepositoryFactory().newRepository()
             .createRepositoryNow();
-        System system = new FluentSystemFactory().newSystem()
+        final System system = new FluentSystemFactory().newSystem()
             .addRepository(repository)
             .createSystemNow();
-        ResourceEnvironment resource = new FluentResourceEnvironmentFactory().newResourceEnvironment()
+        final ResourceEnvironment resource = new FluentResourceEnvironmentFactory().newResourceEnvironment()
             .createResourceEnvironmentNow();
-        Allocation allocation = new FluentAllocationFactory().newAllocation()
+        final Allocation allocation = new FluentAllocationFactory().newAllocation()
             .createAllocationNow();
 
         // Add models to blackboard

@@ -4,7 +4,7 @@ import org.palladiosimulator.retriever.mocore.surrogate.PcmSurrogate;
 import org.palladiosimulator.retriever.mocore.surrogate.element.AtomicComponent;
 
 public class AtomicComponentProcessor extends ComponentProcessor<AtomicComponent> {
-    public AtomicComponentProcessor(PcmSurrogate model) {
+    public AtomicComponentProcessor(final PcmSurrogate model) {
         super(model, AtomicComponent.class);
     }
 }

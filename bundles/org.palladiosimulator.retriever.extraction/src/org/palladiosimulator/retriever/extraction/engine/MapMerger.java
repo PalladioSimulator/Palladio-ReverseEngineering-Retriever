@@ -13,11 +13,11 @@ public final class MapMerger {
         throw new IllegalStateException();
     }
 
-    public static <K, V> Map<K, List<V>> merge(Collection<Map<K, List<V>>> maps) {
-        Map<K, List<V>> mergedMap = new HashMap<>();
+    public static <K, V> Map<K, List<V>> merge(final Collection<Map<K, List<V>>> maps) {
+        final Map<K, List<V>> mergedMap = new HashMap<>();
 
-        for (Map<K, List<V>> map : maps) {
-            for (Map.Entry<K, List<V>> entry : map.entrySet()) {
+        for (final Map<K, List<V>> map : maps) {
+            for (final Map.Entry<K, List<V>> entry : map.entrySet()) {
                 mergedMap.merge(entry.getKey(), entry.getValue(), (a, b) -> Stream.concat(a.stream(), b.stream())
                     .collect(Collectors.toList()));
             }

@@ -7,7 +7,7 @@ import tools.mdsd.mocore.framework.processor.RelationProcessor;
 
 public class ServiceEffectSpecificationRelationProcessor
         extends RelationProcessor<PcmSurrogate, ServiceEffectSpecificationRelation> {
-    public ServiceEffectSpecificationRelationProcessor(PcmSurrogate model) {
+    public ServiceEffectSpecificationRelationProcessor(final PcmSurrogate model) {
         super(model, ServiceEffectSpecificationRelation.class);
     }
 }

@@ -12,24 +12,25 @@ import tools.mdsd.mocore.framework.processor.RelationProcessor;
 
 public class CompositeProvisionDelegationRelationProcessor
         extends RelationProcessor<PcmSurrogate, CompositeProvisionDelegationRelation> {
-    public CompositeProvisionDelegationRelationProcessor(PcmSurrogate model) {
+    public CompositeProvisionDelegationRelationProcessor(final PcmSurrogate model) {
         super(model, CompositeProvisionDelegationRelation.class);
     }
 
     @Override
-    protected void refine(CompositeProvisionDelegationRelation discovery) {
-        Composite discoveryComposite = (Composite) discovery.getSource()
+    protected void refine(final CompositeProvisionDelegationRelation discovery) {
+        final Composite discoveryComposite = (Composite) discovery.getSource()
             .getSource();
-        Component<?> discoveryChild = discovery.getDestination()
+        final Component<?> discoveryChild = discovery.getDestination()
             .getSource();
 
         // Check if the sub-component is part of the composite already
-        List<CompositionRelation> compositions = getModel().getByType(CompositionRelation.class);
+        final List<CompositionRelation> compositions = this.getModel()
+            .getByType(CompositionRelation.class);
         compositions.removeIf(relation -> !discoveryComposite.equals(relation.getSource()));
         compositions.removeIf(relation -> !discoveryChild.equals(relation.getDestination()));
         if (compositions.isEmpty()) {
-            CompositionRelation composition = new CompositionRelation(discoveryComposite, discoveryChild, true);
-            addImplication(composition);
+            final CompositionRelation composition = new CompositionRelation(discoveryComposite, discoveryChild, true);
+            this.addImplication(composition);
         }
 
         super.refine(discovery);

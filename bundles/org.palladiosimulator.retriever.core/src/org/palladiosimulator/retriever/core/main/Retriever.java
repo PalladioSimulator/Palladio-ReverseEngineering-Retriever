@@ -40,7 +40,7 @@ public class Retriever {
 
     private static Repository pcm;
 
-    public Retriever(RetrieverBlackboard blackboard) {
+    public Retriever(final RetrieverBlackboard blackboard) {
         this.blackboard = blackboard;
     }
 
@@ -53,7 +53,7 @@ public class Retriever {
         return pcm;
     }
 
-    public void analyze(RetrieverConfiguration configuration, IProgressMonitor progressMonitor)
+    public void analyze(final RetrieverConfiguration configuration, final IProgressMonitor progressMonitor)
             throws RetrieverException {
 
         try {
@@ -66,8 +66,8 @@ public class Retriever {
             final Set<Rule> rules = configuration.getConfig(Rule.class)
                 .getSelected();
 
-            executeWith(inPath, outPath, rules, blackboard);
-        } catch (Exception e) {
+            executeWith(inPath, outPath, rules, this.blackboard);
+        } catch (final Exception e) {
             throw new RetrieverException("Analysis did not complete successfully", e);
         }
     }
@@ -84,7 +84,8 @@ public class Retriever {
      * @param ruleDoc
      *            the object containing the rules
      */
-    public static void executeWith(Path projectPath, Path outPath, List<CompilationUnit> model, Set<Rule> rules) {
+    public static void executeWith(final Path projectPath, final Path outPath, final List<CompilationUnit> model,
+            final Set<Rule> rules) {
         executeWith(projectPath, outPath, model, rules);
     }
 
@@ -100,7 +101,8 @@ public class Retriever {
      * @param blackboard
      *            the Retriever blackboard, containing (among other things) the discovered files
      */
-    private static void executeWith(Path projectPath, Path outPath, Set<Rule> rules, RetrieverBlackboard blackboard) {
+    private static void executeWith(final Path projectPath, final Path outPath, final Set<Rule> rules,
+            final RetrieverBlackboard blackboard) {
         // Creates a PCM repository with systems, components, interfaces and roles
 
         // Parses the docker-compose file to get a mapping between microservice names and
@@ -111,22 +113,23 @@ public class Retriever {
         pcm = new PCMInstanceCreator(blackboard).createPCM(mapping);
 
         // Create the build file systems
-        Map<RepositoryComponent, CompilationUnit> repoCompLocations = blackboard.getRepositoryComponentLocations();
-        Map<CompilationUnit, RepositoryComponent> invertedEntityLocations = new HashMap<>();
-        for (Entry<RepositoryComponent, CompilationUnit> entry : repoCompLocations.entrySet()) {
+        final Map<RepositoryComponent, CompilationUnit> repoCompLocations = blackboard
+            .getRepositoryComponentLocations();
+        final Map<CompilationUnit, RepositoryComponent> invertedEntityLocations = new HashMap<>();
+        for (final Entry<RepositoryComponent, CompilationUnit> entry : repoCompLocations.entrySet()) {
             invertedEntityLocations.put(entry.getValue(), entry.getKey());
         }
 
-        FluentSystemFactory create = new FluentSystemFactory();
-        for (Entry<Path, Set<CompilationUnit>> entry : blackboard.getSystemAssociations()
+        final FluentSystemFactory create = new FluentSystemFactory();
+        for (final Entry<Path, Set<CompilationUnit>> entry : blackboard.getSystemAssociations()
             .entrySet()) {
             // TODO better name
-            ISystem system = create.newSystem()
+            final ISystem system = create.newSystem()
                 .withName(entry.getKey()
                     .toString());
             boolean hasChildren = false;
-            for (CompilationUnit compUnit : entry.getValue()) {
-                RepositoryComponent repoComp = invertedEntityLocations.get(compUnit);
+            for (final CompilationUnit compUnit : entry.getValue()) {
+                final RepositoryComponent repoComp = invertedEntityLocations.get(compUnit);
                 // Only compilation units that have been processed by some other rule can be
                 // added to a system
                 if (repoComp != null) {
@@ -157,7 +160,7 @@ public class Retriever {
      *            the path to a .class file containing the rules
      * @return the rules from the specified (via gui) file system place
      */
-    public static Rule loadRules(String namespace, Path rulesFile) {
+    public static Rule loadRules(final String namespace, final Path rulesFile) {
 
         final File file = rulesFile.toFile();
 

@@ -20,9 +20,9 @@ public class SignatureProcessorTest extends ProcessorTest<SignatureProcessor, Pc
     @DisabledIf(TEST_API_ONLY_METHOD_NAME)
     public void testRefineWithValidElementAddsCorrectImplications() {
         // Test data
-        PcmSurrogate model = createEmptyModel();
-        SignatureProcessor processor = createProcessor(model);
-        Signature element = createUniqueReplaceable();
+        final PcmSurrogate model = this.createEmptyModel();
+        final SignatureProcessor processor = this.createProcessor(model);
+        final Signature element = this.createUniqueReplaceable();
 
         // Assertions: Pre-execution
         assertTrue(processor.getImplications()
@@ -30,16 +30,16 @@ public class SignatureProcessorTest extends ProcessorTest<SignatureProcessor, Pc
 
         // Execution
         processor.refine(element);
-        Set<Replaceable> implications = new HashSet<>(processor.getImplications());
+        final Set<Replaceable> implications = new HashSet<>(processor.getImplications());
 
         // Assertions: Post-execution
         //// Implicit providing interface
         assertEquals(1, implications.size());
-        Replaceable implication = implications.stream()
+        final Replaceable implication = implications.stream()
             .findFirst()
             .orElseThrow();
         assertEquals(SignatureProvisionRelation.class, implication.getClass());
-        SignatureProvisionRelation relation = (SignatureProvisionRelation) implication;
+        final SignatureProvisionRelation relation = (SignatureProvisionRelation) implication;
         assertEquals(element, relation.getSource());
         assertTrue(relation.isPlaceholder());
         assertTrue(relation.getDestination()
@@ -47,7 +47,7 @@ public class SignatureProcessorTest extends ProcessorTest<SignatureProcessor, Pc
     }
 
     @Override
-    protected SignatureProcessor createProcessor(PcmSurrogate model) {
+    protected SignatureProcessor createProcessor(final PcmSurrogate model) {
         return new SignatureProcessor(model);
     }
 

@@ -13,17 +13,17 @@ import tools.mdsd.mocore.framework.discovery.Discoverer;
 public abstract class DecompositorTest<D extends Decompositor<T>, T> {
     @Test
     public void testDecomposeWithValidSource() {
-        D decompositor = this.createDecompositor();
-        T source = this.createValidSource();
-        Collection<Discoverer<?>> discoverers = decompositor.decompose(source);
+        final D decompositor = this.createDecompositor();
+        final T source = this.createValidSource();
+        final Collection<Discoverer<?>> discoverers = decompositor.decompose(source);
         assertNotNull(discoverers);
         assertTrue(discoverers.size() >= 0);
     }
 
     @Test
     public void testDecomposeWithNullSource() {
-        D decompositor = this.createDecompositor();
-        T source = null;
+        final D decompositor = this.createDecompositor();
+        final T source = null;
         assertThrows(NullPointerException.class, () -> decompositor.decompose(source));
     }
 

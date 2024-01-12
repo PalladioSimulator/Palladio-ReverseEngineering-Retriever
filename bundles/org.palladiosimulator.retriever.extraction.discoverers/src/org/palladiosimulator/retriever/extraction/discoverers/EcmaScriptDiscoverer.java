@@ -42,9 +42,9 @@ public class EcmaScriptDiscoverer implements Discoverer {
             public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
                 final Path root = Paths.get(CommonPlugin.asLocalURI(configuration.getInputFolder())
                     .devicePath());
-                setBlackboard(Objects.requireNonNull(blackboard));
+                this.setBlackboard(Objects.requireNonNull(blackboard));
                 final Map<Path, CompilationUnitTree> compilationUnits = new HashMap<>();
-                Stream.concat(Discoverer.find(root, ".js", logger), Discoverer.find(root, ".ts", logger))
+                Stream.concat(Discoverer.find(root, ".js", this.logger), Discoverer.find(root, ".ts", this.logger))
                     .forEach(p -> {
                         try {
                             final CompilationUnitTree compilationUnit = Parser.create()
@@ -53,10 +53,11 @@ public class EcmaScriptDiscoverer implements Discoverer {
                                 });
                             compilationUnits.put(p, compilationUnit);
                         } catch (NashornException | IOException e) {
-                            logger.error(String.format("%s could not be read correctly.", p), e);
+                            this.logger.error(String.format("%s could not be read correctly.", p), e);
                         }
                     });
-                getBlackboard().putDiscoveredFiles(DISCOVERER_ID, compilationUnits);
+                this.getBlackboard()
+                    .putDiscoveredFiles(DISCOVERER_ID, compilationUnits);
             }
 
             @Override

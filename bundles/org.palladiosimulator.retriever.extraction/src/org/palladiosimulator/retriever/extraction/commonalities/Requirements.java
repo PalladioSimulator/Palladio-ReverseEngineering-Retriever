@@ -18,56 +18,57 @@ public class Requirements implements Iterable<OperationInterface> {
     private final Set<OperationInterface> requirements;
     private final Map<OperationInterface, List<OperationInterface>> groupedRequirements;
 
-    public Requirements(Collection<OperationInterface> requiredInterfaces,
-            Collection<OperationInterface> allDependencies, Collection<OperationInterface> visibleProvisions) {
+    public Requirements(final Collection<OperationInterface> requiredInterfaces,
+            final Collection<OperationInterface> allDependencies,
+            final Collection<OperationInterface> visibleProvisions) {
         this.requirements = new HashSet<>();
 
-        List<OperationInterface> sortedProvisions = new ArrayList<>(visibleProvisions);
+        final List<OperationInterface> sortedProvisions = new ArrayList<>(visibleProvisions);
         Collections.sort(sortedProvisions);
         Collections.reverse(sortedProvisions);
-        for (OperationInterface requirement : requiredInterfaces) {
+        for (final OperationInterface requirement : requiredInterfaces) {
             OperationInterface generalizedRequirement = requirement;
-            for (OperationInterface provision : sortedProvisions) {
+            for (final OperationInterface provision : sortedProvisions) {
                 if (requirement.isPartOf(provision)) {
                     generalizedRequirement = provision;
                     break;
                 }
             }
-            requirements.add(generalizedRequirement);
+            this.requirements.add(generalizedRequirement);
         }
 
-        this.groupedRequirements = DependencyUtils.groupDependencies(requirements, allDependencies);
+        this.groupedRequirements = DependencyUtils.groupDependencies(this.requirements, allDependencies);
     }
 
     public Set<OperationInterface> get() {
-        return Collections.unmodifiableSet(requirements);
+        return Collections.unmodifiableSet(this.requirements);
     }
 
-    public boolean containsPartOf(OperationInterface iface) {
-        return requirements.stream()
+    public boolean containsPartOf(final OperationInterface iface) {
+        return this.requirements.stream()
             .anyMatch(x -> x.isPartOf(iface));
     }
 
-    public boolean containsEntire(OperationInterface iface) {
-        return requirements.stream()
+    public boolean containsEntire(final OperationInterface iface) {
+        return this.requirements.stream()
             .anyMatch(x -> iface.isPartOf(x));
     }
 
     @Override
     public Iterator<OperationInterface> iterator() {
-        return Collections.unmodifiableCollection(requirements)
+        return Collections.unmodifiableCollection(this.requirements)
             .iterator();
     }
 
     public Map<OperationInterface, List<Operation>> simplified() {
-        List<Map<OperationInterface, List<Operation>>> simplifiedInterfaces = new LinkedList<>();
-        for (OperationInterface root : groupedRequirements.keySet()) {
-            List<Operation> simplifiedRoot = new ArrayList<>(root.simplified()
+        final List<Map<OperationInterface, List<Operation>>> simplifiedInterfaces = new LinkedList<>();
+        for (final OperationInterface root : this.groupedRequirements.keySet()) {
+            final List<Operation> simplifiedRoot = new ArrayList<>(root.simplified()
                 .values()
                 .stream()
                 .flatMap(x -> x.stream())
                 .collect(Collectors.toList()));
-            for (OperationInterface member : groupedRequirements.get(root)) {
+            for (final OperationInterface member : this.groupedRequirements.get(root)) {
                 simplifiedRoot.addAll(member.simplified()
                     .values()
                     .stream()
@@ -83,30 +84,27 @@ public class Requirements implements Iterable<OperationInterface> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(requirements);
+        return Objects.hash(this.requirements);
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if ((obj == null) || (this.getClass() != obj.getClass())) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        Requirements other = (Requirements) obj;
-        return Objects.equals(requirements, other.requirements);
+        final Requirements other = (Requirements) obj;
+        return Objects.equals(this.requirements, other.requirements);
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        Map<OperationInterface, List<Operation>> simplified = simplified();
+        final StringBuilder builder = new StringBuilder();
+        final Map<OperationInterface, List<Operation>> simplified = this.simplified();
 
-        for (OperationInterface iface : simplified.keySet()) {
+        for (final OperationInterface iface : simplified.keySet()) {
             builder.append(iface.getName());
             simplified.get(iface)
                 .forEach(x -> builder.append("\n\t")

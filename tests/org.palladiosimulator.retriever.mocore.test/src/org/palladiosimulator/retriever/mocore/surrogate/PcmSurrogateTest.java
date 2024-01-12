@@ -17,8 +17,8 @@ public class PcmSurrogateTest extends ModelTest<PcmSurrogate, SimpleElement> {
     }
 
     @Override
-    protected Relation<SimpleElement, SimpleElement> createRelation(SimpleElement source, SimpleElement destination,
-            boolean isPlaceholder) {
+    protected Relation<SimpleElement, SimpleElement> createRelation(final SimpleElement source,
+            final SimpleElement destination, final boolean isPlaceholder) {
         return new SimpleRelation(source, destination, isPlaceholder);
     }
 }

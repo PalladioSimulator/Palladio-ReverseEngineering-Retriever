@@ -8,25 +8,25 @@ import tools.mdsd.mocore.utility.IdentifierGenerator;
 
 public class SignatureTest extends ElementTest<Signature, OperationSignature> {
     @Override
-    protected Signature createElement(OperationSignature value, boolean isPlaceholder) {
+    protected Signature createElement(final OperationSignature value, final boolean isPlaceholder) {
         return new Signature(value, isPlaceholder);
     }
 
     @Override
     protected OperationSignature getUniqueValue() {
-        String identifier = IdentifierGenerator.getUniqueIdentifier();
-        OperationSignature value = RepositoryFactory.eINSTANCE.createOperationSignature();
+        final String identifier = IdentifierGenerator.getUniqueIdentifier();
+        final OperationSignature value = RepositoryFactory.eINSTANCE.createOperationSignature();
         value.setEntityName(identifier);
         return value;
     }
 
     @Override
     protected Signature getUniqueNonPlaceholder() {
-        return new Signature(getUniqueValue(), false);
+        return new Signature(this.getUniqueValue(), false);
     }
 
     @Override
-    protected Signature getPlaceholderOf(Signature replaceable) {
+    protected Signature getPlaceholderOf(final Signature replaceable) {
         return new Signature(replaceable.getValue(), true);
     }
 }

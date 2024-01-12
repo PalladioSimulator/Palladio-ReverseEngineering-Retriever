@@ -33,7 +33,7 @@ public class MoCoReJobTest {
 
     @Test
     public void testConstructorWithValidInput() {
-        Blackboard<Object> blackboard = new Blackboard<Object>();
+        final Blackboard<Object> blackboard = new Blackboard<>();
         assertDoesNotThrow(() -> new MoCoReJob(blackboard, BLACKBOARD_INPUT_REPOSITORY, BLACKBOARD_OUTPUT_REPOSITORY,
                 BLACKBOARD_OUTPUT_SYSTEM, BLACKBOARD_OUTPUT_ALLOCATION, BLACKBOARD_OUTPUT_RESOURCEENVIRONMENT));
     }
@@ -41,24 +41,24 @@ public class MoCoReJobTest {
     @Test
     public void testCompositeComponentProcessing() throws Exception {
         // Tests constants
-        String componentNameOne = "Component One";
-        String contextNameOne = componentNameOne + " Context";
-        String componentNameTwo = "Component Two";
-        String contextNameTwo = componentNameTwo + " Context";
-        String interfaceNameInternal = "Internal Interface";
-        String roleNameInternalRequired = "Role Requirer " + interfaceNameInternal;
-        String roleNameInternalProvided = "Role Provider " + interfaceNameInternal;
-        String interfaceNameExternalRequired = "External Interface Required";
-        String roleNameExternalRequiredInner = "Inner Role " + interfaceNameExternalRequired;
-        String roleNameExternalRequiredOuter = "Outer Role " + interfaceNameExternalRequired;
-        String interfaceNameExternalProvided = "External Interface Provided";
-        String roleNameExternalProvidedInner = "Inner Role " + interfaceNameExternalProvided;
-        String roleNameExternalProvidedOuter = "Outer Role " + interfaceNameExternalProvided;
+        final String componentNameOne = "Component One";
+        final String contextNameOne = componentNameOne + " Context";
+        final String componentNameTwo = "Component Two";
+        final String contextNameTwo = componentNameTwo + " Context";
+        final String interfaceNameInternal = "Internal Interface";
+        final String roleNameInternalRequired = "Role Requirer " + interfaceNameInternal;
+        final String roleNameInternalProvided = "Role Provider " + interfaceNameInternal;
+        final String interfaceNameExternalRequired = "External Interface Required";
+        final String roleNameExternalRequiredInner = "Inner Role " + interfaceNameExternalRequired;
+        final String roleNameExternalRequiredOuter = "Outer Role " + interfaceNameExternalRequired;
+        final String interfaceNameExternalProvided = "External Interface Provided";
+        final String roleNameExternalProvidedInner = "Inner Role " + interfaceNameExternalProvided;
+        final String roleNameExternalProvidedOuter = "Outer Role " + interfaceNameExternalProvided;
 
         // Create blackboard and fluent repository
-        Blackboard<Object> blackboard = new Blackboard<Object>();
-        FluentRepositoryFactory fluentFactory = new FluentRepositoryFactory();
-        Repo fluentRepository = fluentFactory.newRepository();
+        final Blackboard<Object> blackboard = new Blackboard<>();
+        final FluentRepositoryFactory fluentFactory = new FluentRepositoryFactory();
+        final Repo fluentRepository = fluentFactory.newRepository();
 
         // Create composite component and add to fluent repository
         fluentRepository.addToRepository(fluentFactory.newOperationInterface()
@@ -99,14 +99,14 @@ public class MoCoReJobTest {
         blackboard.addPartition(BLACKBOARD_INPUT_REPOSITORY, fluentRepository.createRepositoryNow());
 
         // Create and run job
-        MoCoReJob job = new MoCoReJob(blackboard, BLACKBOARD_INPUT_REPOSITORY, BLACKBOARD_OUTPUT_REPOSITORY,
+        final MoCoReJob job = new MoCoReJob(blackboard, BLACKBOARD_INPUT_REPOSITORY, BLACKBOARD_OUTPUT_REPOSITORY,
                 BLACKBOARD_OUTPUT_SYSTEM, BLACKBOARD_OUTPUT_ALLOCATION, BLACKBOARD_OUTPUT_RESOURCEENVIRONMENT);
         job.execute(new NullProgressMonitor());
 
         // Check if components exist in repository
-        Repository outputRepository = (Repository) blackboard.getPartition(BLACKBOARD_OUTPUT_REPOSITORY);
-        EList<RepositoryComponent> components = outputRepository.getComponents__Repository();
-        CompositeComponent composite = (CompositeComponent) components.stream()
+        final Repository outputRepository = (Repository) blackboard.getPartition(BLACKBOARD_OUTPUT_REPOSITORY);
+        final EList<RepositoryComponent> components = outputRepository.getComponents__Repository();
+        final CompositeComponent composite = (CompositeComponent) components.stream()
             .filter(component -> component instanceof CompositeComponent)
             .findFirst()
             .orElseThrow();
@@ -114,13 +114,13 @@ public class MoCoReJobTest {
             .size());
 
         // Check if assembly connector created correctly
-        List<AssemblyConnector> assemblyConnectors = composite.getConnectors__ComposedStructure()
+        final List<AssemblyConnector> assemblyConnectors = composite.getConnectors__ComposedStructure()
             .stream()
             .filter(genericConnector -> genericConnector instanceof AssemblyConnector)
             .map(genericConnector -> (AssemblyConnector) genericConnector)
             .collect(Collectors.toList());
         assertEquals(1, assemblyConnectors.size());
-        AssemblyConnector assemblyConnector = assemblyConnectors.get(0);
+        final AssemblyConnector assemblyConnector = assemblyConnectors.get(0);
         assertEquals(componentNameOne, assemblyConnector.getProvidingAssemblyContext_AssemblyConnector()
             .getEncapsulatedComponent__AssemblyContext()
             .getEntityName());
@@ -135,13 +135,13 @@ public class MoCoReJobTest {
             .getEntityName());
 
         // Check if provided delegation created correctly
-        List<ProvidedDelegationConnector> providedDelegations = composite.getConnectors__ComposedStructure()
+        final List<ProvidedDelegationConnector> providedDelegations = composite.getConnectors__ComposedStructure()
             .stream()
             .filter(genericConnector -> genericConnector instanceof ProvidedDelegationConnector)
             .map(genericConnector -> (ProvidedDelegationConnector) genericConnector)
             .collect(Collectors.toList());
         assertEquals(1, providedDelegations.size());
-        ProvidedDelegationConnector providedDelegationConnector = providedDelegations.get(0);
+        final ProvidedDelegationConnector providedDelegationConnector = providedDelegations.get(0);
         assertEquals(componentNameTwo, providedDelegationConnector.getAssemblyContext_ProvidedDelegationConnector()
             .getEncapsulatedComponent__AssemblyContext()
             .getEntityName());
@@ -155,13 +155,13 @@ public class MoCoReJobTest {
                     .getEntityName());
 
         // Check if required delegation created correctly
-        List<RequiredDelegationConnector> requiredDelegations = composite.getConnectors__ComposedStructure()
+        final List<RequiredDelegationConnector> requiredDelegations = composite.getConnectors__ComposedStructure()
             .stream()
             .filter(genericConnector -> genericConnector instanceof RequiredDelegationConnector)
             .map(genericConnector -> (RequiredDelegationConnector) genericConnector)
             .collect(Collectors.toList());
         assertEquals(1, requiredDelegations.size());
-        RequiredDelegationConnector requiredDelegationConnector = requiredDelegations.get(0);
+        final RequiredDelegationConnector requiredDelegationConnector = requiredDelegations.get(0);
         assertEquals(componentNameOne, requiredDelegationConnector.getAssemblyContext_RequiredDelegationConnector()
             .getEncapsulatedComponent__AssemblyContext()
             .getEntityName());
@@ -178,9 +178,9 @@ public class MoCoReJobTest {
     @Test
     public void testRecursiveProvisionLeadsToSystemDelegation() throws Exception {
         // Create blackboard and fluent repository
-        Blackboard<Object> blackboard = new Blackboard<Object>();
-        FluentRepositoryFactory fluentFactory = new FluentRepositoryFactory();
-        Repo fluentRepository = fluentFactory.newRepository();
+        final Blackboard<Object> blackboard = new Blackboard<>();
+        final FluentRepositoryFactory fluentFactory = new FluentRepositoryFactory();
+        final Repo fluentRepository = fluentFactory.newRepository();
 
         // Create composite component and add to fluent repository
         fluentRepository.addToRepository(fluentFactory.newOperationInterface()
@@ -202,14 +202,14 @@ public class MoCoReJobTest {
         blackboard.addPartition(BLACKBOARD_INPUT_REPOSITORY, fluentRepository.createRepositoryNow());
 
         // Create and run job
-        MoCoReJob job = new MoCoReJob(blackboard, BLACKBOARD_INPUT_REPOSITORY, BLACKBOARD_OUTPUT_REPOSITORY,
+        final MoCoReJob job = new MoCoReJob(blackboard, BLACKBOARD_INPUT_REPOSITORY, BLACKBOARD_OUTPUT_REPOSITORY,
                 BLACKBOARD_OUTPUT_SYSTEM, BLACKBOARD_OUTPUT_ALLOCATION, BLACKBOARD_OUTPUT_RESOURCEENVIRONMENT);
         job.execute(new NullProgressMonitor());
 
         // Check inner provision was recursively
-        Repository outputRepository = (Repository) blackboard.getPartition(BLACKBOARD_OUTPUT_REPOSITORY);
-        EList<RepositoryComponent> components = outputRepository.getComponents__Repository();
-        List<CompositeComponent> composites = components.stream()
+        final Repository outputRepository = (Repository) blackboard.getPartition(BLACKBOARD_OUTPUT_REPOSITORY);
+        final EList<RepositoryComponent> components = outputRepository.getComponents__Repository();
+        final List<CompositeComponent> composites = components.stream()
             .filter(component -> component instanceof CompositeComponent)
             .map(component -> (CompositeComponent) component)
             .toList();
@@ -221,10 +221,10 @@ public class MoCoReJobTest {
                         .equals("Doable"))));
 
         // Check most outer provision was delegated by system
-        System outputSystem = (System) blackboard.getPartition(BLACKBOARD_OUTPUT_SYSTEM);
-        EList<Connector> connectors = outputSystem.getConnectors__ComposedStructure();
+        final System outputSystem = (System) blackboard.getPartition(BLACKBOARD_OUTPUT_SYSTEM);
+        final EList<Connector> connectors = outputSystem.getConnectors__ComposedStructure();
         assertEquals(1, connectors.size());
-        ProvidedDelegationConnector delegationConnector = (ProvidedDelegationConnector) connectors.get(0);
+        final ProvidedDelegationConnector delegationConnector = (ProvidedDelegationConnector) connectors.get(0);
         assertEquals("Outer Parent", delegationConnector.getAssemblyContext_ProvidedDelegationConnector()
             .getEncapsulatedComponent__AssemblyContext()
             .getEntityName());

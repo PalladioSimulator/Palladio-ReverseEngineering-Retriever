@@ -12,10 +12,11 @@ public class RESTName implements InterfaceName, OperationName {
     private final List<String> path;
     private final Optional<HTTPMethod> httpMethod;
 
-    public RESTName(String host, String path, Optional<HTTPMethod> httpMethod) throws IllegalArgumentException {
+    public RESTName(final String host, final String path, final Optional<HTTPMethod> httpMethod)
+            throws IllegalArgumentException {
         this.host = host;
         this.httpMethod = httpMethod;
-        Optional<List<String>> parsedPath = parsePath(host + path);
+        final Optional<List<String>> parsedPath = this.parsePath(host + path);
         if (parsedPath.isEmpty()) {
             throw new IllegalArgumentException("Could not parse path due to illegal format: \"" + path + "\"");
         }
@@ -27,60 +28,60 @@ public class RESTName implements InterfaceName, OperationName {
 
     @Override
     public String getName() {
-        return getInterface();
+        return this.getInterface();
     }
 
     @Override
     public String getInterface() {
-        return toString();
+        return this.toString();
     }
 
     @Override
-    public Optional<String> forInterface(String baseInterface) {
-        if (!isPartOf(baseInterface)) {
+    public Optional<String> forInterface(final String baseInterface) {
+        if (!this.isPartOf(baseInterface)) {
             return Optional.empty();
         }
 
-        return Optional.of(getInterface());
+        return Optional.of(this.getInterface());
     }
 
     @Override
     public List<String> getInterfaces() {
-        Stack<List<String>> prefixes = new Stack<>();
+        final Stack<List<String>> prefixes = new Stack<>();
 
-        if (path.size() > 0) {
-            prefixes.push(List.of(path.get(0)));
-            for (int i = 1; i < path.size(); i++) {
-                List<String> prefix = new ArrayList<>(prefixes.peek());
-                prefix.add(path.get(i));
+        if (this.path.size() > 0) {
+            prefixes.push(List.of(this.path.get(0)));
+            for (int i = 1; i < this.path.size(); i++) {
+                final List<String> prefix = new ArrayList<>(prefixes.peek());
+                prefix.add(this.path.get(i));
                 prefixes.push(prefix);
             }
         }
 
-        List<String> interfaces = new ArrayList<>(prefixes.size());
+        final List<String> interfaces = new ArrayList<>(prefixes.size());
 
-        if (httpMethod.isPresent()) {
-            interfaces.add(getInterface());
+        if (this.httpMethod.isPresent()) {
+            interfaces.add(this.getInterface());
         }
 
         // Insert the prefixes in reverse since the most specific element is at index 0 there.
         while (!prefixes.empty()) {
-            interfaces.add(toName(prefixes.pop()));
+            interfaces.add(this.toName(prefixes.pop()));
         }
 
         // Always add root interface
-        interfaces.add(toName(List.of()));
+        interfaces.add(this.toName(List.of()));
 
         return interfaces;
     }
 
     @Override
-    public InterfaceName createInterface(String name) {
-        return new RESTName(host, name, Optional.empty());
+    public InterfaceName createInterface(final String name) {
+        return new RESTName(this.host, name, Optional.empty());
     }
 
-    private String toName(List<String> path) {
-        StringBuilder name = new StringBuilder();
+    private String toName(final List<String> path) {
+        final StringBuilder name = new StringBuilder();
         name.append("/");
         for (int i = 0; i < path.size(); i++) {
             name.append(path.get(i));
@@ -88,22 +89,22 @@ public class RESTName implements InterfaceName, OperationName {
                 name.append("/");
             }
         }
-        return host + name.toString();
+        return this.host + name.toString();
     }
 
     @Override
     public String toString() {
-        String pathString = toName(path);
+        final String pathString = this.toName(this.path);
         String methodString = "";
-        if (httpMethod.isPresent()) {
-            methodString = "[" + httpMethod.get()
+        if (this.httpMethod.isPresent()) {
+            methodString = "[" + this.httpMethod.get()
                 .toString() + "]";
         }
         return pathString + methodString;
     }
 
-    private Optional<List<String>> parsePath(String string) {
-        String[] segments = string.split("/");
+    private Optional<List<String>> parsePath(final String string) {
+        final String[] segments = string.split("/");
 
         // Require at least a "/" after the host name
         if (segments.length == 1 && !string.endsWith("/")) {
@@ -119,45 +120,38 @@ public class RESTName implements InterfaceName, OperationName {
 
     @Override
     public int hashCode() {
-        return Objects.hash(host, path, httpMethod);
+        return Objects.hash(this.host, this.path, this.httpMethod);
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if ((obj == null) || (this.getClass() != obj.getClass())) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        RESTName other = (RESTName) obj;
-        return Objects.equals(host, other.host) && Objects.equals(path, other.path)
-                && Objects.equals(httpMethod, other.httpMethod);
+        final RESTName other = (RESTName) obj;
+        return Objects.equals(this.host, other.host) && Objects.equals(this.path, other.path)
+                && Objects.equals(this.httpMethod, other.httpMethod);
     }
 
     @Override
-    public boolean isPartOf(String iface) {
-        String[] parts = iface.split("\\[");
-        Optional<List<String>> interfacePathOption = parsePath(parts[0]);
+    public boolean isPartOf(final String iface) {
+        final String[] parts = iface.split("\\[");
+        final Optional<List<String>> interfacePathOption = this.parsePath(parts[0]);
         if (interfacePathOption.isEmpty()) {
             return false;
         }
-        List<String> interfacePath = interfacePathOption.get();
-        String otherHost = interfacePath.remove(0);
+        final List<String> interfacePath = interfacePathOption.get();
+        final String otherHost = interfacePath.remove(0);
 
-        if (!otherHost.equals(host)) {
-            return false;
-        }
-
-        if (interfacePath.size() > path.size()) {
+        if (!otherHost.equals(this.host) || (interfacePath.size() > this.path.size())) {
             return false;
         }
 
         for (int i = 0; i < interfacePath.size(); i++) {
-            if (!path.get(i)
+            if (!this.path.get(i)
                 .equals(interfacePath.get(i))) {
                 return false;
             }
@@ -166,14 +160,14 @@ public class RESTName implements InterfaceName, OperationName {
         Optional<HTTPMethod> ifaceHttpMethod = Optional.empty();
         if (parts.length > 1) {
             // Assume that a '[' implies a ']'.
-            int end = parts[1].lastIndexOf(']');
-            String httpMethodName = parts[1].substring(0, end);
+            final int end = parts[1].lastIndexOf(']');
+            final String httpMethodName = parts[1].substring(0, end);
             ifaceHttpMethod = Optional.of(HTTPMethod.valueOf(httpMethodName));
         }
 
         // TODO: If this.httpMethod.isEmpty(), see it as part of the other interface anyway.
         // This allows some imprecision from ECMAScript detection
-        if (interfacePath.size() == path.size() && ifaceHttpMethod.isPresent() && this.httpMethod.isPresent()
+        if (interfacePath.size() == this.path.size() && ifaceHttpMethod.isPresent() && this.httpMethod.isPresent()
                 && !ifaceHttpMethod.equals(this.httpMethod)) {
             return false;
         }

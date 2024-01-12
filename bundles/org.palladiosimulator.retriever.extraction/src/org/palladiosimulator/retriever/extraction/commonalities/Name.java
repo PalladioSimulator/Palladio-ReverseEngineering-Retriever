@@ -16,9 +16,9 @@ public interface Name {
     /**
      * @returns the most specific common interface
      */
-    default Optional<String> getCommonInterface(Name other) {
-        Set<String> interfaces = new HashSet<>(getInterfaces());
-        for (String iface : other.getInterfaces()) {
+    default Optional<String> getCommonInterface(final Name other) {
+        final Set<String> interfaces = new HashSet<>(this.getInterfaces());
+        for (final String iface : other.getInterfaces()) {
             if (interfaces.contains(iface)) {
                 return Optional.of(iface);
             }
@@ -26,7 +26,8 @@ public interface Name {
         return Optional.empty();
     }
 
-    default boolean isPartOf(String iface) {
-        return getInterfaces().contains(iface);
+    default boolean isPartOf(final String iface) {
+        return this.getInterfaces()
+            .contains(iface);
     }
 }

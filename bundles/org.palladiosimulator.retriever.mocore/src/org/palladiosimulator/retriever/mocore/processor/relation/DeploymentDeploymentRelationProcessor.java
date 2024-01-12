@@ -12,21 +12,21 @@ import tools.mdsd.mocore.framework.processor.RelationProcessor;
 
 public class DeploymentDeploymentRelationProcessor
         extends RelationProcessor<PcmSurrogate, DeploymentDeploymentRelation> {
-    public DeploymentDeploymentRelationProcessor(PcmSurrogate model) {
+    public DeploymentDeploymentRelationProcessor(final PcmSurrogate model) {
         super(model, DeploymentDeploymentRelation.class);
     }
 
     @Override
-    protected void refine(DeploymentDeploymentRelation discovery) {
+    protected void refine(final DeploymentDeploymentRelation discovery) {
         // Check whether a linking resource specification already exists for the link to be merged
-        List<LinkResourceSpecificationRelation> specifications = this.getModel()
+        final List<LinkResourceSpecificationRelation> specifications = this.getModel()
             .getByType(LinkResourceSpecificationRelation.class);
         specifications.removeIf(specification -> !Objects.equals(discovery, specification.getDestination()));
         if (specifications.isEmpty()) {
             // Add implicit placeholder specification, if no specification is found for this
             // deployment link
-            LinkResourceSpecification placeholderSpecification = LinkResourceSpecification.getUniquePlaceholder();
-            LinkResourceSpecificationRelation implicitRelation = new LinkResourceSpecificationRelation(
+            final LinkResourceSpecification placeholderSpecification = LinkResourceSpecification.getUniquePlaceholder();
+            final LinkResourceSpecificationRelation implicitRelation = new LinkResourceSpecificationRelation(
                     placeholderSpecification, discovery, true);
             this.addImplication(implicitRelation);
         }
@@ -35,7 +35,7 @@ public class DeploymentDeploymentRelationProcessor
     }
 
     @Override
-    protected void replaceIndirectPlaceholders(DeploymentDeploymentRelation discovery) {
+    protected void replaceIndirectPlaceholders(final DeploymentDeploymentRelation discovery) {
         /*
          * TL;DR Indirect refinement of depl->depl relations is disabled because it leads to
          * information loss.

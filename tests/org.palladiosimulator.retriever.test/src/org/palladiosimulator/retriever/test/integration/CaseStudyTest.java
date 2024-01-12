@@ -54,9 +54,9 @@ abstract class CaseStudyTest {
     public static final URI TEST_DIR = CommonPlugin
         .asLocalURI(URI.createFileURI(URI.decode(new File("res").getAbsolutePath())));
 
-    private URI outDir;
+    private final URI outDir;
 
-    public static void validate(EObject eObject) {
+    public static void validate(final EObject eObject) {
         EcoreUtil.resolveAll(eObject);
         assertEquals(Diagnostic.OK, Diagnostician.INSTANCE.validate(eObject)
             .getSeverity());
@@ -82,29 +82,29 @@ abstract class CaseStudyTest {
      * @param rules
      *            the rules to execute
      */
-    protected CaseStudyTest(String projectDirectory, Rule... rules) {
+    protected CaseStudyTest(final String projectDirectory, final Rule... rules) {
         this.rules = Set.of(rules);
 
-        outDir = TEST_DIR.appendSegment("out")
+        this.outDir = TEST_DIR.appendSegment("out")
             .appendSegment(this.getClass()
                 .getSimpleName());
 
-        config.setInputFolder(TEST_DIR.appendSegments(projectDirectory.split("/")));
-        config.setOutputFolder(outDir);
+        this.config.setInputFolder(TEST_DIR.appendSegments(projectDirectory.split("/")));
+        this.config.setOutputFolder(this.outDir);
 
-        ServiceConfiguration<Rule> ruleConfig = config.getConfig(Rule.class);
-        for (Rule rule : rules) {
+        final ServiceConfiguration<Rule> ruleConfig = this.config.getConfig(Rule.class);
+        for (final Rule rule : rules) {
             ruleConfig.select(rule);
         }
 
-        retrieverJob = new RetrieverJob(config);
+        this.retrieverJob = new RetrieverJob(this.config);
 
         boolean executedSuccessfully;
         try {
-            retrieverJob.execute(new NullProgressMonitor());
+            this.retrieverJob.execute(new NullProgressMonitor());
             executedSuccessfully = true;
         } catch (JobFailedException | UserCanceledException e) {
-            logger.error(e);
+            this.logger.error(e);
             executedSuccessfully = false;
         }
         this.executedSuccessfully = executedSuccessfully;
@@ -113,50 +113,55 @@ abstract class CaseStudyTest {
     // Assertion utilities
 
     private void assertSuccessfulExecution() {
-        assertTrue(executedSuccessfully, "Failed to run Retriever!");
+        assertTrue(this.executedSuccessfully, "Failed to run Retriever!");
     }
 
-    public void assertMaxParameterCount(int expectedMaxParameterCount, String interfaceName, String operationName) {
-        assertInterfaceExists(interfaceName);
-        assertOperationExists(interfaceName, operationName);
-        assertEquals(expectedMaxParameterCount, getSignatureMaxParameterCount(interfaceName, operationName));
+    public void assertMaxParameterCount(final int expectedMaxParameterCount, final String interfaceName,
+            final String operationName) {
+        this.assertInterfaceExists(interfaceName);
+        this.assertOperationExists(interfaceName, operationName);
+        assertEquals(expectedMaxParameterCount, this.getSignatureMaxParameterCount(interfaceName, operationName));
     }
 
-    public void assertComponentExists(String name) {
-        assertTrue(getComponents().stream()
+    public void assertComponentExists(final String name) {
+        assertTrue(this.getComponents()
+            .stream()
             .anyMatch(x -> x.getEntityName()
                 .equals(name)), "component \"" + name + "\" must exist");
     }
 
-    public void assertInterfaceExists(String name) {
-        assertTrue(getInterfaces().stream()
+    public void assertInterfaceExists(final String name) {
+        assertTrue(this.getInterfaces()
+            .stream()
             .filter(OperationInterface.class::isInstance)
             .anyMatch(x -> x.getEntityName()
                 .equals(name)), "interface \"" + name + "\" must exist");
     }
 
-    public void assertOperationExists(String interfaceName, String operationName) {
-        assertFalse(getOperationSignature(interfaceName, operationName).isEmpty(),
-                "interface \"" + interfaceName + "\" must contain operation \"" + operationName + "\"");
+    public void assertOperationExists(final String interfaceName, final String operationName) {
+        assertFalse(this.getOperationSignature(interfaceName, operationName)
+            .isEmpty(), "interface \"" + interfaceName + "\" must contain operation \"" + operationName + "\"");
     }
 
-    public void assertComponentRequiresComponent(String requiringName, String providingName) {
-        Optional<RepositoryComponent> requiringComponent = getComponents().stream()
+    public void assertComponentRequiresComponent(final String requiringName, final String providingName) {
+        final Optional<RepositoryComponent> requiringComponent = this.getComponents()
+            .stream()
             .filter(x -> x.getEntityName()
                 .equals(requiringName))
             .findFirst();
         assertTrue(requiringComponent.isPresent(), "\"" + requiringName + "\" must exist");
 
-        Optional<RepositoryComponent> providingComponent = getComponents().stream()
+        final Optional<RepositoryComponent> providingComponent = this.getComponents()
+            .stream()
             .filter(x -> x.getEntityName()
                 .equals(providingName))
             .findFirst();
         assertTrue(providingComponent.isPresent(), "\"" + providingName + "\" must exist");
 
-        List<Interface> interfaces = getInterfaces();
+        final List<Interface> interfaces = this.getInterfaces();
         assertFalse(interfaces.isEmpty(), "an interface must exist in order for a component to require another");
 
-        Set<EObject> requiredObjects = requiringComponent.get()
+        final Set<EObject> requiredObjects = requiringComponent.get()
             .getRequiredRoles_InterfaceRequiringEntity()
             .stream()
             .flatMap(x -> x.eCrossReferences()
@@ -164,12 +169,12 @@ abstract class CaseStudyTest {
             .collect(Collectors.toSet());
         assertFalse(requiredObjects.isEmpty(), "\"" + requiringName + "\" must require something");
 
-        Set<Interface> requiredInterfaces = interfaces.stream()
+        final Set<Interface> requiredInterfaces = interfaces.stream()
             .filter(requiredObjects::contains)
             .collect(Collectors.toSet());
         assertFalse(requiredInterfaces.isEmpty(), "\"" + requiringName + "\" must require an interface");
 
-        Set<EObject> providedObjects = providingComponent.get()
+        final Set<EObject> providedObjects = providingComponent.get()
             .getProvidedRoles_InterfaceProvidingEntity()
             .stream()
             .flatMap(x -> x.eCrossReferences()
@@ -177,7 +182,7 @@ abstract class CaseStudyTest {
             .collect(Collectors.toSet());
         assertFalse(providedObjects.isEmpty(), "\"" + providingName + "\" must provide something");
 
-        Set<Interface> providedInterfaces = interfaces.stream()
+        final Set<Interface> providedInterfaces = interfaces.stream()
             .filter(providedObjects::contains)
             .collect(Collectors.toSet());
         assertFalse(providedInterfaces.isEmpty(), "\"" + providingName + "\" must provide an interface");
@@ -187,26 +192,29 @@ abstract class CaseStudyTest {
                 "\"" + requiringName + "\" must require an interface that \"" + providingName + "\" provides");
     }
 
-    public void assertInSameCompositeComponent(String childComponentNameA, String childComponentNameB) {
-        Optional<RepositoryComponent> childComponentA = getComponents().stream()
+    public void assertInSameCompositeComponent(final String childComponentNameA, final String childComponentNameB) {
+        final Optional<RepositoryComponent> childComponentA = this.getComponents()
+            .stream()
             .filter(x -> x.getEntityName()
                 .equals(childComponentNameA))
             .findFirst();
         assertTrue(childComponentA.isPresent(), "\"" + childComponentNameA + "\" must exist");
 
-        Optional<RepositoryComponent> childComponentB = getComponents().stream()
+        final Optional<RepositoryComponent> childComponentB = this.getComponents()
+            .stream()
             .filter(x -> x.getEntityName()
                 .equals(childComponentNameB))
             .findFirst();
         assertTrue(childComponentB.isPresent(), "\"" + childComponentNameB + "\" must exist");
 
-        List<CompositeComponent> allCompositeComponents = getComponents().stream()
+        final List<CompositeComponent> allCompositeComponents = this.getComponents()
+            .stream()
             .filter(CompositeComponent.class::isInstance)
             .map(CompositeComponent.class::cast)
             .collect(Collectors.toList());
         assertFalse(allCompositeComponents.isEmpty(), "There must be a composite component");
 
-        Set<CompositeComponent> compositeComponentsA = allCompositeComponents.stream()
+        final Set<CompositeComponent> compositeComponentsA = allCompositeComponents.stream()
             .filter(x -> x.getAssemblyContexts__ComposedStructure()
                 .stream()
                 .anyMatch(y -> y.getEncapsulatedComponent__AssemblyContext()
@@ -214,7 +222,7 @@ abstract class CaseStudyTest {
             .collect(Collectors.toSet());
         assertFalse(compositeComponentsA.isEmpty(), childComponentNameA + " must be part of a composite component");
 
-        Set<CompositeComponent> compositeComponentsB = allCompositeComponents.stream()
+        final Set<CompositeComponent> compositeComponentsB = allCompositeComponents.stream()
             .filter(x -> x.getAssemblyContexts__ComposedStructure()
                 .stream()
                 .anyMatch(y -> y.getEncapsulatedComponent__AssemblyContext()
@@ -227,17 +235,19 @@ abstract class CaseStudyTest {
                 childComponentNameA + " and " + childComponentNameB + " must be part of the same composite component");
     }
 
-    public void assertComponentProvidesOperation(String componentName, String interfaceName, String operationName) {
-        Optional<RepositoryComponent> component = getComponents().stream()
+    public void assertComponentProvidesOperation(final String componentName, final String interfaceName,
+            final String operationName) {
+        final Optional<RepositoryComponent> component = this.getComponents()
+            .stream()
             .filter(x -> x.getEntityName()
                 .equals(componentName))
             .findFirst();
         assertTrue(component.isPresent(), "Component \"" + componentName + "\" must exist");
 
-        List<Interface> interfaces = getInterfaces();
+        final List<Interface> interfaces = this.getInterfaces();
         assertFalse(interfaces.isEmpty(), "an interface must exist in order for a component to provide an operation");
 
-        Set<EObject> providedObjects = component.get()
+        final Set<EObject> providedObjects = component.get()
             .getProvidedRoles_InterfaceProvidingEntity()
             .stream()
             .flatMap(x -> x.eCrossReferences()
@@ -245,74 +255,75 @@ abstract class CaseStudyTest {
             .collect(Collectors.toSet());
         assertFalse(providedObjects.isEmpty(), "\"" + componentName + "\" must provide something");
 
-        Set<Interface> providedInterfaces = interfaces.stream()
+        final Set<Interface> providedInterfaces = interfaces.stream()
             .filter(providedObjects::contains)
             .collect(Collectors.toSet());
         assertFalse(providedInterfaces.isEmpty(), "\"" + componentName + "\" must provide an interface");
 
-        Set<Interface> specifiedInterfaces = providedInterfaces.stream()
+        final Set<Interface> specifiedInterfaces = providedInterfaces.stream()
             .filter(x -> x.getEntityName()
                 .equals(interfaceName))
             .collect(Collectors.toSet());
         assertFalse(specifiedInterfaces.isEmpty(),
                 "\"" + componentName + "\" must provide interface \"" + interfaceName + "\"");
 
-        assertOperationExists(interfaceName, operationName);
+        this.assertOperationExists(interfaceName, operationName);
     }
 
     // Getters
 
     public RetrieverConfiguration getConfig() {
-        assertSuccessfulExecution();
-        return config;
+        this.assertSuccessfulExecution();
+        return this.config;
     }
 
     public List<RepositoryComponent> getComponents() {
-        assertSuccessfulExecution();
-        return Collections.unmodifiableList(repository.getComponents__Repository());
+        this.assertSuccessfulExecution();
+        return Collections.unmodifiableList(this.repository.getComponents__Repository());
     }
 
     public List<DataType> getDatatypes() {
-        assertSuccessfulExecution();
-        return Collections.unmodifiableList(repository.getDataTypes__Repository());
+        this.assertSuccessfulExecution();
+        return Collections.unmodifiableList(this.repository.getDataTypes__Repository());
     }
 
     public List<FailureType> getFailuretypes() {
-        assertSuccessfulExecution();
-        return Collections.unmodifiableList(repository.getFailureTypes__Repository());
+        this.assertSuccessfulExecution();
+        return Collections.unmodifiableList(this.repository.getFailureTypes__Repository());
     }
 
     public List<Interface> getInterfaces() {
-        assertSuccessfulExecution();
-        return Collections.unmodifiableList(repository.getInterfaces__Repository());
+        this.assertSuccessfulExecution();
+        return Collections.unmodifiableList(this.repository.getInterfaces__Repository());
     }
 
     public Repository getRepository() {
-        assertSuccessfulExecution();
-        assertNotNull(repository);
-        return repository;
+        this.assertSuccessfulExecution();
+        assertNotNull(this.repository);
+        return this.repository;
     }
 
     public System getSystem() {
-        assertSuccessfulExecution();
-        assertNotNull(system);
-        return system;
+        this.assertSuccessfulExecution();
+        assertNotNull(this.system);
+        return this.system;
     }
 
     public ResourceEnvironment getResourceEnvironment() {
-        assertSuccessfulExecution();
-        assertNotNull(resourceEnvironment);
-        return resourceEnvironment;
+        this.assertSuccessfulExecution();
+        assertNotNull(this.resourceEnvironment);
+        return this.resourceEnvironment;
     }
 
     public Allocation getAllocation() {
-        assertSuccessfulExecution();
-        assertNotNull(allocation);
-        return allocation;
+        this.assertSuccessfulExecution();
+        assertNotNull(this.allocation);
+        return this.allocation;
     }
 
-    private Set<OperationSignature> getOperationSignature(String interfaceName, String signatureName) {
-        return getInterfaces().stream()
+    private Set<OperationSignature> getOperationSignature(final String interfaceName, final String signatureName) {
+        return this.getInterfaces()
+            .stream()
             .filter(OperationInterface.class::isInstance)
             .map(OperationInterface.class::cast)
             .filter(x -> x.getEntityName()
@@ -321,8 +332,8 @@ abstract class CaseStudyTest {
                 .stream()
                 .filter(y -> {
                     // Ignore uniqueness postfix
-                    String name = y.getEntityName();
-                    int postfixStart = name.indexOf('$');
+                    final String name = y.getEntityName();
+                    final int postfixStart = name.indexOf('$');
                     if (postfixStart > -1) {
                         return name.substring(0, postfixStart)
                             .equals(signatureName);
@@ -334,16 +345,16 @@ abstract class CaseStudyTest {
     }
 
     public RetrieverBlackboard getBlackboard() {
-        assertSuccessfulExecution();
-        return retrieverJob.getBlackboard();
+        this.assertSuccessfulExecution();
+        return this.retrieverJob.getBlackboard();
     }
 
     public Set<Rule> getRules() {
-        return Collections.unmodifiableSet(rules);
+        return Collections.unmodifiableSet(this.rules);
     }
 
-    public int getSignatureMaxParameterCount(String interfaceName, String signatureName) {
-        final Set<OperationSignature> sigs = getOperationSignature(interfaceName, signatureName);
+    public int getSignatureMaxParameterCount(final String interfaceName, final String signatureName) {
+        final Set<OperationSignature> sigs = this.getOperationSignature(interfaceName, signatureName);
         return sigs.stream()
             .map(OperationSignature::getParameters__OperationSignature)
             .map(List::size)
@@ -356,31 +367,31 @@ abstract class CaseStudyTest {
         RETRIEVER, MOCORE,
     }
 
-    protected void loadArtifacts(Artifacts artifacts) {
-        assertSuccessfulExecution();
+    protected void loadArtifacts(final Artifacts artifacts) {
+        this.assertSuccessfulExecution();
 
         switch (artifacts) {
         case RETRIEVER:
-            repository = ModelLoader.loadRepository(outDir.appendSegment("pcm.repository")
+            this.repository = ModelLoader.loadRepository(this.outDir.appendSegment("pcm.repository")
                 .toString());
-            system = null;
-            resourceEnvironment = null;
-            allocation = null;
+            this.system = null;
+            this.resourceEnvironment = null;
+            this.allocation = null;
             break;
         case MOCORE:
-            String fileName = config.getInputFolder()
+            String fileName = this.config.getInputFolder()
                 .lastSegment();
             if (fileName.isEmpty()) {
-                fileName = config.getInputFolder()
+                fileName = this.config.getInputFolder()
                     .trimSegments(1)
                     .lastSegment();
             }
-            String mocoreBase = outDir.appendSegment(fileName)
+            final String mocoreBase = this.outDir.appendSegment(fileName)
                 .toString() + ".";
-            repository = ModelLoader.loadRepository(mocoreBase + "repository");
-            system = ModelLoader.loadSystem(mocoreBase + "system");
-            resourceEnvironment = ModelLoader.loadResourceEnvironment(mocoreBase + "resourceenvironment");
-            allocation = ModelLoader.loadAllocation(mocoreBase + "allocation");
+            this.repository = ModelLoader.loadRepository(mocoreBase + "repository");
+            this.system = ModelLoader.loadSystem(mocoreBase + "system");
+            this.resourceEnvironment = ModelLoader.loadResourceEnvironment(mocoreBase + "resourceenvironment");
+            this.allocation = ModelLoader.loadAllocation(mocoreBase + "allocation");
             break;
         default:
             throw new IllegalArgumentException("Unhandled artifact type!");
@@ -414,48 +425,48 @@ abstract class CaseStudyTest {
 
     @Test
     void retrieverRepository() {
-        loadArtifacts(Artifacts.RETRIEVER);
-        testRetrieverRepository();
+        this.loadArtifacts(Artifacts.RETRIEVER);
+        this.testRetrieverRepository();
     }
 
     @Test
     void retrieverSeff() {
-        loadArtifacts(Artifacts.RETRIEVER);
-        testRetrieverSeff();
+        this.loadArtifacts(Artifacts.RETRIEVER);
+        this.testRetrieverSeff();
     }
 
     @Test
     @Disabled("There are no tests for MoCoRe yet")
     void moCoReRepository() {
-        loadArtifacts(Artifacts.MOCORE);
-        testMoCoReRepository();
+        this.loadArtifacts(Artifacts.MOCORE);
+        this.testMoCoReRepository();
     }
 
     @Test
     @Disabled("There are no tests for MoCoRe yet")
     void moCoReSeff() {
-        loadArtifacts(Artifacts.MOCORE);
-        testMoCoReSeff();
+        this.loadArtifacts(Artifacts.MOCORE);
+        this.testMoCoReSeff();
     }
 
     @Test
     @Disabled("There are no tests for MoCoRe yet")
     void moCoReSystem() {
-        loadArtifacts(Artifacts.MOCORE);
-        testMoCoReSystem();
+        this.loadArtifacts(Artifacts.MOCORE);
+        this.testMoCoReSystem();
     }
 
     @Test
     @Disabled("There are no tests for MoCoRe yet")
     void moCoReResourceEnvironment() {
-        loadArtifacts(Artifacts.MOCORE);
-        testMoCoReResourceEnvironment();
+        this.loadArtifacts(Artifacts.MOCORE);
+        this.testMoCoReResourceEnvironment();
     }
 
     @Test
     @Disabled("There are no tests for MoCoRe yet")
     void moCoReAllocation() {
-        loadArtifacts(Artifacts.MOCORE);
-        testMoCoReAllocation();
+        this.loadArtifacts(Artifacts.MOCORE);
+        this.testMoCoReAllocation();
     }
 }

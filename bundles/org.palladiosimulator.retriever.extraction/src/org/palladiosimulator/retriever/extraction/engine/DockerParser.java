@@ -35,15 +35,15 @@ public class DockerParser {
 
     private static final Logger LOG = Logger.getLogger(DockerParser.class);
 
-    public DockerParser(Path path, PCMDetector pcmDetector) {
+    public DockerParser(final Path path, final PCMDetector pcmDetector) {
 
         LOG.info("starting docker process");
 
         this.path = path;
         this.pcmDetector = pcmDetector;
-        final InputStream input = getDockerFile();
+        final InputStream input = this.getDockerFile();
         final List<String> services = extractServiceNames(input);
-        mapping = createServiceComponentMapping(services);
+        this.mapping = this.createServiceComponentMapping(services);
     }
 
     /**
@@ -55,7 +55,7 @@ public class DockerParser {
     private InputStream getDockerFile() {
 
         List<Path> paths = new ArrayList<>();
-        try (Stream<Path> files = Files.walk(path)) {
+        try (Stream<Path> files = Files.walk(this.path)) {
             paths = files.filter(f -> f.getFileName()
                 .toString()
                 .contains(FILE_NAME))
@@ -86,7 +86,7 @@ public class DockerParser {
      * @return the list of all service names found in the docker-compose file
      */
     @SuppressWarnings("unchecked")
-    private static List<String> extractServiceNames(InputStream stream) {
+    private static List<String> extractServiceNames(final InputStream stream) {
         // final Yaml yaml = new Yaml();
         final Map<String, Object> object = new HashMap<>(); // (Map<String, Object>)
                                                             // yaml.load(stream);
@@ -107,9 +107,9 @@ public class DockerParser {
      *            a list of all service names from a docker-compose file
      * @return the mapping between service names and Java model instances
      */
-    private Map<String, Set<CompilationUnit>> createServiceComponentMapping(List<String> serviceNames) {
+    private Map<String, Set<CompilationUnit>> createServiceComponentMapping(final List<String> serviceNames) {
 
-        final Set<CompUnitOrName> components = pcmDetector.getCompilationUnits();
+        final Set<CompUnitOrName> components = this.pcmDetector.getCompilationUnits();
 
         final Map<String, Set<CompilationUnit>> serviceToCompMapping = new HashMap<>();
 
@@ -117,9 +117,9 @@ public class DockerParser {
             if (!compUnitOrName.isUnit()) {
                 return;
             }
-            CompilationUnit comp = compUnitOrName.compilationUnit()
+            final CompilationUnit comp = compUnitOrName.compilationUnit()
                 .get();
-            try (Stream<Path> files = Files.walk(path)) {
+            try (Stream<Path> files = Files.walk(this.path)) {
                 // TODO try to find a more robust heuristic
                 final List<Path> foundPaths = files.filter(f -> f.toString()
                     .contains(((AbstractTypeDeclaration) comp.types()
@@ -149,7 +149,7 @@ public class DockerParser {
     }
 
     public Map<String, Set<CompilationUnit>> getMapping() {
-        return mapping;
+        return this.mapping;
     }
 
 }

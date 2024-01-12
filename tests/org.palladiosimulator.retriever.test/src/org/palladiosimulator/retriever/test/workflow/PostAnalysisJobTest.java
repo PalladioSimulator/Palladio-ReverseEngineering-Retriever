@@ -79,49 +79,50 @@ public class PostAnalysisJobTest {
 
     @BeforeEach
     public void setupEnvironment() throws IOException {
-        Repository repository = RepositoryFactory.eINSTANCE.createRepository();
-        Map<ASTNode, ServiceEffectSpecification> ast2seffMap = new HashMap<>();
+        final Repository repository = RepositoryFactory.eINSTANCE.createRepository();
+        final Map<ASTNode, ServiceEffectSpecification> ast2seffMap = new HashMap<>();
 
-        Path directoryPath = Path.of(DIRECTORY_CASESTUDY);
-        Map<String, CompilationUnit> compilationUnits = parseCasestudyPackage(directoryPath);
+        final Path directoryPath = Path.of(DIRECTORY_CASESTUDY);
+        final Map<String, CompilationUnit> compilationUnits = this.parseCasestudyPackage(directoryPath);
 
         // For each comp. unit fill repository & ast2seff map with correct elements
-        for (CompilationUnit compilationUnit : compilationUnits.values()) {
-            List<MethodDeclaration> methodDeclarations = MethodDeclarationVisitor.perform(compilationUnit);
+        for (final CompilationUnit compilationUnit : compilationUnits.values()) {
+            final List<MethodDeclaration> methodDeclarations = MethodDeclarationVisitor.perform(compilationUnit);
 
             // Associate method declarations with class names (-> usually single class per comp.
             // unit)
-            Multimap<String, MethodDeclaration> classDeclarations = HashMultimap.create();
-            for (MethodDeclaration methodDeclaration : methodDeclarations) {
-                TypeDeclaration typeDeclaration = (TypeDeclaration) methodDeclaration.getParent();
-                String className = typeDeclaration.getName()
+            final Multimap<String, MethodDeclaration> classDeclarations = HashMultimap.create();
+            for (final MethodDeclaration methodDeclaration : methodDeclarations) {
+                final TypeDeclaration typeDeclaration = (TypeDeclaration) methodDeclaration.getParent();
+                final String className = typeDeclaration.getName()
                     .toString();
                 classDeclarations.put(className, methodDeclaration);
             }
 
             // For each class create one component, one interface, associated signatures, & seffs
-            for (String className : classDeclarations.keySet()) {
+            for (final String className : classDeclarations.keySet()) {
                 // Create component
-                BasicComponent component = RepositoryFactory.eINSTANCE.createBasicComponent();
+                final BasicComponent component = RepositoryFactory.eINSTANCE.createBasicComponent();
                 component.setEntityName(className);
                 component.setRepository__RepositoryComponent(repository);
 
                 // Create operation interface
-                OperationInterface operationInterface = RepositoryFactory.eINSTANCE.createOperationInterface();
+                final OperationInterface operationInterface = RepositoryFactory.eINSTANCE.createOperationInterface();
                 operationInterface.setEntityName(className + "able");
                 operationInterface.setRepository__Interface(repository);
 
                 // Add interface to component via provided role
-                OperationProvidedRole providedRole = RepositoryFactory.eINSTANCE.createOperationProvidedRole();
+                final OperationProvidedRole providedRole = RepositoryFactory.eINSTANCE.createOperationProvidedRole();
                 providedRole.setProvidedInterface__OperationProvidedRole(operationInterface);
                 component.getProvidedRoles_InterfaceProvidingEntity()
                     .add(providedRole);
 
                 // Create signatures & Create seffs
-                for (MethodDeclaration methodDeclaration : classDeclarations.get(className)) {
-                    String methodName = methodDeclaration.getName()
+                for (final MethodDeclaration methodDeclaration : classDeclarations.get(className)) {
+                    final String methodName = methodDeclaration.getName()
                         .toString();
-                    OperationSignature operationSignature = RepositoryFactory.eINSTANCE.createOperationSignature();
+                    final OperationSignature operationSignature = RepositoryFactory.eINSTANCE
+                        .createOperationSignature();
                     operationSignature.setEntityName(methodName);
 
                     // Add signature to interface
@@ -129,7 +130,7 @@ public class PostAnalysisJobTest {
                         .add(operationSignature);
 
                     // Create seff for signature & add to component
-                    ResourceDemandingSEFF seff = SeffFactory.eINSTANCE.createResourceDemandingSEFF();
+                    final ResourceDemandingSEFF seff = SeffFactory.eINSTANCE.createResourceDemandingSEFF();
                     seff.setBasicComponent_ServiceEffectSpecification(component);
                     seff.setDescribedService__SEFF(operationSignature);
 
@@ -140,25 +141,25 @@ public class PostAnalysisJobTest {
         }
 
         // Add required roles manually
-        List<Pair<String, String>> requiredRelations = List.of(Pair.create("EntityService", "EntityRepository"),
+        final List<Pair<String, String>> requiredRelations = List.of(Pair.create("EntityService", "EntityRepository"),
                 Pair.create("EntityService", "Entity"), Pair.create("EntityRepository", "Entity"));
-        for (Pair<String, String> requiredRelation : requiredRelations) {
-            BasicComponent requirerer = (BasicComponent) repository.getComponents__Repository()
+        for (final Pair<String, String> requiredRelation : requiredRelations) {
+            final BasicComponent requirerer = (BasicComponent) repository.getComponents__Repository()
                 .stream()
                 .filter(component -> component.getEntityName()
                     .equals(requiredRelation.getElement1()))
                 .findFirst()
                 .orElseThrow();
-            BasicComponent provider = (BasicComponent) repository.getComponents__Repository()
+            final BasicComponent provider = (BasicComponent) repository.getComponents__Repository()
                 .stream()
                 .filter(component -> component.getEntityName()
                     .equals(requiredRelation.getElement2()))
                 .findFirst()
                 .orElseThrow();
-            OperationInterface providerInterface = ((OperationProvidedRole) provider
+            final OperationInterface providerInterface = ((OperationProvidedRole) provider
                 .getProvidedRoles_InterfaceProvidingEntity()
                 .get(0)).getProvidedInterface__OperationProvidedRole();
-            OperationRequiredRole requiredRole = RepositoryFactory.eINSTANCE.createOperationRequiredRole();
+            final OperationRequiredRole requiredRole = RepositoryFactory.eINSTANCE.createOperationRequiredRole();
             requiredRole.setRequiredInterface__OperationRequiredRole(providerInterface);
             requirerer.getRequiredRoles_InterfaceRequiringEntity()
                 .add(requiredRole);
@@ -191,21 +192,22 @@ public class PostAnalysisJobTest {
     @Test
     public void processAnalysedCasestudyWithAst2SeffJob() throws Exception {
         // Construct & execute job
-        Ast2SeffJob ast2SeffJob = new Ast2SeffJob(this.getBlackboard(), KEY_SEFF_ASSOCIATIONS, KEY_AST2SEFF_REPOSITORY);
+        final Ast2SeffJob ast2SeffJob = new Ast2SeffJob(this.getBlackboard(), KEY_SEFF_ASSOCIATIONS,
+                KEY_AST2SEFF_REPOSITORY);
         ast2SeffJob.execute(new NullProgressMonitor());
 
         // Get output repo from blackboard & extract all seff elements
-        Repository outputRepository = (Repository) this.getBlackboard()
+        final Repository outputRepository = (Repository) this.getBlackboard()
             .getPartition(KEY_AST2SEFF_REPOSITORY);
-        List<ServiceEffectSpecification> seffs = outputRepository.getComponents__Repository()
+        final List<ServiceEffectSpecification> seffs = outputRepository.getComponents__Repository()
             .stream()
             .flatMap(component -> ((BasicComponent) component).getServiceEffectSpecifications__BasicComponent()
                 .stream())
             .collect(Collectors.toList());
 
         // Assert all seffs have at least start & stop action
-        for (ServiceEffectSpecification seff : seffs) {
-            EList<AbstractAction> actions = ((ResourceDemandingSEFF) seff).getSteps_Behaviour();
+        for (final ServiceEffectSpecification seff : seffs) {
+            final EList<AbstractAction> actions = ((ResourceDemandingSEFF) seff).getSteps_Behaviour();
             assertTrue(actions.size() >= 2);
             assertTrue(actions.stream()
                 .anyMatch(action -> action instanceof StartAction));
@@ -217,20 +219,21 @@ public class PostAnalysisJobTest {
     @Test
     public void mergeAst2SeffOutputWithRepository() throws Exception {
         // Construct jobs
-        Ast2SeffJob ast2SeffJob = new Ast2SeffJob(this.getBlackboard(), KEY_SEFF_ASSOCIATIONS, KEY_AST2SEFF_REPOSITORY);
-        SeffMergerJob seffMergerJob = new SeffMergerJob(this.getBlackboard(), KEY_AST2SEFF_REPOSITORY,
+        final Ast2SeffJob ast2SeffJob = new Ast2SeffJob(this.getBlackboard(), KEY_SEFF_ASSOCIATIONS,
+                KEY_AST2SEFF_REPOSITORY);
+        final SeffMergerJob seffMergerJob = new SeffMergerJob(this.getBlackboard(), KEY_AST2SEFF_REPOSITORY,
                 KEY_ANALYSIS_REPOSITORY);
 
         // Assert empty seffs in analysis repository
-        Repository analysisRepository = (Repository) this.getBlackboard()
+        final Repository analysisRepository = (Repository) this.getBlackboard()
             .getPartition(KEY_ANALYSIS_REPOSITORY);
         List<ServiceEffectSpecification> analysisRepositorySeffs = analysisRepository.getComponents__Repository()
             .stream()
             .flatMap(component -> ((BasicComponent) component).getServiceEffectSpecifications__BasicComponent()
                 .stream())
             .collect(Collectors.toList());
-        for (ServiceEffectSpecification seff : analysisRepositorySeffs) {
-            EList<AbstractAction> actions = ((ResourceDemandingSEFF) seff).getSteps_Behaviour();
+        for (final ServiceEffectSpecification seff : analysisRepositorySeffs) {
+            final EList<AbstractAction> actions = ((ResourceDemandingSEFF) seff).getSteps_Behaviour();
             assertTrue(actions.isEmpty());
         }
 
@@ -244,8 +247,8 @@ public class PostAnalysisJobTest {
             .flatMap(component -> ((BasicComponent) component).getServiceEffectSpecifications__BasicComponent()
                 .stream())
             .collect(Collectors.toList());
-        for (ServiceEffectSpecification seff : analysisRepositorySeffs) {
-            EList<AbstractAction> actions = ((ResourceDemandingSEFF) seff).getSteps_Behaviour();
+        for (final ServiceEffectSpecification seff : analysisRepositorySeffs) {
+            final EList<AbstractAction> actions = ((ResourceDemandingSEFF) seff).getSteps_Behaviour();
             assertTrue(actions.size() >= 2);
             assertTrue(actions.stream()
                 .anyMatch(action -> action instanceof StartAction));
@@ -257,10 +260,11 @@ public class PostAnalysisJobTest {
     @Test
     public void refineIntermediateRepository() throws Exception {
         // Construct jobs
-        Ast2SeffJob ast2SeffJob = new Ast2SeffJob(this.getBlackboard(), KEY_SEFF_ASSOCIATIONS, KEY_AST2SEFF_REPOSITORY);
-        SeffMergerJob seffMergerJob = new SeffMergerJob(this.getBlackboard(), KEY_AST2SEFF_REPOSITORY,
+        final Ast2SeffJob ast2SeffJob = new Ast2SeffJob(this.getBlackboard(), KEY_SEFF_ASSOCIATIONS,
+                KEY_AST2SEFF_REPOSITORY);
+        final SeffMergerJob seffMergerJob = new SeffMergerJob(this.getBlackboard(), KEY_AST2SEFF_REPOSITORY,
                 KEY_ANALYSIS_REPOSITORY);
-        MoCoReJob mocoreJob = new MoCoReJob(this.getBlackboard(), KEY_ANALYSIS_REPOSITORY, KEY_MOCORE_REPOSITORY,
+        final MoCoReJob mocoreJob = new MoCoReJob(this.getBlackboard(), KEY_ANALYSIS_REPOSITORY, KEY_MOCORE_REPOSITORY,
                 KEY_MOCORE_SYSTEM, KEY_MOCORE_ALLOCATION, KEY_MOCORE_RESOURCE_ENVIRONMENT);
 
         // Execute jobs
@@ -269,13 +273,14 @@ public class PostAnalysisJobTest {
         mocoreJob.execute(new NullProgressMonitor());
 
         // Fetch output models from blackboard
-        Repository repository = (Repository) this.getBlackboard()
+        final Repository repository = (Repository) this.getBlackboard()
             .getPartition(KEY_MOCORE_REPOSITORY);
-        org.palladiosimulator.pcm.system.System system = (org.palladiosimulator.pcm.system.System) this.getBlackboard()
+        final org.palladiosimulator.pcm.system.System system = (org.palladiosimulator.pcm.system.System) this
+            .getBlackboard()
             .getPartition(KEY_MOCORE_SYSTEM);
-        Allocation allocation = (Allocation) this.getBlackboard()
+        final Allocation allocation = (Allocation) this.getBlackboard()
             .getPartition(KEY_MOCORE_ALLOCATION);
-        ResourceEnvironment resourceEnvironment = (ResourceEnvironment) this.getBlackboard()
+        final ResourceEnvironment resourceEnvironment = (ResourceEnvironment) this.getBlackboard()
             .getPartition(KEY_MOCORE_RESOURCE_ENVIRONMENT);
 
         // Check repository validity
@@ -285,13 +290,13 @@ public class PostAnalysisJobTest {
             .size());
         repository.getInterfaces__Repository()
             .forEach(interFace -> {
-                OperationInterface operationInterface = (OperationInterface) interFace;
+                final OperationInterface operationInterface = (OperationInterface) interFace;
                 assertFalse(operationInterface.getSignatures__OperationInterface()
                     .isEmpty());
             });
         repository.getComponents__Repository()
             .forEach(component -> {
-                BasicComponent basicComponent = (BasicComponent) component;
+                final BasicComponent basicComponent = (BasicComponent) component;
                 assertFalse(basicComponent.getServiceEffectSpecifications__BasicComponent()
                     .isEmpty());
                 assertFalse(basicComponent.getProvidedRoles_InterfaceProvidingEntity()
@@ -322,14 +327,15 @@ public class PostAnalysisJobTest {
     @Test
     public void persistModels() throws Exception {
         // Construct jobs
-        Ast2SeffJob ast2SeffJob = new Ast2SeffJob(this.getBlackboard(), KEY_SEFF_ASSOCIATIONS, KEY_AST2SEFF_REPOSITORY);
-        SeffMergerJob seffMergerJob = new SeffMergerJob(this.getBlackboard(), KEY_AST2SEFF_REPOSITORY,
+        final Ast2SeffJob ast2SeffJob = new Ast2SeffJob(this.getBlackboard(), KEY_SEFF_ASSOCIATIONS,
+                KEY_AST2SEFF_REPOSITORY);
+        final SeffMergerJob seffMergerJob = new SeffMergerJob(this.getBlackboard(), KEY_AST2SEFF_REPOSITORY,
                 KEY_ANALYSIS_REPOSITORY);
-        MoCoReJob mocoreJob = new MoCoReJob(this.getBlackboard(), KEY_ANALYSIS_REPOSITORY, KEY_MOCORE_REPOSITORY,
+        final MoCoReJob mocoreJob = new MoCoReJob(this.getBlackboard(), KEY_ANALYSIS_REPOSITORY, KEY_MOCORE_REPOSITORY,
                 KEY_MOCORE_SYSTEM, KEY_MOCORE_ALLOCATION, KEY_MOCORE_RESOURCE_ENVIRONMENT);
-        URI inputDirectory = URI.createURI(DIRECTORY_CASESTUDY);
-        URI outputDirectory = URI.createURI(this.temporaryOutputDirectory.toString());
-        PersistenceJob persistenceJob = new PersistenceJob(this.getBlackboard(), inputDirectory, outputDirectory,
+        final URI inputDirectory = URI.createURI(DIRECTORY_CASESTUDY);
+        final URI outputDirectory = URI.createURI(this.temporaryOutputDirectory.toString());
+        final PersistenceJob persistenceJob = new PersistenceJob(this.getBlackboard(), inputDirectory, outputDirectory,
                 KEY_MOCORE_REPOSITORY, KEY_MOCORE_SYSTEM, KEY_MOCORE_ALLOCATION, KEY_MOCORE_RESOURCE_ENVIRONMENT);
 
         // Execute jobs
@@ -339,35 +345,35 @@ public class PostAnalysisJobTest {
         persistenceJob.execute(new NullProgressMonitor());
 
         // Check if model files were created successfully
-        List<Path> paths = Files.walk(this.temporaryOutputDirectory)
+        final List<Path> paths = Files.walk(this.temporaryOutputDirectory)
             .toList();
-        Path repositoryPath = paths.stream()
+        final Path repositoryPath = paths.stream()
             .filter(path -> com.google.common.io.Files.getFileExtension(path.toString())
                 .equals("repository"))
             .findFirst()
             .orElseThrow();
-        Path systemPath = paths.stream()
+        final Path systemPath = paths.stream()
             .filter(path -> com.google.common.io.Files.getFileExtension(path.toString())
                 .equals("system"))
             .findFirst()
             .orElseThrow();
-        Path resourceEnvironmentPath = paths.stream()
+        final Path resourceEnvironmentPath = paths.stream()
             .filter(path -> com.google.common.io.Files.getFileExtension(path.toString())
                 .equals("resourceenvironment"))
             .findFirst()
             .orElseThrow();
-        Path allocationPath = paths.stream()
+        final Path allocationPath = paths.stream()
             .filter(path -> com.google.common.io.Files.getFileExtension(path.toString())
                 .equals("allocation"))
             .findFirst()
             .orElseThrow();
 
         // Load model files saved to disk
-        Repository persistedRepository = ModelLoader.loadRepository(repositoryPath.toString());
-        org.palladiosimulator.pcm.system.System persistedSystem = ModelLoader.loadSystem(systemPath.toString());
-        ResourceEnvironment persistedResourceEnvironment = ModelLoader
+        final Repository persistedRepository = ModelLoader.loadRepository(repositoryPath.toString());
+        final org.palladiosimulator.pcm.system.System persistedSystem = ModelLoader.loadSystem(systemPath.toString());
+        final ResourceEnvironment persistedResourceEnvironment = ModelLoader
             .loadResourceEnvironment(resourceEnvironmentPath.toString());
-        Allocation persistedAllocation = ModelLoader.loadAllocation(allocationPath.toString());
+        final Allocation persistedAllocation = ModelLoader.loadAllocation(allocationPath.toString());
 
         // Check loaded repository validity
         assertEquals(3, persistedRepository.getComponents__Repository()
@@ -376,13 +382,13 @@ public class PostAnalysisJobTest {
             .size());
         persistedRepository.getInterfaces__Repository()
             .forEach(interFace -> {
-                OperationInterface operationInterface = (OperationInterface) interFace;
+                final OperationInterface operationInterface = (OperationInterface) interFace;
                 assertFalse(operationInterface.getSignatures__OperationInterface()
                     .isEmpty());
             });
         persistedRepository.getComponents__Repository()
             .forEach(component -> {
-                BasicComponent basicComponent = (BasicComponent) component;
+                final BasicComponent basicComponent = (BasicComponent) component;
                 assertFalse(basicComponent.getServiceEffectSpecifications__BasicComponent()
                     .isEmpty());
                 assertFalse(basicComponent.getProvidedRoles_InterfaceProvidingEntity()
@@ -399,7 +405,7 @@ public class PostAnalysisJobTest {
         // correctly
         persistedSystem.getAssemblyContexts__ComposedStructure()
             .forEach(assemblyContext -> {
-                BasicComponent basicComponent = (BasicComponent) assemblyContext
+                final BasicComponent basicComponent = (BasicComponent) assemblyContext
                     .getEncapsulatedComponent__AssemblyContext();
                 assertFalse(basicComponent.getServiceEffectSpecifications__BasicComponent()
                     .isEmpty());
@@ -425,7 +431,7 @@ public class PostAnalysisJobTest {
         // resolved correctly
         persistedAllocation.getAllocationContexts_Allocation()
             .forEach(allocationContext -> {
-                BasicComponent basicComponent = (BasicComponent) allocationContext
+                final BasicComponent basicComponent = (BasicComponent) allocationContext
                     .getAssemblyContext_AllocationContext()
                     .getEncapsulatedComponent__AssemblyContext();
                 assertFalse(basicComponent.getServiceEffectSpecifications__BasicComponent()
@@ -439,10 +445,10 @@ public class PostAnalysisJobTest {
         return this.blackboard;
     }
 
-    private Map<String, CompilationUnit> parseCasestudyPackage(Path directory) {
-        ASTParser parser = getASTParser();
-        String[] classpathEntries = getEntries(directory, ".jar");
-        final String[] sources = getEntries(directory, ".java");
+    private Map<String, CompilationUnit> parseCasestudyPackage(final Path directory) {
+        final ASTParser parser = this.getASTParser();
+        final String[] classpathEntries = this.getEntries(directory, ".jar");
+        final String[] sources = this.getEntries(directory, ".java");
         final String[] encodings = new String[sources.length];
         Arrays.fill(encodings, StandardCharsets.UTF_8.toString());
         final Map<String, CompilationUnit> compilationUnits = new HashMap<>();
@@ -461,7 +467,7 @@ public class PostAnalysisJobTest {
     }
 
     private ASTParser getASTParser() {
-        String javaCoreVersion = JavaCore.latestSupportedJavaVersion();
+        final String javaCoreVersion = JavaCore.latestSupportedJavaVersion();
         final ASTParser parser = ASTParser.newParser(AST.getJLSLatest());
         parser.setResolveBindings(true);
         parser.setBindingsRecovery(true);
@@ -471,7 +477,7 @@ public class PostAnalysisJobTest {
         return parser;
     }
 
-    private String[] getEntries(Path directory, String suffix) {
+    private String[] getEntries(final Path directory, final String suffix) {
         try (Stream<Path> paths = Files.walk(directory)) {
             return paths.filter(path -> Files.isRegularFile(path) && path.getFileName()
                 .toString()

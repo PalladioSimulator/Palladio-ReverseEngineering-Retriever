@@ -14,17 +14,17 @@ public class AnalystCollection implements ServiceCollection<Analyst> {
     private final Set<Analyst> analysts = new HashSet<>();
 
     public AnalystCollection() throws CoreException {
-        for (IConfigurationElement extension : Platform.getExtensionRegistry()
+        for (final IConfigurationElement extension : Platform.getExtensionRegistry()
             .getConfigurationElementsFor(EXTENSION_POINT)) {
             final Object o = extension.createExecutableExtension("class");
             if (o instanceof Analyst) {
-                analysts.add((Analyst) o);
+                this.analysts.add((Analyst) o);
             }
         }
     }
 
     @Override
     public Set<Analyst> getServices() {
-        return Collections.unmodifiableSet(analysts);
+        return Collections.unmodifiableSet(this.analysts);
     }
 }

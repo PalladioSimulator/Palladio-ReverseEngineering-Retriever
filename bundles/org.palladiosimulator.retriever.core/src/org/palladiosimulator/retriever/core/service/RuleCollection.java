@@ -11,20 +11,20 @@ import org.palladiosimulator.retriever.extraction.engine.ServiceCollection;
 
 public class RuleCollection implements ServiceCollection<Rule> {
     public static final String EXTENSION_POINT = "org.palladiosimulator.retriever.extraction.rule";
-    private Set<Rule> rules = new HashSet<>();
+    private final Set<Rule> rules = new HashSet<>();
 
     public RuleCollection() throws CoreException {
-        for (IConfigurationElement extension : Platform.getExtensionRegistry()
+        for (final IConfigurationElement extension : Platform.getExtensionRegistry()
             .getConfigurationElementsFor(EXTENSION_POINT)) {
             final Object o = extension.createExecutableExtension("class");
             if (o instanceof Rule) {
-                rules.add((Rule) o);
+                this.rules.add((Rule) o);
             }
         }
     }
 
     @Override
     public Set<Rule> getServices() {
-        return rules;
+        return this.rules;
     }
 }

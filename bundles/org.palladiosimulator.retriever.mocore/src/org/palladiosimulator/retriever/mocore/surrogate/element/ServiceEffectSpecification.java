@@ -4,12 +4,12 @@ import org.palladiosimulator.generator.fluent.repository.factory.FluentRepositor
 import org.palladiosimulator.pcm.seff.ResourceDemandingSEFF;
 
 public class ServiceEffectSpecification extends PcmElement<ResourceDemandingSEFF> {
-    public ServiceEffectSpecification(ResourceDemandingSEFF value, boolean isPlaceholder) {
+    public ServiceEffectSpecification(final ResourceDemandingSEFF value, final boolean isPlaceholder) {
         super(value, isPlaceholder);
     }
 
     public static ServiceEffectSpecification getUniquePlaceholder() {
-        ResourceDemandingSEFF value = new FluentRepositoryFactory().newSeff()
+        final ResourceDemandingSEFF value = new FluentRepositoryFactory().newSeff()
             .withSeffBehaviour()
             .withStartAction()
             .followedBy()

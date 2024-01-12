@@ -18,6 +18,6 @@ public class RetrieverTabGroup extends AbstractLaunchConfigurationTabGroup {
         tabs.add(new RetrieverTab());
         tabs.add(new DebugEnabledCommonTab());
 
-        setTabs(tabs.toArray(new ILaunchConfigurationTab[0]));
+        this.setTabs(tabs.toArray(new ILaunchConfigurationTab[0]));
     }
 }

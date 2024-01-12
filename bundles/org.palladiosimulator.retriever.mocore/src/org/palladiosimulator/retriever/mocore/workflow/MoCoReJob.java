@@ -33,8 +33,9 @@ public class MoCoReJob implements IBlackboardInteractingJob<Blackboard<Object>> 
     private final String allocationOutputKey;
     private final String resourceEnvironmentOutputKey;
 
-    public MoCoReJob(Blackboard<Object> blackboard, String repositoryInputKey, String repositoryOutputKey,
-            String systemOutputKey, String allocationOutputKey, String resourceEnvironmentOutputKey) {
+    public MoCoReJob(final Blackboard<Object> blackboard, final String repositoryInputKey,
+            final String repositoryOutputKey, final String systemOutputKey, final String allocationOutputKey,
+            final String resourceEnvironmentOutputKey) {
         this.blackboard = Objects.requireNonNull(blackboard);
         this.repositoryInputKey = Objects.requireNonNull(repositoryInputKey);
         this.repositoryOutputKey = Objects.requireNonNull(repositoryOutputKey);
@@ -44,40 +45,40 @@ public class MoCoReJob implements IBlackboardInteractingJob<Blackboard<Object>> 
     }
 
     @Override
-    public void execute(IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
+    public void execute(final IProgressMonitor monitor) throws JobFailedException, UserCanceledException {
         // Fetch input from blackboard
         monitor.subTask("Retrieving job input from blackboard");
-        Repository inputRepository = (Repository) this.blackboard.getPartition(repositoryInputKey);
+        final Repository inputRepository = (Repository) this.blackboard.getPartition(this.repositoryInputKey);
 
         // Convert input into processable discoverers
         monitor.subTask("Converting input into processable discoveries");
-        RepositoryDecompositor repositoryDecompositor = new RepositoryDecompositor();
-        Collection<Discoverer<?>> discoverers = repositoryDecompositor.decompose(inputRepository);
+        final RepositoryDecompositor repositoryDecompositor = new RepositoryDecompositor();
+        final Collection<Discoverer<?>> discoverers = repositoryDecompositor.decompose(inputRepository);
 
         // Composite & refine discoveries via PCM orchestrator
         monitor.subTask("Processing discoveries");
-        PcmOrchestrator orchestrator = new PcmOrchestrator();
+        final PcmOrchestrator orchestrator = new PcmOrchestrator();
         discoverers.forEach(orchestrator::processDiscoverer);
 
         // Transform surrogate model into PCM models
         monitor.subTask("Transforming surrogate model into output models");
-        PcmSurrogate surrogate = orchestrator.getModel();
-        Repository repository = new RepositoryTransformer().transform(surrogate);
-        System system = new SystemTransformer().transform(surrogate, repository);
-        ResourceEnvironment resourceEnvironment = new ResourceEnvironmentTransformer().transform(surrogate);
-        Allocation allocation = new AllocationTransformer().transform(surrogate, system, resourceEnvironment);
+        final PcmSurrogate surrogate = orchestrator.getModel();
+        final Repository repository = new RepositoryTransformer().transform(surrogate);
+        final System system = new SystemTransformer().transform(surrogate, repository);
+        final ResourceEnvironment resourceEnvironment = new ResourceEnvironmentTransformer().transform(surrogate);
+        final Allocation allocation = new AllocationTransformer().transform(surrogate, system, resourceEnvironment);
 
         // Add transformed models to blackboard
         monitor.subTask("Adding output models to blackboard");
-        this.blackboard.addPartition(repositoryOutputKey, repository);
-        this.blackboard.addPartition(systemOutputKey, system);
-        this.blackboard.addPartition(allocationOutputKey, allocation);
-        this.blackboard.addPartition(resourceEnvironmentOutputKey, resourceEnvironment);
+        this.blackboard.addPartition(this.repositoryOutputKey, repository);
+        this.blackboard.addPartition(this.systemOutputKey, system);
+        this.blackboard.addPartition(this.allocationOutputKey, allocation);
+        this.blackboard.addPartition(this.resourceEnvironmentOutputKey, resourceEnvironment);
         monitor.done();
     }
 
     @Override
-    public void cleanup(IProgressMonitor monitor) throws CleanupFailedException {
+    public void cleanup(final IProgressMonitor monitor) throws CleanupFailedException {
         // No cleanup required for the job
     }
 
@@ -87,7 +88,7 @@ public class MoCoReJob implements IBlackboardInteractingJob<Blackboard<Object>> 
     }
 
     @Override
-    public void setBlackboard(Blackboard<Object> blackboard) {
+    public void setBlackboard(final Blackboard<Object> blackboard) {
         this.blackboard = Objects.requireNonNull(blackboard);
     }
 }
