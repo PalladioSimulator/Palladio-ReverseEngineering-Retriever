@@ -2,48 +2,48 @@
 <?eclipse version="3.4"?>
 <plugin>
 	<extension point="org.eclipse.debug.core.launchConfigurationTypes">
-	    <launchConfigurationType
-           delegate="org.palladiosimulator.retriever.core.gui.RetrieverConfigurationDelegate"
-           id="org.palladiosimulator.retriever.core.gui.LaunchRetriever"
-           modes="run, debug"
-           name="Launch Retriever"
-           public="true">        
-	    </launchConfigurationType>
-   </extension>
-   <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
-	    <launchConfigurationTabGroup
-	        type="org.palladiosimulator.retriever.core.gui.LaunchRetriever"
-	        class="org.palladiosimulator.retriever.core.gui.RetrieverTabGroup"
-	        id="org.palladiosimulator.retriever.core.gui.LaunchRetrieverTabGroup">
-	    </launchConfigurationTabGroup>
+		<launchConfigurationType
+			delegate="org.palladiosimulator.retriever.core.gui.RetrieverConfigurationDelegate"
+			id="org.palladiosimulator.retriever.core.gui.LaunchRetriever"
+			modes="run, debug"
+			name="Launch Retriever"
+			public="true">
+		</launchConfigurationType>
+	</extension>
+	<extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+		<launchConfigurationTabGroup
+			type="org.palladiosimulator.retriever.core.gui.LaunchRetriever"
+			class="org.palladiosimulator.retriever.core.gui.RetrieverTabGroup"
+			id="org.palladiosimulator.retriever.core.gui.LaunchRetrieverTabGroup">
+		</launchConfigurationTabGroup>
 	</extension>
 	<extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
 		<launchConfigurationTypeImage
-	        icon="icons/Retriever_16x16.gif"
-	        configTypeID="org.palladiosimulator.retriever.core.gui.LaunchRetriever"
-	        id="org.palladiosimulator.retriever.core.gui.LaunchRetrieverTypeImages">
-	    </launchConfigurationTypeImage>
+			icon="icons/Retriever_16x16.gif"
+			configTypeID="org.palladiosimulator.retriever.core.gui.LaunchRetriever"
+			id="org.palladiosimulator.retriever.core.gui.LaunchRetrieverTypeImages">
+		</launchConfigurationTypeImage>
 	</extension>
- <extension
-       id="application"
-       name="Retriever"
-       point="org.eclipse.core.runtime.applications">
-    <application
-          cardinality="singleton-global"
-          icon="icons/Retriever_16x16.gif"
-          thread="main"
-          visible="true">
-	    <run
-	     class="org.palladiosimulator.retriever.core.cli.RetrieverApplication">
-	    </run>
-    </application>
- </extension>
- <extension
-       id="org.palladiosimulator.retriever.core.service.performance_analyst"
-       name="Performance Analyst"
-       point="org.palladiosimulator.retriever.extraction.analyst">
-    <analyst
-          class="org.palladiosimulator.retriever.core.service.PerformanceAnalyst">
-    </analyst>
- </extension>
+	<extension
+		id="application"
+		name="Retriever"
+		point="org.eclipse.core.runtime.applications">
+		<application
+			cardinality="singleton-global"
+			icon="icons/Retriever_16x16.gif"
+			thread="main"
+			visible="true">
+			<run
+				class="org.palladiosimulator.retriever.core.cli.RetrieverApplication">
+			</run>
+		</application>
+	</extension>
+	<extension
+		id="org.palladiosimulator.retriever.core.service.performance_analyst"
+		name="Performance Analyst"
+		point="org.palladiosimulator.retriever.extraction.analyst">
+		<analyst
+			class="org.palladiosimulator.retriever.core.service.PerformanceAnalyst">
+		</analyst>
+	</extension>
 </plugin>

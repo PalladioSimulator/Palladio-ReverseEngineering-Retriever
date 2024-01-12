@@ -1,69 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension
-         id="org.palladiosimulator.retriever.extraction.rules.docker"
-         name="Docker Rules"
-         point="org.palladiosimulator.retriever.extraction.rule">
-      <rule
-            class="org.palladiosimulator.retriever.extraction.rules.DockerRules">
-      </rule>
-   </extension>
-   <extension
-         id="org.palladiosimulator.retriever.extraction.rules.ecmascript"
-         name="ECMAScript Rules"
-         point="org.palladiosimulator.retriever.extraction.rule">
-      <rule
-            class="org.palladiosimulator.retriever.extraction.rules.EcmaScriptRules">
-      </rule>
-   </extension>
-   <extension
-         id="org.palladiosimulator.retriever.extraction.rules.ecmascript"
-         name="Gradle Rules"
-         point="org.palladiosimulator.retriever.extraction.rule">
-      <rule
-            class="org.palladiosimulator.retriever.extraction.rules.GradleRules">
-      </rule>
-   </extension>
-   <extension
-         id="org.palladiosimulator.retriever.extraction.rules.jax_rs"
-         name="Jax RS Rules"
-         point="org.palladiosimulator.retriever.extraction.rule">
-      <rule
-            class="org.palladiosimulator.retriever.extraction.rules.JaxRSRules">
-      </rule>
-   </extension>
-   <extension
-         id="org.palladiosimulator.retriever.extraction.rules.maven"
-         name="Maven Rules"
-         point="org.palladiosimulator.retriever.extraction.rule">
-      <rule
-            class="org.palladiosimulator.retriever.extraction.rules.MavenRules">
-      </rule>
-   </extension>
-   <extension
-         id="org.palladiosimulator.retriever.extraction.rules.spring"
-         name="Spring Rules"
-         point="org.palladiosimulator.retriever.extraction.rule">
-      <rule
-            class="org.palladiosimulator.retriever.extraction.rules.SpringRules">
-      </rule>
-   </extension>
-   <extension
-         id="org.palladiosimulator.retriever.extraction.rules.spring.zuul"
-         name="Spring Zuul Rules"
-         point="org.palladiosimulator.retriever.extraction.rule">
-      <rule
-            class="org.palladiosimulator.retriever.extraction.rules.SpringZuulRules">
-      </rule>
-   </extension>
-   <extension
-         id="org.palladiosimulator.retriever.extraction.rules.spring.cloudgateway"
-         name="Spring Cloud Gateway Rules"
-         point="org.palladiosimulator.retriever.extraction.rule">
-      <rule
-            class="org.palladiosimulator.retriever.extraction.rules.SpringGatewayRules">
-      </rule>
-   </extension>
+	<extension
+		id="org.palladiosimulator.retriever.extraction.rules.docker"
+		name="Docker Rules"
+		point="org.palladiosimulator.retriever.extraction.rule">
+		<rule
+			class="org.palladiosimulator.retriever.extraction.rules.DockerRules">
+		</rule>
+	</extension>
+	<extension
+		id="org.palladiosimulator.retriever.extraction.rules.ecmascript"
+		name="ECMAScript Rules"
+		point="org.palladiosimulator.retriever.extraction.rule">
+		<rule
+			class="org.palladiosimulator.retriever.extraction.rules.EcmaScriptRules">
+		</rule>
+	</extension>
+	<extension
+		id="org.palladiosimulator.retriever.extraction.rules.ecmascript"
+		name="Gradle Rules"
+		point="org.palladiosimulator.retriever.extraction.rule">
+		<rule
+			class="org.palladiosimulator.retriever.extraction.rules.GradleRules">
+		</rule>
+	</extension>
+	<extension
+		id="org.palladiosimulator.retriever.extraction.rules.jax_rs"
+		name="Jax RS Rules"
+		point="org.palladiosimulator.retriever.extraction.rule">
+		<rule
+			class="org.palladiosimulator.retriever.extraction.rules.JaxRSRules">
+		</rule>
+	</extension>
+	<extension
+		id="org.palladiosimulator.retriever.extraction.rules.maven"
+		name="Maven Rules"
+		point="org.palladiosimulator.retriever.extraction.rule">
+		<rule
+			class="org.palladiosimulator.retriever.extraction.rules.MavenRules">
+		</rule>
+	</extension>
+	<extension
+		id="org.palladiosimulator.retriever.extraction.rules.spring"
+		name="Spring Rules"
+		point="org.palladiosimulator.retriever.extraction.rule">
+		<rule
+			class="org.palladiosimulator.retriever.extraction.rules.SpringRules">
+		</rule>
+	</extension>
+	<extension
+		id="org.palladiosimulator.retriever.extraction.rules.spring.zuul"
+		name="Spring Zuul Rules"
+		point="org.palladiosimulator.retriever.extraction.rule">
+		<rule
+			class="org.palladiosimulator.retriever.extraction.rules.SpringZuulRules">
+		</rule>
+	</extension>
+	<extension
+		id="org.palladiosimulator.retriever.extraction.rules.spring.cloudgateway"
+		name="Spring Cloud Gateway Rules"
+		point="org.palladiosimulator.retriever.extraction.rule">
+		<rule
+			class="org.palladiosimulator.retriever.extraction.rules.SpringGatewayRules">
+		</rule>
+	</extension>
 
 </plugin>

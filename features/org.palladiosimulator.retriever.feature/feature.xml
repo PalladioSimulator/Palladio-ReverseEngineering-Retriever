@@ -1,65 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.palladiosimulator.retriever.feature"
-      label="Retriever Feature"
-      version="5.2.0.qualifier"
-      plugin="org.palladiosimulator.branding"
-      license-feature="org.palladiosimulator.license"
-      license-feature-version="1.0.0">
+	id="org.palladiosimulator.retriever.feature"
+	label="Retriever Feature"
+	version="5.2.0.qualifier"
+	plugin="org.palladiosimulator.branding"
+	license-feature="org.palladiosimulator.license"
+	license-feature-version="1.0.0">
 
-   <license url="">
-      
-   </license>
+	<license url="">
 
-   <requires>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.eclipse.xtend.lib"/>
-      <import plugin="org.palladiosimulator.pcm"/>
-      <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.palladiosimulator.generator.fluent"/>
-      <import plugin="org.apache.log4j"/>
-      <import plugin="de.uka.ipd.sdq.workflow"/>
-      <import plugin="de.uka.ipd.sdq.workflow.launchconfig"/>
-      <import plugin="org.eclipse.debug.ui"/>
-      <import plugin="org.eclipse.equinox.app"/>
-      <import plugin="org.eclipse.swt"/>
-      <import plugin="org.palladiosimulator.commons"/>
-      <import plugin="tools.mdsd.mocore.framework"/>
-   </requires>
+	</license>
 
-   <plugin
-         id="org.palladiosimulator.retriever.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+	<requires>
+		<import plugin="org.eclipse.core.resources" />
+		<import plugin="org.eclipse.xtend.lib" />
+		<import plugin="org.palladiosimulator.pcm" />
+		<import plugin="org.eclipse.jdt.core" />
+		<import plugin="org.palladiosimulator.generator.fluent" />
+		<import plugin="org.apache.log4j" />
+		<import plugin="de.uka.ipd.sdq.workflow" />
+		<import plugin="de.uka.ipd.sdq.workflow.launchconfig" />
+		<import plugin="org.eclipse.debug.ui" />
+		<import plugin="org.eclipse.equinox.app" />
+		<import plugin="org.eclipse.swt" />
+		<import plugin="org.palladiosimulator.commons" />
+		<import plugin="tools.mdsd.mocore.framework" />
+	</requires>
 
-   <plugin
-         id="org.palladiosimulator.retriever.extraction"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+	<plugin
+		id="org.palladiosimulator.retriever.core"
+		download-size="0"
+		install-size="0"
+		version="0.0.0"
+		unpack="false" />
 
-   <plugin
-         id="org.palladiosimulator.retriever.extraction.discoverers"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+	<plugin
+		id="org.palladiosimulator.retriever.extraction"
+		download-size="0"
+		install-size="0"
+		version="0.0.0"
+		unpack="false" />
 
-   <plugin
-         id="org.palladiosimulator.retriever.extraction.rules"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+	<plugin
+		id="org.palladiosimulator.retriever.extraction.discoverers"
+		download-size="0"
+		install-size="0"
+		version="0.0.0"
+		unpack="false" />
 
-   <plugin
-         id="org.palladiosimulator.retriever.mocore"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+	<plugin
+		id="org.palladiosimulator.retriever.extraction.rules"
+		download-size="0"
+		install-size="0"
+		version="0.0.0"
+		unpack="false" />
+
+	<plugin
+		id="org.palladiosimulator.retriever.mocore"
+		download-size="0"
+		install-size="0"
+		version="0.0.0"
+		unpack="false" />
 
 </feature>

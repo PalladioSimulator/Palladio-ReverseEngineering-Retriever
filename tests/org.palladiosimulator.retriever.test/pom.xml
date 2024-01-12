@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -43,7 +45,8 @@
 							<goal>wget</goal>
 						</goals>
 						<configuration>
-							<url>https://github.com/acmeair/acmeair/archive/refs/tags/v1.2.0.zip</url>
+							<url>
+								https://github.com/acmeair/acmeair/archive/refs/tags/v1.2.0.zip</url>
 							<unpack>true</unpack>
 							<skipCache>true</skipCache>
 							<outputDirectory>${project.basedir}/res/external/</outputDirectory>
@@ -56,20 +59,23 @@
 							<goal>wget</goal>
 						</goals>
 						<configuration>
-							<url>https://github.com/DescartesResearch/TeaStore/archive/refs/tags/v1.4.1.zip</url>
+							<url>
+								https://github.com/DescartesResearch/TeaStore/archive/refs/tags/v1.4.1.zip</url>
 							<unpack>true</unpack>
 							<skipCache>true</skipCache>
 							<outputDirectory>${project.basedir}/res/external/</outputDirectory>
 						</configuration>
 					</execution>
 					<execution>
-						<id>download-test-resource-spring-petclinic-microservices</id>
+						<id>
+							download-test-resource-spring-petclinic-microservices</id>
 						<phase>generate-resources</phase>
 						<goals>
 							<goal>wget</goal>
 						</goals>
 						<configuration>
-							<url>https://github.com/spring-petclinic/spring-petclinic-microservices/archive/refs/tags/v2.3.6.zip</url>
+							<url>
+								https://github.com/spring-petclinic/spring-petclinic-microservices/archive/refs/tags/v2.3.6.zip</url>
 							<unpack>true</unpack>
 							<skipCache>true</skipCache>
 							<outputDirectory>${project.basedir}/res/external/</outputDirectory>
@@ -82,7 +88,8 @@
 							<goal>wget</goal>
 						</goals>
 						<configuration>
-							<url>https://github.com/sqshq/piggymetrics/archive/refs/tags/spring.version.2.0.3.zip</url>
+							<url>
+								https://github.com/sqshq/piggymetrics/archive/refs/tags/spring.version.2.0.3.zip</url>
 							<unpack>true</unpack>
 							<skipCache>true</skipCache>
 							<outputDirectory>${project.basedir}/res/external/</outputDirectory>
