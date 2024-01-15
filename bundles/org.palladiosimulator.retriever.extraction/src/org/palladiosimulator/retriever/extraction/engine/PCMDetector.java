@@ -2,11 +2,11 @@ package org.palladiosimulator.retriever.extraction.engine;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
@@ -41,8 +41,8 @@ import org.palladiosimulator.retriever.extraction.commonalities.RequirementsBuil
 public class PCMDetector {
     private static final Logger LOG = Logger.getLogger(PCMDetector.class);
 
-    private final Map<CompUnitOrName, ComponentBuilder> components = new HashMap<>();
-    private final Map<String, CompositeBuilder> composites = new HashMap<>();
+    private final Map<CompUnitOrName, ComponentBuilder> components = new ConcurrentHashMap<>();
+    private final Map<String, CompositeBuilder> composites = new ConcurrentHashMap<>();
     private final ProvisionsBuilder compositeProvisions = new ProvisionsBuilder();
     private final RequirementsBuilder compositeRequirements = new RequirementsBuilder();
     private final Set<OperationInterface> providedInterfaces = new HashSet<>();
