@@ -91,9 +91,9 @@ class JaxRSRules implements Rule {
 		}
 
 		for (iface : getAllInterfaces(unit)) {
-			pcmDetector.detectProvidedInterface(identifier, iface.resolveBinding)
+			pcmDetector.detectProvidedInterfaceWeakly(identifier, iface.resolveBinding)
 			for (m : getMethods(iface)) {
-				pcmDetector.detectProvidedOperation(identifier, iface.resolveBinding, m)
+				pcmDetector.detectProvidedOperationWeakly(identifier, iface.resolveBinding, m)
 			}
 		}
 	}
@@ -104,7 +104,7 @@ class JaxRSRules implements Rule {
 
 		pcmDetector.detectComponent(identifier)
 
-		getAllPublicMethods(unit).forEach[m|pcmDetector.detectProvidedOperation(identifier, m.resolveBinding)]
+		getAllPublicMethods(unit).forEach[m|pcmDetector.detectProvidedOperationWeakly(identifier, m.resolveBinding)]
 		// Do not detect requirements of services, this may connect them too tightly
 		if (!identifier.name.endsWith("ServiceImpl")) {
 			getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]

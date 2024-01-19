@@ -219,9 +219,9 @@ class SpringRules implements Rule {
 			val ifaceBinding = iface.resolveBinding
 			// Hide Repository interface implementations, they tend to connect composites in unrepresentative ways
 			if (ifaceBinding !== null && !ifaceBinding.name.endsWith("Repository")) {
-				pcmDetector.detectProvidedInterface(identifier, ifaceBinding)
+				pcmDetector.detectProvidedInterfaceWeakly(identifier, ifaceBinding)
 				for (m : getMethods(iface)) {
-					pcmDetector.detectProvidedOperation(identifier, ifaceBinding, m)
+					pcmDetector.detectProvidedOperationWeakly(identifier, ifaceBinding, m)
 				}
 			}
 		}

@@ -2,7 +2,6 @@ package org.palladiosimulator.retriever.extraction.engine;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,7 +44,6 @@ public class PCMDetector {
     private final Map<String, CompositeBuilder> composites = new ConcurrentHashMap<>();
     private final ProvisionsBuilder compositeProvisions = new ProvisionsBuilder();
     private final RequirementsBuilder compositeRequirements = new RequirementsBuilder();
-    private final Set<OperationInterface> providedInterfaces = new HashSet<>();
 
     private static String getFullUnitName(final CompUnitOrName unit) {
         // TODO this is potentially problematic, maybe restructure
@@ -92,7 +90,7 @@ public class PCMDetector {
             if (type instanceof TypeDeclaration) {
                 this.components.put(unit, new ComponentBuilder(unit));
                 final ITypeBinding binding = ((TypeDeclaration) type).resolveBinding();
-                this.detectProvidedInterface(unit, binding);
+                this.detectProvidedInterfaceWeakly(unit, binding);
             }
         }
     }
@@ -162,7 +160,11 @@ public class PCMDetector {
     private void detectRequiredInterface(final CompUnitOrName unit, final boolean compositeRequired,
             final boolean detectWeakly, final Collection<OperationInterface> ifaces) {
         for (final OperationInterface iface : ifaces) {
-            if (detectWeakly && !this.providedInterfaces.contains(iface)) {
+            final boolean isProvided = this.compositeProvisions.containsRelated(iface) || this.components.values()
+                .stream()
+                .anyMatch(component -> component.provisions()
+                    .containsRelated(iface));
+            if (!isProvided && detectWeakly) {
                 this.components.get(unit)
                     .requirements()
                     .addWeakly(iface);
@@ -173,6 +175,11 @@ public class PCMDetector {
                 this.components.get(unit)
                     .requirements()
                     .add(iface);
+                this.components.values()
+                    .stream()
+                    .forEach(component -> component.provisions()
+                        .strengthenIfPresent(iface));
+                this.compositeProvisions.strengthenIfPresent(iface);
                 if (compositeRequired) {
                     this.compositeRequirements.add(iface);
                 }
@@ -181,34 +188,67 @@ public class PCMDetector {
     }
 
     public void detectProvidedInterface(final CompUnitOrName unit, final ITypeBinding iface) {
+        this.detectProvidedInterface(unit, iface, false, false);
+    }
+
+    public void detectProvidedInterfaceWeakly(final CompUnitOrName unit, final ITypeBinding iface) {
+        this.detectProvidedInterface(unit, iface, false, true);
+    }
+
+    private void detectProvidedInterface(final CompUnitOrName unit, final ITypeBinding iface,
+            final boolean compositeProvided, final boolean detectWeakly) {
         if (iface == null) {
             LOG.warn("Unresolved type binding detected in " + getFullUnitName(unit) + "!");
             return;
         }
         final OperationInterface provision = new EntireInterface(iface,
                 new JavaInterfaceName(NameConverter.toPCMIdentifier(iface)));
-        this.detectProvidedInterface(unit, provision);
+        this.detectProvidedInterface(unit, provision, compositeProvided, detectWeakly);
     }
 
     public void detectProvidedOperation(final CompUnitOrName unit, final IMethodBinding method) {
+        detectProvidedOperation(unit, method, false);
+    }
+
+    public void detectProvidedOperationWeakly(final CompUnitOrName unit, final IMethodBinding method) {
+        detectProvidedOperation(unit, method, true);
+    }
+
+    private void detectProvidedOperation(final CompUnitOrName unit, final IMethodBinding method,
+            final boolean detectWeakly) {
         if (method == null) {
             LOG.warn("Unresolved method binding detected in " + getFullUnitName(unit) + "!");
             return;
         }
-        this.detectProvidedOperation(unit, method.getDeclaringClass(), method);
+        this.detectProvidedOperation(unit, method.getDeclaringClass(), method, detectWeakly);
     }
 
     public void detectProvidedOperation(final CompUnitOrName unit, final ITypeBinding declaringIface,
             final IMethodBinding method) {
+        this.detectProvidedOperation(unit, declaringIface, method, false);
+    }
+
+    public void detectProvidedOperationWeakly(final CompUnitOrName unit, final ITypeBinding declaringIface,
+            final IMethodBinding method) {
+        this.detectProvidedOperation(unit, declaringIface, method, true);
+    }
+
+    private void detectProvidedOperation(final CompUnitOrName unit, final ITypeBinding declaringIface,
+            final IMethodBinding method, final boolean detectWeakly) {
         if (declaringIface == null) {
             LOG.warn("Unresolved type binding detected in " + getFullUnitName(unit) + "!");
             return;
         }
-        this.detectProvidedOperation(unit, NameConverter.toPCMIdentifier(declaringIface), method);
+        this.detectProvidedOperation(unit, NameConverter.toPCMIdentifier(declaringIface), method, false, detectWeakly);
     }
 
     public void detectProvidedOperation(final CompUnitOrName unit, final String declaringIface,
             final IMethodBinding method) {
+        this.detectProvidedOperation(unit, declaringIface, method, false, false);
+    }
+
+    private void detectProvidedOperation(final CompUnitOrName unit, final String declaringIface,
+            final IMethodBinding method, final boolean compositeProvided, final boolean detectWeakly) {
         String operationName;
         if (method == null) {
             LOG.warn("Unresolved method binding detected in " + getFullUnitName(unit) + "!");
@@ -217,27 +257,57 @@ public class PCMDetector {
             operationName = method.getName();
         }
 
-        this.detectProvidedOperation(unit, method, new JavaOperationName(declaringIface, operationName));
+        this.detectProvidedOperation(unit, method, new JavaOperationName(declaringIface, operationName),
+                compositeProvided, detectWeakly);
     }
 
     public void detectProvidedOperation(final CompUnitOrName unit, final IMethodBinding method,
             final OperationName name) {
+        detectProvidedOperation(unit, method, name, false, false);
+    }
+
+    private void detectProvidedOperation(final CompUnitOrName unit, final IMethodBinding method,
+            final OperationName name, final boolean compositeProvided, final boolean detectWeakly) {
         if (this.components.get(unit) == null) {
             this.components.put(unit, new ComponentBuilder(unit));
         }
         final OperationInterface provision = new Operation(method, name);
-        this.detectProvidedInterface(unit, provision);
+        this.detectProvidedInterface(unit, provision, compositeProvided, detectWeakly);
     }
 
-    public void detectProvidedInterface(final CompUnitOrName unit, final OperationInterface provision) {
-        this.components.get(unit)
-            .provisions()
-            .add(provision);
-        this.providedInterfaces.add(provision);
-        this.components.values()
-            .stream()
-            .forEach(component -> component.requirements()
-                .strengthenIfPresent(provision));
+    private void detectProvidedInterface(final CompUnitOrName unit, final OperationInterface iface,
+            final boolean compositeProvided, final boolean detectWeakly) {
+        this.detectProvidedInterface(unit, compositeProvided, detectWeakly, List.of(iface));
+    }
+
+    private void detectProvidedInterface(final CompUnitOrName unit, final boolean compositeProvided,
+            final boolean detectWeakly, final Collection<OperationInterface> ifaces) {
+        for (final OperationInterface iface : ifaces) {
+            final boolean isRequired = this.compositeRequirements.containsRelated(iface) || this.components.values()
+                .stream()
+                .anyMatch(component -> component.requirements()
+                    .containsRelated(iface));
+            if (!isRequired && detectWeakly) {
+                this.components.get(unit)
+                    .provisions()
+                    .addWeakly(iface);
+                if (compositeProvided) {
+                    this.compositeProvisions.addWeakly(iface);
+                }
+            } else {
+                this.components.get(unit)
+                    .provisions()
+                    .add(iface);
+                this.components.values()
+                    .stream()
+                    .forEach(component -> component.requirements()
+                        .strengthenIfPresent(iface));
+                this.compositeRequirements.strengthenIfPresent(iface);
+                if (compositeProvided) {
+                    this.compositeProvisions.add(iface);
+                }
+            }
+        }
     }
 
     public void detectPartOfComposite(final CompUnitOrName unit, final String compositeName) {
@@ -266,19 +336,17 @@ public class PCMDetector {
 
     public void detectCompositeProvidedOperation(final CompUnitOrName unit, final ITypeBinding declaringIface,
             final IMethodBinding method) {
-        this.detectCompositeProvidedOperation(unit, NameConverter.toPCMIdentifier(declaringIface), method);
+        this.detectCompositeProvidedOperation(unit, NameConverter.toPCMIdentifier(declaringIface), method, false);
     }
 
-    public void detectCompositeProvidedOperation(final CompUnitOrName unit, final String declaringIface,
-            final IMethodBinding method) {
-        this.compositeProvisions.add(new Operation(method, new JavaOperationName(declaringIface, method.getName())));
-        this.detectProvidedOperation(unit, declaringIface, method);
+    private void detectCompositeProvidedOperation(final CompUnitOrName unit, final String declaringIface,
+            final IMethodBinding method, final boolean detectWeakly) {
+        this.detectProvidedOperation(unit, declaringIface, method, true, detectWeakly);
     }
 
     public void detectCompositeProvidedOperation(final CompUnitOrName unit, final IMethodBinding method,
             final OperationName name) {
-        this.compositeProvisions.add(new Operation(method, name));
-        this.detectProvidedOperation(unit, method, name);
+        this.detectProvidedOperation(unit, method, name, true, false);
     }
 
     private CompositeBuilder getComposite(final String name) {

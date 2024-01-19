@@ -56,7 +56,12 @@ public class PCMDetectionResult {
         final Composite metaComposite = metaCompositeBuilder.construct(temporaryComponents,
                 new RequirementsBuilder().create(Set.of(), Set.of()), new ProvisionsBuilder().create(Set.of()),
                 Set.of());
-        return metaComposite.parts();
+        final Set<Component> connectedComponents = metaComposite.parts();
+        if (connectedComponents.isEmpty()) {
+            return temporaryComponents;
+        } else {
+            return connectedComponents;
+        }
     }
 
     private static Set<Component> createComponents(final Map<CompUnitOrName, ComponentBuilder> components,
