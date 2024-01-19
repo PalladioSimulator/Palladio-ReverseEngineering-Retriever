@@ -86,7 +86,7 @@ runs:
         echo "action_version=$ACTION_VERSION" >>  $GITHUB_ENV
 
     - name: Download latest Retriever
-      if: env.action_version == 'master'
+      if: env.action_version == 'main'
       shell: bash
       run: |
         curl -s ${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/latest \
@@ -97,7 +97,7 @@ runs:
           | xargs wget -O "${{ env.tmp_dir }}/retriever.zip"
 
     - name: Download Retriever
-      if: env.action_version != 'master'
+      if: env.action_version != 'main'
       shell: bash
       # Downloads Retriever with the same version that this action has
       # (not necessarily the most recent one!).
