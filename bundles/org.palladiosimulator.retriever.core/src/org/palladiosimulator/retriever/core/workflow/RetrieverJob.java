@@ -58,7 +58,11 @@ public class RetrieverJob extends AbstractExtendableJob<RetrieverBlackboard> {
                 RetrieverBlackboardKeys.RULE_ENGINE_MOCORE_OUTPUT_ALLOCATION,
                 RetrieverBlackboardKeys.RULE_ENGINE_MOCORE_OUTPUT_RESOURCE_ENVIRONMENT));
 
-        super.add(new PlantUmlJob(configuration, this.getBlackboard()));
+        super.add(new PlantUmlJob(getBlackboard(), configuration.getOutputFolder(),
+                RetrieverBlackboardKeys.RULE_ENGINE_MOCORE_OUTPUT_REPOSITORY,
+                RetrieverBlackboardKeys.RULE_ENGINE_MOCORE_OUTPUT_SYSTEM,
+                RetrieverBlackboardKeys.RULE_ENGINE_MOCORE_OUTPUT_ALLOCATION,
+                RetrieverBlackboardKeys.RULE_ENGINE_MOCORE_OUTPUT_RESOURCE_ENVIRONMENT));
     }
 
     private List<ParallelJob> createRuleJobs(final RetrieverConfiguration configuration) {
