@@ -27,6 +27,7 @@ public class RetrieverConfigurationImpl extends AbstractComposedJobConfiguration
     private static final String CONFIG_PREFIX = "org.palladiosimulator.retriever.core.configuration.";
     public static final String RULE_ENGINE_INPUT_PATH = "input.path";
     public static final String RULE_ENGINE_OUTPUT_PATH = CONFIG_PREFIX + "output.path";
+    public static final String RULE_ENGINE_RULES_PATH = CONFIG_PREFIX + "rules.path";
     public static final String RULE_ENGINE_SELECTED_RULES = CONFIG_PREFIX + "rules";
     public static final String RULE_ENGINE_SELECTED_ANALYSTS = CONFIG_PREFIX + "analysts";
     public static final String RULE_ENGINE_SELECTED_DISCOVERERS = CONFIG_PREFIX + "discoverers";
@@ -36,6 +37,7 @@ public class RetrieverConfigurationImpl extends AbstractComposedJobConfiguration
 
     private /* not final */ URI inputFolder;
     private /* not final */ URI outputFolder;
+    private /* not final */ URI rulesFolder;
 
     private final Map<Class<? extends Service>, ServiceConfiguration<? extends Service>> serviceConfigs;
 
@@ -99,6 +101,9 @@ public class RetrieverConfigurationImpl extends AbstractComposedJobConfiguration
         if (attributeMap.get(RULE_ENGINE_OUTPUT_PATH) != null) {
             this.setOutputFolder(URI.createURI((String) attributeMap.get(RULE_ENGINE_OUTPUT_PATH)));
         }
+        if (attributeMap.get(RULE_ENGINE_RULES_PATH) != null) {
+            this.setRulesFolder(URI.createURI((String) attributeMap.get(RULE_ENGINE_RULES_PATH)));
+        }
 
         for (final ServiceConfiguration<? extends Service> serviceConfig : this.serviceConfigs.values()) {
             serviceConfig.applyAttributeMap(attributeMap);
@@ -121,6 +126,11 @@ public class RetrieverConfigurationImpl extends AbstractComposedJobConfiguration
     }
 
     @Override
+    public URI getRulesFolder() {
+        return this.rulesFolder;
+    }
+
+    @Override
     public void setInputFolder(final URI inputFolder) {
         this.inputFolder = inputFolder;
     }
@@ -128,6 +138,11 @@ public class RetrieverConfigurationImpl extends AbstractComposedJobConfiguration
     @Override
     public void setOutputFolder(final URI outputFolder) {
         this.outputFolder = outputFolder;
+    }
+
+    @Override
+    public void setRulesFolder(final URI rulesFolder) {
+        this.rulesFolder = rulesFolder;
     }
 
     @Override
@@ -143,6 +158,7 @@ public class RetrieverConfigurationImpl extends AbstractComposedJobConfiguration
 
         result.put(RULE_ENGINE_INPUT_PATH, this.getInputFolder());
         result.put(RULE_ENGINE_OUTPUT_PATH, this.getOutputFolder());
+        result.put(RULE_ENGINE_RULES_PATH, this.getRulesFolder());
 
         for (final ServiceConfiguration<? extends Service> serviceConfig : this.serviceConfigs.values()) {
             result.putAll(serviceConfig.toMap());
