@@ -40,18 +40,14 @@ public class PlantUmlJob extends AbstractBlackboardInteractingJob<RetrieverBlack
     private final String allocationKey;
     private final URI outputFolder;
     private final String repositoryKey;
-    // Unused until we implement resource environment transformation for PlanUML.
-    @SuppressWarnings("unused")
-    private final String resourceEnvironmentKey;
     private final String systemKey;
 
     public PlantUmlJob(final RetrieverBlackboard blackboard, final URI outputFolder, final String repositoryKey,
-            final String systemKey, final String allocationKey, final String resourceEnvironmentKey) {
+            final String systemKey, final String allocationKey) {
         super.setBlackboard(Objects.requireNonNull(blackboard));
         this.repositoryKey = Objects.requireNonNull(repositoryKey);
         this.systemKey = Objects.requireNonNull(systemKey);
         this.allocationKey = Objects.requireNonNull(allocationKey);
-        this.resourceEnvironmentKey = Objects.requireNonNull(resourceEnvironmentKey);
         this.outputFolder = Objects.requireNonNull(outputFolder);
 
     }
