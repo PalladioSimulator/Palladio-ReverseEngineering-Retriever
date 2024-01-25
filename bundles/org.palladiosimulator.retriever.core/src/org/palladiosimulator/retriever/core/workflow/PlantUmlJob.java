@@ -59,21 +59,27 @@ public class PlantUmlJob extends AbstractBlackboardInteractingJob<RetrieverBlack
 
     @Override
     public void execute(final IProgressMonitor arg0) throws JobFailedException, UserCanceledException {
-        final Repository repository = (Repository) getBlackboard().getPartition(repositoryKey);
-        if ((repository != null) && !repository.eContents().isEmpty()) {
-            writeFile(arg0, START_UML + new PcmComponentDiagramGenerator(repository).getDiagramText() + END_UML,
+        final Repository repository = (Repository) this.getBlackboard()
+            .getPartition(this.repositoryKey);
+        if ((repository != null) && !repository.eContents()
+            .isEmpty()) {
+            this.writeFile(arg0, START_UML + new PcmComponentDiagramGenerator(repository).getDiagramText() + END_UML,
                     COMPONENT_DIAGRAM_NAME);
         }
 
-        final System system = (System) getBlackboard().getPartition(systemKey);
-        if ((system != null) && !system.eContents().isEmpty()) {
-            writeFile(arg0, START_UML + new PcmSystemDiagramGenerator(system).getDiagramText() + END_UML,
+        final System system = (System) this.getBlackboard()
+            .getPartition(this.systemKey);
+        if ((system != null) && !system.eContents()
+            .isEmpty()) {
+            this.writeFile(arg0, START_UML + new PcmSystemDiagramGenerator(system).getDiagramText() + END_UML,
                     SYSTEM_DIAGRAM_NAME);
         }
 
-        final Allocation allocation = (Allocation) getBlackboard().getPartition(allocationKey);
-        if ((allocation != null) && !allocation.eContents().isEmpty()) {
-            writeFile(arg0, START_UML + new PcmAllocationDiagramGenerator(allocation).getDiagramText() + END_UML,
+        final Allocation allocation = (Allocation) this.getBlackboard()
+            .getPartition(this.allocationKey);
+        if ((allocation != null) && !allocation.eContents()
+            .isEmpty()) {
+            this.writeFile(arg0, START_UML + new PcmAllocationDiagramGenerator(allocation).getDiagramText() + END_UML,
                     ALLOCATION_DIAGRAM_NAME);
         }
     }
@@ -84,9 +90,11 @@ public class PlantUmlJob extends AbstractBlackboardInteractingJob<RetrieverBlack
     }
 
     private void writeFile(final IProgressMonitor monitor, final String plantUmlSource, final String fileName) {
-        if (outputFolder.isPlatformResource()) {
-            final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-            final IFile file = root.getFile(new Path(outputFolder.appendSegment(fileName).toPlatformString(true)));
+        if (this.outputFolder.isPlatformResource()) {
+            final IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
+                .getRoot();
+            final IFile file = root.getFile(new Path(this.outputFolder.appendSegment(fileName)
+                .toPlatformString(true)));
             try {
                 if (!file.exists()) {
                     file.create(new ByteArrayInputStream(new byte[0]), IResource.FORCE, monitor);
@@ -97,7 +105,8 @@ public class PlantUmlJob extends AbstractBlackboardInteractingJob<RetrieverBlack
             }
 
         } else {
-            final String path = outputFolder.appendSegment(fileName).devicePath();
+            final String path = this.outputFolder.appendSegment(fileName)
+                .devicePath();
             try (FileWriter writer = new FileWriter(path)) {
                 writer.append(plantUmlSource);
             } catch (final IOException e) {
