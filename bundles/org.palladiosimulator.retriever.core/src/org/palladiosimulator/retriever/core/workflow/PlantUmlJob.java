@@ -63,7 +63,7 @@ public class PlantUmlJob extends AbstractBlackboardInteractingJob<RetrieverBlack
             .getPartition(this.repositoryKey);
         if ((repository != null) && !repository.eContents()
             .isEmpty()) {
-            this.writeFile(arg0, START_UML + new PcmComponentDiagramGenerator(repository).getDiagramText() + END_UML,
+            this.writeFile(arg0, START_UML + new PcmComponentDiagramGenerator(repository).get() + END_UML,
                     COMPONENT_DIAGRAM_NAME);
         }
 
@@ -71,7 +71,7 @@ public class PlantUmlJob extends AbstractBlackboardInteractingJob<RetrieverBlack
             .getPartition(this.systemKey);
         if ((system != null) && !system.eContents()
             .isEmpty()) {
-            this.writeFile(arg0, START_UML + new PcmSystemDiagramGenerator(system).getDiagramText() + END_UML,
+            this.writeFile(arg0, START_UML + new PcmSystemDiagramGenerator(system).get() + END_UML,
                     SYSTEM_DIAGRAM_NAME);
         }
 
@@ -79,7 +79,7 @@ public class PlantUmlJob extends AbstractBlackboardInteractingJob<RetrieverBlack
             .getPartition(this.allocationKey);
         if ((allocation != null) && !allocation.eContents()
             .isEmpty()) {
-            this.writeFile(arg0, START_UML + new PcmAllocationDiagramGenerator(allocation).getDiagramText() + END_UML,
+            this.writeFile(arg0, START_UML + new PcmAllocationDiagramGenerator(allocation).get() + END_UML,
                     ALLOCATION_DIAGRAM_NAME);
         }
     }
