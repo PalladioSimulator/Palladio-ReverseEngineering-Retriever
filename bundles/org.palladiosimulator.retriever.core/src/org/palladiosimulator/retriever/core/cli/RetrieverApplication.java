@@ -101,7 +101,7 @@ public class RetrieverApplication implements IApplication {
             return -1;
         }
 
-        if(cmd.hasOption("rules-directory") || cmd.hasShortOption("x")) {
+        if(cmd.hasOption("rules-directory")) {
             try {
                 configuration.setRulesFolder(URI.createFileURI(URI.decode(Paths.get(cmd.getOptionValue("x"))
                     .toAbsolutePath()
