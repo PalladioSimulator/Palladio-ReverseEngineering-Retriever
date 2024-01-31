@@ -101,14 +101,16 @@ public class RetrieverApplication implements IApplication {
             return -1;
         }
 
-        try {
-            configuration.setRulesFolder(URI.createFileURI(URI.decode(Paths.get(cmd.getOptionValue("x"))
-                .toAbsolutePath()
-                .normalize()
-                .toString())));
-        } catch (final InvalidPathException e) {
-            System.err.println("Invalid rules path: " + e.getMessage());
-            return -1;
+        if(cmd.hasOption("rules-directory") || cmd.hasShortOption("x")) {
+            try {
+                configuration.setRulesFolder(URI.createFileURI(URI.decode(Paths.get(cmd.getOptionValue("x"))
+                    .toAbsolutePath()
+                    .normalize()
+                    .toString())));
+            } catch (final InvalidPathException e) {
+                System.err.println("Invalid rules path: " + e.getMessage());
+                return -1;
+            }
         }
 
         // Enable all discoverers, in case a selected rule depends on them.
