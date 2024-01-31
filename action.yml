@@ -1,4 +1,4 @@
-# A GitHub Action that allows to run Retriever on arbitrary GitHub repositories.
+# A GitHub Action that allows to run the Retriever on arbitrary GitHub repositories.
 
 name: "Run Retriever"
 description: |
@@ -15,7 +15,15 @@ inputs:
   rules:
     description: "The rules to reverse-engineer with, as a comma-separated list"
     required: true
-    default: "org.palladiosimulator.retriever.extraction.rules.SpringRules,org.palladiosimulator.retriever.extraction.rules.MavenRules"
+    default: "org.palladiosimulator.retriever.extraction.rules.maven,org.palladiosimulator.retriever.extraction.rules.spring"
+  rules_path:
+    description: "The location of additional project specific rules"
+    required: false
+    default: "."
+  benchmark:
+    description: "Whether use hyperfine to benchmark the execution of the retriever, otherwise just the one time execution time is reported"
+    required: false
+    default: "false"
 
 runs:
   using: "composite"
@@ -36,13 +44,17 @@ runs:
     - name: Gather Git Repository Info
       shell: bash
       run: |
-        GIT_INFO_FILE=${{ env.tmp_dir }}/retriever_out/git_info.txt
+        GIT_INFO_FILE=${{ env.tmp_dir }}/retriever_out/git_info.md
+        cd "${{ github.workspace }}/${{ inputs.source_path }}"
         echo "GIT_INFO_FILE=$GIT_INFO_FILE" >> $GITHUB_ENV
         {
-          echo "Git repository information:"
-          echo "Repository URL: $(git config --get remote.origin.url)"
-          echo "Current Branch: $(git branch --show-current)"
-          echo "Latest Commit: $(git log -1 --pretty=format:"%H - %s")"
+          echo "# Git repository information"
+          echo "|    |    |"
+          echo "|--- | ---|"
+          echo "| Repository URL | $(git config --get remote.origin.url) |"
+          echo "| Branch         | $(git branch --show-current) |"
+          echo "| Commit         | $(git log -1 --pretty=format:"%H") |"
+          echo "| Date           | $(date -u) |"
         } > $GIT_INFO_FILE
     
     - name: Install Neofetch
@@ -52,12 +64,14 @@ runs:
     - name: Gather Specific System Information with Neofetch
       shell: bash
       run: |
-        SYSTEM_INFO_FILE=${{ env.tmp_dir }}/retriever_out/system_info.txt
+        SYSTEM_INFO_FILE=${{ env.tmp_dir }}/retriever_out/system_info.md
         echo "SYSTEM_INFO_FILE=$SYSTEM_INFO_FILE" >> $GITHUB_ENV
-        echo "SYSTEM_INFO_FILE=${{ env.tmp_dir }}/retriever_out/system_info.txt" >> $GITHUB_ENV
         {
-          echo "system information:"
-          neofetch os distro kernel cpu gpu memory --stdout
+          echo "# System information"
+          echo "| Attribute | Value |"
+          echo "| --------- | ----- |"
+          neofetch os distro kernel cpu gpu memory --stdout | \
+          sed -E 's/^(os): (.*)$/| OS | \2 |/; s/^(distro): (.*)$/| Distro | \2 |/; s/^(kernel): (.*)$/| Kernel | \2 |/; s/^(cpu): (.*)$/| CPU | \2 |/; s/^(gpu): (.*)$/| GPU | \2 |/; s/^(memory): (.*)$/| Memory | \2 |/'
         } > $SYSTEM_INFO_FILE
     
     - name: Install cloc
@@ -68,11 +82,12 @@ runs:
     - name: Run cloc analysis
       shell: bash
       run: |
-        CLOC_INFO_FILE=${{ env.tmp_dir }}/retriever_out/cloc.txt
+        CLOC_INFO_FILE=${{ env.tmp_dir }}/retriever_out/cloc.md
         echo "CLOC_INFO_FILE=$CLOC_INFO_FILE" >> $GITHUB_ENV
         {
-          echo "cloc analysis output:"
-          cloc ${{ inputs.source_path }} --quiet
+          echo "# Cloc analysis"
+          cloc ${{ inputs.source_path }} --unicode --autoconf --diff-timeout 300 --docstring-as-code --read-binary-files --md --quiet | \
+          sed -e '1d; 2s/cloc|github.com\/AlDanial\///; /^--- | ---$/d'
         } > $CLOC_INFO_FILE
 
     - name: Get action version
@@ -99,7 +114,7 @@ runs:
     - name: Download Retriever
       if: env.action_version != 'main'
       shell: bash
-      # Downloads Retriever with the same version that this action has
+      # Downloads the Retriever with the same version that this action has
       # (not necessarily the most recent one!).
       run: |
         curl -s ${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/tags/${{ env.action_version }} \
@@ -114,27 +129,80 @@ runs:
       working-directory: ${{ env.tmp_dir }}
       run: unzip retriever.zip -d retriever
 
+    - name: Install Hyperfine
+      if: inputs.benchmark == 'true'
+      shell: bash
+      run: |
+        wget https://github.com/sharkdp/hyperfine/releases/download/v1.16.1/hyperfine_1.16.1_amd64.deb
+        sudo dpkg -i hyperfine_1.16.1_amd64.deb
+
+    - name: Set Up Xvfb
+      shell: bash
+      run: |
+        # Install Xvfb if not already installed
+        sudo apt-get install -y xvfb
+        # Start Xvfb on display number 99
+        Xvfb :99 -screen 0 1280x1024x24 &
+        # Export display number 99 for use by Eclipse
+        echo "DISPLAY=:99" >> $GITHUB_ENV
+
     - name: Execute Retriever
       shell: bash
       working-directory: ${{ env.tmp_dir }}/retriever
       env:
-        RETRIEVER_COMMAND: './eclipse -i "${{ github.workspace }}/${{ inputs.source_path }}" -o "${{ env.tmp_dir }}/retriever_out" -r "${{ inputs.rules }}"'
+        DISPLAY: ":99"
+        RETRIEVER_COMMAND: './eclipse -nosplash -i "${{ github.workspace }}/${{ inputs.source_path }}" -o "${{ env.tmp_dir }}/eclipse_tmp" -r "${{ inputs.rules }}"'
+        TIMING_INFO_FILE: ${{ env.tmp_dir }}/retriever_out/timing.md
       run: |
-        TIMING_INFO_FILE=${{ env.tmp_dir }}/retriever_out/timing.txt
         echo "TIMING_INFO_FILE=$TIMING_INFO_FILE" >> $GITHUB_ENV
-        /usr/bin/time -p -o "$TIMING_INFO_FILE" $RETRIEVER_COMMAND
-        # Read and reformat the timing information
-        {
-          echo "Retriever execution time:"
-          while IFS= read -r line; do
-            case "$line" in
-              real*) echo "Total Elapsed Time (seconds): ${line#* }" ;;
-              user*) echo "User CPU Time (seconds): ${line#* }" ;;
-              sys*) echo "System CPU Time (seconds): ${line#* }" ;;
-            esac
-          done < "$TIMING_INFO_FILE"
-        } > "${TIMING_INFO_FILE}.tmp" && mv "${TIMING_INFO_FILE}.tmp" "$TIMING_INFO_FILE"
+        mkdir "${{ env.tmp_dir }}/eclipse_tmp"
+        if [ "${{ inputs.benchmark }}" = "true" ]; then
+          # Execute with Hyperfine
+          hyperfine \
+            --warmup 3 \
+            --runs 10 \
+            --show-output \
+            --ignore-failure \
+            --export-markdown $TIMING_INFO_FILE \
+            --prepare 'sleep 1; \
+            rm -rf "${{ env.tmp_dir }}/eclipse_tmp"; sleep 1; \
+            rm -rf "${{ env.tmp_dir }}/retriever/workspace"; sleep 1; \
+            echo "cleanup done"' \
+            "$RETRIEVER_COMMAND"
+          
+          # Remove the first column from the table using sed
+          sed -i 's/^[^|]*|[^|]*|/|/' $TIMING_INFO_FILE
+          {
+            echo "# Retriever execution time"
+            cat $TIMING_INFO_FILE
+          } > "${TIMING_INFO_FILE}.tmp" && mv "${TIMING_INFO_FILE}.tmp" "$TIMING_INFO_FILE"
+                    
+        else
+          # Execute with /usr/bin/time
+          /usr/bin/time -p -o "$TIMING_INFO_FILE" $RETRIEVER_COMMAND
+          # Read and reformat the timing information
+          {
+            echo "# Retriever execution time"
+            echo "| Metric | Time (seconds) |"
+            echo "| --- | ---: |"
+            while IFS= read -r line; do
+              case "$line" in
+                real*) echo "| Real CPU Time | ${line#* } |" ;;
+                user*) echo "| User CPU Time | ${line#* } |" ;;
+                sys*) echo "| System CPU Time | ${line#* } |" ;;
+              esac
+            done < "$TIMING_INFO_FILE"
+            echo "<!--"
+            echo "Explainations:"
+            echo "- __Real CPU Time__: actual time the command has run (can be less than total time spent in user and system mode for multi-threaded processes)"
+            echo "- __User CPU Time__: time the command has spent running in user mode"
+            echo "- __System CPU Time__: time the command has spent running in system or kernel mode"
+            echo "-->"
+          } > "${TIMING_INFO_FILE}.tmp" && mv "${TIMING_INFO_FILE}.tmp" "$TIMING_INFO_FILE"
+        fi
 
+        mv ${{ env.tmp_dir }}/eclipse_tmp/* ${{ env.tmp_dir }}/retriever_out/
+    
     - name: Combine and Clean Up Files
       shell: bash
       run: |
@@ -144,10 +212,10 @@ runs:
           echo
           cat $SYSTEM_INFO_FILE
           echo
-          cat $CLOC_INFO_FILE
-          echo
           cat $TIMING_INFO_FILE
-        } > ${{ env.tmp_dir }}/retriever_out/report.txt
+          echo
+          cat $CLOC_INFO_FILE
+        } > ${{ env.tmp_dir }}/retriever_out/report.md
         # Delete the original files
         rm -f $GIT_INFO_FILE $SYSTEM_INFO_FILE $CLOC_INFO_FILE $TIMING_INFO_FILE
 

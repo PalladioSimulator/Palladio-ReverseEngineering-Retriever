@@ -14,6 +14,10 @@ public interface RetrieverConfiguration extends ExtendableJobConfiguration {
 
     void setOutputFolder(URI createFileURI);
 
+    URI getRulesFolder();
+
+    void setRulesFolder(URI createFileURI);
+
     <T extends Service> ServiceConfiguration<T> getConfig(Class<T> serviceClass);
 
 }
