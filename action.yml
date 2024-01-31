@@ -136,21 +136,10 @@ runs:
         wget https://github.com/sharkdp/hyperfine/releases/download/v1.16.1/hyperfine_1.16.1_amd64.deb
         sudo dpkg -i hyperfine_1.16.1_amd64.deb
 
-    - name: Set Up Xvfb
-      shell: bash
-      run: |
-        # Install Xvfb if not already installed
-        sudo apt-get install -y xvfb
-        # Start Xvfb on display number 99
-        Xvfb :99 -screen 0 1280x1024x24 &
-        # Export display number 99 for use by Eclipse
-        echo "DISPLAY=:99" >> $GITHUB_ENV
-
     - name: Execute Retriever
       shell: bash
       working-directory: ${{ env.tmp_dir }}/retriever
       env:
-        DISPLAY: ":99"
         RETRIEVER_COMMAND: './eclipse -nosplash -i "${{ github.workspace }}/${{ inputs.source_path }}" -o "${{ env.tmp_dir }}/eclipse_tmp" -r "${{ inputs.rules }}"'
         TIMING_INFO_FILE: ${{ env.tmp_dir }}/retriever_out/timing.md
       run: |
