@@ -36,6 +36,8 @@ public class RetrieverApplication implements IApplication {
             .addRequiredOption("r", "rules", true,
                     "Supported rules for reverse engineering: " + String.join(", ", availableRuleIDs));
 
+        options.addOption("x", "rules-directory", true, "Path to the directory with additional project specific rules.");
+
         options.addOption("h", "help", false, "Print this help message.");
 
         return options;
@@ -96,6 +98,16 @@ public class RetrieverApplication implements IApplication {
                 .toString())));
         } catch (final InvalidPathException e) {
             System.err.println("Invalid output path: " + e.getMessage());
+            return -1;
+        }
+
+        try {
+            configuration.setRulesFolder(URI.createFileURI(URI.decode(Paths.get(cmd.getOptionValue("x"))
+                .toAbsolutePath()
+                .normalize()
+                .toString())));
+        } catch (final InvalidPathException e) {
+            System.err.println("Invalid rules path: " + e.getMessage());
             return -1;
         }
 
