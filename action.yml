@@ -48,9 +48,10 @@ runs:
         cd "${{ github.workspace }}/${{ inputs.source_path }}"
         echo "GIT_INFO_FILE=$GIT_INFO_FILE" >> $GITHUB_ENV
         {
-          echo "# Git repository information"
-          echo "|    |    |"
-          echo "|--- | ---|"
+          echo "# [Retriever](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever) Report"
+          echo "## Git repository information"
+          echo "|    Attribute   | Value |"
+          echo "| -------------- | ----- |"
           echo "| Repository URL | $(git config --get remote.origin.url) |"
           echo "| Branch         | $(git branch --show-current) |"
           echo "| Commit         | $(git log -1 --pretty=format:"%H") |"
@@ -67,7 +68,7 @@ runs:
         SYSTEM_INFO_FILE=${{ env.tmp_dir }}/retriever_out/system_info.md
         echo "SYSTEM_INFO_FILE=$SYSTEM_INFO_FILE" >> $GITHUB_ENV
         {
-          echo "# System information"
+          echo "## System information"
           echo "| Attribute | Value |"
           echo "| --------- | ----- |"
           neofetch os distro kernel cpu gpu memory --stdout | \
@@ -85,7 +86,7 @@ runs:
         CLOC_INFO_FILE=${{ env.tmp_dir }}/retriever_out/cloc.md
         echo "CLOC_INFO_FILE=$CLOC_INFO_FILE" >> $GITHUB_ENV
         {
-          echo "# Cloc analysis"
+          echo "## Cloc analysis"
           cloc ${{ inputs.source_path }} --unicode --autoconf --diff-timeout 300 --docstring-as-code --read-binary-files --md --quiet | \
           sed -e '1d; 2s/cloc|github.com\/AlDanial\///; /^--- | ---$/d'
         } > $CLOC_INFO_FILE
@@ -162,7 +163,7 @@ runs:
           # Remove the first column from the table using sed
           sed -i 's/^[^|]*|[^|]*|/|/' $TIMING_INFO_FILE
           {
-            echo "# Retriever execution time"
+            echo "## Retriever execution time"
             cat $TIMING_INFO_FILE
           } > "${TIMING_INFO_FILE}.tmp" && mv "${TIMING_INFO_FILE}.tmp" "$TIMING_INFO_FILE"
                     
@@ -171,7 +172,7 @@ runs:
           /usr/bin/time -p -o "$TIMING_INFO_FILE" $RETRIEVER_COMMAND
           # Read and reformat the timing information
           {
-            echo "# Retriever execution time"
+            echo "## Retriever execution time"
             echo "| Metric | Time (seconds) |"
             echo "| --- | ---: |"
             while IFS= read -r line; do
@@ -204,7 +205,7 @@ runs:
           cat $TIMING_INFO_FILE
           echo
           cat $CLOC_INFO_FILE
-        } > ${{ env.tmp_dir }}/retriever_out/report.md
+        } > ${{ env.tmp_dir }}/retriever_out/README.md
         # Delete the original files
         rm -f $GIT_INFO_FILE $SYSTEM_INFO_FILE $CLOC_INFO_FILE $TIMING_INFO_FILE
 
