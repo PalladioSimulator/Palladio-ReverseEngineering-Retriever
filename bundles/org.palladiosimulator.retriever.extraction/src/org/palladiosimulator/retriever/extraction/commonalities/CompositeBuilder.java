@@ -2,6 +2,8 @@ package org.palladiosimulator.retriever.extraction.commonalities;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -76,12 +78,45 @@ public class CompositeBuilder {
         final List<OperationInterface> requirements = new ArrayList<>();
         final List<Map<OperationInterface, List<OperationInterface>>> provisions = new ArrayList<>();
 
+        List<String> partNames = new LinkedList<>();
         for (final Component part : parts) {
             requirements.addAll(part.requirements()
                 .get());
             provisions.add(part.provisions()
                 .getGrouped());
+            partNames.add(part.name());
         }
+
+        // Derive Composite name.
+        Map<String, Integer> prefixes = new HashMap<>();
+        for (String partName : partNames) {
+            String prefix = "";
+            for (String nameSegment : partName.split("\\.")) {
+                if (!prefix.isEmpty()) {
+                    prefix += ".";
+                }
+                prefix += nameSegment;
+                prefixes.put(prefix, 1 + prefixes.getOrDefault(prefix, 0));
+            }
+        }
+
+        int maxSupport = prefixes.entrySet()
+            .stream()
+            .max((a, b) -> a.getValue()
+                .compareTo(b.getValue()))
+            .map(x -> x.getValue())
+            .orElse(0);
+
+        String chosenPrefix = prefixes.entrySet()
+            .stream()
+            .filter(x -> x.getValue()
+                .equals(maxSupport))
+            .map(x -> x.getKey())
+            .max(Comparator.comparing(x -> x.length()))
+            .orElse(name);
+
+        Logger.getLogger(this.getClass())
+            .warn("Chose name " + chosenPrefix + " supported by " + maxSupport + "/" + parts.size() + " parts.");
 
         final Set<OperationInterface> externalRequirements = requirements.stream()
             .filter(x -> compositeRequirements.containsEntire(x))
@@ -96,7 +131,7 @@ public class CompositeBuilder {
             .map(entry -> entry.getKey())
             .collect(Collectors.toSet());
 
-        return new Composite(this.name, parts, externalRequirements, externalProvisions, internalInterfaces);
+        return new Composite(chosenPrefix, parts, externalRequirements, externalProvisions, internalInterfaces);
     }
 
     // Writes to remainingComopnents, parts, and internalInterfaces.

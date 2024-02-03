@@ -111,9 +111,22 @@ public class PCMInstanceCreator {
 
         this.createPCMInterfaces(interfaces);
 
+        final Map<String, Integer> compositeComponentNames = new HashMap<>();
         for (final Composite composite : composites) {
+            compositeComponentNames.put(composite.name(),
+                    1 + compositeComponentNames.getOrDefault(composite.name(), 0));
+        }
+
+        for (final Composite composite : composites) {
+            String name = composite.name();
+            int nameOccurrences = compositeComponentNames.get(name);
+            if (nameOccurrences > 1) {
+                compositeComponentNames.put(name, nameOccurrences - 1);
+                name += " " + nameOccurrences;
+            }
+
             final CompositeComponentCreator c = this.create.newCompositeComponent()
-                .withName(composite.name());
+                .withName(name.replace(".", "_"));
             composite.parts()
                 .forEach(x -> this.componentCompositeCreators.put(x, c));
             composite.internalInterfaces()
