@@ -149,7 +149,7 @@ class SpringRules implements Rule {
 
 		if(identifier.toString.endsWith("Test")) return;
 
-		pcmDetector.detectComponent(identifier)
+		if(!isAbstraction(unit) || isClient || isRepository) pcmDetector.detectComponent(identifier)
 
 		if (isComponent) {
 			getConstructors(unit).stream.filter[c|isMethodAnnotatedWithName(c, "Autowired")].flatMap [ c |
@@ -215,13 +215,13 @@ class SpringRules implements Rule {
 			}
 		}
 
-		for (iface : getAllInterfaces(unit)) {
-			val ifaceBinding = iface.resolveBinding
+		for (parent : getAllAbstractParents(unit)) {
+			val parentBinding = parent.resolveBinding
 			// Hide Repository interface implementations, they tend to connect composites in unrepresentative ways
-			if (ifaceBinding !== null && !ifaceBinding.name.endsWith("Repository")) {
-				pcmDetector.detectProvidedInterfaceWeakly(identifier, ifaceBinding)
-				for (m : getMethods(iface)) {
-					pcmDetector.detectProvidedOperationWeakly(identifier, ifaceBinding, m)
+			if (parentBinding !== null && !parentBinding.name.endsWith("Repository")) {
+				pcmDetector.detectProvidedInterfaceWeakly(identifier, parentBinding)
+				for (m : getMethods(parent)) {
+					pcmDetector.detectProvidedOperationWeakly(identifier, parentBinding, m)
 				}
 			}
 		}

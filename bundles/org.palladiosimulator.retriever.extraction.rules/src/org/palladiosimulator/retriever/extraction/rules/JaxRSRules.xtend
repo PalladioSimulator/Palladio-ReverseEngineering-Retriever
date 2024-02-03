@@ -44,6 +44,8 @@ class JaxRSRules implements Rule {
 
 		if(identifier.toString.endsWith("Test")) return;
 
+		if(isAbstraction(unit)) return;
+
 		// technology based and general recognition
 		if (isConverter) {
 			detectDefault(blackboard, unit)
@@ -90,10 +92,13 @@ class JaxRSRules implements Rule {
 			detectDefault(blackboard, unit)
 		}
 
-		for (iface : getAllInterfaces(unit)) {
-			pcmDetector.detectProvidedInterfaceWeakly(identifier, iface.resolveBinding)
-			for (m : getMethods(iface)) {
-				pcmDetector.detectProvidedOperationWeakly(identifier, iface.resolveBinding, m)
+		for (parent : getAllAbstractParents(unit)) {
+			System.out.println(identifier.name + ": " + parent)
+			val parentBinding = parent.resolveBinding
+			pcmDetector.detectProvidedInterfaceWeakly(identifier, parentBinding)
+			for (m : getMethods(parent)) {
+				System.out.println("\t " + m.name)
+				pcmDetector.detectProvidedOperationWeakly(identifier, parentBinding, m)
 			}
 		}
 	}

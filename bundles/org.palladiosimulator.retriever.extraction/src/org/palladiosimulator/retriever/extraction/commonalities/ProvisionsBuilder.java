@@ -25,10 +25,18 @@ public class ProvisionsBuilder {
     }
 
     public synchronized void strengthenIfPresent(final OperationInterface iface) {
-        if (this.weakProvisions.contains(iface)) {
-            this.weakProvisions.remove(iface);
-            this.provisions.add(iface);
+        List<OperationInterface> remainingProvisions = new LinkedList<>();
+        for (final OperationInterface provision : this.weakProvisions) {
+            final boolean partlyProvided = provision.isPartOf(iface);
+            final boolean entirelyProvided = iface.isPartOf(provision);
+            if (partlyProvided || entirelyProvided) {
+                this.provisions.add(provision);
+            } else {
+                remainingProvisions.add(provision);
+            }
         }
+        this.weakProvisions.clear();
+        this.weakProvisions.addAll(remainingProvisions);
     }
 
     public synchronized boolean containsRelated(final OperationInterface requirement) {
