@@ -10,11 +10,6 @@ public class PiggymetricsTest extends CaseStudyTest {
 
     @Override
     void testRetrieverRepository() {
-        // TODO: Temporarily disabled due to rule changes.
-        if (this.getClass() != null) {
-            return;
-        }
-
         this.assertComponentExists("com_piggymetrics_account_client_AuthServiceClient");
         this.assertComponentExists("com_piggymetrics_notification_service_NotificationServiceImpl");
 

@@ -10,11 +10,6 @@ public class PetclinicTest extends CaseStudyTest {
 
     @Override
     void testRetrieverRepository() {
-        // TODO: Temporarily disabled due to rule changes.
-        if (this.getClass() != null) {
-            return;
-        }
-
         this.assertComponentExists("org_springframework_samples_petclinic_api_boundary_web_ApiGatewayController");
 
         this.assertComponentProvidesOperation("org_springframework_samples_petclinic_vets_web_VetResource",

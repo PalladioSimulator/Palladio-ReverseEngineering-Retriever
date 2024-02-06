@@ -10,11 +10,6 @@ public class TeaStoreTest extends CaseStudyTest {
 
     @Override
     void testRetrieverRepository() {
-        // TODO: Temporarily disabled due to rule changes.
-        if (this.getClass() != null) {
-            return;
-        }
-
         this.assertComponentExists("tools_descartes_teastore_auth_security_BCryptProvider");
         this.assertInterfaceExists("tools_descartes_teastore_kieker_probes_records_IPayloadCharacterization");
 
