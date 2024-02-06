@@ -61,9 +61,12 @@ public class RuleHelper {
     public static boolean isAbstraction(final CompilationUnit unit) {
         final List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
 
+        if (isClassModifiedExactlyWith(unit, "abstract")) {
+            return true;
+        }
+
         for (final AbstractTypeDeclaration abstType : types) {
-            if (abstType instanceof TypeDeclaration typeDecl && (typeDecl.isInterface() || typeDecl.modifiers()
-                .contains(Modifier.ABSTRACT))) {
+            if (abstType instanceof TypeDeclaration typeDecl && typeDecl.isInterface()) {
                 return true;
             }
         }

@@ -1,9 +1,7 @@
 package org.palladiosimulator.retriever.test.integration;
 
-import org.junit.jupiter.api.Disabled;
 import org.palladiosimulator.retriever.extraction.rules.SpringRules;
 
-@Disabled("TODO: Currently broken")
 public class PetclinicTest extends CaseStudyTest {
 
     protected PetclinicTest() {

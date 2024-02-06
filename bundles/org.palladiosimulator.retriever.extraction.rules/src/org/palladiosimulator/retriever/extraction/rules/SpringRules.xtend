@@ -149,14 +149,17 @@ class SpringRules implements Rule {
 
 		if(identifier.toString.endsWith("Test")) return;
 
-		if(!isAbstraction(unit) || isClient || isRepository) pcmDetector.detectComponent(identifier)
+		if(isAbstraction(unit) && !isClient && !isRepository) return;
 
 		if (isComponent) {
+			pcmDetector.detectComponent(identifier);
 			getConstructors(unit).stream.filter[c|isMethodAnnotatedWithName(c, "Autowired")].flatMap [ c |
 				getParameters(c).stream
 			].filter[p|!isParameterAnnotatedWith(p, "Value")].forEach [ p |
 				pcmDetector.detectRequiredInterface(identifier, p)
 			]
+		} else {
+			return;
 		}
 
 		if (isService || isController) {
