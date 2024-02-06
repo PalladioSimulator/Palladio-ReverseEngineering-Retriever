@@ -34,12 +34,24 @@ runs:
         distribution: "temurin"
         java-version: "17"
 
-    - name: Create temporary directory
+    - name: Create Temporary Directory
       shell: bash
       run: |
         TMP_DIR=$(mktemp -d)
         echo "tmp_dir=$TMP_DIR" >> $GITHUB_ENV
         mkdir $TMP_DIR/retriever_out
+
+    - name: Gather Retriever Info
+      shell: bash
+      run: |
+        RETRIEVER_INFO_FILE=${{ env.tmp_dir }}/retriever_out/retriever_info.md
+        echo "RETRIEVER_INFO_FILE=$RETRIEVER_INFO_FILE" >> $GITHUB_ENV
+        {
+          echo "# [Retriever](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever) Report"
+          echo "| Version | Date |"
+          echo "| ------- | ---- |"
+          echo "| $(curl -sL ${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/latest | jq  -r ".tag_name") | $(date -u) |"
+        } > $RETRIEVER_INFO_FILE
 
     - name: Gather Git Repository Info
       shell: bash
@@ -48,14 +60,12 @@ runs:
         cd "${{ github.workspace }}/${{ inputs.source_path }}"
         echo "GIT_INFO_FILE=$GIT_INFO_FILE" >> $GITHUB_ENV
         {
-          echo "# [Retriever](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever) Report"
           echo "## Git repository information"
           echo "|    Attribute   | Value |"
           echo "| -------------- | ----- |"
           echo "| Repository URL | $(git config --get remote.origin.url) |"
           echo "| Branch         | $(git branch --show-current) |"
           echo "| Commit         | $(git log -1 --pretty=format:"%H") |"
-          echo "| Date           | $(date -u) |"
         } > $GIT_INFO_FILE
     
     - name: Install Neofetch
@@ -80,7 +90,7 @@ runs:
       run: |
         sudo apt install cloc
 
-    - name: Run cloc analysis
+    - name: Run cloc Analysis
       shell: bash
       run: |
         CLOC_INFO_FILE=${{ env.tmp_dir }}/retriever_out/cloc.md
@@ -91,7 +101,7 @@ runs:
           sed -e '1d; 2s/cloc|github.com\/AlDanial\///; /^--- | ---$/d'
         } > $CLOC_INFO_FILE
 
-    - name: Get action version
+    - name: Get Action Version
       shell: bash
       # Assuming a format like in the GitHub Actions documentation:
       # /home/runner/work/_actions/repo-owner/name-of-action-repo/v1
@@ -101,7 +111,7 @@ runs:
         ACTION_VERSION=$(echo ${{ github.action_path }} | cut -d / -f 8- -)
         echo "action_version=$ACTION_VERSION" >>  $GITHUB_ENV
 
-    - name: Download latest Retriever
+    - name: Download Latest Retriever
       if: env.action_version == 'main'
       shell: bash
       run: |
@@ -130,7 +140,7 @@ runs:
       working-directory: ${{ env.tmp_dir }}
       run: unzip retriever.zip -d retriever
 
-    - name: Install Hyperfine
+    - name: Install hyperfine
       if: inputs.benchmark == 'true'
       shell: bash
       run: |
@@ -198,6 +208,8 @@ runs:
       run: |
         # Combine files into one, with empty lines between file contents
         {
+          cat $RETRIEVER_INFO_FILE
+          echo
           cat $GIT_INFO_FILE
           echo
           cat $SYSTEM_INFO_FILE
@@ -207,10 +219,10 @@ runs:
           cat $CLOC_INFO_FILE
         } > ${{ env.tmp_dir }}/retriever_out/README.md
         # Delete the original files
-        rm -f $GIT_INFO_FILE $SYSTEM_INFO_FILE $CLOC_INFO_FILE $TIMING_INFO_FILE
+        rm -f $RETRIEVER_INFO_FILE $GIT_INFO_FILE $SYSTEM_INFO_FILE $CLOC_INFO_FILE $TIMING_INFO_FILE
 
 
-    - name: Prepare analysis results for upload
+    - name: Prepare Analysis Results for Upload
       shell: bash
       working-directory: ${{ env.tmp_dir }}
       run: |
@@ -219,13 +231,13 @@ runs:
         mv tmp/* retriever_out
         rmdir tmp
 
-    - name: Upload analysis results
+    - name: Upload Analysis Results
       uses: actions/upload-artifact@v3
       with:
         name: retriever
         path: ${{ env.tmp_dir }}/retriever_out
 
-    - name: Prepare Eclipse logs for upload
+    - name: Prepare Eclipse Logs for Upload
       if: failure()
       shell: bash
       working-directory: ${{ env.tmp_dir }}
@@ -233,14 +245,14 @@ runs:
         mkdir -p eclipse_logs/${{ inputs.source_path }}
         mv retriever/configuration/*.log retriever/workspace/.metadata/.log eclipse_logs/${{ inputs.source_path }}
 
-    - name: Upload Eclipse logs
+    - name: Upload Eclipse Logs
       if: failure()
       uses: actions/upload-artifact@v3
       with:
         name: eclipse_logs
         path: ${{ env.tmp_dir }}/eclipse_logs
 
-    - name: Delete temporary directory
+    - name: Delete Temporary Directory
       if: always()
       shell: bash
       run: rm -rf ${{ env.tmp_dir }}
