@@ -44,23 +44,50 @@ runs:
     - name: Gather Git Repository Info
       shell: bash
       run: |
-        GIT_INFO_FILE=${{ env.tmp_dir }}/retriever_out/git_info.md
-        cd "${{ github.workspace }}/${{ inputs.source_path }}"
+        GIT_INFO_FILE="${{ env.tmp_dir }}/retriever_out/git_info.md"
+        SOURCE_PATH="${{ github.workspace }}/${{ inputs.source_path }}"
         echo "GIT_INFO_FILE=$GIT_INFO_FILE" >> $GITHUB_ENV
-        {
-          echo "# Git repository information"
+
+        gather_git_info() {
           echo "|    |    |"
           echo "|--- | ---|"
           echo "| Repository URL | $(git config --get remote.origin.url) |"
           echo "| Branch         | $(git branch --show-current) |"
           echo "| Commit         | $(git log -1 --pretty=format:"%H") |"
-          echo "| Date           | $(date -u) |"
-        } > $GIT_INFO_FILE
-    
+          echo ""
+        }
+
+        print_header() {
+          echo "# Git repository information"
+          echo "Date of execution: $(date -u)"
+        }
+
+        # gather git repository information of the source directory or the containing directories
+        if [ -d "$SOURCE_PATH/.git" ]; then
+          cd "$SOURCE_PATH"
+          print_header > "$GIT_INFO_FILE"
+          gather_git_info > "$GIT_INFO_FILE"
+        else
+          FOUND_REPO=false
+          for d in "$SOURCE_PATH"/*; do
+            if [ -d "$d/.git" ]; then
+              cd "$d"
+              if [ "$FOUND_REPO" = false ]; then
+                print_header > "$GIT_INFO_FILE"
+              fi
+              gather_git_info >> "$GIT_INFO_FILE"
+              FOUND_REPO=true
+            fi
+          done
+          if [ "$FOUND_REPO" = false ]; then
+            echo "no git repository found" > "$GIT_INFO_FILE"
+          fi
+        fi
+
     - name: Install Neofetch
       shell: bash
       run: sudo apt-get install -y neofetch
-    
+
     - name: Gather Specific System Information with Neofetch
       shell: bash
       run: |
@@ -73,7 +100,7 @@ runs:
           neofetch os distro kernel cpu gpu memory --stdout | \
           sed -E 's/^(os): (.*)$/| OS | \2 |/; s/^(distro): (.*)$/| Distro | \2 |/; s/^(kernel): (.*)$/| Kernel | \2 |/; s/^(cpu): (.*)$/| CPU | \2 |/; s/^(gpu): (.*)$/| GPU | \2 |/; s/^(memory): (.*)$/| Memory | \2 |/'
         } > $SYSTEM_INFO_FILE
-    
+
     - name: Install cloc
       shell: bash
       run: |
@@ -191,7 +218,7 @@ runs:
         fi
 
         mv ${{ env.tmp_dir }}/eclipse_tmp/* ${{ env.tmp_dir }}/retriever_out/
-    
+
     - name: Combine and Clean Up Files
       shell: bash
       run: |
@@ -207,7 +234,6 @@ runs:
         } > ${{ env.tmp_dir }}/retriever_out/report.md
         # Delete the original files
         rm -f $GIT_INFO_FILE $SYSTEM_INFO_FILE $CLOC_INFO_FILE $TIMING_INFO_FILE
-
 
     - name: Prepare analysis results for upload
       shell: bash
