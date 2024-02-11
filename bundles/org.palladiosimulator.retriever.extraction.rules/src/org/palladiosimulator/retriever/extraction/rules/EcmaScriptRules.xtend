@@ -20,11 +20,11 @@ import org.openjdk.nashorn.api.tree.ObjectLiteralTree
 import java.util.List
 import org.openjdk.nashorn.api.tree.VariableTree
 import org.palladiosimulator.retriever.extraction.commonalities.RESTName
-import java.util.Optional
 import org.palladiosimulator.retriever.extraction.commonalities.CompUnitOrName
 import org.palladiosimulator.retriever.extraction.engine.Rule
 import org.palladiosimulator.retriever.extraction.rules.data.GatewayRoute
 import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard
+import org.palladiosimulator.retriever.extraction.commonalities.HTTPMethod
 
 class EcmaScriptRules implements Rule {
 
@@ -83,10 +83,10 @@ class EcmaScriptRules implements Rule {
 			for (url : httpRequests.get(key)) {
 				val mappedURL = mapURL(hostname, "/" + url, gatewayRoutes)
 				if (!mappedURL.isPartOf("/" + hostname)) {
-					pcmDetector.detectRequiredInterface(GATEWAY_NAME, mappedURL);
+					pcmDetector.detectRequiredInterface(GATEWAY_NAME, mappedURL)
 				}
 				pcmDetector.detectProvidedOperation(GATEWAY_NAME, null,
-					new RESTName(hostname, "/" + url, Optional.empty()));
+					new RESTName(hostname, "/" + url, HTTPMethod.any))
 			}
 		}
 	}
@@ -110,7 +110,9 @@ class EcmaScriptRules implements Rule {
 			}
 			var urlsWithWildcards = new HashSet()
 			for (url : resolvedUrls) {
-				urlsWithWildcards.add(url.replaceAll(VARIABLE_PREFIX + ".*\\/?", "*"))
+				val urlWithoutInteriorParameters = url.replaceAll(VARIABLE_PREFIX + ".+?/", "*/")
+				val urlWithoutParameters = urlWithoutInteriorParameters.replaceAll(VARIABLE_PREFIX + ".*", "*")
+				urlsWithWildcards.add(urlWithoutParameters)
 			}
 
 			normalizedRequests.put(source + key.replaceAll(START_NONWORD_CHARS, BLANK), urlsWithWildcards)
@@ -277,7 +279,7 @@ class EcmaScriptRules implements Rule {
 				return route.applyTo(url)
 			}
 		}
-		return new RESTName(host, url, Optional.empty)
+		return new RESTName(host, url, HTTPMethod.any)
 	}
 
 	override isBuildRule() {

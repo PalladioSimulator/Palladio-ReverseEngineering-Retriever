@@ -7,7 +7,6 @@ import org.palladiosimulator.retriever.extraction.commonalities.CompUnitOrName
 import java.util.Set
 import org.palladiosimulator.retriever.extraction.engine.Rule
 import org.palladiosimulator.retriever.extraction.commonalities.RESTName
-import java.util.Optional
 import org.palladiosimulator.retriever.extraction.rules.util.RESTHelper
 import java.util.Map
 import org.palladiosimulator.retriever.extraction.commonalities.HTTPMethod
@@ -68,7 +67,7 @@ class JaxRSRules implements Rule {
 					methodPath = RESTHelper.replaceArgumentsWithWildcards(methodPath)
 					// TODO: HTTP method switch-case
 					pcmDetector.detectCompositeProvidedOperation(identifier, m.resolveBinding,
-						new RESTName("SERVICE-HOST", methodPath, Optional.empty))
+						new RESTName("SERVICE-HOST", methodPath, HTTPMethod.all))
 				}
 			]
 			getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]
@@ -83,7 +82,7 @@ class JaxRSRules implements Rule {
 			getMethods(unit).forEach [ m |
 				if (SERVLET_METHODS.containsKey(m.name.identifier)) {
 					pcmDetector.detectProvidedOperation(identifier, m.resolveBinding,
-						new RESTName("SERVICE-HOST", path, Optional.of(SERVLET_METHODS.get(m.name.identifier))))
+						new RESTName("SERVICE-HOST", path, Set.of(SERVLET_METHODS.get(m.name.identifier))))
 				}
 			]
 			getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]
@@ -93,11 +92,9 @@ class JaxRSRules implements Rule {
 		}
 
 		for (parent : getAllAbstractParents(unit)) {
-			System.out.println(identifier.name + ": " + parent)
 			val parentBinding = parent.resolveBinding
 			pcmDetector.detectProvidedInterfaceWeakly(identifier, parentBinding)
 			for (m : getMethods(parent)) {
-				System.out.println("\t " + m.name)
 				pcmDetector.detectProvidedOperationWeakly(identifier, parentBinding, m)
 			}
 		}

@@ -292,32 +292,32 @@ class SpringRules implements Rule {
 	def getHTTPMethod(MethodDeclaration m) {
 		val requestMapping = getMappingString(m, "RequestMapping");
 		if (requestMapping !== null) {
-			return Optional.empty;
+			return HTTPMethod.any();
 		}
 
 		val getMapping = getMappingString(m, "GetMapping");
 		if (getMapping !== null) {
-			return Optional.of(HTTPMethod.GET);
+			return Set.of(HTTPMethod.GET);
 		}
 
 		val postMapping = getMappingString(m, "PostMapping");
 		if (postMapping !== null) {
-			return Optional.of(HTTPMethod.POST);
+			return Set.of(HTTPMethod.POST);
 		}
 
 		val putMapping = getMappingString(m, "PutMapping");
 		if (putMapping !== null) {
-			return Optional.of(HTTPMethod.PUT);
+			return Set.of(HTTPMethod.PUT);
 		}
 
 		val deleteMapping = getMappingString(m, "DeleteMapping");
 		if (deleteMapping !== null) {
-			return Optional.of(HTTPMethod.DELETE);
+			return Set.of(HTTPMethod.DELETE);
 		}
 
 		val patchMapping = getMappingString(m, "PatchMapping");
 		if (patchMapping !== null) {
-			return Optional.of(HTTPMethod.PATCH);
+			return Set.of(HTTPMethod.PATCH);
 		}
 
 		return null;
