@@ -147,7 +147,7 @@ public class Retriever {
 
         // Persist the repository at ./pcm.repository
         blackboard.addPartition(RetrieverBlackboard.KEY_REPOSITORY, pcm);
-        ModelSaver.saveRepository(pcm, outPath.toString(), "pcm");
+        // ModelSaver.saveRepository(pcm, outPath.toString(), "pcm");
     }
 
     /**
