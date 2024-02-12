@@ -63,9 +63,9 @@ class EcmaScriptRules implements Rule {
 			}
 		}
 
-		var hostnameMap = blackboard.getPartition(HOSTNAMES_ID) as Map<Path, String>
-		if (hostnameMap === null) {
-			hostnameMap = Map.of
+		var hostnameMap = Map.of 
+		if (blackboard.hasPartition(HOSTNAMES_ID)) {
+			hostnameMap = blackboard.getPartition(HOSTNAMES_ID) as Map<Path, String>
 		}
 		var hostname = "API-HOST"
 		var Path mostSpecificHostnamePath = null
