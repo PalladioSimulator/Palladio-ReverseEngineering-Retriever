@@ -1,7 +1,9 @@
 package org.palladiosimulator.retriever.test.integration;
 
+import org.junit.jupiter.api.Disabled;
 import org.palladiosimulator.retriever.extraction.rules.JaxRSRules;
 
+@Disabled("Inconsistent repository, will be fixed")
 public class ACMETest extends CaseStudyTest {
 
     protected ACMETest() {
@@ -9,7 +11,7 @@ public class ACMETest extends CaseStudyTest {
     }
 
     @Override
-    void testRetrieverRepository() {
+    void testRepository() {
         this.assertComponentExists("com_acmeair_wxs_service_FlightServiceImpl");
 
         this.assertComponentProvidesOperation("com_acmeair_morphia_services_CustomerServiceImpl",

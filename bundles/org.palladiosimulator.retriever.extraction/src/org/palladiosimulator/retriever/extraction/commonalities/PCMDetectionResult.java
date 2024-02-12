@@ -56,7 +56,12 @@ public class PCMDetectionResult {
         final Composite metaComposite = metaCompositeBuilder.construct(temporaryComponents,
                 new RequirementsBuilder().create(Set.of(), Set.of()), new ProvisionsBuilder().create(Set.of()),
                 Set.of());
-        return metaComposite.parts();
+        final Set<Component> connectedComponents = metaComposite.parts();
+        if (connectedComponents.isEmpty()) {
+            return temporaryComponents;
+        } else {
+            return connectedComponents;
+        }
     }
 
     private static Set<Component> createComponents(final Map<CompUnitOrName, ComponentBuilder> components,
@@ -78,7 +83,6 @@ public class PCMDetectionResult {
             final RequirementsBuilder compositeRequirements, final Set<OperationInterface> visibleProvisions) {
 
         // Construct composites.
-        Set<Composite> constructedComposites = new HashSet<>();
         final List<Composite> allComposites = composites.values()
             .stream()
             .map(x -> x.construct(freeComponents, compositeRequirements.create(visibleProvisions, visibleProvisions),
@@ -87,29 +91,29 @@ public class PCMDetectionResult {
 
         // Remove redundant composites.
         final Set<Composite> redundantComposites = new HashSet<>();
+        final Set<Composite> remainingComposites = new HashSet<>();
+
         for (int i = 0; i < allComposites.size(); ++i) {
             final Composite subject = allComposites.get(i);
             final long subsetCount = allComposites.subList(i + 1, allComposites.size())
                 .stream()
+                .filter(x -> !redundantComposites.contains(x))
                 .filter(x -> subject.isSubsetOf(x) || x.isSubsetOf(subject))
                 .count();
 
             // Any composite is guaranteed to be the subset of at least one composite in the
-            // list,
-            // namely itself. If it is the subset of any composites other than itself, it is
+            // list, namely itself. If it is the subset of any composites other than itself, it is
             // redundant.
             if (subsetCount > 0) {
                 redundantComposites.add(subject);
+            } else {
+                // TODO: Is there any merging necessary, like adapting the redundant composite's
+                // requirements to its peer?
+                remainingComposites.add(subject);
             }
-
-            // TODO: Is there any merging necessary, like adapting the redundant composite's
-            // requirements to its peer?
-            constructedComposites = allComposites.stream()
-                .filter(x -> !redundantComposites.contains(x))
-                .collect(Collectors.toUnmodifiableSet());
         }
 
-        return constructedComposites;
+        return remainingComposites;
     }
 
     private static Set<OperationInterface> collectVisibleProvisions(final Set<Component> components,

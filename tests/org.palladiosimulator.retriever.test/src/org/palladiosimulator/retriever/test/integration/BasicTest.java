@@ -36,7 +36,7 @@ public class BasicTest extends CaseStudyTest {
 
     protected BasicTest() {
         super(PROJECT_NAME, RULES);
-        this.loadArtifacts(Artifacts.RETRIEVER);
+        this.loadArtifacts();
     }
 
     private OperationInterface getConflictingMethods(final List<Interface> interfaces) {

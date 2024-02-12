@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.util.IModifierConstants;
 
 /**
  * This class is used as a supporting library for writing rules for Retriever. It contains numerous
@@ -60,8 +61,12 @@ public class RuleHelper {
     public static boolean isAbstraction(final CompilationUnit unit) {
         final List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
 
+        if (isClassModifiedExactlyWith(unit, "abstract")) {
+            return true;
+        }
+
         for (final AbstractTypeDeclaration abstType : types) {
-            if ((abstType instanceof TypeDeclaration) && ((TypeDeclaration) abstType).isInterface()) {
+            if (abstType instanceof TypeDeclaration typeDecl && typeDecl.isInterface()) {
                 return true;
             }
         }
@@ -320,17 +325,31 @@ public class RuleHelper {
         return false;
     }
 
-    public static List<Type> getAllInterfaces(final CompilationUnit unit) {
+    /**
+     * Returns everything listed after "implements" and "extends" in the type declaration that is
+     * either abstract or an interface.
+     */
+    public static List<Type> getAllAbstractParents(final CompilationUnit unit) {
         final List<Type> interfaces = new ArrayList<>();
 
         final List<AbstractTypeDeclaration> types = cast(unit.types(), AbstractTypeDeclaration.class);
 
         for (final AbstractTypeDeclaration abstType : types) {
-            if (abstType instanceof TypeDeclaration) {
-                final TypeDeclaration type = (TypeDeclaration) abstType;
-
+            if (abstType instanceof TypeDeclaration type) {
                 final List<Type> interfaceTypes = cast(type.superInterfaceTypes(), Type.class);
                 interfaces.addAll(interfaceTypes);
+
+                Type superclassType = type.getSuperclassType();
+                if (superclassType == null) {
+                    continue;
+                }
+                ITypeBinding superclassBinding = superclassType.resolveBinding();
+                if (superclassBinding == null) {
+                    continue;
+                }
+                if ((superclassBinding.getModifiers() & IModifierConstants.ACC_ABSTRACT) != 0) {
+                    interfaces.add(superclassType);
+                }
             }
         }
 
