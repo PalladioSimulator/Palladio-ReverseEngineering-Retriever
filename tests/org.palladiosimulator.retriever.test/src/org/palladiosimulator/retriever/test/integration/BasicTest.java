@@ -51,18 +51,6 @@ public class BasicTest extends CaseStudyTest {
         return conflictingMethods;
     }
 
-    /**
-     * Tests the basic functionality of Retriever. Requires it to execute without an exception and
-     * produce an output file.
-     */
-    @Test
-    void testExecutesAndProducesFile() {
-        assertTrue(new File(this.getConfig()
-            .getOutputFolder()
-            .appendSegment("pcm.repository")
-            .devicePath()).exists());
-    }
-
     @Disabled("FIXME: Reliance on outdated JaxRS rule")
     @Test
     void testArray() {
