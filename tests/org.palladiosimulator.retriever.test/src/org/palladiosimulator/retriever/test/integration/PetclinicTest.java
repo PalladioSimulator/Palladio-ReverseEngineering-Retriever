@@ -9,18 +9,18 @@ public class PetclinicTest extends CaseStudyTest {
     }
 
     @Override
-    void testRetrieverRepository() {
+    void testRepository() {
         this.assertComponentExists("org_springframework_samples_petclinic_api_boundary_web_ApiGatewayController");
 
         this.assertComponentProvidesOperation("org_springframework_samples_petclinic_vets_web_VetResource",
-                "/vets-service/vets[GET]", "/vets-service/vets[GET]");
+                "vets-service/vets[GET]", "vets-service/vets[GET]");
         this.assertComponentProvidesOperation("org_springframework_samples_petclinic_visits_web_VisitResource",
-                "/visits-service", "/visits-service/pets/visits[GET]");
+                "visits-service/pets/visits[GET]", "visits-service/pets/visits[GET]");
         this.assertComponentProvidesOperation("org_springframework_samples_petclinic_customers_web_PetResource",
-                "/customers-service/owners/*/pets", "/customers-service/owners/*/pets[GET]");
+                "customers-service/petTypes[GET]", "customers-service/petTypes[GET]");
 
-        this.assertMaxParameterCount(2, "/customers-service/owners[PUT]", "/customers-service/owners[PUT]");
-        this.assertMaxParameterCount(1, "/api-gateway/api/gateway/owners[GET]", "/api-gateway/api/gateway/owners[GET]");
+        this.assertMaxParameterCount(2, "customers-service/owners[PUT]", "customers-service/owners[PUT]");
+        this.assertMaxParameterCount(1, "api-gateway/api/gateway/owners[GET]", "api-gateway/api/gateway/owners[GET]");
 
         this.assertComponentRequiresComponent("org_springframework_samples_petclinic_customers_web_PetResource",
                 "org_springframework_samples_petclinic_customers_model_PetRepository");

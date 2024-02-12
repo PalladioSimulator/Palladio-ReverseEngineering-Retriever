@@ -9,16 +9,16 @@ public class PiggymetricsTest extends CaseStudyTest {
     }
 
     @Override
-    void testRetrieverRepository() {
+    void testRepository() {
         this.assertComponentExists("com_piggymetrics_account_client_AuthServiceClient");
         this.assertComponentExists("com_piggymetrics_notification_service_NotificationServiceImpl");
 
         this.assertComponentProvidesOperation("com_piggymetrics_statistics_controller_StatisticsController",
-                "/statistics", "/statistics/current");
-        this.assertComponentProvidesOperation("com_piggymetrics_account_controller_AccountController", "/accounts",
-                "/accounts");
+                "statistics-service/statistics", "statistics-service/statistics/current");
+        this.assertComponentProvidesOperation("com_piggymetrics_account_controller_AccountController", "account-service/accounts",
+                "account-service/accounts");
         this.assertComponentProvidesOperation("com_piggymetrics_notification_controller_RecipientController",
-                "/notifications/recipients", "/notifications/recipients");
+                "notification-service/notifications/recipients", "notification-service/notifications/recipients");
 
         this.assertMaxParameterCount(2, "com_piggymetrics_notification_service_RecipientService", "markNotified");
 

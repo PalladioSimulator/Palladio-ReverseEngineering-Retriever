@@ -46,7 +46,7 @@ public class SeffAssociationTest extends CaseStudyTest {
     }
 
     @Override
-    void testRetrieverSeff() {
+    void testSeff() {
         final RetrieverBlackboard blackboard = this.getBlackboard();
 
         @SuppressWarnings("unchecked")

@@ -9,7 +9,7 @@ public class ACMETest extends CaseStudyTest {
     }
 
     @Override
-    void testRetrieverRepository() {
+    void testRepository() {
         this.assertComponentExists("com_acmeair_wxs_service_FlightServiceImpl");
 
         this.assertComponentProvidesOperation("com_acmeair_morphia_services_CustomerServiceImpl",

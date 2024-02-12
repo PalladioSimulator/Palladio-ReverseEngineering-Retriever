@@ -363,110 +363,73 @@ abstract class CaseStudyTest {
 
     // Resource loading
 
-    protected enum Artifacts {
-        RETRIEVER, MOCORE,
-    }
-
-    protected void loadArtifacts(final Artifacts artifacts) {
+    protected void loadArtifacts() {
         this.assertSuccessfulExecution();
 
-        switch (artifacts) {
-        case RETRIEVER:
-            this.repository = ModelLoader.loadRepository(this.outDir.appendSegment("pcm.repository")
-                .toString());
-            this.system = null;
-            this.resourceEnvironment = null;
-            this.allocation = null;
-            break;
-        case MOCORE:
-            String fileName = this.config.getInputFolder()
+        String fileName = this.config.getInputFolder()
+            .lastSegment();
+        if (fileName.isEmpty()) {
+            fileName = this.config.getInputFolder()
+                .trimSegments(1)
                 .lastSegment();
-            if (fileName.isEmpty()) {
-                fileName = this.config.getInputFolder()
-                    .trimSegments(1)
-                    .lastSegment();
-            }
-            final String mocoreBase = this.outDir.appendSegment(fileName)
-                .toString() + ".";
-            this.repository = ModelLoader.loadRepository(mocoreBase + "repository");
-            this.system = ModelLoader.loadSystem(mocoreBase + "system");
-            this.resourceEnvironment = ModelLoader.loadResourceEnvironment(mocoreBase + "resourceenvironment");
-            this.allocation = ModelLoader.loadAllocation(mocoreBase + "allocation");
-            break;
-        default:
-            throw new IllegalArgumentException("Unhandled artifact type!");
         }
+        final String pathBase = this.outDir.appendSegment(fileName)
+            .toString() + ".";
+        this.repository = ModelLoader.loadRepository(pathBase + "repository");
+        this.system = ModelLoader.loadSystem(pathBase + "system");
+        this.resourceEnvironment = ModelLoader.loadResourceEnvironment(pathBase + "resourceenvironment");
+        this.allocation = ModelLoader.loadAllocation(pathBase + "allocation");
     }
 
     // Template methods
 
-    void testRetrieverRepository() {
+    void testRepository() {
     }
 
-    void testRetrieverSeff() {
+    void testSeff() {
     }
 
-    void testMoCoReRepository() {
+    void testSystem() {
     }
 
-    void testMoCoReSeff() {
+    void testResourceEnvironment() {
     }
 
-    void testMoCoReSystem() {
-    }
-
-    void testMoCoReResourceEnvironment() {
-    }
-
-    void testMoCoReAllocation() {
+    void testAllocation() {
     }
 
     // Tests
 
     @Test
-    void retrieverRepository() {
-        this.loadArtifacts(Artifacts.RETRIEVER);
-        this.testRetrieverRepository();
+    void repository() {
+        this.loadArtifacts();
+        this.testRepository();
     }
 
     @Test
-    void retrieverSeff() {
-        this.loadArtifacts(Artifacts.RETRIEVER);
-        this.testRetrieverSeff();
+    void seff() {
+        this.loadArtifacts();
+        this.testSeff();
     }
 
     @Test
-    @Disabled("There are no tests for MoCoRe yet")
-    void moCoReRepository() {
-        this.loadArtifacts(Artifacts.MOCORE);
-        this.testMoCoReRepository();
+    @Disabled("There are no tests for systems yet")
+    void system() {
+        this.loadArtifacts();
+        this.testSystem();
     }
 
     @Test
-    @Disabled("There are no tests for MoCoRe yet")
-    void moCoReSeff() {
-        this.loadArtifacts(Artifacts.MOCORE);
-        this.testMoCoReSeff();
+    @Disabled("There are no tests for resource environments yet")
+    void resourceEnvironment() {
+        this.loadArtifacts();
+        this.testResourceEnvironment();
     }
 
     @Test
-    @Disabled("There are no tests for MoCoRe yet")
-    void moCoReSystem() {
-        this.loadArtifacts(Artifacts.MOCORE);
-        this.testMoCoReSystem();
-    }
-
-    @Test
-    @Disabled("There are no tests for MoCoRe yet")
-    void moCoReResourceEnvironment() {
-        this.loadArtifacts(Artifacts.MOCORE);
-        this.testMoCoReResourceEnvironment();
-    }
-
-    @Test
-    @Disabled("There are no tests for MoCoRe yet")
-    void moCoReAllocation() {
-        this.loadArtifacts(Artifacts.MOCORE);
-        this.testMoCoReAllocation();
+    @Disabled("There are no tests for allocation contexts yet")
+    void allocation() {
+        this.loadArtifacts();
+        this.testAllocation();
     }
 }
