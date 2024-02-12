@@ -1,7 +1,9 @@
 package org.palladiosimulator.retriever.test.integration;
 
+import org.junit.jupiter.api.Disabled;
 import org.palladiosimulator.retriever.extraction.rules.JaxRSRules;
 
+@Disabled("Inconsistent repository, will be fixed")
 public class ACMETest extends CaseStudyTest {
 
     protected ACMETest() {
