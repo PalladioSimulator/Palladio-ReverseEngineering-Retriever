@@ -68,7 +68,12 @@ class SpringGatewayRules implements Rule {
 			LOG.warn("Route in " + applicationName + ": " + route.path + " -> " + route.getTargetHost)
 		}
 		routeMap.put(projectRoot, routes)
-		blackboard.addPartition(RULE_ID, routeMap)
+		if (blackboard.hasPartition(RULE_ID)) {
+			(blackboard.getPartition(RULE_ID) as Map<Path, List<GatewayRoute>>).putAll(routeMap);
+		} else {
+			blackboard.addPartition(RULE_ID, routeMap)
+		}
+
 		if (blackboard.hasPartition(ECMASCRIPT_ROUTES_ID)) {
 			val ecmaScriptRouteMap = blackboard.getPartition(ECMASCRIPT_ROUTES_ID) as Map<Path, List<GatewayRoute>>
 			if (ecmaScriptRouteMap.containsKey(projectRoot)) {
@@ -76,7 +81,6 @@ class SpringGatewayRules implements Rule {
 			} else {
 				ecmaScriptRouteMap.put(projectRoot, routes)
 			}
-			blackboard.addPartition(ECMASCRIPT_ROUTES_ID, ecmaScriptRouteMap)
 		} else {
 			blackboard.addPartition(ECMASCRIPT_ROUTES_ID, routeMap)
 		}
@@ -87,8 +91,9 @@ class SpringGatewayRules implements Rule {
 				hostnameMap = blackboard.getPartition(ECMASCRIPT_HOSTNAMES_ID) as Map<Path, String>
 			}
 			hostnameMap.put(projectRoot, applicationName)
-
-			blackboard.addPartition(ECMASCRIPT_HOSTNAMES_ID, hostnameMap)
+			if (!blackboard.hasPartition(ECMASCRIPT_HOSTNAMES_ID)) {
+				blackboard.addPartition(ECMASCRIPT_HOSTNAMES_ID, hostnameMap)
+			}
 		}
 	}
 

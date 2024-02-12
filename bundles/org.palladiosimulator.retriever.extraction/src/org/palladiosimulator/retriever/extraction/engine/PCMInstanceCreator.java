@@ -1,6 +1,7 @@
 package org.palladiosimulator.retriever.extraction.engine;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -111,9 +112,22 @@ public class PCMInstanceCreator {
 
         this.createPCMInterfaces(interfaces);
 
+        final Map<String, Integer> compositeComponentNames = new HashMap<>();
         for (final Composite composite : composites) {
+            compositeComponentNames.put(composite.name(),
+                    1 + compositeComponentNames.getOrDefault(composite.name(), 0));
+        }
+
+        for (final Composite composite : composites) {
+            String name = composite.name();
+            int nameOccurrences = compositeComponentNames.get(name);
+            if (nameOccurrences > 1) {
+                compositeComponentNames.put(name, nameOccurrences - 1);
+                name += " " + nameOccurrences;
+            }
+
             final CompositeComponentCreator c = this.create.newCompositeComponent()
-                .withName(composite.name());
+                .withName(name.replace(".", "_"));
             composite.parts()
                 .forEach(x -> this.componentCompositeCreators.put(x, c));
             composite.internalInterfaces()
@@ -328,14 +342,15 @@ public class PCMInstanceCreator {
 
             distinctInterfaces.clear();
             for (final OperationInterface requirement : comp.requirements()) {
-                final org.palladiosimulator.pcm.repository.OperationInterface requiredInterface = this
-                    .fetchInterface(requirement);
-                if (distinctInterfaces.contains(requiredInterface)) {
-                    continue;
+                for (final org.palladiosimulator.pcm.repository.OperationInterface requiredInterface : this
+                    .fetchInterfaces(requirement)) {
+                    if (distinctInterfaces.contains(requiredInterface)) {
+                        continue;
+                    }
+                    distinctInterfaces.add(requiredInterface);
+                    pcmComp.requires(requiredInterface, requirement.getName()
+                        .toString());
                 }
-                distinctInterfaces.add(requiredInterface);
-                pcmComp.requires(requiredInterface, requirement.getName()
-                    .toString());
             }
 
             final BasicComponent builtComp = pcmComp.build();
@@ -356,16 +371,18 @@ public class PCMInstanceCreator {
 
     }
 
-    private org.palladiosimulator.pcm.repository.OperationInterface fetchInterface(final OperationInterface iface) {
+    private Collection<org.palladiosimulator.pcm.repository.OperationInterface> fetchInterfaces(
+            final OperationInterface iface) {
+        Collection<org.palladiosimulator.pcm.repository.OperationInterface> result = new HashSet<>();
         if (this.pcmInterfaces.containsKey(iface)) {
-            return this.pcmInterfaces.get(iface);
+            result.add(this.pcmInterfaces.get(iface));
         }
         for (final OperationInterface registeredInterface : this.pcmInterfaces.keySet()) {
             if (iface.isPartOf(registeredInterface)) {
-                return this.pcmInterfaces.get(registeredInterface);
+                result.add(this.pcmInterfaces.get(registeredInterface));
             }
         }
-        throw new IllegalArgumentException();
+        return result;
     }
 
     private static Primitive convertPrimitive(final ITypeBinding primT) {

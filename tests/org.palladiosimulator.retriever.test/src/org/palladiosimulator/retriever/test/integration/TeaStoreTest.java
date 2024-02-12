@@ -1,28 +1,20 @@
 package org.palladiosimulator.retriever.test.integration;
 
-import org.junit.jupiter.api.Disabled;
-import org.palladiosimulator.retriever.extraction.rules.SpringRules;
+import org.palladiosimulator.retriever.extraction.rules.JaxRSRules;
 
-@Disabled("TODO: Currently broken")
 public class TeaStoreTest extends CaseStudyTest {
 
     protected TeaStoreTest() {
-        super("external/TeaStore-1.4.1", new SpringRules());
+        super("external/TeaStore-1.4.1", new JaxRSRules());
     }
 
     @Override
-    void testRetrieverRepository() {
-        // TODO: Temporarily disabled due to rule changes.
-        if (this.getClass() != null) {
-            return;
-        }
+    void testRepository() {
+        this.assertInterfaceExists("SERVICE-HOST/login[GET]");
 
-        this.assertComponentExists("tools_descartes_teastore_auth_security_BCryptProvider");
-        this.assertInterfaceExists("tools_descartes_teastore_kieker_probes_records_IPayloadCharacterization");
-
-        this.assertComponentProvidesOperation("tools_descartes_teastore_recommender_algorithm_AbstractRecommender",
-                "tools_descartes_teastore_recommender_algorithm_IRecommender", "train");
-        this.assertComponentProvidesOperation("tools_descartes_teastore_recommender_algorithm_AbstractRecommender",
-                "tools_descartes_teastore_recommender_algorithm_IRecommender", "recommendProducts");
+        this.assertComponentProvidesOperation("tools_descartes_teastore_webui_servlet_AboutUsServlet",
+                "SERVICE-HOST/about[GET]", "SERVICE-HOST/about[GET]");
+        this.assertComponentProvidesOperation("tools_descartes_teastore_webui_servlet_CartActionServlet",
+                "SERVICE-HOST/cartAction[GET]", "SERVICE-HOST/cartAction[GET]");
     }
 }

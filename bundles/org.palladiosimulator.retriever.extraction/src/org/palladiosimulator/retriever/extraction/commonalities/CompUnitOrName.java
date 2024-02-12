@@ -66,4 +66,9 @@ public class CompUnitOrName {
         final CompUnitOrName other = (CompUnitOrName) obj;
         return Objects.equals(this.compilationUnit, other.compilationUnit) && Objects.equals(this.name, other.name);
     }
+    
+    @Override
+    public String toString() {
+        return this.name();
+    }
 }

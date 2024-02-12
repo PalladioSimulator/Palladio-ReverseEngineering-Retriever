@@ -7,7 +7,6 @@ import org.palladiosimulator.retriever.extraction.commonalities.CompUnitOrName
 import java.util.Set
 import org.palladiosimulator.retriever.extraction.engine.Rule
 import org.palladiosimulator.retriever.extraction.commonalities.RESTName
-import java.util.Optional
 import org.palladiosimulator.retriever.extraction.rules.util.RESTHelper
 import java.util.Map
 import org.palladiosimulator.retriever.extraction.commonalities.HTTPMethod
@@ -44,6 +43,8 @@ class JaxRSRules implements Rule {
 
 		if(identifier.toString.endsWith("Test")) return;
 
+		if(isAbstraction(unit)) return;
+
 		// technology based and general recognition
 		if (isConverter) {
 			detectDefault(blackboard, unit)
@@ -66,7 +67,7 @@ class JaxRSRules implements Rule {
 					methodPath = RESTHelper.replaceArgumentsWithWildcards(methodPath)
 					// TODO: HTTP method switch-case
 					pcmDetector.detectCompositeProvidedOperation(identifier, m.resolveBinding,
-						new RESTName("SERVICE-HOST", methodPath, Optional.empty))
+						new RESTName("SERVICE-HOST", methodPath, HTTPMethod.all))
 				}
 			]
 			getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]
@@ -81,7 +82,7 @@ class JaxRSRules implements Rule {
 			getMethods(unit).forEach [ m |
 				if (SERVLET_METHODS.containsKey(m.name.identifier)) {
 					pcmDetector.detectProvidedOperation(identifier, m.resolveBinding,
-						new RESTName("SERVICE-HOST", path, Optional.of(SERVLET_METHODS.get(m.name.identifier))))
+						new RESTName("SERVICE-HOST", path, Set.of(SERVLET_METHODS.get(m.name.identifier))))
 				}
 			]
 			getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]
@@ -90,10 +91,11 @@ class JaxRSRules implements Rule {
 			detectDefault(blackboard, unit)
 		}
 
-		for (iface : getAllInterfaces(unit)) {
-			pcmDetector.detectProvidedInterface(identifier, iface.resolveBinding)
-			for (m : getMethods(iface)) {
-				pcmDetector.detectProvidedOperation(identifier, iface.resolveBinding, m)
+		for (parent : getAllAbstractParents(unit)) {
+			val parentBinding = parent.resolveBinding
+			pcmDetector.detectProvidedInterfaceWeakly(identifier, parentBinding)
+			for (m : getMethods(parent)) {
+				pcmDetector.detectProvidedOperationWeakly(identifier, parentBinding, m)
 			}
 		}
 	}
@@ -104,7 +106,7 @@ class JaxRSRules implements Rule {
 
 		pcmDetector.detectComponent(identifier)
 
-		getAllPublicMethods(unit).forEach[m|pcmDetector.detectProvidedOperation(identifier, m.resolveBinding)]
+		getAllPublicMethods(unit).forEach[m|pcmDetector.detectProvidedOperationWeakly(identifier, m.resolveBinding)]
 		// Do not detect requirements of services, this may connect them too tightly
 		if (!identifier.name.endsWith("ServiceImpl")) {
 			getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]
