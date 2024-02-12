@@ -45,13 +45,15 @@ public class PathTest {
     @Test
     void httpMethodsAreSpecializations() {
         final String path = "/some/path";
-        final RESTName generalName = new RESTName("test-host", path, HTTPMethod.any());
+        final RESTName generalRequirementName = new RESTName("test-host", path, HTTPMethod.any());
         final RESTName specificName = new RESTName("test-host", path, HTTPMethod.GET);
+        final RESTName generalProvisionName = new RESTName("test-host", path, HTTPMethod.all());
 
-        final Operation generalOperation = new Operation(null, generalName);
+        final Operation generalRequirementOperation = new Operation(null, generalRequirementName);
         final Operation specificOperation = new Operation(null, specificName);
+        final Operation generalProvisionOperation = new Operation(null, generalProvisionName);
 
-        assertTrue(specificOperation.isPartOf(generalOperation));
-        assertFalse(generalOperation.isPartOf(specificOperation));
+        assertTrue(specificOperation.isPartOf(generalRequirementOperation));
+        assertFalse(generalProvisionOperation.isPartOf(specificOperation));
     }
 }

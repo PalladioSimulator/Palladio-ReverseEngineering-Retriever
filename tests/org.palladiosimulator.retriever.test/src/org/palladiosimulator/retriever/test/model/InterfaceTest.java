@@ -91,7 +91,7 @@ public class InterfaceTest {
         assertEquals(1, operations.size(), "more than one operation in the interface");
 
         final List<Operation> firstMethodCandidates = operations.stream()
-            .filter(x -> Optional.of("test-host/method")
+            .filter(x -> Optional.of("test-host/method[GET]")
                 .equals(x.getName()
                     .forInterface("test-host/method")))
             .collect(Collectors.toList());
@@ -171,7 +171,7 @@ public class InterfaceTest {
 
         final Component builtComponent = builder.create(allDependencies, visibleProvisions);
         final EntireInterface expectedInterface = new EntireInterface(
-                new RESTName("test-host", "/common_interface", HTTPMethod.all()));
+                new RESTName("test-host", "/common_interface", HTTPMethod.GET));
         assertTrue(builtComponent.provisions()
             .containsPartOf(expectedInterface));
 
@@ -190,7 +190,7 @@ public class InterfaceTest {
         assertEquals(2, operations.size(), "wrong number of operations in the interface");
 
         final List<Operation> firstMethodCandidates = operations.stream()
-            .filter(x -> Optional.of("test-host/common_interface/first_method")
+            .filter(x -> Optional.of("test-host/common_interface/first_method[GET]")
                 .equals(x.getName()
                     .forInterface("test-host/common_interface")))
             .collect(Collectors.toList());
@@ -199,7 +199,7 @@ public class InterfaceTest {
         assertEquals(1, firstMethodCandidates.size(), "interface contains multiple instances of first method");
 
         final List<Operation> secondMethodCandidates = operations.stream()
-            .filter(x -> Optional.of("test-host/common_interface/second_method")
+            .filter(x -> Optional.of("test-host/common_interface/second_method[GET]")
                 .equals(x.getName()
                     .forInterface("test-host/common_interface")))
             .collect(Collectors.toList());
