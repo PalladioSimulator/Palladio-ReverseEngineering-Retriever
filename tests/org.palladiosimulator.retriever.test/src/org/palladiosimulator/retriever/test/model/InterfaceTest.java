@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.palladiosimulator.retriever.extraction.commonalities.Component;
 import org.palladiosimulator.retriever.extraction.commonalities.ComponentBuilder;
 import org.palladiosimulator.retriever.extraction.commonalities.EntireInterface;
+import org.palladiosimulator.retriever.extraction.commonalities.HTTPMethod;
 import org.palladiosimulator.retriever.extraction.commonalities.JavaInterfaceName;
 import org.palladiosimulator.retriever.extraction.commonalities.JavaOperationName;
 import org.palladiosimulator.retriever.extraction.commonalities.Operation;
@@ -64,7 +65,7 @@ public class InterfaceTest {
     @Test
     void singlePathOperation() {
         final ComponentBuilder builder = new ComponentBuilder(null);
-        final Operation expectedOperation = new Operation(null, new RESTName("test-host", "/method", Optional.empty()));
+        final Operation expectedOperation = new Operation(null, new RESTName("test-host", "/method", HTTPMethod.GET));
         builder.provisions()
             .add(expectedOperation);
 
@@ -90,7 +91,7 @@ public class InterfaceTest {
         assertEquals(1, operations.size(), "more than one operation in the interface");
 
         final List<Operation> firstMethodCandidates = operations.stream()
-            .filter(x -> Optional.of("test-host/method")
+            .filter(x -> Optional.of("test-host/method[GET]")
                 .equals(x.getName()
                     .forInterface("test-host/method")))
             .collect(Collectors.toList());
@@ -157,9 +158,9 @@ public class InterfaceTest {
     void entirePathInterface() {
         final ComponentBuilder builder = new ComponentBuilder(null);
         final Operation firstMethod = new Operation(null,
-                new RESTName("test-host", "/common_interface/first_method", Optional.empty()));
+                new RESTName("test-host", "/common_interface/first_method", HTTPMethod.GET));
         final Operation secondMethod = new Operation(null,
-                new RESTName("test-host", "/common_interface/second_method", Optional.empty()));
+                new RESTName("test-host", "/common_interface/second_method", HTTPMethod.GET));
         builder.provisions()
             .add(firstMethod);
         builder.provisions()
@@ -170,7 +171,7 @@ public class InterfaceTest {
 
         final Component builtComponent = builder.create(allDependencies, visibleProvisions);
         final EntireInterface expectedInterface = new EntireInterface(
-                new RESTName("test-host", "/common_interface", Optional.empty()));
+                new RESTName("test-host", "/common_interface", HTTPMethod.GET));
         assertTrue(builtComponent.provisions()
             .containsPartOf(expectedInterface));
 
@@ -189,7 +190,7 @@ public class InterfaceTest {
         assertEquals(2, operations.size(), "wrong number of operations in the interface");
 
         final List<Operation> firstMethodCandidates = operations.stream()
-            .filter(x -> Optional.of("test-host/common_interface/first_method")
+            .filter(x -> Optional.of("test-host/common_interface/first_method[GET]")
                 .equals(x.getName()
                     .forInterface("test-host/common_interface")))
             .collect(Collectors.toList());
@@ -198,7 +199,7 @@ public class InterfaceTest {
         assertEquals(1, firstMethodCandidates.size(), "interface contains multiple instances of first method");
 
         final List<Operation> secondMethodCandidates = operations.stream()
-            .filter(x -> Optional.of("test-host/common_interface/second_method")
+            .filter(x -> Optional.of("test-host/common_interface/second_method[GET]")
                 .equals(x.getName()
                     .forInterface("test-host/common_interface")))
             .collect(Collectors.toList());

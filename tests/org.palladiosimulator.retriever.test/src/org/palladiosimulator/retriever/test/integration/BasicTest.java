@@ -36,7 +36,7 @@ public class BasicTest extends CaseStudyTest {
 
     protected BasicTest() {
         super(PROJECT_NAME, RULES);
-        this.loadArtifacts(Artifacts.RETRIEVER);
+        this.loadArtifacts();
     }
 
     private OperationInterface getConflictingMethods(final List<Interface> interfaces) {
@@ -49,18 +49,6 @@ public class BasicTest extends CaseStudyTest {
         }
         assertNotNull(conflictingMethods);
         return conflictingMethods;
-    }
-
-    /**
-     * Tests the basic functionality of Retriever. Requires it to execute without an exception and
-     * produce an output file.
-     */
-    @Test
-    void testExecutesAndProducesFile() {
-        assertTrue(new File(this.getConfig()
-            .getOutputFolder()
-            .appendSegment("pcm.repository")
-            .devicePath()).exists());
     }
 
     @Disabled("FIXME: Reliance on outdated JaxRS rule")

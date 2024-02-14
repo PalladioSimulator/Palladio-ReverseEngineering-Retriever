@@ -149,14 +149,17 @@ class SpringRules implements Rule {
 
 		if(identifier.toString.endsWith("Test")) return;
 
-		pcmDetector.detectComponent(identifier)
+		if(isAbstraction(unit) && !isClient && !isRepository) return;
 
 		if (isComponent) {
+			pcmDetector.detectComponent(identifier);
 			getConstructors(unit).stream.filter[c|isMethodAnnotatedWithName(c, "Autowired")].flatMap [ c |
 				getParameters(c).stream
 			].filter[p|!isParameterAnnotatedWith(p, "Value")].forEach [ p |
 				pcmDetector.detectRequiredInterface(identifier, p)
 			]
+		} else {
+			return;
 		}
 
 		if (isService || isController) {
@@ -215,13 +218,13 @@ class SpringRules implements Rule {
 			}
 		}
 
-		for (iface : getAllInterfaces(unit)) {
-			val ifaceBinding = iface.resolveBinding
+		for (parent : getAllAbstractParents(unit)) {
+			val parentBinding = parent.resolveBinding
 			// Hide Repository interface implementations, they tend to connect composites in unrepresentative ways
-			if (ifaceBinding !== null && !ifaceBinding.name.endsWith("Repository")) {
-				pcmDetector.detectProvidedInterface(identifier, ifaceBinding)
-				for (m : getMethods(iface)) {
-					pcmDetector.detectProvidedOperation(identifier, ifaceBinding, m)
+			if (parentBinding !== null && !parentBinding.name.endsWith("Repository")) {
+				pcmDetector.detectProvidedInterfaceWeakly(identifier, parentBinding)
+				for (m : getMethods(parent)) {
+					pcmDetector.detectProvidedOperationWeakly(identifier, parentBinding, m)
 				}
 			}
 		}
@@ -289,32 +292,32 @@ class SpringRules implements Rule {
 	def getHTTPMethod(MethodDeclaration m) {
 		val requestMapping = getMappingString(m, "RequestMapping");
 		if (requestMapping !== null) {
-			return Optional.empty;
+			return HTTPMethod.any();
 		}
 
 		val getMapping = getMappingString(m, "GetMapping");
 		if (getMapping !== null) {
-			return Optional.of(HTTPMethod.GET);
+			return Set.of(HTTPMethod.GET);
 		}
 
 		val postMapping = getMappingString(m, "PostMapping");
 		if (postMapping !== null) {
-			return Optional.of(HTTPMethod.POST);
+			return Set.of(HTTPMethod.POST);
 		}
 
 		val putMapping = getMappingString(m, "PutMapping");
 		if (putMapping !== null) {
-			return Optional.of(HTTPMethod.PUT);
+			return Set.of(HTTPMethod.PUT);
 		}
 
 		val deleteMapping = getMappingString(m, "DeleteMapping");
 		if (deleteMapping !== null) {
-			return Optional.of(HTTPMethod.DELETE);
+			return Set.of(HTTPMethod.DELETE);
 		}
 
 		val patchMapping = getMappingString(m, "PatchMapping");
 		if (patchMapping !== null) {
-			return Optional.of(HTTPMethod.PATCH);
+			return Set.of(HTTPMethod.PATCH);
 		}
 
 		return null;
