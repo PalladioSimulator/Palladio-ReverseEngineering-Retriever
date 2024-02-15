@@ -91,7 +91,7 @@ runs:
         }
 
         print_header() {
-          echo "# Git repository information"
+          echo "## Git repository information"
           echo "Date of execution: $(date -u)"
         }
 
