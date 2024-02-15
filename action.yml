@@ -92,7 +92,6 @@ runs:
 
         print_header() {
           echo "## Git repository information"
-          echo "Date of execution: $(date -u)"
         }
 
         # gather git repository information of the source directory or the containing directories
