@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.palladiosimulator.retriever.extraction.engine.MapMerger;
@@ -60,8 +62,8 @@ public class Requirements implements Iterable<OperationInterface> {
             .iterator();
     }
 
-    public Map<OperationInterface, List<Operation>> simplified() {
-        final List<Map<OperationInterface, List<Operation>>> simplifiedInterfaces = new LinkedList<>();
+    public Map<OperationInterface, SortedSet<Operation>> simplified() {
+        final List<Map<OperationInterface, SortedSet<Operation>>> simplifiedInterfaces = new LinkedList<>();
         for (final OperationInterface root : this.groupedRequirements.keySet()) {
             final List<Operation> simplifiedRoot = new ArrayList<>(root.simplified()
                 .values()
@@ -77,7 +79,7 @@ public class Requirements implements Iterable<OperationInterface> {
             }
             simplifiedInterfaces.add(Map.of(root, simplifiedRoot.stream()
                 .distinct()
-                .collect(Collectors.toList())));
+                .collect(Collectors.toCollection(TreeSet::new))));
         }
         return MapMerger.merge(simplifiedInterfaces);
     }
@@ -102,7 +104,7 @@ public class Requirements implements Iterable<OperationInterface> {
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
-        final Map<OperationInterface, List<Operation>> simplified = this.simplified();
+        final Map<OperationInterface, SortedSet<Operation>> simplified = this.simplified();
 
         for (final OperationInterface iface : simplified.keySet()) {
             builder.append(iface.getName());

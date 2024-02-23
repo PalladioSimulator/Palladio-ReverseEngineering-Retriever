@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -107,7 +108,7 @@ public class PCMInstanceCreator {
         final PCMDetectionResult detectionResult = this.blackboard.getPCMDetector()
             .getResult();
         final Set<Component> components = detectionResult.getComponents();
-        final Map<OperationInterface, List<Operation>> interfaces = detectionResult.getOperationInterfaces();
+        final Map<OperationInterface, SortedSet<Operation>> interfaces = detectionResult.getOperationInterfaces();
         final Set<Composite> composites = detectionResult.getCompositeComponents();
 
         this.createPCMInterfaces(interfaces);
@@ -244,7 +245,7 @@ public class PCMInstanceCreator {
         return this.repository.createRepositoryNow();
     }
 
-    private void createPCMInterfaces(final Map<OperationInterface, List<Operation>> interfaces) {
+    private void createPCMInterfaces(final Map<OperationInterface, SortedSet<Operation>> interfaces) {
         final Map<String, Integer> signatureNameCount = new HashMap<>();
         interfaces.forEach((inter, operations) -> {
             final String interName = inter.getName()
@@ -331,7 +332,7 @@ public class PCMInstanceCreator {
                 .simplified()
                 .values()
                 .stream()
-                .flatMap(List::stream)
+                .flatMap(Collection::stream)
                 .forEach(operation -> {
                     final IMethodBinding method = operation.getBinding();
                     final Optional<ASTNode> declaration = this.getDeclaration(method);
