@@ -244,6 +244,7 @@ public class PCMInstanceCreator {
     }
 
     private void createPCMInterfaces(final Map<OperationInterface, Set<Operation>> interfaces) {
+        final Map<String, Integer> interfaceNameRegistry = new HashMap<>();
         final Map<String, Integer> signatureNameRegistry = new HashMap<>();
 
         interfaces.forEach((inter, operations) -> {
@@ -251,16 +252,17 @@ public class PCMInstanceCreator {
                 .toString();
             LOG.info("Current PCM Interface: " + interName);
 
-            final String pcmInterfaceName = interName.replace(".", "_");
+            final String pcmInterfaceName = prepareUniquePCMName(interName, interfaceNameRegistry);
             final OperationInterfaceCreator pcmInterface = this.create.newOperationInterface()
                 .withName(pcmInterfaceName);
 
             for (final Operation operation : operations) {
-                String name = operation.getName()
+                final String operationName = operation.getName()
                     .forInterface(interName)
                     .orElseThrow();
+                final String pcmOperationName = prepareUniquePCMName(operationName, signatureNameRegistry);
                 OperationSignatureCreator signature = this.create.newOperationSignature()
-                    .withName(prepareUniquePCMName(name, signatureNameRegistry));
+                    .withName(pcmOperationName);
 
                 final IMethodBinding method = operation.getBinding();
 
@@ -282,7 +284,7 @@ public class PCMInstanceCreator {
                 final Optional<ASTNode> astNode = this.getDeclaration(method);
                 if (astNode.isPresent() && this.blackboard.getSeffAssociation(astNode.get()) == null) {
                     final ResourceDemandingSEFF seff = this.create.newSeff()
-                        .onSignature(this.create.fetchOfSignature(name))
+                        .onSignature(this.create.fetchOfSignature(pcmOperationName))
                         .buildRDSeff();
                     this.blackboard.putSeffAssociation(astNode.get(), seff);
                 }
