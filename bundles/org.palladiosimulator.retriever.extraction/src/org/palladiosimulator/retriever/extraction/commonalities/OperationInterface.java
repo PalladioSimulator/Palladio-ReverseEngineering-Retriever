@@ -1,12 +1,12 @@
 package org.palladiosimulator.retriever.extraction.commonalities;
 
 import java.util.Map;
-import java.util.SortedSet;
+import java.util.Set;
 
 public interface OperationInterface extends Comparable<OperationInterface> {
     Name getName();
 
-    Map<OperationInterface, SortedSet<Operation>> simplified();
+    Map<OperationInterface, Set<Operation>> simplified();
 
     /**
      * @returns the most specific interface name (and the interface name for java)

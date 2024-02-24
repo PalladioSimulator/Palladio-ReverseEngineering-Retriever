@@ -1,10 +1,10 @@
 package org.palladiosimulator.retriever.extraction.commonalities;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
@@ -32,8 +32,8 @@ public class EntireInterface implements OperationInterface {
     }
 
     @Override
-    public Map<OperationInterface, SortedSet<Operation>> simplified() {
-        return Map.of(this, new TreeSet<>());
+    public Map<OperationInterface, Set<Operation>> simplified() {
+        return Map.of(this, new HashSet<>());
     }
 
     @Override
