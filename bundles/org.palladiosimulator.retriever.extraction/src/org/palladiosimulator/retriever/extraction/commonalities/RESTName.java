@@ -112,6 +112,7 @@ public class RESTName implements InterfaceName, OperationName {
             } else {
                 List<String> httpMethodNames = this.httpMethods.stream()
                     .map(HTTPMethod::toString)
+                    .sorted()
                     .collect(Collectors.toList());
                 methodString += String.join(",", httpMethodNames);
             }
