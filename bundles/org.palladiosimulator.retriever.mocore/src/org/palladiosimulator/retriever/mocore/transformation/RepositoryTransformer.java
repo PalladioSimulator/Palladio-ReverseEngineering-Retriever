@@ -1,6 +1,7 @@
 package org.palladiosimulator.retriever.mocore.transformation;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -29,6 +30,8 @@ import org.palladiosimulator.pcm.repository.OperationSignature;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.seff.AbstractAction;
+import org.palladiosimulator.pcm.seff.AbstractBranchTransition;
+import org.palladiosimulator.pcm.seff.BranchAction;
 import org.palladiosimulator.pcm.seff.ExternalCallAction;
 import org.palladiosimulator.pcm.seff.ResourceDemandingSEFF;
 import org.palladiosimulator.pcm.seff.ServiceEffectSpecification;
@@ -94,7 +97,6 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
             }
         }
 
-        // Add basic components with their roles and seff to fluent repository
         for (final AtomicComponent component : model.getByType(AtomicComponent.class)) {
             final BasicComponentCreator componentCreator = this.getCreator(repositoryFactory, component);
 
@@ -170,10 +172,7 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
                         if (seff instanceof ResourceDemandingSEFF) {
                             final ResourceDemandingSEFF rdSeff = (ResourceDemandingSEFF) seff;
                             final EList<AbstractAction> behavior = rdSeff.getSteps_Behaviour();
-                            final List<ExternalCallAction> externalCallActions = behavior.stream()
-                                .filter(action -> action instanceof ExternalCallAction)
-                                .map(action -> (ExternalCallAction) action)
-                                .collect(Collectors.toList());
+                            final List<ExternalCallAction> externalCallActions = filterExternalCallActions(behavior);
 
                             for (final ExternalCallAction externalCallAction : externalCallActions) {
                                 final OperationSignature externalSignature = externalCallAction
@@ -669,6 +668,24 @@ public class RepositoryTransformer implements Transformer<PcmSurrogate, Reposito
         final String interfaceEntityName = interfaceInstance.getValue()
             .getEntityName();
         return String.format(ROLE_REQUIRES_NAME_PATTERN, interfaceEntityName);
+    }
+
+    private static List<ExternalCallAction> filterExternalCallActions(Collection<AbstractAction> actions) {
+        final List<ExternalCallAction> externalCallActions = new ArrayList<>();
+
+        for (AbstractAction action : actions) {
+            if (action instanceof final BranchAction branchAction) {
+                for (final AbstractBranchTransition branch : branchAction.getBranches_Branch()) {
+                    final EList<AbstractAction> branchActions = branch.getBranchBehaviour_BranchTransition()
+                        .getSteps_Behaviour();
+                    externalCallActions.addAll(filterExternalCallActions(branchActions));
+                }
+            } else if (action instanceof final ExternalCallAction externalCallAction) {
+                externalCallActions.add(externalCallAction);
+            }
+        }
+
+        return externalCallActions;
     }
 
     // TODO Test and move to evaluation helper

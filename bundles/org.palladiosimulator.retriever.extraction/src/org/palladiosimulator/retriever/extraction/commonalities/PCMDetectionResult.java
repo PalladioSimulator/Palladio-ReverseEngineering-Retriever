@@ -12,7 +12,7 @@ import org.palladiosimulator.retriever.extraction.engine.MapMerger;
 public class PCMDetectionResult {
     private final Set<Component> components;
     private final Set<Composite> composites;
-    private final Map<OperationInterface, List<Operation>> operationInterfaces;
+    private final Map<OperationInterface, Set<Operation>> operationInterfaces;
 
     public PCMDetectionResult(final Map<CompUnitOrName, ComponentBuilder> components,
             final Map<String, CompositeBuilder> composites, final ProvisionsBuilder compositeProvisions,
@@ -144,9 +144,8 @@ public class PCMDetectionResult {
         return provisions;
     }
 
-    private Map<OperationInterface, List<Operation>> createOperationInterfaces() {
-        // TODO: This has to include composite interfaces as well
-        final List<Map<OperationInterface, List<Operation>>> constructedOperationInterfaces = this.getComponents()
+    private Map<OperationInterface, Set<Operation>> createOperationInterfaces() {
+        final List<Map<OperationInterface, Set<Operation>>> constructedOperationInterfaces = this.getComponents()
             .stream()
             .map(x -> x.provisions()
                 .simplified())
@@ -177,7 +176,7 @@ public class PCMDetectionResult {
         return this.composites;
     }
 
-    public Map<OperationInterface, List<Operation>> getOperationInterfaces() {
+    public Map<OperationInterface, Set<Operation>> getOperationInterfaces() {
         return this.operationInterfaces;
     }
 }
