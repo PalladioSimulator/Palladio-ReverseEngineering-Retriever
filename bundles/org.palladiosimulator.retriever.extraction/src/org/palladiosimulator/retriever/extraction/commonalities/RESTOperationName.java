@@ -55,8 +55,8 @@ public class RESTOperationName implements OperationName {
     }
 
     @Override
-    public InterfaceName createInterface(final String name) {
-        return RESTName.parse(name)
+    public Name createName(final String name) {
+        return RESTOperationName.parse(name)
             .orElseThrow();
     }
 
@@ -113,6 +113,11 @@ public class RESTOperationName implements OperationName {
 
     @Override
     public boolean isPartOf(final String iface) {
+        if (RESTName.parse(iface)
+            .isPresent()) {
+            return restName.isPartOf(iface);
+        }
+
         Optional<RESTOperationName> parsedIface = parse(iface);
         if (parsedIface.isEmpty()) {
             return false;
@@ -120,14 +125,14 @@ public class RESTOperationName implements OperationName {
 
         RESTOperationName restIface = parsedIface.get();
 
-        if (!this.restName.isPartOf(restIface.restName.toString())) {
+        if (!this.restName.equals(restIface.restName)) {
             return false;
         }
 
         Set<HTTPMethod> normalHttpMethods = new HashSet<>(this.httpMethods);
         normalHttpMethods.remove(HTTPMethod.WILDCARD);
 
-        if (this.restName.equals(restIface.restName) && !restIface.httpMethods.contains(HTTPMethod.WILDCARD)
+        if (!restIface.httpMethods.contains(HTTPMethod.WILDCARD)
                 && !restIface.httpMethods.containsAll(this.httpMethods)) {
             return false;
         }

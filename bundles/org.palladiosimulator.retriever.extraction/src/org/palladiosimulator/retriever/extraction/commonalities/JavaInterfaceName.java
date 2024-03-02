@@ -21,7 +21,7 @@ public class JavaInterfaceName implements InterfaceName {
     }
 
     @Override
-    public InterfaceName createInterface(final String name) {
+    public InterfaceName createName(final String name) {
         return new JavaInterfaceName(name);
     }
 

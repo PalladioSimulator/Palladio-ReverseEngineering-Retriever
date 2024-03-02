@@ -57,7 +57,7 @@ public class RESTName implements InterfaceName {
     }
 
     @Override
-    public InterfaceName createInterface(final String name) {
+    public InterfaceName createName(final String name) {
         return parse(name).orElseThrow();
     }
 
@@ -164,6 +164,10 @@ public class RESTName implements InterfaceName {
     }
 
     public static Optional<RESTName> parse(final String iface) {
+        if (iface.contains("[")) {
+            // If a HTTP method is present, iface is not a RESTName.
+            return Optional.empty();
+        }
         final Optional<List<String>> interfacePathOption = parsePath(iface);
         if (interfacePathOption.isEmpty()) {
             return Optional.empty();

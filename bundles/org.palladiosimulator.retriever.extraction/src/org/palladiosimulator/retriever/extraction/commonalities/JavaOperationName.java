@@ -32,7 +32,7 @@ public class JavaOperationName implements OperationName {
     }
 
     @Override
-    public InterfaceName createInterface(final String name) {
+    public InterfaceName createName(final String name) {
         return new JavaInterfaceName(name);
     }
 
