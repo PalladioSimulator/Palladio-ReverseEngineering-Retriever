@@ -21,6 +21,7 @@ import org.palladiosimulator.retriever.extraction.engine.Rule
 import org.palladiosimulator.retriever.extraction.rules.util.SpringHelper
 import org.palladiosimulator.retriever.extraction.rules.util.RESTHelper
 import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard
+import org.palladiosimulator.retriever.extraction.commonalities.RESTOperationName
 
 class SpringRules implements Rule {
 	static final Logger LOG = Logger.getLogger(SpringRules)
@@ -188,7 +189,7 @@ class SpringRules implements Rule {
 						methodName = RESTHelper.replaceArgumentsWithWildcards(methodName);
 						val httpMethod = getHTTPMethod(m);
 						pcmDetector.detectCompositeProvidedOperation(identifier, m.resolveBinding,
-							new RESTName(applicationName, methodName, httpMethod));
+							new RESTOperationName(applicationName, methodName, httpMethod));
 					}
 				}
 			}
@@ -210,9 +211,10 @@ class SpringRules implements Rule {
 						requestedMapping = substituteVariables(requestedMapping, contextVariables);
 						var methodName = ifaceName + "/" + requestedMapping;
 						methodName = RESTHelper.replaceArgumentsWithWildcards(methodName);
-						val httpMethod = getHTTPMethod(m);
+						// Ignore HTTPMethod, only entire interfaces can be required right now.
+						// TODO: Find a way around this.
 						pcmDetector.detectCompositeRequiredInterface(identifier,
-							new RESTName(serviceIdentifier, methodName, httpMethod));
+							new RESTName(serviceIdentifier, methodName));
 					}
 				}
 			}
@@ -292,32 +294,32 @@ class SpringRules implements Rule {
 	def getHTTPMethod(MethodDeclaration m) {
 		val requestMapping = getMappingString(m, "RequestMapping");
 		if (requestMapping !== null) {
-			return HTTPMethod.any();
+			return HTTPMethod.WILDCARD;
 		}
 
 		val getMapping = getMappingString(m, "GetMapping");
 		if (getMapping !== null) {
-			return Set.of(HTTPMethod.GET);
+			return HTTPMethod.GET;
 		}
 
 		val postMapping = getMappingString(m, "PostMapping");
 		if (postMapping !== null) {
-			return Set.of(HTTPMethod.POST);
+			return HTTPMethod.POST;
 		}
 
 		val putMapping = getMappingString(m, "PutMapping");
 		if (putMapping !== null) {
-			return Set.of(HTTPMethod.PUT);
+			return HTTPMethod.PUT;
 		}
 
 		val deleteMapping = getMappingString(m, "DeleteMapping");
 		if (deleteMapping !== null) {
-			return Set.of(HTTPMethod.DELETE);
+			return HTTPMethod.DELETE;
 		}
 
 		val patchMapping = getMappingString(m, "PatchMapping");
 		if (patchMapping !== null) {
-			return Set.of(HTTPMethod.PATCH);
+			return HTTPMethod.PATCH;
 		}
 
 		return null;

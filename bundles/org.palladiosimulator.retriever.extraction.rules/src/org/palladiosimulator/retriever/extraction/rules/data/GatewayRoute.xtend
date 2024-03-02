@@ -1,7 +1,6 @@
 package org.palladiosimulator.retriever.extraction.rules.data
 
 import org.palladiosimulator.retriever.extraction.commonalities.RESTName
-import org.palladiosimulator.retriever.extraction.commonalities.HTTPMethod
 
 class GatewayRoute {
 	static final String TRAILING_WILDCARD = "/**"
@@ -42,7 +41,7 @@ class GatewayRoute {
 			val newUrlSegments = urlSegments.subList(stripPrefixLength, urlSegments.length)
 			newUrl = toPath(newUrlSegments)
 		}
-		return new RESTName(targetHost, newUrl, HTTPMethod.any)
+		return new RESTName(targetHost, newUrl)
 	}
 
 	private static def calculateStripPrefixLength(String pathPattern) {
