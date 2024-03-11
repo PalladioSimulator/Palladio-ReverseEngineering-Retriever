@@ -183,12 +183,11 @@ runs:
             fi
         done
 
-# Check if the download was successful
-if [ $success -ne 1 ]; then
-    echo "Failed to find the download URL after $max_retries attempts."
-    exit 1
-fi
-
+        # Check if the download was successful
+        if [ $success -ne 1 ]; then
+            echo "Failed to find the download URL after $max_retries attempts."
+            exit 1
+        fi
 
     - name: Extract Retriever
       shell: bash
