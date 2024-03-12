@@ -1,50 +1,84 @@
-# Palladio Reverseengineering Retriever GitHub Action
+# Palladio Reverse Engineering Retriever GitHub Action
 
 ## Overview
 
-This GitHub Action, named "Run Retriever," is designed to reverse-engineer a project's source code into a Palladio Component Model (PCM) and upload the PCM as an artifact named `retriever`. Specifically, it targets GitHub repositories, making it an essential tool for developers looking to analyze and understand the architecture of their projects in a model-driven manner. The action outputs the PCM to the specified `source_path`, allowing for a detailed examination of the project structure.
+This GitHub Action is designed to reverse-engineer a project's source code into a Palladio Component Model (PCM) and upload the PCM as an artifact named `retriever`.
+In addition to that further useful information and measurements on the project are gathered and collected in a report.
+This action is intended to be used to analyze projects in a reusable and automatic way to document and to gather insights.
 
 ## How It Works
 
-The action performs several steps to generate the PCM:
+The action performs several steps to generate the PCM and the report:
 
-1. **Set Up JDK 17:** Ensures Java Development Kit 17 is available for the action to run.
-2. **Create Temporary Directory:** Prepares a workspace for the retriever's output and intermediate files.
-3. **Gather Retriever Info:** Collects and records information about the Retriever tool's version and execution date.
-4. **Gather Git Repository Info:** Retrieves and logs details about the Git repository, including the URL, branch, and latest commit.
-5. **System Information:** Installs `neofetch` to fetch and log detailed system information where the action is executed.
-6. **Code Analysis:** Uses `cloc` to analyze the source code, providing a summary of languages used, lines of code, and comments.
-7. **Execution Timing:** Optionally benchmarks the Retriever execution using `hyperfine` or reports the execution time using `time`.
-8. **Combine and Clean Up Files:** Aggregates all collected information into a single README.md file and cleans up intermediate files.
-9. **Upload Analysis Results:** The final PCM and analysis report are packaged and uploaded as an artifact.
+1. **Set Up JDK 17:**
+   Ensures Java Development Kit 17 is available for the action to run.
+   Required to execute the retriever eclipse plugin.
+2. **Create Temporary Directory:**
+   Prepares a workspace for the retriever's output and intermediate files of the report.
+3. **Gather Retriever Information:**
+   Collects and records information about the Retriever tool's version and execution date.
+4. **Gather Git Repository Information:**
+   Retrieves and logs details about the Git repository, including the URL, branch, and latest commit. 
+   This is done for all repositories in case a multi repository project is analyzed.
+5. **Gather System Information:**
+   Installs `neofetch` to fetch and log detailed system information of the GitHub runner that executes the action.
+6. **Perform Code Analysis:**
+   Uses `cloc` to analyze the source code, providing a summary of languages used, lines of code, and comments.
+7. **Execution Timing:**
+   This step executes the Retriever and measures the runtime of the reverse engineering process.
+   Depending on the input value of the parameter `benchmark`, the runtime is either measured using `time` or benchmarked using `hyperfine`.
+   The benchmark performs 3 warmup cycles after which 10 runs are performed to measure the descriptive statistics of the runtime.  
+8. **Combine and Clean Up Files:** 
+   Aggregates all collected information into a single `README.md` file and cleans up intermediate files.
+9. **Upload Analysis Results:** 
+   The final PCM and analysis report are packaged and uploaded as an artifact called `retriever`.
 
 ## Inputs
 
 The action requires the following inputs:
 
-- **source_path:** The project location to reverse-engineer. It's required and defaults to the root directory.
-- **rules:** A comma-separated list of rules for reverse-engineering. Required.
-- **rules_path:** Location of additional project-specific rules. Optional.
-- **benchmark:** Whether to use Hyperfine for benchmarking the retriever's execution. Optional and defaults to false.
+| Input     | Required/Optional | Description                                                                 | Default Value     |
+|----------------|-------------------|-----------------------------------------------------------------------------|-------------------|
+| source_path    | Required          | The project location to reverse-engineer.                                   | Root directory    |
+| rules*          | Required          | A comma-separated list of rules for reverse-engineering.                    | Maven and Spring              |
+| rules_path     | Optional          | Location of additional project-specific rules.                              | Root directory                |
+| benchmark      | Optional          | Whether to use Hyperfine for benchmarking the retriever's execution.        | false             |
+
+*The following `rules` are currently supported:
+- Maven Project Object Model: `org.palladiosimulator.retriever.extraction.rules.maven`
+- Spring Boot and Framework: `org.palladiosimulator.retriever.extraction.rules.spring`
+- Jakarta RESTful Web Services: `org.palladiosimulator.retriever.extraction.rules.jax_rs`
 
 ## Output
 
-The output artifact, named `retriever`, contains the Palladio Component Model (PCM) at the specified `source_path`. For example, if `source_path=MyProject/Repository`, the PCM will be located at `[retriever]/MyProject/Repository/repository.pcm`.
+The output artifact, named `retriever`, contains the Palladio Component Model (PCM) and the markdown report `README.md` containing the gathered information and measurements.
 
 ## Example Usage
 
+This is a sample workflow that uses the retriever action. 
+Add this `.yml` file to the workflow folder `./github/workflows/` of your GitHub.
+
 ```yaml
+name: Reverse Engineering
+
 jobs:
-  analyze_project:
+  ReverseEngineering:
+    name: Reverse Engineering
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
     steps:
-      - uses: actions/checkout@v3
-      - uses: your-username/run-retriever@v1
-        with:
-          source_path: "src/my_project"
-          rules: "org.palladiosimulator.retriever.extraction.rules.maven,org.palladiosimulator.retriever.extraction.rules.spring"
-          rules_path: "config/rules"
-          benchmark: "true"
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Run Rule Engine
+      uses: PalladioSimulator/Palladio-ReverseEngineering-Retriever@main
+      with:
+        source_path: 'src/my_project'
+        benchmark: 'true'
+        rules: "org.palladiosimulator.retriever.extraction.rules.maven,org.palladiosimulator.retriever.extraction.rules.spring"
 ```
 
-This example checks out a project and runs the Retriever action on the `src/my_project` directory with specified rules and a custom rules path. Benchmarking is enabled to provide detailed execution timing.
+This example checks out a project and runs the Retriever action on the `src/my_project` directory with the specified rule.
+Benchmarking is enabled to provide detailed information about the execution time.
