@@ -74,7 +74,7 @@ To contribute, please follow these steps:
 Alternatively, you can read the GitHub documentation on how to [create a pull request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request).
 
 ## Links
-* Palladio homepage: https://www.palladio-simulator.com/home/
+* Palladio homepage: https://www.palladio-simulator.com/
 * Comprehensive documentation: https://sdqweb.ipd.kit.edu/wiki/Palladio_Component_Model
 * Issue tracker: https://palladio-simulator.atlassian.net/jira/
 * Update site: https://updatesite.palladio-simulator.com/palladio-reverseengineering-retriever/nightly/
