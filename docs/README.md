@@ -3,7 +3,7 @@
 ## Overview
 
 This GitHub Action is designed to reverse-engineer a project's source code into a Palladio Component Model (PCM) and upload the PCM as an artifact named `retriever`.
-In addition to that further useful information and measurements on the project are gathered and collected in a markdown report.
+In addition to that, further useful information and measurements on the project are gathered and collected in a markdown report.
 This action is intended to be used to analyze projects in a reusable and automatic manner.
 
 ## How It Works
@@ -27,7 +27,7 @@ The action performs several steps to generate the PCM and the report:
 7. **Execution Timing:**
    This step executes the Retriever and measures the runtime of the reverse engineering process.
    Depending on the input value of the parameter `benchmark`, the runtime is either simply measured using `time` or benchmarked using `hyperfine`.
-   In case of the benchmark, 3 warmup cycles are performed after which 10 runs are executed to measure the descriptive statistics of the runtime.  
+   In case of the benchmark, three warm up cycles are performed. Afterwards, ten runs are executed to measure the descriptive statistics of the runtime.  
 8. **Combine and Clean Up Files:** 
    Aggregates all collected information into a single `README.md` file and cleans up intermediate files.
 9. **Upload Analysis Results:** 
