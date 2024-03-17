@@ -41,37 +41,85 @@ runs:
         echo "tmp_dir=$TMP_DIR" >> $GITHUB_ENV
         mkdir $TMP_DIR/retriever_out
 
+    - name: Get Action Version
+      shell: bash
+      # Assuming a format like in the GitHub Actions documentation:
+      # /home/runner/work/_actions/repo-owner/name-of-action-repo/v1
+      # There, the 7th segment is the action's tag. This is bumped up
+      # to 8 since `cut` counts the empty string before the first / as well.
+      run: |
+        ACTION_VERSION=$(echo ${{ github.action_path }} | cut -d / -f 8- -)
+        echo "action_version=$ACTION_VERSION" >>  $GITHUB_ENV
+
+    - name: Determine Retriever Version
+      shell: bash
+      # Uses the latest Retriever or the Retriever with the same version that this action has
+      run: |
+        if [[ "${{ env.action_version }}" == "main" ]]; then
+          echo "retriever=${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/latest" >> $GITHUB_ENV
+        else
+          echo "retriever=${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/tags/${{ env.action_version }}" >> $GITHUB_ENV
+        fi
+
     - name: Gather Retriever Info
       shell: bash
       run: |
         RETRIEVER_INFO_FILE=${{ env.tmp_dir }}/retriever_out/retriever_info.md
+
         echo "RETRIEVER_INFO_FILE=$RETRIEVER_INFO_FILE" >> $GITHUB_ENV
         {
           echo "# [Retriever](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever) Report"
           echo "| Version | Date |"
           echo "| ------- | ---- |"
-          echo "| $(curl -sL ${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/latest | jq  -r ".tag_name") | $(date -u) |"
+          echo "| $(curl -sL "${{ env.retriever }}" | jq  -r ".tag_name") | $(date -u) |"
         } > $RETRIEVER_INFO_FILE
 
     - name: Gather Git Repository Info
       shell: bash
       run: |
-        GIT_INFO_FILE=${{ env.tmp_dir }}/retriever_out/git_info.md
-        cd "${{ github.workspace }}/${{ inputs.source_path }}"
+        GIT_INFO_FILE="${{ env.tmp_dir }}/retriever_out/git_info.md"
+        SOURCE_PATH="${{ github.workspace }}/${{ inputs.source_path }}"
         echo "GIT_INFO_FILE=$GIT_INFO_FILE" >> $GITHUB_ENV
-        {
-          echo "## Git repository information"
+
+        gather_git_info() {
           echo "|    Attribute   | Value |"
           echo "| -------------- | ----- |"
           echo "| Repository URL | $(git config --get remote.origin.url) |"
           echo "| Branch         | $(git branch --show-current) |"
           echo "| Commit         | $(git log -1 --pretty=format:"%H") |"
-        } > $GIT_INFO_FILE
-    
+          echo ""
+        }
+
+        print_header() {
+          echo "## Git repository information"
+        }
+
+        # gather git repository information of the source directory or the containing directories
+        if [ -d "$SOURCE_PATH/.git" ]; then
+          cd "$SOURCE_PATH"
+          print_header >> "$GIT_INFO_FILE"
+          gather_git_info >> "$GIT_INFO_FILE"
+        else
+          FOUND_REPO=false
+          for d in "$SOURCE_PATH"/*; do
+            if [ -d "$d/.git" ]; then
+              cd "$d"
+              if [ "$FOUND_REPO" = false ]; then
+                print_header >> "$GIT_INFO_FILE"
+              fi
+              gather_git_info >> "$GIT_INFO_FILE"
+              FOUND_REPO=true
+            fi
+          done
+          if [ "$FOUND_REPO" = false ]; then
+            echo "no git repository found" > "$GIT_INFO_FILE"
+          fi
+        fi
+
     - name: Install Neofetch
       shell: bash
       run: sudo apt-get install -y neofetch
-    
+
     - name: Gather Specific System Information with Neofetch
       shell: bash
       run: |
@@ -84,7 +132,7 @@ runs:
           neofetch os distro kernel cpu gpu memory --stdout | \
           sed -E 's/^(os): (.*)$/| OS | \2 |/; s/^(distro): (.*)$/| Distro | \2 |/; s/^(kernel): (.*)$/| Kernel | \2 |/; s/^(cpu): (.*)$/| CPU | \2 |/; s/^(gpu): (.*)$/| GPU | \2 |/; s/^(memory): (.*)$/| Memory | \2 |/'
         } > $SYSTEM_INFO_FILE
-    
+
     - name: Install cloc
       shell: bash
       run: |
@@ -101,34 +149,10 @@ runs:
           sed -e '1d; 2s/cloc|github.com\/AlDanial\///; /^--- | ---$/d'
         } > $CLOC_INFO_FILE
 
-    - name: Get Action Version
-      shell: bash
-      # Assuming a format like in the GitHub Actions documentation:
-      # /home/runner/work/_actions/repo-owner/name-of-action-repo/v1
-      # There, the 7th segment is the action's tag. This is bumped up
-      # to 8 since `cut` counts the empty string before the first / as well.
-      run: |
-        ACTION_VERSION=$(echo ${{ github.action_path }} | cut -d / -f 8- -)
-        echo "action_version=$ACTION_VERSION" >>  $GITHUB_ENV
-
-    - name: Download Latest Retriever
-      if: env.action_version == 'main'
-      shell: bash
-      run: |
-        curl -s ${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/latest \
-          | grep -E 'browser_download_url' \
-          | grep linux \
-          | grep x86_64 \
-          | grep -Eo 'https://[^\"]*' \
-          | xargs wget -O "${{ env.tmp_dir }}/retriever.zip"
-
     - name: Download Retriever
-      if: env.action_version != 'main'
       shell: bash
-      # Downloads the Retriever with the same version that this action has
-      # (not necessarily the most recent one!).
       run: |
-        curl -s ${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/tags/${{ env.action_version }} \
+        curl -s ${{ env.retriever }} \
           | grep -E 'browser_download_url' \
           | grep linux \
           | grep x86_64 \
@@ -151,6 +175,7 @@ runs:
       shell: bash
       working-directory: ${{ env.tmp_dir }}/retriever
       env:
+        NO_AT_BRIDGE: 1 # avoid eclipse error "AT-SPI: Error retrieving accessibility bus address"
         RETRIEVER_COMMAND: './eclipse -nosplash -i "${{ github.workspace }}/${{ inputs.source_path }}" -o "${{ env.tmp_dir }}/eclipse_tmp" -r "${{ inputs.rules }}"'
         TIMING_INFO_FILE: ${{ env.tmp_dir }}/retriever_out/timing.md
       run: |
@@ -202,7 +227,7 @@ runs:
         fi
 
         mv ${{ env.tmp_dir }}/eclipse_tmp/* ${{ env.tmp_dir }}/retriever_out/
-    
+
     - name: Combine and Clean Up Files
       shell: bash
       run: |
@@ -220,7 +245,6 @@ runs:
         } > ${{ env.tmp_dir }}/retriever_out/README.md
         # Delete the original files
         rm -f $RETRIEVER_INFO_FILE $GIT_INFO_FILE $SYSTEM_INFO_FILE $CLOC_INFO_FILE $TIMING_INFO_FILE
-
 
     - name: Prepare Analysis Results for Upload
       shell: bash
