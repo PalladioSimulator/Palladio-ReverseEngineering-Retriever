@@ -60,8 +60,8 @@ public class Requirements implements Iterable<OperationInterface> {
             .iterator();
     }
 
-    public Map<OperationInterface, List<Operation>> simplified() {
-        final List<Map<OperationInterface, List<Operation>>> simplifiedInterfaces = new LinkedList<>();
+    public Map<OperationInterface, Set<Operation>> simplified() {
+        final List<Map<OperationInterface, Set<Operation>>> simplifiedInterfaces = new LinkedList<>();
         for (final OperationInterface root : this.groupedRequirements.keySet()) {
             final List<Operation> simplifiedRoot = new ArrayList<>(root.simplified()
                 .values()
@@ -77,7 +77,7 @@ public class Requirements implements Iterable<OperationInterface> {
             }
             simplifiedInterfaces.add(Map.of(root, simplifiedRoot.stream()
                 .distinct()
-                .collect(Collectors.toList())));
+                .collect(Collectors.toCollection(HashSet::new))));
         }
         return MapMerger.merge(simplifiedInterfaces);
     }
@@ -102,7 +102,7 @@ public class Requirements implements Iterable<OperationInterface> {
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
-        final Map<OperationInterface, List<Operation>> simplified = this.simplified();
+        final Map<OperationInterface, Set<Operation>> simplified = this.simplified();
 
         for (final OperationInterface iface : simplified.keySet()) {
             builder.append(iface.getName());

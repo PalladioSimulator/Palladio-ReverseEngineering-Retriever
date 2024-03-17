@@ -39,7 +39,6 @@ import org.palladiosimulator.retriever.extraction.commonalities.Operation;
 import org.palladiosimulator.retriever.extraction.commonalities.OperationInterface;
 import org.palladiosimulator.retriever.extraction.commonalities.PCMDetectionResult;
 
-// TODO Bug-fix, probably
 // Class to create a pcm instance out of all results from the detector class
 public class PCMInstanceCreator {
     private static final Logger LOG = Logger.getLogger(PCMInstanceCreator.class);
@@ -107,7 +106,7 @@ public class PCMInstanceCreator {
         final PCMDetectionResult detectionResult = this.blackboard.getPCMDetector()
             .getResult();
         final Set<Component> components = detectionResult.getComponents();
-        final Map<OperationInterface, List<Operation>> interfaces = detectionResult.getOperationInterfaces();
+        final Map<OperationInterface, Set<Operation>> interfaces = detectionResult.getOperationInterfaces();
         final Set<Composite> composites = detectionResult.getCompositeComponents();
 
         this.createPCMInterfaces(interfaces);
@@ -244,30 +243,26 @@ public class PCMInstanceCreator {
         return this.repository.createRepositoryNow();
     }
 
-    private void createPCMInterfaces(final Map<OperationInterface, List<Operation>> interfaces) {
-        final Map<String, Integer> signatureNameCount = new HashMap<>();
+    private void createPCMInterfaces(final Map<OperationInterface, Set<Operation>> interfaces) {
+        final Map<String, Integer> interfaceNameRegistry = new HashMap<>();
+        final Map<String, Integer> signatureNameRegistry = new HashMap<>();
+
         interfaces.forEach((inter, operations) -> {
             final String interName = inter.getName()
                 .toString();
             LOG.info("Current PCM Interface: " + interName);
 
-            final String pcmInterfaceName = interName.replace(".", "_");
+            final String pcmInterfaceName = prepareUniquePCMName(interName, interfaceNameRegistry);
             final OperationInterfaceCreator pcmInterface = this.create.newOperationInterface()
                 .withName(pcmInterfaceName);
 
             for (final Operation operation : operations) {
-                String name = operation.getName()
+                final String operationName = operation.getName()
                     .forInterface(interName)
                     .orElseThrow();
-                name = name.replace(".", "_");
-                final Integer oldCount = signatureNameCount.getOrDefault(name, 0);
-                signatureNameCount.put(name, oldCount + 1);
-                // Omit suffix for first occurrence.
-                if (oldCount > 0) {
-                    name = name + "$" + signatureNameCount.get(name);
-                }
+                final String pcmOperationName = prepareUniquePCMName(operationName, signatureNameRegistry);
                 OperationSignatureCreator signature = this.create.newOperationSignature()
-                    .withName(name);
+                    .withName(pcmOperationName);
 
                 final IMethodBinding method = operation.getBinding();
 
@@ -289,7 +284,7 @@ public class PCMInstanceCreator {
                 final Optional<ASTNode> astNode = this.getDeclaration(method);
                 if (astNode.isPresent() && this.blackboard.getSeffAssociation(astNode.get()) == null) {
                     final ResourceDemandingSEFF seff = this.create.newSeff()
-                        .onSignature(this.create.fetchOfSignature(name))
+                        .onSignature(this.create.fetchOfSignature(pcmOperationName))
                         .buildRDSeff();
                     this.blackboard.putSeffAssociation(astNode.get(), seff);
                 }
@@ -298,6 +293,20 @@ public class PCMInstanceCreator {
             this.repository.addToRepository(pcmInterface);
             this.pcmInterfaces.put(inter, this.create.fetchOfOperationInterface(pcmInterfaceName));
         });
+    }
+
+    private static String prepareUniquePCMName(final String name, final Map<String, Integer> registry) {
+        String pcmName = name.replace(".", "_");
+
+        Integer numberOfOccurences = registry.getOrDefault(pcmName, 0);
+        numberOfOccurences += 1;
+        registry.put(pcmName, numberOfOccurences);
+
+        if (numberOfOccurences == 1) {
+            // Omit suffix for first occurrence.
+            return pcmName;
+        }
+        return pcmName + "$" + registry.get(name);
     }
 
     private Optional<ASTNode> getDeclaration(final IMethodBinding binding) {
@@ -331,7 +340,7 @@ public class PCMInstanceCreator {
                 .simplified()
                 .values()
                 .stream()
-                .flatMap(List::stream)
+                .flatMap(Collection::stream)
                 .forEach(operation -> {
                     final IMethodBinding method = operation.getBinding();
                     final Optional<ASTNode> declaration = this.getDeclaration(method);

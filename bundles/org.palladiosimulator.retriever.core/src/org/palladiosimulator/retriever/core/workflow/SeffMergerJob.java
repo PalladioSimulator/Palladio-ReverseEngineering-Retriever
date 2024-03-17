@@ -15,7 +15,10 @@ import org.palladiosimulator.pcm.repository.OperationSignature;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.seff.AbstractAction;
+import org.palladiosimulator.pcm.seff.AbstractBranchTransition;
+import org.palladiosimulator.pcm.seff.BranchAction;
 import org.palladiosimulator.pcm.seff.ExternalCallAction;
+import org.palladiosimulator.pcm.seff.ResourceDemandingBehaviour;
 import org.palladiosimulator.pcm.seff.ResourceDemandingSEFF;
 import org.palladiosimulator.pcm.seff.ServiceEffectSpecification;
 
@@ -108,54 +111,8 @@ public class SeffMergerJob implements IBlackboardInteractingJob<Blackboard<Objec
 
                 // Adapt external call actions to new repository -> Swap signatures and required
                 // roles
-                final EList<AbstractAction> behaviorSteps = ((ResourceDemandingSEFF) sourceSeff).getSteps_Behaviour();
-                for (final AbstractAction action : behaviorSteps) {
-                    if (!(action instanceof ExternalCallAction)) {
-                        continue;
-                    }
-                    final ExternalCallAction externalCallAction = (ExternalCallAction) action;
-                    final String calledSignatureEntityName = externalCallAction.getCalledService_ExternalService()
-                        .getEntityName();
-
-                    // Fetch called signature from destination repository
-                    final Optional<OperationSignature> calledSignatureOption = destinationRepository
-                        .getInterfaces__Repository()
-                        .stream()
-                        .filter(interFace -> interFace instanceof OperationInterface)
-                        .flatMap(interFace -> ((OperationInterface) interFace).getSignatures__OperationInterface()
-                            .stream())
-                        .filter(signature -> signature.getEntityName()
-                            .equals(calledSignatureEntityName))
-                        .findFirst();
-
-                    if (calledSignatureOption.isEmpty()) {
-                        LOG.warn("Failed to find called signature for " + calledSignatureEntityName + "!");
-                        continue;
-                    }
-                    final OperationSignature calledSignature = calledSignatureOption.get();
-
-                    // Fetch required role from destination repository
-                    final Optional<OperationRequiredRole> requiredRoleOption = destinationComponent
-                        .getRequiredRoles_InterfaceRequiringEntity()
-                        .stream()
-                        .filter(role -> role instanceof OperationRequiredRole)
-                        .map(role -> (OperationRequiredRole) role)
-                        .filter(role -> role.getRequiredInterface__OperationRequiredRole()
-                            .getSignatures__OperationInterface()
-                            .contains(calledSignature))
-                        .findFirst();
-
-                    if (requiredRoleOption.isEmpty()) {
-                        LOG.warn(
-                                "Failed to find required role for " + calledSignature.getInterface__OperationSignature()
-                                    .getEntityName() + "#" + calledSignature.getEntityName() + "!");
-                        continue;
-                    }
-                    final OperationRequiredRole requiredRole = requiredRoleOption.get();
-
-                    externalCallAction.setCalledService_ExternalService(calledSignature);
-                    externalCallAction.setRole_ExternalService(requiredRole);
-                }
+                adaptExternalCallActions((ResourceDemandingSEFF) sourceSeff, destinationRepository,
+                        destinationComponent);
 
                 // Find optional already existing and conflicting seff in destination component
                 final Optional<ServiceEffectSpecification> optionalDestinationSeff = destinationComponent
@@ -175,6 +132,62 @@ public class SeffMergerJob implements IBlackboardInteractingJob<Blackboard<Objec
             }
         }
         monitor.done();
+    }
+
+    private static void adaptExternalCallActions(final ResourceDemandingBehaviour sourceBehaviour,
+            final Repository destinationRepository, final BasicComponent destinationComponent) {
+        final EList<AbstractAction> behaviorSteps = sourceBehaviour.getSteps_Behaviour();
+        for (final AbstractAction action : behaviorSteps) {
+            if (action instanceof final BranchAction branchAction) {
+                for (final AbstractBranchTransition branch : branchAction.getBranches_Branch()) {
+                    adaptExternalCallActions(branch.getBranchBehaviour_BranchTransition(), destinationRepository,
+                            destinationComponent);
+                }
+                continue;
+            } else if (!(action instanceof ExternalCallAction)) {
+                continue;
+            }
+            final ExternalCallAction externalCallAction = (ExternalCallAction) action;
+            final String calledSignatureEntityName = externalCallAction.getCalledService_ExternalService()
+                .getEntityName();
+
+            // Fetch called signature from destination repository
+            final Optional<OperationSignature> calledSignatureOption = destinationRepository.getInterfaces__Repository()
+                .stream()
+                .filter(interFace -> interFace instanceof OperationInterface)
+                .flatMap(interFace -> ((OperationInterface) interFace).getSignatures__OperationInterface()
+                    .stream())
+                .filter(signature -> signature.getEntityName()
+                    .equals(calledSignatureEntityName))
+                .findFirst();
+
+            if (calledSignatureOption.isEmpty()) {
+                LOG.warn("Failed to find called signature for " + calledSignatureEntityName + "!");
+                continue;
+            }
+            final OperationSignature calledSignature = calledSignatureOption.get();
+
+            // Fetch required role from destination repository
+            final Optional<OperationRequiredRole> requiredRoleOption = destinationComponent
+                .getRequiredRoles_InterfaceRequiringEntity()
+                .stream()
+                .filter(role -> role instanceof OperationRequiredRole)
+                .map(role -> (OperationRequiredRole) role)
+                .filter(role -> role.getRequiredInterface__OperationRequiredRole()
+                    .getSignatures__OperationInterface()
+                    .contains(calledSignature))
+                .findFirst();
+
+            if (requiredRoleOption.isEmpty()) {
+                LOG.warn("Failed to find required role for " + calledSignature.getInterface__OperationSignature()
+                    .getEntityName() + "#" + calledSignature.getEntityName() + "!");
+                continue;
+            }
+            final OperationRequiredRole requiredRole = requiredRoleOption.get();
+
+            externalCallAction.setCalledService_ExternalService(calledSignature);
+            externalCallAction.setRole_ExternalService(requiredRole);
+        }
     }
 
     @Override
