@@ -152,12 +152,42 @@ runs:
     - name: Download Retriever
       shell: bash
       run: |
-        curl -s ${{ env.retriever }} \
-          | grep -E 'browser_download_url' \
-          | grep linux \
-          | grep x86_64 \
-          | grep -Eo 'https://[^\"]*' \
-          | xargs wget -O "${{ env.tmp_dir }}/retriever.zip"
+        # Set maximum retries
+        max_retries=3
+        attempt=0
+        success=0
+
+        while [ $attempt -lt $max_retries ]; do
+            ((attempt=attempt+1))
+            
+            echo "Attempt $attempt of $max_retries..."
+            
+            # Execute the curl command and save its output
+            output=$(curl --retry 3 -s ${{ env.retriever }})
+            
+            # Check for 'browser_download_url' (this is sometimes missing which causes an error -> retry)
+            echo "$output" | grep 'browser_download_url' > /dev/null
+            if [ $? -eq 0 ]; then
+                # If found, use the URL to download the file with wget
+                echo "$output" | grep -E 'browser_download_url' \
+                | grep linux \
+                | grep x86_64 \
+                | grep -Eo 'https://[^\"]*' \
+                | xargs wget -O "${{ env.tmp_dir }}/retriever.zip"
+                
+                success=1
+                break # Exit loop on success
+            else
+                echo "URL not found, retrying..."
+                sleep 5 
+            fi
+        done
+
+        # Check if the download was successful
+        if [ $success -ne 1 ]; then
+            echo "Failed to find the download URL after $max_retries attempts."
+            exit 1
+        fi
 
     - name: Extract Retriever
       shell: bash
@@ -176,7 +206,7 @@ runs:
       working-directory: ${{ env.tmp_dir }}/retriever
       env:
         NO_AT_BRIDGE: 1 # avoid eclipse error "AT-SPI: Error retrieving accessibility bus address"
-        RETRIEVER_COMMAND: './eclipse -nosplash -i "${{ github.workspace }}/${{ inputs.source_path }}" -o "${{ env.tmp_dir }}/eclipse_tmp" -r "${{ inputs.rules }}"'
+        RETRIEVER_COMMAND: './eclipse -nosplash -i "${{ github.workspace }}/${{ inputs.source_path }}" -o "${{ env.tmp_dir }}/eclipse_tmp" -r "${{ inputs.rules }}" -x "${{ inputs.rules_path }}"'
         TIMING_INFO_FILE: ${{ env.tmp_dir }}/retriever_out/timing.md
       run: |
         echo "TIMING_INFO_FILE=$TIMING_INFO_FILE" >> $GITHUB_ENV
