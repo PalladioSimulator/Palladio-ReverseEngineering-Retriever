@@ -71,6 +71,7 @@ public class RESTOperationName implements OperationName {
         String httpMethodString = "";
         List<String> httpMethodNames = this.httpMethods.stream()
             .map(HTTPMethod::toString)
+            .sorted()
             .collect(Collectors.toList());
         httpMethodString = "[";
         httpMethodString += String.join(",", httpMethodNames);
