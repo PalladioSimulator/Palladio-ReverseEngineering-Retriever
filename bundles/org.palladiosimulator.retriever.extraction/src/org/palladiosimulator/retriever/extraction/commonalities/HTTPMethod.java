@@ -1,20 +1,23 @@
 package org.palladiosimulator.retriever.extraction.commonalities;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 public enum HTTPMethod {
-    GET, POST, PUT, DELETE, PATCH;
+    GET, POST, PUT, DELETE, PATCH,
+    /**
+     * Special value signaling all HTTPMethods are provided/required.
+     */
+    WILDCARD;
 
     public static boolean areAllPresent(Collection<HTTPMethod> httpMethods) {
-        return httpMethods.containsAll(all());
-    }
+        if (httpMethods.contains(HTTPMethod.WILDCARD)) {
+            return true;
+        }
 
-    public static Set<HTTPMethod> all() {
-        return Set.of(values());
-    }
-
-    public static Set<HTTPMethod> any() {
-        return Set.of();
+        Set<HTTPMethod> normalValues = new HashSet<>(Set.of(values()));
+        normalValues.remove(WILDCARD);
+        return httpMethods.containsAll(normalValues);
     }
 }

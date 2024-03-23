@@ -44,16 +44,23 @@ public final class DependencyUtils {
             }
             if (isRoot) {
                 for (final OperationInterface rootInterface : groupedDependencies.keySet()) {
-                    final Optional<String> commonInterfaceName = grouplessDependency.getName()
+                    final Optional<String> commonName = grouplessDependency.getName()
                         .getCommonInterface(rootInterface.getName());
                     boolean containsOtherDependency = false;
 
-                    if (!commonInterfaceName.isPresent()) {
+                    if (!commonName.isPresent()) {
                         continue;
                     }
 
-                    final OperationInterface commonInterface = new EntireInterface(rootInterface.getName()
-                        .createInterface(commonInterfaceName.get()));
+                    Name commonInterfaceName = rootInterface.getName()
+                        .createName(commonName.get());
+                    OperationInterface commonInterface;
+
+                    if (commonInterfaceName instanceof RESTOperationName restName) {
+                        commonInterface = new RESTOperationUnion(restName);
+                    } else {
+                        commonInterface = new EntireInterface(commonInterfaceName);
+                    }
 
                     for (final OperationInterface dependency : allDependencies) {
                         // Check all foreign dependencies
@@ -68,8 +75,12 @@ public final class DependencyUtils {
                         // De-duplicate interfaces.
                         final Set<OperationInterface> interfaces = new HashSet<>(
                                 groupedDependencies.remove(rootInterface));
-                        interfaces.add(commonInterface);
-                        interfaces.add(rootInterface);
+                        if (!(commonInterface instanceof RESTOperationUnion)) {
+                            interfaces.add(commonInterface);
+                        }
+                        if (!(rootInterface instanceof RESTOperationUnion)) {
+                            interfaces.add(rootInterface);
+                        }
                         interfaces.add(grouplessDependency);
                         groupedDependencies.put(commonInterface, new ArrayList<>(interfaces));
                         isRoot = false;

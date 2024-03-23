@@ -24,7 +24,7 @@ import org.palladiosimulator.retriever.extraction.commonalities.CompUnitOrName
 import org.palladiosimulator.retriever.extraction.engine.Rule
 import org.palladiosimulator.retriever.extraction.rules.data.GatewayRoute
 import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard
-import org.palladiosimulator.retriever.extraction.commonalities.HTTPMethod
+import org.palladiosimulator.retriever.extraction.commonalities.RESTOperationName
 
 class EcmaScriptRules implements Rule {
 
@@ -86,7 +86,7 @@ class EcmaScriptRules implements Rule {
 					pcmDetector.detectRequiredInterface(GATEWAY_NAME, mappedURL)
 				}
 				pcmDetector.detectProvidedOperation(GATEWAY_NAME, null,
-					new RESTName(hostname, "/" + url, HTTPMethod.any))
+					new RESTOperationName(hostname, "/" + url))
 			}
 		}
 	}
@@ -279,7 +279,7 @@ class EcmaScriptRules implements Rule {
 				return route.applyTo(url)
 			}
 		}
-		return new RESTName(host, url, HTTPMethod.any)
+		return new RESTName(host, url)
 	}
 
 	override isBuildRule() {

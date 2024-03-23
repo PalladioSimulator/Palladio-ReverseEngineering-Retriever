@@ -120,7 +120,7 @@ public class PCMDetector {
             .map(x -> x.getType())
             .map(x -> new EntireInterface(x, new JavaInterfaceName(NameConverter.toPCMIdentifier(x))))
             .collect(Collectors.toList());
-        this.detectRequiredInterface(unit, compositeRequired, detectWeakly, ifaces);
+        this.detectRequired(unit, compositeRequired, detectWeakly, ifaces);
     }
 
     public void detectRequiredInterface(final CompUnitOrName unit, final SingleVariableDeclaration parameter) {
@@ -141,11 +141,11 @@ public class PCMDetector {
 
     private void detectRequiredInterface(final CompUnitOrName unit, final boolean compositeRequired,
             final boolean detectWeakly, final OperationInterface iface) {
-        this.detectRequiredInterface(unit, compositeRequired, detectWeakly, List.of(iface));
+        this.detectRequired(unit, compositeRequired, detectWeakly, List.of(iface));
     }
 
-    private void detectRequiredInterface(final CompUnitOrName unit, final boolean compositeRequired,
-            final boolean detectWeakly, final Collection<OperationInterface> ifaces) {
+    private void detectRequired(final CompUnitOrName unit, final boolean compositeRequired, final boolean detectWeakly,
+            final Collection<OperationInterface> ifaces) {
         for (final OperationInterface iface : ifaces) {
             final boolean isProvided = this.compositeProvisions.containsRelated(iface) || this.components.values()
                 .stream()
