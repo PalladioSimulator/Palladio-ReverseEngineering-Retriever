@@ -9,6 +9,7 @@ import org.palladiosimulator.retriever.extraction.commonalities.HTTPMethod;
 import org.palladiosimulator.retriever.extraction.commonalities.Operation;
 import org.palladiosimulator.retriever.extraction.commonalities.RESTName;
 import org.palladiosimulator.retriever.extraction.commonalities.RESTOperationName;
+import org.palladiosimulator.retriever.extraction.commonalities.RESTOperationUnion;
 
 public class PathTest {
 
@@ -43,13 +44,13 @@ public class PathTest {
     }
 
     @Test
-    void httpMethodsAreSpecializations() {
+    void httpMethodsMatchCorrectly() {
         final String path = "/some/path";
-        final RESTOperationName generalName = new RESTOperationName("test-host", path);
+        final RESTOperationName generalName = new RESTOperationName("test-host", path, HTTPMethod.WILDCARD);
         final RESTOperationName specificName = new RESTOperationName("test-host", path, HTTPMethod.GET);
 
-        final Operation generalOperation = new Operation(null, generalName);
-        final Operation specificOperation = new Operation(null, specificName);
+        final RESTOperationUnion generalOperation = new RESTOperationUnion(generalName);
+        final RESTOperationUnion specificOperation = new RESTOperationUnion(specificName);
 
         assertTrue(specificOperation.isPartOf(generalOperation));
         assertFalse(generalOperation.isPartOf(specificOperation));

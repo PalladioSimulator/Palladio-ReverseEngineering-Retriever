@@ -19,8 +19,8 @@ import org.palladiosimulator.retriever.extraction.commonalities.JavaInterfaceNam
 import org.palladiosimulator.retriever.extraction.commonalities.JavaOperationName;
 import org.palladiosimulator.retriever.extraction.commonalities.Operation;
 import org.palladiosimulator.retriever.extraction.commonalities.OperationInterface;
-import org.palladiosimulator.retriever.extraction.commonalities.RESTName;
 import org.palladiosimulator.retriever.extraction.commonalities.RESTOperationName;
+import org.palladiosimulator.retriever.extraction.commonalities.RESTOperationUnion;
 
 public class InterfaceTest {
 
@@ -172,7 +172,8 @@ public class InterfaceTest {
         final List<OperationInterface> visibleProvisions = List.of(firstMethod, secondMethod);
 
         final Component builtComponent = builder.create(allDependencies, visibleProvisions);
-        final EntireInterface expectedInterface = new EntireInterface(new RESTName("test-host", "/common_interface"));
+        final OperationInterface expectedInterface = new RESTOperationUnion(
+                new RESTOperationName("test-host", "/common_interface"));
         assertTrue(builtComponent.provisions()
             .containsPartOf(expectedInterface));
 
