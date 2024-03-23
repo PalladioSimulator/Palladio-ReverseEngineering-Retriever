@@ -33,7 +33,7 @@ jobs:
         RELEASE_TAG=v$(echo $PROJECT_VERSION | sed "s/-SNAPSHOT/.$(date +%Y%m%d%H%M)/")
         echo "release_tag=$RELEASE_TAG" >> $GITHUB_ENV 
     - name: Release Products
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         files: products/org.palladiosimulator.retriever.product/target/products/*
         tag_name: ${{ env.release_tag }}
