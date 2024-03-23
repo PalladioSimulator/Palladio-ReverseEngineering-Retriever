@@ -67,7 +67,8 @@ public final class DependencyUtils {
                         if (!dependencies.contains(dependency)) {
                             // If a foreign dependency is part of the new common interface, it must
                             // not be created
-                            containsOtherDependency |= dependency.isPartOf(commonInterface);
+                            containsOtherDependency |= dependency.isPartOf(commonInterface)
+                                    && !commonInterface.isPartOf(dependency);
                         }
                     }
 

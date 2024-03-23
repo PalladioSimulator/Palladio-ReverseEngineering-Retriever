@@ -141,7 +141,12 @@ public class RESTName implements InterfaceName {
 
     @Override
     public boolean isPartOf(final String iface) {
-        Optional<RESTName> parsedIface = parse(iface);
+        String pathCandidate = iface;
+        if (iface.contains("[")) {
+            int pathEnd = iface.indexOf('[');
+            pathCandidate = iface.substring(0, pathEnd);
+        }
+        Optional<RESTName> parsedIface = parse(pathCandidate);
         if (parsedIface.isEmpty()) {
             return false;
         }

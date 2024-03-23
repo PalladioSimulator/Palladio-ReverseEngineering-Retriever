@@ -27,7 +27,7 @@ public class Operation implements OperationInterface {
     @Override
     public boolean isPartOf(final OperationInterface other) {
         if (other instanceof Operation otherOperation) {
-            return Objects.equals(this.binding, otherOperation.binding);
+            return this.equals(other);
         } else {
             return OperationInterface.super.isPartOf(other);
         }
