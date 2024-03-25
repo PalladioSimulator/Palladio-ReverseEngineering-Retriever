@@ -25,6 +25,15 @@ public class Operation implements OperationInterface {
     }
 
     @Override
+    public boolean isPartOf(final OperationInterface other) {
+        if (other instanceof Operation otherOperation) {
+            return this.equals(other);
+        } else {
+            return OperationInterface.super.isPartOf(other);
+        }
+    }
+
+    @Override
     public Map<OperationInterface, Set<Operation>> simplified() {
         return Map.of(this, Set.of(this));
     }

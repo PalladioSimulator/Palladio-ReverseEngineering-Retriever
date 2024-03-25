@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface Name {
-    InterfaceName createInterface(String name);
+    Name createName(String name);
 
     /**
      * @returns interfaces that this name is part of, sorted from specific to general.

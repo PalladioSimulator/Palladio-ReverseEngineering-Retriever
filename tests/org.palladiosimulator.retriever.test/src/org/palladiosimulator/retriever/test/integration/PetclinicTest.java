@@ -19,7 +19,7 @@ public class PetclinicTest extends CaseStudyTest {
         this.assertComponentProvidesOperation("org_springframework_samples_petclinic_customers_web_PetResource",
                 "customers-service/petTypes[GET]", "customers-service/petTypes[GET]");
 
-        this.assertMaxParameterCount(2, "customers-service/owners[PUT]", "customers-service/owners[PUT]");
+        this.assertMaxParameterCount(2, "customers-service/owners[GET,POST,PUT]", "customers-service/owners[PUT]");
         this.assertMaxParameterCount(1, "api-gateway/api/gateway/owners[GET]", "api-gateway/api/gateway/owners[GET]");
 
         this.assertComponentRequiresComponent("org_springframework_samples_petclinic_customers_web_PetResource",

@@ -10,14 +10,14 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 public class EntireInterface implements OperationInterface {
     private final Optional<ITypeBinding> binding;
-    private final InterfaceName name;
+    private final Name name;
 
-    public EntireInterface(final InterfaceName name) {
+    public EntireInterface(final Name name) {
         this.binding = Optional.empty();
         this.name = name;
     }
 
-    public EntireInterface(final ITypeBinding binding, final InterfaceName name) {
+    public EntireInterface(final ITypeBinding binding, final Name name) {
         this.binding = Optional.of(binding);
         this.name = name;
     }

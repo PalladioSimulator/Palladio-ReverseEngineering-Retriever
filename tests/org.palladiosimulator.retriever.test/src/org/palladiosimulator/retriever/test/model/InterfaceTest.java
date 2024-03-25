@@ -19,7 +19,8 @@ import org.palladiosimulator.retriever.extraction.commonalities.JavaInterfaceNam
 import org.palladiosimulator.retriever.extraction.commonalities.JavaOperationName;
 import org.palladiosimulator.retriever.extraction.commonalities.Operation;
 import org.palladiosimulator.retriever.extraction.commonalities.OperationInterface;
-import org.palladiosimulator.retriever.extraction.commonalities.RESTName;
+import org.palladiosimulator.retriever.extraction.commonalities.RESTOperationName;
+import org.palladiosimulator.retriever.extraction.commonalities.RESTOperationUnion;
 
 public class InterfaceTest {
 
@@ -65,7 +66,8 @@ public class InterfaceTest {
     @Test
     void singlePathOperation() {
         final ComponentBuilder builder = new ComponentBuilder(null);
-        final Operation expectedOperation = new Operation(null, new RESTName("test-host", "/method", HTTPMethod.GET));
+        final Operation expectedOperation = new Operation(null,
+                new RESTOperationName("test-host", "/method", HTTPMethod.GET));
         builder.provisions()
             .add(expectedOperation);
 
@@ -158,9 +160,9 @@ public class InterfaceTest {
     void entirePathInterface() {
         final ComponentBuilder builder = new ComponentBuilder(null);
         final Operation firstMethod = new Operation(null,
-                new RESTName("test-host", "/common_interface/first_method", HTTPMethod.GET));
+                new RESTOperationName("test-host", "/common_interface/first_method", HTTPMethod.GET));
         final Operation secondMethod = new Operation(null,
-                new RESTName("test-host", "/common_interface/second_method", HTTPMethod.GET));
+                new RESTOperationName("test-host", "/common_interface/second_method", HTTPMethod.GET));
         builder.provisions()
             .add(firstMethod);
         builder.provisions()
@@ -170,8 +172,8 @@ public class InterfaceTest {
         final List<OperationInterface> visibleProvisions = List.of(firstMethod, secondMethod);
 
         final Component builtComponent = builder.create(allDependencies, visibleProvisions);
-        final EntireInterface expectedInterface = new EntireInterface(
-                new RESTName("test-host", "/common_interface", HTTPMethod.GET));
+        final OperationInterface expectedInterface = new RESTOperationUnion(
+                new RESTOperationName("test-host", "/common_interface"));
         assertTrue(builtComponent.provisions()
             .containsPartOf(expectedInterface));
 
