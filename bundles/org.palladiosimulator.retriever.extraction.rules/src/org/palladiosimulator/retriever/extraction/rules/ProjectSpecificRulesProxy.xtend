@@ -6,16 +6,40 @@ import java.nio.file.Path
 import java.util.Optional
 import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration
 import java.util.Set
+import org.eclipse.xtend.core.compiler.batch.XtendBatchCompiler
+import java.net.URLClassLoader
+import java.io.File
 
-class ProjectSpecificRules implements Rule {
+class ProjectSpecificRulesProxy implements Rule {
 	
-	public static final String RULE_ID = "org.palladiosimulator.retriever.extraction.rules.spring.cloudgateway"
+	public static final String RULE_ID = "org.palladiosimulator.retriever.extraction.rules.project_specific"
+	public static final String LOADED_CLASS_NAME = "org.palladiosimulator.retriever.extraction.rules.ProjectSpecificRules"
 	public static final String RULE_PATH_KEY = "xtend_file_path"
 
 	Optional<Rule> innerRule = Optional.empty;
 	
 	override create(RetrieverConfiguration config, RetrieverBlackboard blackboard) {
-		// TODO: load and build innerRule
+		val rulePath = config.getConfig(Rule).getConfig(RULE_ID, RULE_PATH_KEY)
+		val outputPath = "TODO" // TODO
+		
+		val compiler = new XtendBatchCompiler()
+		compiler.sourcePath = rulePath
+		compiler.outputPath = outputPath
+		if (compiler.compile()) {
+			val outputUrl = new File(outputPath).toURI.toURL
+			val classLoader = new URLClassLoader(#[outputUrl])
+			val loadedClass = classLoader.loadClass(LOADED_CLASS_NAME)
+			val ruleInstance = loadedClass.getConstructor().newInstance()
+			// TODO: handle failures
+			innerRule = Optional.of(Rule.cast(ruleInstance))
+		}
+		
+		if (innerRule.isPresent()) {
+			innerRule.get().create(config, blackboard)
+		} else {
+			Rule.super.create(config, blackboard)
+			// TODO: Fail or log error
+		}
 	}
 	
 	override isBuildRule() {
