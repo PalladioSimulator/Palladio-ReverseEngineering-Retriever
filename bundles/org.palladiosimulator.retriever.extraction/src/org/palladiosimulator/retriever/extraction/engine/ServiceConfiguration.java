@@ -113,8 +113,18 @@ public class ServiceConfiguration<T extends Service> {
         final List<T> requiringServices = new LinkedList<>();
         final Map<String, Set<String>> extendedRequirements = new HashMap<>();
 
+        final Set<String> selectedIDs = new HashSet<>();
         for (final T service : remainingServices) {
-            extendedRequirements.put(service.getID(), new HashSet<>(service.getRequiredServices()));
+            selectedIDs.add(service.getID());
+        }
+
+        for (final T service : remainingServices) {
+            Set<String> requiredServices = service.getRequiredServices();
+            if (requiredServices.contains(null)) {
+                extendedRequirements.put(service.getID(), new HashSet<>(selectedIDs));
+            } else {
+                extendedRequirements.put(service.getID(), new HashSet<>(requiredServices));
+            }
         }
 
         // Rephrase all dependencies into requirements

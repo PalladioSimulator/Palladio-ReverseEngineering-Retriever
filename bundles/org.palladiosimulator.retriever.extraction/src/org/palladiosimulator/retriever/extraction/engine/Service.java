@@ -23,6 +23,8 @@ public interface Service {
 
     /**
      * IDs of services that must run before this one.
+     * If the set contains {@code null}, this service will be dependent
+     * on all other services within its {@code ServiceCollection}.
      */
     Set<String> getRequiredServices();
 
