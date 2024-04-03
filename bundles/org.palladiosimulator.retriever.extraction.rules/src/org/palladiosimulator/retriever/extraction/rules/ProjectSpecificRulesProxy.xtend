@@ -9,6 +9,7 @@ import java.util.Set
 import org.eclipse.xtend.core.compiler.batch.XtendBatchCompiler
 import java.net.URLClassLoader
 import java.io.File
+import java.util.HashSet
 
 class ProjectSpecificRulesProxy implements Rule {
 	
@@ -19,14 +20,14 @@ class ProjectSpecificRulesProxy implements Rule {
 	Optional<Rule> innerRule = Optional.empty;
 	
 	override create(RetrieverConfiguration config, RetrieverBlackboard blackboard) {
-		val rulePath = config.getConfig(Rule).getConfig(RULE_ID, RULE_PATH_KEY)
-		val outputPath = "TODO" // TODO
+		val rulePath = new File(config.getConfig(Rule).getConfig(RULE_ID, RULE_PATH_KEY))
+		val outputPath = rulePath.parentFile
 		
 		val compiler = new XtendBatchCompiler()
-		compiler.sourcePath = rulePath
-		compiler.outputPath = outputPath
+		compiler.sourcePath = rulePath.toString
+		compiler.outputPath = outputPath.toString
 		if (compiler.compile()) {
-			val outputUrl = new File(outputPath).toURI.toURL
+			val outputUrl = outputPath.toURI.toURL
 			val classLoader = new URLClassLoader(#[outputUrl])
 			val loadedClass = classLoader.loadClass(LOADED_CLASS_NAME)
 			val ruleInstance = loadedClass.getConstructor().newInstance()
@@ -70,7 +71,9 @@ class ProjectSpecificRulesProxy implements Rule {
 	
 	override getRequiredServices() {
 		// special value signaling dependency on all other rules
-		Set.of(null)
+		val requirements = new HashSet()
+		requirements.add(null)
+		requirements
 	}
 	
 }

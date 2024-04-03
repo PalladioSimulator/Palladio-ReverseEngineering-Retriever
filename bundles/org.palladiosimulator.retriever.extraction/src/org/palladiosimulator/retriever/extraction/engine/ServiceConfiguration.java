@@ -120,7 +120,9 @@ public class ServiceConfiguration<T extends Service> {
 
         for (final T service : remainingServices) {
             Set<String> requiredServices = service.getRequiredServices();
-            if (requiredServices.contains(null)) {
+            // Support types such as immutable sets that do not support contains(null).
+            if (requiredServices.stream()
+                .anyMatch(x -> x == null)) {
                 extendedRequirements.put(service.getID(), new HashSet<>(selectedIDs));
             } else {
                 extendedRequirements.put(service.getID(), new HashSet<>(requiredServices));
@@ -190,6 +192,9 @@ public class ServiceConfiguration<T extends Service> {
     }
 
     public void selectDependenciesOf(final Service service) {
+        if (service == null) {
+            return;
+        }
         for (final String dependencyID : service.getRequiredServices()) {
             if (!this.services.containsKey(dependencyID)) {
                 continue;
