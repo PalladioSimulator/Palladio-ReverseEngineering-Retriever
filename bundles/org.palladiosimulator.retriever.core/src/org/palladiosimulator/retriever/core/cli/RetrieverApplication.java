@@ -4,6 +4,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,7 +37,8 @@ public class RetrieverApplication implements IApplication {
             .addRequiredOption("r", "rules", true,
                     "Supported rules for reverse engineering: " + String.join(", ", availableRuleIDs));
 
-        options.addOption("x", "rules-directory", true, "Path to the directory with additional project specific rules.");
+        options.addOption("x", "rules-directory", true,
+                "Path to the directory with additional project specific rules.");
 
         options.addOption("h", "help", false, "Print this help message.");
 
@@ -101,7 +103,7 @@ public class RetrieverApplication implements IApplication {
             return -1;
         }
 
-        if(cmd.hasOption("rules-directory")) {
+        if (cmd.hasOption("rules-directory")) {
             try {
                 configuration.setRulesFolder(URI.createFileURI(URI.decode(Paths.get(cmd.getOptionValue("x"))
                     .toAbsolutePath()
@@ -111,13 +113,12 @@ public class RetrieverApplication implements IApplication {
                 System.err.println("Invalid rules path: " + e.getMessage());
                 return -1;
             }
-        }
 
-        // Enable all discoverers, in case a selected rule depends on them.
-        // TODO: This is unnecessary once rule dependencies are in place
-        final ServiceConfiguration<Discoverer> discovererConfig = configuration.getConfig(Discoverer.class);
-        for (final Discoverer discoverer : new DiscovererCollection().getServices()) {
-            discovererConfig.select(discoverer);
+            // Enable all discoverers, in case the project-specific rules depend on them.
+            final ServiceConfiguration<Discoverer> discovererConfig = configuration.getConfig(Discoverer.class);
+            for (final Discoverer discoverer : new DiscovererCollection().getServices()) {
+                discovererConfig.select(discoverer);
+            }
         }
 
         final ServiceConfiguration<Rule> ruleConfig = configuration.getConfig(Rule.class);
@@ -135,6 +136,17 @@ public class RetrieverApplication implements IApplication {
         }
         for (final Rule rule : rules) {
             ruleConfig.select(rule);
+        }
+
+        if (cmd.hasOption("rules-directory")) {
+            final Optional<Rule> projectSpecificRulesProxy = availableRules.stream()
+                .filter(x -> "org.palladiosimulator.retriever.extraction.rules.project_specific".equals(x.getID()))
+                .findAny();
+            if (projectSpecificRulesProxy.isEmpty()) {
+                System.err.println("Internal error: could not find project-specific rules proxy");
+                return -1;
+            }
+            ruleConfig.select(projectSpecificRulesProxy.get());
         }
 
         new RetrieverJob(configuration).execute(new NullProgressMonitor());

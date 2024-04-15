@@ -12,12 +12,9 @@ import java.io.File
 import java.util.HashSet
 import org.eclipse.xtend.core.XtendInjectorSingleton
 import javax.tools.ToolProvider
-import javax.tools.ForwardingJavaFileManager
-import javax.tools.JavaFileManager
 import org.eclipse.core.runtime.Platform
 import org.eclipse.emf.common.CommonPlugin
-import org.eclipse.emf.ecore.plugin.EcorePlugin
-import org.eclipse.core.runtime.FileLocator
+import java.io.IOException
 
 class ProjectSpecificRulesProxy implements Rule {
 
@@ -28,43 +25,74 @@ class ProjectSpecificRulesProxy implements Rule {
 	Optional<Rule> innerRule = Optional.empty;
 
 	override create(RetrieverConfiguration config, RetrieverBlackboard blackboard) {
-		val rulePath = new File(config.getConfig(Rule).getConfig(RULE_ID, RULE_PATH_KEY))
-		val outputPath = new File(rulePath.parentFile.toPath.resolve("xtend-gen").toString)
-		outputPath.mkdirs
-		
-		val compiler = XtendInjectorSingleton.INJECTOR.getInstance(XtendBatchCompiler)
-		compiler.sourcePath = rulePath.toString
-		compiler.outputPath = outputPath.toString
-		compiler.currentClassLoader = class.classLoader
-		compiler.useCurrentClassLoaderAsParent = true
-		if (compiler.compile()) {
-			val javaFile = outputPath.toPath.resolve("org").resolve("palladiosimulator").resolve("retriever").resolve(
-				"extraction").resolve("rules").resolve("ProjectSpecificRules.java")
-			val javaCompiler = ToolProvider.systemJavaCompiler
-			val standardFileManager = javaCompiler.getStandardFileManager(null, null, null)
-			val workingDirectory = new File(Platform.installLocation.URL.path).toPath
-			val jarpath = workingDirectory.resolve("plugins").resolve("*")
-			val classpath = buildClassPath(jarpath.toString)
-			val javaCompilerOptions = #["-classpath", classpath]
-			val javaFileObject = standardFileManager.getJavaFileObjects(javaFile)
-			val compilationTask = javaCompiler.getTask(null, standardFileManager, null, javaCompilerOptions, null, javaFileObject)
-			compilationTask.call
-			val outputUrl = outputPath.toURI.toURL
-			val classLoader = new URLClassLoader(#[outputUrl], class.classLoader)
-			val loadedClass = classLoader.loadClass(LOADED_CLASS_NAME)
-			val ruleInstance = loadedClass.getConstructor().newInstance()
-			// TODO: handle failures
-			innerRule = Optional.of(Rule.cast(ruleInstance))
+		val rulesDirectory = getConfiguredRulesDirectory(config)
+
+		val xtendGenDirectory = new File(rulesDirectory.parentFile.toPath.resolve("xtend-gen").toString)
+		if (!xtendGenDirectory.mkdirs) {
+			throw new IOException("Could not create intermediate compilation directory at " + xtendGenDirectory);
 		}
 
-		if (innerRule.isPresent()) {
-			innerRule.get().create(config, blackboard)
-		} else {
-			Rule.super.create(config, blackboard)
-		// TODO: Fail or log error
+		compileXtend(rulesDirectory, xtendGenDirectory)
+		compileJava(xtendGenDirectory)
+
+		val classDirectoryURL = xtendGenDirectory.toURI.toURL
+		val classLoader = new URLClassLoader(#[classDirectoryURL], class.classLoader)
+		val ruleInstance = try {
+				val loadedClass = classLoader.loadClass(LOADED_CLASS_NAME)
+				loadedClass.getConstructor().newInstance()
+			} catch (ClassNotFoundException exception) {
+				throw new IllegalArgumentException(
+					"Could not find project-specific rule. It must have the fully qualified name " + LOADED_CLASS_NAME,
+					exception)
+			}
+
+		innerRule = Optional.of(ruleInstance as Rule)
+		innerRule.get().create(config, blackboard)
+	}
+
+	def getConfiguredRulesDirectory(RetrieverConfiguration config) {
+		val configuredValue = config.getConfig(Rule).getConfig(RULE_ID, RULE_PATH_KEY)
+		if (configuredValue !== null) {
+			return new File(configuredValue)
+		} else if (config.getOutputFolder() !== null) {
+			val localURI = CommonPlugin.asLocalURI(config.getOutputFolder())
+			return new File(localURI.devicePath())
+		}
+		throw new IllegalArgumentException("No path for project-specific rules is specified");
+	}
+
+	def compileXtend(File inputDirectory, File outputDirectory) {
+		val compiler = XtendInjectorSingleton.INJECTOR.getInstance(XtendBatchCompiler)
+		compiler.sourcePath = inputDirectory.toString
+		compiler.outputPath = outputDirectory.toString
+		compiler.currentClassLoader = class.classLoader
+		compiler.useCurrentClassLoaderAsParent = true
+		if (!compiler.compile()) {
+			throw new IllegalArgumentException("Could not compile xtend files located in " + inputDirectory)
 		}
 	}
-	
+
+	def compileJava(File inOutDirectory) {
+		val sourcePath = inOutDirectory.toPath.resolve("org").resolve("palladiosimulator").resolve("retriever").resolve(
+			"extraction").resolve("rules").resolve("ProjectSpecificRules.java")
+
+		val workingDirectory = new File(Platform.installLocation.URL.path).toPath
+		val jarpath = workingDirectory.resolve("plugins").resolve("*")
+		val classpath = buildClassPath(jarpath.toString)
+
+		val compiler = ToolProvider.systemJavaCompiler
+		val fileManager = compiler.getStandardFileManager(null, null, null)
+		val compilerOptions = #["-classpath", classpath]
+		val sourceFile = fileManager.getJavaFileObjects(sourcePath)
+		val compilationTask = compiler.getTask(null, fileManager, null, compilerOptions, null, sourceFile)
+
+		// This call saves the compiled class files into the source directory.
+		if (!compilationTask.call()) {
+			throw new IllegalArgumentException("Could not compile java files generated from xtend files located in " +
+				inOutDirectory)
+		}
+	}
+
 	/**
 	 * This function builds a classpath from the passed Strings
 	 * 
@@ -72,24 +100,25 @@ class ProjectSpecificRulesProxy implements Rule {
 	 * @return returns the complete classpath with wildcards expanded
 	 */
 	def buildClassPath(String... paths) {
-	    val sb = new StringBuilder()
-	    for (path : paths) {
-	        if (path.endsWith("*")) {
-	            val subPath = path.substring(0, path.length - 1)
-	            val pathFile = new File(subPath)
-	            for (file : pathFile.listFiles) {
-	                if (file.isFile && file.name.endsWith(".jar")) {
-	                    sb.append(subPath)
-	                    sb.append(file.name)
-	                    sb.append(System.getProperty("path.separator"))
-	                }
-	            }
-	        } else {
-	            sb.append(path)
-	            sb.append(System.getProperty("path.separator"))
-	        }
-	    }
-	    return sb.toString
+		// Adapted from https://stackoverflow.com/a/22989029
+		val sb = new StringBuilder()
+		for (path : paths) {
+			if (path.endsWith("*")) {
+				val subPath = path.substring(0, path.length - 1)
+				val pathFile = new File(subPath)
+				for (file : pathFile.listFiles) {
+					if (file.isFile && file.name.endsWith(".jar")) {
+						sb.append(subPath)
+						sb.append(file.name)
+						sb.append(System.getProperty("path.separator"))
+					}
+				}
+			} else {
+				sb.append(path)
+				sb.append(System.getProperty("path.separator"))
+			}
+		}
+		return sb.toString
 	}
 
 	override isBuildRule() {
