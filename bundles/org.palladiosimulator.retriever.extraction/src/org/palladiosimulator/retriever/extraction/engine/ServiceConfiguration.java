@@ -113,8 +113,20 @@ public class ServiceConfiguration<T extends Service> {
         final List<T> requiringServices = new LinkedList<>();
         final Map<String, Set<String>> extendedRequirements = new HashMap<>();
 
+        final Set<String> selectedIDs = new HashSet<>();
         for (final T service : remainingServices) {
-            extendedRequirements.put(service.getID(), new HashSet<>(service.getRequiredServices()));
+            selectedIDs.add(service.getID());
+        }
+
+        for (final T service : remainingServices) {
+            Set<String> requiredServices = service.getRequiredServices();
+            // Support types such as immutable sets that do not support contains(null).
+            if (requiredServices.stream()
+                .anyMatch(x -> x == null)) {
+                extendedRequirements.put(service.getID(), new HashSet<>(selectedIDs));
+            } else {
+                extendedRequirements.put(service.getID(), new HashSet<>(requiredServices));
+            }
         }
 
         // Rephrase all dependencies into requirements
@@ -180,6 +192,9 @@ public class ServiceConfiguration<T extends Service> {
     }
 
     public void selectDependenciesOf(final Service service) {
+        if (service == null) {
+            return;
+        }
         for (final String dependencyID : service.getRequiredServices()) {
             if (!this.services.containsKey(dependencyID)) {
                 continue;
