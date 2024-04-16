@@ -27,8 +27,8 @@ class ProjectSpecificRulesProxy implements Rule {
 	override create(RetrieverConfiguration config, RetrieverBlackboard blackboard) {
 		val rulesDirectory = getConfiguredRulesDirectory(config)
 
-		val xtendGenDirectory = new File(rulesDirectory.parentFile.toPath.resolve("xtend-gen").toString)
-		if (!xtendGenDirectory.mkdirs) {
+		val xtendGenDirectory = new File(rulesDirectory.toString + "-xtend-gen")
+		if (!xtendGenDirectory.exists && !xtendGenDirectory.mkdirs) {
 			throw new IOException("Could not create intermediate compilation directory at " + xtendGenDirectory);
 		}
 
@@ -52,7 +52,7 @@ class ProjectSpecificRulesProxy implements Rule {
 
 	def getConfiguredRulesDirectory(RetrieverConfiguration config) {
 		val configuredValue = config.getConfig(Rule).getConfig(RULE_ID, RULE_PATH_KEY)
-		if (configuredValue !== null) {
+		if (configuredValue !== null && !configuredValue.blank) {
 			return new File(configuredValue)
 		} else if (config.getOutputFolder() !== null) {
 			val localURI = CommonPlugin.asLocalURI(config.getOutputFolder())
