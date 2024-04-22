@@ -85,8 +85,7 @@ class EcmaScriptRules implements Rule {
 				if (!mappedURL.isPartOf("/" + hostname)) {
 					pcmDetector.detectRequiredInterface(GATEWAY_NAME, mappedURL)
 				}
-				pcmDetector.detectProvidedOperation(GATEWAY_NAME, null,
-					new RESTOperationName(hostname, "/" + url))
+				pcmDetector.detectProvidedOperation(GATEWAY_NAME, null, new RESTOperationName(hostname, "/" + url))
 			}
 		}
 	}
@@ -121,7 +120,7 @@ class EcmaScriptRules implements Rule {
 		return normalizedRequests
 	}
 
-	def findDirectHttpRequest(Tree element) {
+	def Map<String, Set<String>> findDirectHttpRequest(Tree element) {
 		val calls = new HashMap()
 		element.accept(new SimpleTreeVisitorES6<Void, Void>() {
 			override visitFunctionCall(FunctionCallTree node, Void v) {
@@ -137,7 +136,11 @@ class EcmaScriptRules implements Rule {
 					val caller = identifier.getName() + SEPARATOR + member.getIdentifier()
 					val urls = findLiteralsInArguments(node.getArguments())
 					if (!urls.isEmpty()) {
-						calls.put(caller, urls)
+						if (calls.containsKey(caller)) {
+							calls.get(caller).addAll(urls)
+						} else {
+							calls.put(caller, urls)
+						}
 					}
 				}
 				return super.visitFunctionCall(node, null)
@@ -180,13 +183,17 @@ class EcmaScriptRules implements Rule {
 		return calls;
 	}
 
-	def findFunctionDeclarationsWithUrls(Tree element) {
+	def Map<String, Set<String>> findFunctionDeclarationsWithUrls(Tree element) {
 		val declarations = new HashMap();
 		element.accept(new SimpleTreeVisitorES6<Void, Void>() {
 			override visitFunctionDeclaration(FunctionDeclarationTree functionDeclaration, Void v) {
 				val urls = findLiteralsForIdentifier(functionDeclaration, URL_KEYWORD)
 				if (!urls.empty) {
-					declarations.put(functionDeclaration.name.name, urls)
+					if (declarations.containsKey(functionDeclaration)) {
+						declarations.get(functionDeclaration.name.name).addAll(urls)
+					} else {
+						declarations.put(functionDeclaration.name.name, urls)
+					}
 				}
 				return super.visitFunctionDeclaration(functionDeclaration, null)
 			}
