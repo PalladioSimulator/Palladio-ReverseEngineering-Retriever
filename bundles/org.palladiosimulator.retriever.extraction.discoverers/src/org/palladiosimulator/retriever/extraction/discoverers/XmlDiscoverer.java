@@ -54,15 +54,8 @@ public class XmlDiscoverer implements Discoverer {
                         }
                     });
 
-                final Map<Path, Document> poms = new HashMap<>();
-                xmls.keySet()
-                    .stream()
-                    .filter(p -> p.getFileName()
-                        .toString()
-                        .equalsIgnoreCase("pom.xml"))
-                    .forEach(p -> poms.put(p, xmls.get(p)));
                 this.getBlackboard()
-                    .putDiscoveredFiles(DISCOVERER_ID, poms);
+                    .putDiscoveredFiles(DISCOVERER_ID, xmls);
             }
 
             @Override

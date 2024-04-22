@@ -22,6 +22,7 @@ import org.palladiosimulator.retriever.extraction.rules.util.SpringHelper
 import org.palladiosimulator.retriever.extraction.rules.util.RESTHelper
 import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard
 import org.palladiosimulator.retriever.extraction.commonalities.RESTOperationName
+import org.palladiosimulator.retriever.extraction.rules.util.ProjectHelper
 
 class SpringRules implements Rule {
 	static final Logger LOG = Logger.getLogger(SpringRules)
@@ -44,7 +45,7 @@ class SpringRules implements Rule {
 		val poms = blackboard.getDiscoveredFiles(XML_DISCOVERER_ID, typeof(Document))
 		val propertyFiles = blackboard.getDiscoveredFiles(PROPERTIES_DISCOVERER_ID, typeof(Properties))
 
-		val projectRoot = SpringHelper.findProjectRoot(path, poms)
+		val projectRoot = ProjectHelper.findMavenProjectRoot(path, poms)
 		val configRoot = SpringHelper.findConfigRoot(poms)
 		val bootstrapYaml = projectRoot === null
 				? null
