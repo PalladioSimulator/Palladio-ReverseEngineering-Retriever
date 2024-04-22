@@ -19,7 +19,6 @@ inputs:
   rules_path:
     description: "The location of additional project specific rules"
     required: false
-    default: "."
   benchmark:
     description: "Whether use hyperfine to benchmark the execution of the retriever, otherwise just the one time execution time is reported"
     required: false
@@ -201,12 +200,21 @@ runs:
         wget https://github.com/sharkdp/hyperfine/releases/download/v1.16.1/hyperfine_1.16.1_amd64.deb
         sudo dpkg -i hyperfine_1.16.1_amd64.deb
 
+    - name: Prepare Retriever Command
+      shell: bash
+      env:
+        RETRIEVER_COMMAND: './eclipse -nosplash -i "${{ github.workspace }}/${{ inputs.source_path }}" -o "${{ env.tmp_dir }}/eclipse_tmp" -r "${{ inputs.rules }}"'
+      run: |
+        if [[ "${{ inputs.rules_path }}" != '' ]]; then
+          RETRIEVER_COMMAND="${RETRIEVER_COMMAND} -x \"${{ github.workspace }}/${{ inputs.rules_path }}\""
+        fi
+        echo "retriever_command=$RETRIEVER_COMMAND" >> $GITHUB_ENV
+
     - name: Execute Retriever
       shell: bash
       working-directory: ${{ env.tmp_dir }}/retriever
       env:
         NO_AT_BRIDGE: 1 # avoid eclipse error "AT-SPI: Error retrieving accessibility bus address"
-        RETRIEVER_COMMAND: './eclipse -nosplash -i "${{ github.workspace }}/${{ inputs.source_path }}" -o "${{ env.tmp_dir }}/eclipse_tmp" -r "${{ inputs.rules }}" -x "${{ inputs.rules_path }}"'
         TIMING_INFO_FILE: ${{ env.tmp_dir }}/retriever_out/timing.md
       run: |
         echo "TIMING_INFO_FILE=$TIMING_INFO_FILE" >> $GITHUB_ENV
@@ -223,7 +231,7 @@ runs:
             rm -rf "${{ env.tmp_dir }}/eclipse_tmp"; sleep 1; \
             rm -rf "${{ env.tmp_dir }}/retriever/workspace"; sleep 1; \
             echo "cleanup done"' \
-            "$RETRIEVER_COMMAND"
+            "${{ env.retriever_command }}"
           
           # Remove the first column from the table using sed
           sed -i 's/^[^|]*|[^|]*|/|/' $TIMING_INFO_FILE
@@ -234,7 +242,7 @@ runs:
                     
         else
           # Execute with /usr/bin/time
-          /usr/bin/time -p -o "$TIMING_INFO_FILE" $RETRIEVER_COMMAND
+          /usr/bin/time -p -o "$TIMING_INFO_FILE" ${{ env.retriever_command }}
           # Read and reformat the timing information
           {
             echo "## Retriever execution time"
