@@ -17,21 +17,6 @@ final class SpringHelper {
 		throw new IllegalAccessException()
 	}
 
-	static def findProjectRoot(Path currentPath, Map<Path, Document> poms) {
-		if (currentPath === null || poms === null) {
-			return null
-		}
-		val closestPom = poms.entrySet.stream.map([entry|entry.key]) // Only keep poms above the current compilation unit.
-		.filter([path|currentPath.startsWith(path.parent)]) // Take the longest path, which is the pom.xml closest to the compilation unit
-		.max([a, b|a.size.compareTo(b.size)])
-
-		if (closestPom.present) {
-			return closestPom.get.parent
-		} else {
-			return null
-		}
-	}
-
 	static def findConfigRoot(Map<Path, Document> poms) {
 		if (poms === null) {
 			return null

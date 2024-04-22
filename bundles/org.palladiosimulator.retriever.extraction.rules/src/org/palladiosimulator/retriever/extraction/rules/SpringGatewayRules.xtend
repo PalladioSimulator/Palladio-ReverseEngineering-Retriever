@@ -15,6 +15,7 @@ import org.palladiosimulator.retriever.extraction.engine.Rule
 import org.palladiosimulator.retriever.extraction.rules.util.SpringHelper
 import org.palladiosimulator.retriever.extraction.rules.data.GatewayRoute
 import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard
+import org.palladiosimulator.retriever.extraction.rules.util.ProjectHelper
 
 class SpringGatewayRules implements Rule {
 	static final Logger LOG = Logger.getLogger(SpringGatewayRules)
@@ -34,7 +35,7 @@ class SpringGatewayRules implements Rule {
 		val poms = blackboard.getDiscoveredFiles(XML_DISCOVERER_ID, typeof(Document))
 		val propertyFiles = blackboard.getDiscoveredFiles(PROPERTIES_DISCOVERER_ID, typeof(Properties))
 
-		val projectRoot = SpringHelper.findProjectRoot(path, poms)
+		val projectRoot = ProjectHelper.findMavenProjectRoot(path, poms)
 
 		var Map<Path, List<GatewayRoute>> routeMap = new HashMap<Path, List<GatewayRoute>>()
 		if (blackboard.hasPartition(RULE_ID)) {
