@@ -17,6 +17,7 @@ class JaxRSRules implements Rule {
 	public static final String RULE_ID = "org.palladiosimulator.retriever.extraction.rules.jax_rs"
 
 	public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverers.java"
+	public static final String DEPLOYMENT_RULE_ID = "org.palladiosimulator.retriever.extraction.rules.jax_rs.deployment"
 
 	static final Map<String, HTTPMethod> SERVLET_METHODS = Map.of("doGet", HTTPMethod.GET, "doPost", HTTPMethod.POST,
 		"doDelete", HTTPMethod.DELETE, "doPut", HTTPMethod.PUT, "handleGETRequest", HTTPMethod.GET, "handlePOSTRequest",
@@ -27,10 +28,21 @@ class JaxRSRules implements Rule {
 
 		if(unit === null) return;
 
-		processRuleForCompUnit(blackboard, unit)
+		val hostnameMap = blackboard.getPartition(DEPLOYMENT_RULE_ID) as Map<Path, String>
+		var hostname = "SERVICE-HOST"
+		var Path mostSpecificHostnamePath = null
+		for (hostnamePath : hostnameMap.keySet) {
+			if (hostnamePath !== null && path.startsWith(hostnamePath) &&
+				(mostSpecificHostnamePath === null || hostnamePath.startsWith(mostSpecificHostnamePath))) {
+				hostname = hostnameMap.get(hostnamePath)
+				mostSpecificHostnamePath = hostnamePath
+			}
+		}
+
+		processRuleForCompUnit(blackboard, unit, hostname)
 	}
 
-	def processRuleForCompUnit(RetrieverBlackboard blackboard, CompilationUnit unit) {
+	def processRuleForCompUnit(RetrieverBlackboard blackboard, CompilationUnit unit, String hostname) {
 		val pcmDetector = blackboard.getPCMDetector()
 		if (pcmDetector === null) {
 			return
@@ -67,7 +79,7 @@ class JaxRSRules implements Rule {
 					methodPath = RESTHelper.replaceArgumentsWithWildcards(methodPath)
 					// TODO: HTTP method switch-case
 					pcmDetector.detectCompositeProvidedOperation(identifier, m.resolveBinding,
-						new RESTOperationName("SERVICE-HOST", methodPath))
+						new RESTOperationName(hostname, methodPath))
 				}
 			]
 			getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]
@@ -82,7 +94,7 @@ class JaxRSRules implements Rule {
 			getMethods(unit).forEach [ m |
 				if (SERVLET_METHODS.containsKey(m.name.identifier)) {
 					pcmDetector.detectProvidedOperation(identifier, m.resolveBinding,
-						new RESTOperationName("SERVICE-HOST", path, Set.of(SERVLET_METHODS.get(m.name.identifier))))
+						new RESTOperationName(hostname, path, Set.of(SERVLET_METHODS.get(m.name.identifier))))
 				}
 			]
 			getFields(unit).forEach[f|pcmDetector.detectRequiredInterfaceWeakly(identifier, f)]
@@ -130,7 +142,7 @@ class JaxRSRules implements Rule {
 	}
 
 	override getRequiredServices() {
-		return Set.of(JAVA_DISCOVERER_ID)
+		return Set.of(JAVA_DISCOVERER_ID, DEPLOYMENT_RULE_ID)
 	}
 
 	override getDependentServices() {
