@@ -73,5 +73,13 @@
           class="org.palladiosimulator.retriever.extraction.rules.ProjectSpecificRulesProxy">
     </rule>
  </extension>
+ <extension
+       id="org.palladiosimulator.retriever.extraction.rules.jax_rs.deployment"
+       name="Jax RS Deployment Rules"
+       point="org.palladiosimulator.retriever.extraction.rule">
+    <rule
+          class="org.palladiosimulator.retriever.extraction.rules.JaxRSDeploymentRules">
+    </rule>
+ </extension>
 
 </plugin>
