@@ -45,7 +45,7 @@ class SpringRules implements Rule {
 		val poms = blackboard.getDiscoveredFiles(XML_DISCOVERER_ID, typeof(Document))
 		val propertyFiles = blackboard.getDiscoveredFiles(PROPERTIES_DISCOVERER_ID, typeof(Properties))
 
-		val projectRoot = ProjectHelper.findMavenProjectRoot(path, poms)
+		val projectRoot = ProjectHelper.findProjectRoot(path, "pom.xml")
 		val configRoot = SpringHelper.findConfigRoot(poms)
 		val bootstrapYaml = projectRoot === null
 				? null

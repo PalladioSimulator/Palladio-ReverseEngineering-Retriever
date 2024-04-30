@@ -10,7 +10,6 @@ import java.util.Properties
 import java.util.Set
 import java.util.function.Function
 import org.apache.log4j.Logger
-import org.jdom2.Document
 import org.palladiosimulator.retriever.extraction.engine.Rule
 import org.palladiosimulator.retriever.extraction.rules.util.SpringHelper
 import org.palladiosimulator.retriever.extraction.rules.data.GatewayRoute
@@ -32,10 +31,9 @@ class SpringGatewayRules implements Rule {
 	override processRules(RetrieverBlackboard blackboard, Path path) {
 		val rawYamls = blackboard.getPartition(YAML_DISCOVERER_ID) as Map<Path, Iterable<Map<String, Object>>>
 		val yamlMappers = blackboard.getPartition(YAML_MAPPERS_KEY) as Map<Path, Function<String, Optional<String>>>
-		val poms = blackboard.getDiscoveredFiles(XML_DISCOVERER_ID, typeof(Document))
 		val propertyFiles = blackboard.getDiscoveredFiles(PROPERTIES_DISCOVERER_ID, typeof(Properties))
 
-		val projectRoot = ProjectHelper.findMavenProjectRoot(path, poms)
+		val projectRoot = ProjectHelper.findProjectRoot(path, "pom.xml")
 
 		var Map<Path, List<GatewayRoute>> routeMap = new HashMap<Path, List<GatewayRoute>>()
 		if (blackboard.hasPartition(RULE_ID)) {
