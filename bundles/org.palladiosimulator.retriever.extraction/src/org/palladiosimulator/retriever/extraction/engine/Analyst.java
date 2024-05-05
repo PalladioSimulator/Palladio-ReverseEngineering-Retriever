@@ -1,8 +1,6 @@
-package org.palladiosimulator.retriever.core.service;
+package org.palladiosimulator.retriever.extraction.engine;
 
 import java.util.Set;
-
-import org.palladiosimulator.retriever.extraction.engine.Service;
 
 /**
  * The defining interface of the org.palladiosimulator.retriever.extraction.analyst extension point.
