@@ -1,5 +1,5 @@
 # Retriever
-> Eclipse plugin for model-driven reverse engineering
+> **R**everse **E**ngineering **T**echnique with **R**efinement **I**ntegration of **E**xtracted **V**iews with **E**lements and **R**elationships
 
 [![Build Pipeline](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/actions/workflows/build.yml/badge.svg)](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/actions/workflows/build.yml) [![Continual Improvement Process](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/actions/workflows/quality.yml/badge.svg)](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/actions/workflows/quality.yml) [![Continuous Product Integration](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/actions/workflows/product.yml/badge.svg)](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/actions/workflows/product.yml)
 
@@ -10,7 +10,10 @@ This component extraction supports base components, composite structures, interf
 ## Status
 The rules engine is currently under active development. If you are interested in further information or would like to contribute your personal thoughts or requirements, please do not hesitate to contact us.
 
-## Built With
+## Retriever Architecture
+This UML diagram shows how the Retriever approach works with the Eclipse platform. The main part of the diagram is the Retriever component, which works with other processes such as Discoverer, Extraction, Finalization, and Refinement. These components work through an orchestrator that coordinates reverse engineering so that it can be used in two ways: programmatically and graphically. It also shows how the software interacts with external models and metamodels. The diagram shows how components such as SoMoX SEFF and Vulnerability connect to the main Retriever component to extract and display software model information.
+
+### Platform
 Retriever is implemented with the [Eclipse Modeling Framework (EMF)](https://www.eclipse.org/modeling/emf/). It is thus provided as a plug-in for the [Eclipse platform](https://www.eclipse.org/eclipse/).
 
 Source code based on EMF metamodels is generated during the build process and is therefore not added to the repository. To generate the source code, either the Maven build or the [EMF generation workflow](https://www.eclipse.org/modeling/emf/docs/2.x/tutorials/clibmod/clibmod_emf2.0.html#step2) must be run.
@@ -19,23 +22,38 @@ The rules for the model-to-model transformations are implemented in [Xtend](http
 
 ### Discoverers
 * [CSV Discoverer](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/blob/master/bundles/org.palladiosimulator.retriever.extraction.discoverers/src/org/palladiosimulator/retriever/extraction/discoverers/CsvDiscoverer.java)
+* [ECMA Discoverer](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/blob/master/bundles/org.palladiosimulator.retriever.extraction.discoverers/src/org/palladiosimulator/retriever/extraction/discoverers/EcmaScriptDiscoverer.java)
 * [Java Discoverer](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/blob/master/bundles/org.palladiosimulator.retriever.extraction.discoverers/src/org/palladiosimulator/retriever/extraction/discoverers/JavaDiscoverer.java)
 * [JSON Discoverer](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/blob/master/bundles/org.palladiosimulator.retriever.extraction.discoverers/src/org/palladiosimulator/retriever/extraction/discoverers/JsonDiscoverer.java)
+* [Properties Discoverer](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/blob/master/bundles/org.palladiosimulator.retriever.extraction.discoverers/src/org/palladiosimulator/retriever/extraction/discoverers/PropertiesDiscoverer.java)
+* [SQL Discoverer](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/blob/master/bundles/org.palladiosimulator.retriever.extraction.discoverers/src/org/palladiosimulator/retriever/extraction/discoverers/SqlDiscoverer.java)
 * [XML Discoverer](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/blob/master/bundles/org.palladiosimulator.retriever.extraction.discoverers/src/org/palladiosimulator/retriever/extraction/discoverers/XmlDiscoverer.java)
 * [YAML Discoverer](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/blob/master/bundles/org.palladiosimulator.retriever.extraction.discoverers/src/org/palladiosimulator/retriever/extraction/discoverers/YamlDiscoverer.java)
 
-### Rules
-* [Spring Boot and Framework](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/tree/master/bundles/org.palladiosimulator.retriever.extraction.rules/src/org/palladiosimulator/retriever/extraction/rules/SpringRules.xtend)
-* [Jakarta RESTful Web Services](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/tree/master/bundles/org.palladiosimulator.retriever.extraction.rules/src/org/palladiosimulator/retriever/extraction/rules/JaxRSRules.xtend)
-* [Maven Project Object Model](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/tree/master/bundles/org.palladiosimulator.retriever.extraction.rules/src/org/palladiosimulator/retriever/extraction/rules/MavenRules.xtend)
+### Extraction
+* [Docker Container](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/tree/master/bundles/org.palladiosimulator.retriever.extraction.rules/src/org/palladiosimulator/retriever/extraction/rules/DockerRules.xtend)
+* [ECMAScript 6](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/tree/master/bundles/org.palladiosimulator.retriever.extraction.rules/src/org/palladiosimulator/retriever/extraction/rules/EcmaScriptRules.xtend)
+* [Gradle Build](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/tree/master/bundles/org.palladiosimulator.retriever.extraction.rules/src/org/palladiosimulator/retriever/extraction/rules/GradleRules.xtend)
+* [Jakarta Deployment](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/tree/master/bundles/org.palladiosimulator.retriever.extraction.rules/src/org/palladiosimulator/retriever/extraction/rules/JaxRSDeploymentRules.xtend)
+* [Jakarta Services](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/tree/master/bundles/org.palladiosimulator.retriever.extraction.rules/src/org/palladiosimulator/retriever/extraction/rules/JaxRSRules.xtend)
+* [Maven Build](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/tree/master/bundles/org.palladiosimulator.retriever.extraction.rules/src/org/palladiosimulator/retriever/extraction/rules/MavenRules.xtend)
+* [Spring Boot](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/tree/master/bundles/org.palladiosimulator.retriever.extraction.rules/src/org/palladiosimulator/retriever/extraction/rules/SpringRules.xtend)
+* [Spring Gateway](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/tree/master/bundles/org.palladiosimulator.retriever.extraction.rules/src/org/palladiosimulator/retriever/extraction/rules/SpringGatewayRules.xtend)
+* [Zuul Gateway](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever/tree/master/bundles/org.palladiosimulator.retriever.extraction.rules/src/org/palladiosimulator/retriever/extraction/rules/SpringZuulRules.xtend)
+
 
 ### Analyzer
-* [Docker Vulnerability](https://github.com/FluidTrust/Palladio-ReverseEngineering-Docker-Vulnerability)
+* [Behavior](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-SoMoX-SEFF)
+* [Vulnerability](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever-Vulnerability)
+
+### Finalizer
+* [Quality Prediction](https://github.com/PalladioSimulator/Palladio-Core-PCM)
+* [Documentation](https://github.com/hallvard/plantuml)
 
 ## Getting Started
 ### Preconditions
 * [Installation of PCM Nightly](https://sdqweb.ipd.kit.edu/wiki/PCM_Installation#PCM_Nightly)
-  * Requires [Java Development Kit 11](https://adoptopenjdk.net/?variant=openjdk11&jvmVariant=hotspot) and [Eclipse 2022-12 Modeling Tools](https://www.eclipse.org/downloads/packages/release/2022-12/r/eclipse-modeling-tools)
+  * Requires [Java Development Kit 17](https://adoptopenjdk.net/?variant=openjdk17&jvmVariant=hotspot) and [Eclipse 2022-12 Modeling Tools](https://www.eclipse.org/downloads/packages/release/2022-12/r/eclipse-modeling-tools)
   * [Install](https://help.eclipse.org/latest/topic/org.eclipse.platform.doc.user/tasks/tasks-124.htm) PCM Nightly from the [update site](https://updatesite.palladio-simulator.com/palladio-build-updatesite/nightly/)
   * Do not install the *deprecated* categories
 
@@ -79,7 +97,6 @@ Alternatively, you can read the GitHub documentation on how to [create a pull re
 * Issue tracker: https://palladio-simulator.atlassian.net/jira/
 * Update site: https://updatesite.palladio-simulator.com/palladio-reverseengineering-retriever/nightly/
 * Javadoc: https://updatesite.palladio-simulator.com/palladio-reverseengineering-retriever/nightly/javadoc/
-* Deprecated build server: https://build.palladio-simulator.com/job/PalladioSimulator/job/Palladio-ReverseEngineering-Retriever/
 
 ## Licensing
 The code in this project is licensed under the [EPL-2.0 License](LICENSE).
