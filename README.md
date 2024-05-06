@@ -13,6 +13,8 @@ The rules engine is currently under active development. If you are interested in
 ## Retriever Architecture
 This UML diagram shows how the Retriever approach works with the Eclipse platform. The main part of the diagram is the Retriever component, which works with other processes such as Discoverer, Extraction, Finalization, and Refinement. These components work through an orchestrator that coordinates reverse engineering so that it can be used in two ways: programmatically and graphically. It also shows how the software interacts with external models and metamodels. The diagram shows how components such as SoMoX SEFF and Vulnerability connect to the main Retriever component to extract and display software model information.
 
+![Retriever Architecture](https://www.plantuml.com/plantuml/svg/FSq_hi8m383n_PtYSG3YdQaBEu8JcCHABJbEvJzmVTgbqoVzbc_nG8iSydTXhPADqkH_ZTZy1c3uBPrZpNSwMPqQf57g7F104MmyNpnICAQTSdtIXypfhfsLo5ZxJc5yC0naXJQhmsbbE_OBQTlx0m00)
+
 ### Platform
 Retriever is implemented with the [Eclipse Modeling Framework (EMF)](https://www.eclipse.org/modeling/emf/). It is thus provided as a plug-in for the [Eclipse platform](https://www.eclipse.org/eclipse/).
 
