@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.palladiosimulator.retriever.core.configuration.RetrieverBlackboardKeys;
-import org.palladiosimulator.retriever.core.service.Analyst;
 import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
+import org.palladiosimulator.retriever.extraction.engine.Analyst;
 import org.palladiosimulator.retriever.extraction.engine.Discoverer;
 import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
 import org.palladiosimulator.retriever.extraction.engine.Rule;

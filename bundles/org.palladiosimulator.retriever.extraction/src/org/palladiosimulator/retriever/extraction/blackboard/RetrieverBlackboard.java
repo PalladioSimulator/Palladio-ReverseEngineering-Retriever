@@ -88,6 +88,10 @@ public class RetrieverBlackboard extends Blackboard<Object> {
         return Collections.unmodifiableMap(seffAssociations);
     }
 
+    public Map<System, Path> getSystemPaths() {
+        return Collections.unmodifiableMap(this.systemPaths);
+    }
+
     public <T> void putDiscoveredFiles(final String discovererID, final Map<Path, T> pathsToFiles) {
         this.discovererIDs.add(discovererID);
         this.addPartition(discovererID, pathsToFiles);

@@ -3,6 +3,7 @@ package org.palladiosimulator.retriever.core.cli;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
@@ -21,12 +22,15 @@ import org.palladiosimulator.retriever.core.configuration.RetrieverConfiguration
 import org.palladiosimulator.retriever.core.service.DiscovererCollection;
 import org.palladiosimulator.retriever.core.service.RuleCollection;
 import org.palladiosimulator.retriever.core.workflow.RetrieverJob;
+import org.palladiosimulator.retriever.extraction.engine.Analyst;
 import org.palladiosimulator.retriever.extraction.engine.Discoverer;
 import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
 import org.palladiosimulator.retriever.extraction.engine.Rule;
 import org.palladiosimulator.retriever.extraction.engine.ServiceConfiguration;
 
 public class RetrieverApplication implements IApplication {
+
+    private static String VULNERABILITY_ANALYST_ID = "org.palladiosimulator.retriever.vulnerability.core.analyst";
 
     private static Options createOptions(final Set<String> availableRuleIDs) {
         final Options options = new Options();
@@ -39,6 +43,8 @@ public class RetrieverApplication implements IApplication {
 
         options.addOption("x", "rules-directory", true,
                 "Path to the directory with additional project specific rules.");
+
+        options.addOption("a", "analyze-vulnerabilites", true, "Path to the snyk executable.");
 
         options.addOption("h", "help", false, "Print this help message.");
 
@@ -147,6 +153,21 @@ public class RetrieverApplication implements IApplication {
                 return -1;
             }
             ruleConfig.select(projectSpecificRulesProxy.get());
+        }
+
+        if (cmd.hasOption("analyze-vulnerabilites")) {
+            final ServiceConfiguration<Analyst> analystConfig = configuration.getConfig(Analyst.class);
+            final Collection<Analyst> availableAnalysts = analystConfig.getAvailable();
+            final Optional<Analyst> vulnerabilityAnalyst = availableAnalysts.stream()
+                .filter(x -> VULNERABILITY_ANALYST_ID.equals(x.getID()))
+                .findAny();
+            if (vulnerabilityAnalyst.isEmpty()) {
+                System.err.println("Internal error: could not find vulnerability analyst");
+                return -1;
+            }
+            analystConfig.select(vulnerabilityAnalyst.get());
+            analystConfig.setConfig(VULNERABILITY_ANALYST_ID, "SNYK_EXE_LOCATION",
+                    cmd.getOptionValue("analyze-vulnerabilities"));
         }
 
         new RetrieverJob(configuration).execute(new NullProgressMonitor());
