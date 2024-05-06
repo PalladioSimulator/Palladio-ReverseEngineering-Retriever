@@ -1,0 +1,54 @@
+@startuml "Retriever Architecture"
+skinparam fixCircleLabelOverlapping true
+skinparam componentStyle uml2
+
+package "Eclipse" {
+
+    package "Metamodels" {
+        [Confidentiality]
+        [Palladio]
+        [PlantUML]
+    }
+
+    package "View-Based Reverse Engineering" {
+
+        package "Behavioral Views" {
+            [SoMoX SEFF]
+            [Vulnerability]
+        }
+
+        component "Retriever" {
+            () Register as "Register Metamodel"
+            () View as "View Extraction"
+            [Discoverers]
+            [Extraction]
+            [Finalization]
+            [Orchestrator]
+            [Refinement]
+            [Discoverers] -0)- [Orchestrator]
+            [Extraction] -0)- [Orchestrator]
+            [Finalization] -0)- [Orchestrator]
+            [Refinement] -0)- [Orchestrator]
+            () Register - [Finalization]
+            () View - [Extraction]
+        }
+
+        [Confidentiality] --> Register
+        [Palladio] --> Register
+        [PlantUML] --> Register
+        [SoMoX SEFF] --> View
+        [Vulnerability] --> View
+        [Confidentiality] -0)- [Vulnerability]
+        [Palladio] -0)- [Extraction]
+        [Palladio] -0)- [Refinement]
+        [Palladio] -0)- [SoMoX SEFF]
+    }
+}
+
+file In as "Artifacts"
+file Out as "Artifacts"
+[Discoverers] -(0- In
+[Finalization] -(0- Out
+[Orchestrator] -0)- :Actor: : "CLI"
+[Orchestrator] -0)- :Actor: : "GUI"
+@enduml
