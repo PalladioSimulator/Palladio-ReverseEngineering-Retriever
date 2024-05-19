@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Retriever Services
+Bundle-SymbolicName: org.palladiosimulator.retriever.services;singleton:=true
+Bundle-Version: 5.2.0.qualifier
+Bundle-Vendor: palladiosimulator.org
+Automatic-Module-Name: org.palladiosimulator.retriever.extraction.engine
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Export-Package: org.palladiosimulator.retriever.services,
+ org.palladiosimulator.retriever.services.blackboard
+Require-Bundle: de.uka.ipd.sdq.workflow,
+ org.eclipse.emf.common,
+ org.palladiosimulator.pcm,
+ org.eclipse.jdt.core

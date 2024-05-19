@@ -17,12 +17,13 @@ import java.util.Optional
 import org.palladiosimulator.retriever.extraction.commonalities.CompUnitOrName
 import java.util.function.Function
 import java.util.Set
-import org.palladiosimulator.retriever.extraction.engine.Rule
 import org.palladiosimulator.retriever.extraction.rules.util.SpringHelper
 import org.palladiosimulator.retriever.extraction.rules.util.RESTHelper
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard
 import org.palladiosimulator.retriever.extraction.commonalities.RESTOperationName
 import org.palladiosimulator.retriever.extraction.rules.util.ProjectHelper
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard
+import org.palladiosimulator.retriever.services.Rule
+import org.palladiosimulator.retriever.extraction.engine.PCMDetector
 
 class SpringRules implements Rule {
 	static final Logger LOG = Logger.getLogger(SpringRules)
@@ -133,7 +134,7 @@ class SpringRules implements Rule {
 
 	def processRuleForCompUnit(RetrieverBlackboard blackboard, CompilationUnit unit, String applicationName,
 		String contextPath, Map<String, String> contextVariables) {
-		val pcmDetector = blackboard.getPCMDetector
+		val pcmDetector = blackboard.getPCMDetector as PCMDetector
 		if(pcmDetector === null) return;
 
 		// Abort if there is no CompilationUnit at the specified path

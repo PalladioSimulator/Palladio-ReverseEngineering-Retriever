@@ -1,10 +1,7 @@
 package org.palladiosimulator.retriever.extraction.rules
 
-import org.palladiosimulator.retriever.extraction.engine.Rule
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard
 import java.nio.file.Path
 import java.util.Optional
-import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration
 import java.util.Set
 import org.eclipse.xtend.core.compiler.batch.XtendBatchCompiler
 import java.net.URLClassLoader
@@ -15,6 +12,9 @@ import javax.tools.ToolProvider
 import org.eclipse.core.runtime.Platform
 import org.eclipse.emf.common.CommonPlugin
 import java.io.IOException
+import org.palladiosimulator.retriever.services.RetrieverConfiguration
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard
+import org.palladiosimulator.retriever.services.Rule
 
 class ProjectSpecificRulesProxy implements Rule {
 

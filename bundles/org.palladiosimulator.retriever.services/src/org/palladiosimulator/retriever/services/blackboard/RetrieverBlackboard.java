@@ -1,4 +1,4 @@
-package org.palladiosimulator.retriever.extraction.blackboard;
+package org.palladiosimulator.retriever.services.blackboard;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -13,7 +13,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
 import org.palladiosimulator.pcm.seff.ServiceEffectSpecification;
 import org.palladiosimulator.pcm.system.System;
-import org.palladiosimulator.retriever.extraction.engine.PCMDetector;
 
 import de.uka.ipd.sdq.workflow.blackboard.Blackboard;
 
@@ -26,15 +25,15 @@ public class RetrieverBlackboard extends Blackboard<Object> {
     private final Map<Path, Set<CompilationUnit>> systemAssociations;
     private final Map<System, Path> systemPaths;
     private final Set<String> discovererIDs;
-    private PCMDetector pcmDetector;
+    private Object pcmDetector;
 
-    public RetrieverBlackboard() {
+    public RetrieverBlackboard(final Object pcmDetector) {
         super();
         this.repositoryComponentLocations = new HashMap<>();
         this.systemAssociations = new HashMap<>();
         this.systemPaths = new HashMap<>();
         this.discovererIDs = new HashSet<>();
-        this.pcmDetector = new PCMDetector();
+        this.pcmDetector = pcmDetector;
         this.addPartition(KEY_SEFF_ASSOCIATIONS, new HashMap<>());
     }
 
@@ -47,11 +46,11 @@ public class RetrieverBlackboard extends Blackboard<Object> {
         return Collections.unmodifiableMap(this.repositoryComponentLocations);
     }
 
-    public void setPCMDetector(final PCMDetector pcmDetector) {
+    public void setPCMDetector(final Object pcmDetector) {
         this.pcmDetector = pcmDetector;
     }
 
-    public PCMDetector getPCMDetector() {
+    public Object getPCMDetector() {
         return this.pcmDetector;
     }
 

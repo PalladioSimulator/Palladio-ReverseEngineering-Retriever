@@ -21,10 +21,11 @@ import java.util.List
 import org.openjdk.nashorn.api.tree.VariableTree
 import org.palladiosimulator.retriever.extraction.commonalities.RESTName
 import org.palladiosimulator.retriever.extraction.commonalities.CompUnitOrName
-import org.palladiosimulator.retriever.extraction.engine.Rule
 import org.palladiosimulator.retriever.extraction.rules.data.GatewayRoute
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard
 import org.palladiosimulator.retriever.extraction.commonalities.RESTOperationName
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard
+import org.palladiosimulator.retriever.services.Rule
+import org.palladiosimulator.retriever.extraction.engine.PCMDetector
 
 class EcmaScriptRules implements Rule {
 
@@ -77,7 +78,7 @@ class EcmaScriptRules implements Rule {
 			}
 		}
 
-		val pcmDetector = blackboard.getPCMDetector
+		val pcmDetector = blackboard.getPCMDetector as PCMDetector
 		val httpRequests = findAllHttpRequests(blackboard, compilationUnit)
 		for (key : httpRequests.keySet) {
 			for (url : httpRequests.get(key)) {

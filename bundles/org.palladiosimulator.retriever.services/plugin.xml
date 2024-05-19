@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+	<extension-point id="org.palladiosimulator.retriever.services.discoverer"
+		name="Retriever Discoverer"
+		schema="schema/org.palladiosimulator.retriever.services.discoverer.exsd" />
+	<extension-point id="org.palladiosimulator.retriever.extraction.rule"
+		name="Retriever Rule"
+		schema="schema/org.palladiosimulator.retriever.extraction.rule.exsd" />
+	<extension-point id="org.palladiosimulator.retriever.extraction.analyst"
+		name="Retriever Analyst"
+		schema="schema/org.palladiosimulator.retriever.extraction.analyst.exsd" />
+</plugin>

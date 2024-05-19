@@ -1,4 +1,4 @@
-package org.palladiosimulator.retriever.extraction.engine;
+package org.palladiosimulator.retriever.services;
 
 import java.io.IOException;
 import java.nio.file.Files;

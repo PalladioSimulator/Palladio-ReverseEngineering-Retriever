@@ -1,8 +1,8 @@
-package org.palladiosimulator.retriever.extraction.engine;
+package org.palladiosimulator.retriever.services;
 
 import java.util.Set;
 
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard;
 
 import de.uka.ipd.sdq.workflow.jobs.IBlackboardInteractingJob;
 

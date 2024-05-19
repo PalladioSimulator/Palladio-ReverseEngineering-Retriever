@@ -15,9 +15,9 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FileASTRequestor;
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
-import org.palladiosimulator.retriever.extraction.engine.Discoverer;
-import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
+import org.palladiosimulator.retriever.services.Discoverer;
+import org.palladiosimulator.retriever.services.RetrieverConfiguration;
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;

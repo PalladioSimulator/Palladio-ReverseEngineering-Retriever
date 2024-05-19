@@ -1,6 +1,6 @@
 package org.palladiosimulator.retriever.core.configuration;
 
-import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
+import org.palladiosimulator.retriever.services.RetrieverConfiguration;
 
 import de.uka.ipd.sdq.workflow.launchconfig.AbstractWorkflowBasedRunConfiguration;
 

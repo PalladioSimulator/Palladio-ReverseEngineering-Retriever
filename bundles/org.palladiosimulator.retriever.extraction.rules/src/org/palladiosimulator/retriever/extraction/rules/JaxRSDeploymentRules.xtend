@@ -6,14 +6,14 @@ import java.util.List
 import java.util.Map
 import java.util.Set
 import org.jdom2.Document
-import org.palladiosimulator.retriever.extraction.engine.Rule
 import org.palladiosimulator.retriever.extraction.rules.data.GatewayRoute
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard
 import java.util.stream.Collectors
 import org.palladiosimulator.retriever.extraction.rules.util.ProjectHelper
 import java.util.ArrayList
 import org.eclipse.jdt.core.dom.CompilationUnit
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard
+import org.palladiosimulator.retriever.services.Rule
 
 class JaxRSDeploymentRules implements Rule {
 	public static final String RULE_ID = "org.palladiosimulator.retriever.extraction.rules.jax_rs.deployment"

@@ -4,7 +4,7 @@
 	<extension
 		id="org.palladiosimulator.retriever.extraction.discoverers.csv"
 		name="CSV Discoverer"
-		point="org.palladiosimulator.retriever.extraction.discoverer">
+		point="org.palladiosimulator.retriever.services.discoverer">
 		<discoverer
 			class="org.palladiosimulator.retriever.extraction.discoverers.CsvDiscoverer">
 		</discoverer>
@@ -12,7 +12,7 @@
 	<extension
 		id="org.palladiosimulator.retriever.extraction.discoverers.java"
 		name="Java Discoverer"
-		point="org.palladiosimulator.retriever.extraction.discoverer">
+		point="org.palladiosimulator.retriever.services.discoverer">
 		<discoverer
 			class="org.palladiosimulator.retriever.extraction.discoverers.JavaDiscoverer">
 		</discoverer>
@@ -20,7 +20,7 @@
 	<extension
 		id="org.palladiosimulator.retriever.extraction.discoverers.json"
 		name="JSON Discoverer"
-		point="org.palladiosimulator.retriever.extraction.discoverer">
+		point="org.palladiosimulator.retriever.services.discoverer">
 		<discoverer
 			class="org.palladiosimulator.retriever.extraction.discoverers.JsonDiscoverer">
 		</discoverer>
@@ -28,7 +28,7 @@
 	<extension
 		id="org.palladiosimulator.retriever.extraction.discoverers.xml"
 		name="XML Discoverer"
-		point="org.palladiosimulator.retriever.extraction.discoverer">
+		point="org.palladiosimulator.retriever.services.discoverer">
 		<discoverer
 			class="org.palladiosimulator.retriever.extraction.discoverers.XmlDiscoverer">
 		</discoverer>
@@ -36,7 +36,7 @@
 	<extension
 		id="org.palladiosimulator.retriever.extraction.discoverers.yaml"
 		name="YAML Discoverer"
-		point="org.palladiosimulator.retriever.extraction.discoverer">
+		point="org.palladiosimulator.retriever.services.discoverer">
 		<discoverer
 			class="org.palladiosimulator.retriever.extraction.discoverers.YamlDiscoverer">
 		</discoverer>
@@ -44,7 +44,7 @@
 	<extension
 		id="org.palladiosimulator.retriever.extraction.discoverers.properties"
 		name=".properties Discoverer"
-		point="org.palladiosimulator.retriever.extraction.discoverer">
+		point="org.palladiosimulator.retriever.services.discoverer">
 		<discoverer
 			class="org.palladiosimulator.retriever.extraction.discoverers.PropertiesDiscoverer">
 		</discoverer>
@@ -52,7 +52,7 @@
 	<extension
 		id="org.palladiosimulator.retriever.extraction.discoverers.ecmascript"
 		name="ECMAScript Discoverer"
-		point="org.palladiosimulator.retriever.extraction.discoverer">
+		point="org.palladiosimulator.retriever.services.discoverer">
 		<discoverer
 			class="org.palladiosimulator.retriever.extraction.discoverers.EcmaScriptDiscoverer">
 		</discoverer>

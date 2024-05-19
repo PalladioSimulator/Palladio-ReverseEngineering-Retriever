@@ -1,9 +1,9 @@
-package org.palladiosimulator.retriever.extraction.engine;
+package org.palladiosimulator.retriever.services;
 
 import java.nio.file.Path;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;
