@@ -91,8 +91,14 @@ runs:
           REPO_PATH=$(echo $REPO_URL | sed -E 's/.*github\.com[:\/](.*)\.git/\1/')
           API_URL="https://api.github.com/repos/$REPO_PATH"
 
-          NUM_STARS=$(curl -s $API_URL | jq '.stargazers_count')
-          NUM_CONTRIBUTORS=$(curl -s $API_URL/contributors | jq 'length')
+
+          echo "API_URL"
+          echo $API_URL
+
+          git log
+
+          NUM_STARS=$(curl -s $API_URL | jq '.stargazers_count // 0')
+          NUM_CONTRIBUTORS=$(curl -s $API_URL/contributors | jq 'length // 0')
 
           echo "|      Attribute    | Value |"
           echo "| ----------------- | ----- |"
