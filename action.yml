@@ -54,11 +54,13 @@ runs:
       shell: bash
       # Uses the latest Retriever or the Retriever with the same version that this action has
       run: |
-        if [[ "${{ env.action_version }}" == "main" ]]; then
-          echo "retriever=${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/latest" >> $GITHUB_ENV
-        else
-          echo "retriever=${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/tags/${{ env.action_version }}" >> $GITHUB_ENV
-        fi
+        echo "retriever=${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/latest" >> $GITHUB_ENV
+
+      #  if [[ "${{ env.action_version }}" == "main" ]]; then
+      #    echo "retriever=${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/latest" >> $GITHUB_ENV
+      #  else
+      #    echo "retriever=${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/tags/${{ env.action_version }}" >> $GITHUB_ENV
+      #  fi
 
     - name: Gather Retriever Info
       shell: bash
