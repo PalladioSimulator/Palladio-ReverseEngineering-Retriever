@@ -81,11 +81,25 @@ runs:
         echo "GIT_INFO_FILE=$GIT_INFO_FILE" >> $GITHUB_ENV
 
         gather_git_info() {
-          echo "|    Attribute   | Value |"
-          echo "| -------------- | ----- |"
-          echo "| Repository URL | $(git config --get remote.origin.url) |"
-          echo "| Branch         | $(git branch --show-current) |"
-          echo "| Commit         | $(git log -1 --pretty=format:"%H") |"
+          REPO_URL=$(git config --get remote.origin.url)
+          BRANCH=$(git branch --show-current)
+          COMMIT=$(git log -1 --pretty=format:"%H")
+          NUM_COMMITS=$(git rev-list --count HEAD)
+
+          REPO_PATH=$(echo $REPO_URL | sed -E 's/.*github\.com[:\/](.*)\.git/\1/')
+          API_URL="https://api.github.com/repos/$REPO_PATH"
+
+          NUM_STARS=$(curl -s $API_URL | jq '.stargazers_count')
+          NUM_CONTRIBUTORS=$(curl -s $API_URL/contributors | jq 'length')
+
+          echo "|      Attribute    | Value |"
+          echo "| ----------------- | ----- |"
+          echo "| Repository URL    | $REPO_URL |"
+          echo "| Branch            | $BRANCH |"
+          echo "| Commit            | $COMMIT |"
+          echo "| Number of Commits | $NUM_COMMITS |"
+          echo "| Stars             | $NUM_STARS |"
+          echo "| Contributors      | $NUM_CONTRIBUTORS |"
           echo ""
         }
 
