@@ -86,17 +86,14 @@ runs:
           REPO_URL=$(git config --get remote.origin.url)
           BRANCH=$(git branch --show-current)
           COMMIT=$(git log -1 --pretty=format:"%H")
-          NUM_COMMITS=$(git rev-list --count HEAD)
 
-          REPO_PATH=$(echo $REPO_URL | sed -E 's/.*github\.com[:\/](.*)\.git/\1/')
-          API_URL="https://api.github.com/repos/$REPO_PATH"
+          REPO_PATH=$(echo $REPO_URL | sed -E 's/.*github\.com[:\/](.*)/\1/')
+          OWNER=$(echo $REPO_PATH | cut -d'/' -f1)
+          REPO_NAME=$(echo $REPO_PATH | cut -d'/' -f2 | sed 's/\.git$//')
+          API_URL="https://api.github.com/repos/$OWNER/$REPO_NAME"
 
-
-          echo "API_URL"
-          echo $API_URL
-
-          git log
-
+          # Get the number of commits using GitHub API and pagination info
+          NUM_COMMITS=$(curl -s -I "${API_URL}/commits?per_page=1" | grep -i 'link:' | sed -E 's/.*page=([0-9]+)>; rel="last".*/\1/')
           NUM_STARS=$(curl -s $API_URL | jq '.stargazers_count // 0')
           NUM_CONTRIBUTORS=$(curl -s $API_URL/contributors | jq 'length // 0')
 
