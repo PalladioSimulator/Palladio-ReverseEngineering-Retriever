@@ -10,7 +10,7 @@ import org.palladiosimulator.retriever.services.Rule;
 import org.palladiosimulator.retriever.services.ServiceCollection;
 
 public class RuleCollection implements ServiceCollection<Rule> {
-    public static final String EXTENSION_POINT = "org.palladiosimulator.retriever.extraction.rule";
+    public static final String EXTENSION_POINT = "org.palladiosimulator.retriever.services.rule";
     private final Set<Rule> rules = new HashSet<>();
 
     public RuleCollection() throws CoreException {

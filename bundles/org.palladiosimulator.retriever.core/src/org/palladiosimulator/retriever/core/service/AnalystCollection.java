@@ -11,7 +11,7 @@ import org.palladiosimulator.retriever.services.Analyst;
 import org.palladiosimulator.retriever.services.ServiceCollection;
 
 public class AnalystCollection implements ServiceCollection<Analyst> {
-    public static final String EXTENSION_POINT = "org.palladiosimulator.retriever.extraction.analyst";
+    public static final String EXTENSION_POINT = "org.palladiosimulator.retriever.services.analyst";
     private final Set<Analyst> analysts = new HashSet<>();
 
     public AnalystCollection() throws CoreException {
