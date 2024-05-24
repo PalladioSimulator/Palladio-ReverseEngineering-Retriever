@@ -8,8 +8,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.Platform;
-import org.palladiosimulator.retriever.extraction.engine.Discoverer;
-import org.palladiosimulator.retriever.extraction.engine.ServiceCollection;
+import org.palladiosimulator.retriever.services.Discoverer;
+import org.palladiosimulator.retriever.services.ServiceCollection;
 
 public class DiscovererCollection implements ServiceCollection<Discoverer> {
     public static final String EXTENSION_POINT = "org.palladiosimulator.retriever.extraction.discoverer";

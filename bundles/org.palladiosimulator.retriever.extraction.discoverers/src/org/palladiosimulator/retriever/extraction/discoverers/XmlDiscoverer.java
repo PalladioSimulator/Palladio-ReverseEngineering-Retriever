@@ -16,9 +16,9 @@ import org.eclipse.emf.common.CommonPlugin;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
-import org.palladiosimulator.retriever.extraction.engine.Discoverer;
-import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
+import org.palladiosimulator.retriever.services.Discoverer;
+import org.palladiosimulator.retriever.services.RetrieverConfiguration;
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;

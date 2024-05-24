@@ -16,10 +16,10 @@ import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.CommonPlugin;
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
 import org.palladiosimulator.retriever.extraction.discoverers.wrappers.YamlMapper;
-import org.palladiosimulator.retriever.extraction.engine.Discoverer;
-import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
+import org.palladiosimulator.retriever.services.Discoverer;
+import org.palladiosimulator.retriever.services.RetrieverConfiguration;
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 

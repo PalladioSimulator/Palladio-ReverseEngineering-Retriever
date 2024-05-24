@@ -13,9 +13,9 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.junit.jupiter.api.Test;
 import org.palladiosimulator.pcm.seff.ServiceEffectSpecification;
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
 import org.palladiosimulator.retriever.extraction.discoverers.JavaDiscoverer;
 import org.palladiosimulator.retriever.extraction.rules.SpringRules;
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard;
 
 public class SeffAssociationTest extends CaseStudyTest {
 
