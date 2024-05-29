@@ -143,6 +143,7 @@ runs:
           SUM_BLANK=0
           SUM_COMMENT=0
           SUM_CODE=0
+          SUM_TECHNOLOGY=0
 
           echo "## Cloc analysis"
           echo ""
@@ -172,6 +173,7 @@ runs:
               SUM_BLANK=$((SUM_BLANK + blank))
               SUM_COMMENT=$((SUM_COMMENT + comment))
               SUM_CODE=$((SUM_CODE + code))
+              SUM_TECHNOLOGY=$((SUM_TECHNOLOGY + 1))
 
               echo "$language|$files|$blank|$comment|$code"
             fi
@@ -203,11 +205,16 @@ runs:
             SUM_BLANK=$((SUM_BLANK + ecma_blank))
             SUM_COMMENT=$((SUM_COMMENT + ecma_comment))
             SUM_CODE=$((SUM_CODE + ecma_code))
+            SUM_TECHNOLOGY=$((SUM_TECHNOLOGY + 1))
 
             echo "ECMAScript|$ecma_files|$ecma_blank|$ecma_comment|$ecma_code"
           fi
 
           echo "**SUM:**|**$SUM_FILES**|**$SUM_BLANK**|**$SUM_COMMENT**|**$SUM_CODE**"
+
+          echo "source_files_count=$SUM_FILES" >> $GITHUB_ENV
+          echo "lines_of_code=$SUM_CODE" >> $GITHUB_ENV
+          echo "technology_count=$SUM_TECHNOLOGY" >> $GITHUB_ENV
 
         } > $CLOC_INFO_FILE
 
@@ -342,6 +349,11 @@ runs:
       run: |
         RETRIEVER_INFO_FILE=${{ env.tmp_dir }}/retriever_out/retriever_info.md
 
+        ABSTRACTION=$(echo "scale=2; ${{ env.source_files_count }} / ${{ env.component_count }} | bc -l)
+        if [[ "$ABSTRACTION" != 0* ]]; then
+          ABSTRACTION="0$ABSTRACTION"
+        fi
+
         echo "RETRIEVER_INFO_FILE=$RETRIEVER_INFO_FILE" >> $GITHUB_ENV
         {
           echo "# [Retriever](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever) Report"
@@ -350,6 +362,10 @@ runs:
           echo "| Retriever Version | $(curl -sL "${{ env.retriever }}" | jq -r ".tag_name") |"
           echo "| Date              | $(date -u) |"
           echo "| #Components       | ${{ env.component_count }} |"
+          echo "| #Source Files     | ${{ env.source_files_count }} |"
+          echo "| Lines of Code     | ${{ env.lines_of_code }} |"
+          echo "| #Technologies     | ${{ env.technology_count }} |"
+          echo "| Abstraction       | $ABSTRACTION |"
         } > $RETRIEVER_INFO_FILE
 
     - name: Combine and Clean Up Files
