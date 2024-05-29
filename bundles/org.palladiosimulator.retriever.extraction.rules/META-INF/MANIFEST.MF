@@ -14,5 +14,6 @@ Require-Bundle: org.eclipse.core.resources,
  de.uka.ipd.sdq.workflow,
  org.jdom2,
  org.openjdk.nashorn.core;bundle-version="15.4.0",
- org.eclipse.xtend.core
+ org.eclipse.xtend.core,
+ org.palladiosimulator.retriever.services
 Export-Package: org.palladiosimulator.retriever.extraction.rules

@@ -22,11 +22,11 @@ import org.palladiosimulator.retriever.core.service.AnalystCollection;
 import org.palladiosimulator.retriever.core.service.DiscovererCollection;
 import org.palladiosimulator.retriever.core.service.EmptyCollection;
 import org.palladiosimulator.retriever.core.service.RuleCollection;
-import org.palladiosimulator.retriever.extraction.engine.Analyst;
-import org.palladiosimulator.retriever.extraction.engine.Discoverer;
-import org.palladiosimulator.retriever.extraction.engine.Rule;
-import org.palladiosimulator.retriever.extraction.engine.ServiceCollection;
-import org.palladiosimulator.retriever.extraction.engine.ServiceConfiguration;
+import org.palladiosimulator.retriever.services.Analyst;
+import org.palladiosimulator.retriever.services.Discoverer;
+import org.palladiosimulator.retriever.services.Rule;
+import org.palladiosimulator.retriever.services.ServiceCollection;
+import org.palladiosimulator.retriever.services.ServiceConfiguration;
 
 import de.uka.ipd.sdq.workflow.launchconfig.ImageRegistryHelper;
 import de.uka.ipd.sdq.workflow.launchconfig.LaunchConfigPlugin;

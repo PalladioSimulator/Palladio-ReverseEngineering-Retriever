@@ -26,4 +26,5 @@ Require-Bundle: com.google.guava,
  org.palladiosimulator.retriever.extraction,
  org.palladiosimulator.retriever.core,
  org.palladiosimulator.retriever.extraction.discoverers,
- org.palladiosimulator.retriever.extraction.rules
+ org.palladiosimulator.retriever.extraction.rules,
+ org.palladiosimulator.retriever.services
