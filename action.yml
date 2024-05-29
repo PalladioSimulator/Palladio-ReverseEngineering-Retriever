@@ -137,7 +137,12 @@ runs:
 
         CLOC_VERSION_INFO=$(grep -E '^cloc\|' $CLOC_INFO_FILE.tmp | sed 's/cloc|//')
 
+        cat $CLOC_INFO_FILE.tmp
+
+        cat $CLOC_VERSION_INFO
+
         echo "CLOC_INFO_FILE=$CLOC_INFO_FILE" >> $GITHUB_ENV
+
         {
           SUM_FILES=0
           SUM_BLANK=0
@@ -167,6 +172,8 @@ runs:
             comment=$(echo "$comment" | xargs)
             code=$(echo "$code" | xargs)
 
+            echo $language
+
             # Check if the language is in the whitelist
             if [[ " ${WHITELIST[@]} " =~ " ${language} " ]]; then
               SUM_FILES=$((SUM_FILES + files))
@@ -186,6 +193,8 @@ runs:
           if [[ -n "$JS_ROW" || -n "$TS_ROW" ]]; then
             IFS='|' read -r js_files js_blank js_comment js_code <<< "$JS_ROW"
             IFS='|' read -r ts_files ts_blank ts_comment ts_code <<< "$TS_ROW"
+
+            echo "JS TS"
 
             js_files=${js_files:-0}
             js_blank=${js_blank:-0}
@@ -216,7 +225,7 @@ runs:
           echo "lines_of_code=$SUM_CODE" >> $GITHUB_ENV
           echo "technology_count=$SUM_TECHNOLOGY" >> $GITHUB_ENV
 
-        } > $CLOC_INFO_FILE
+        }
 
     - name: Download Retriever
       shell: bash
