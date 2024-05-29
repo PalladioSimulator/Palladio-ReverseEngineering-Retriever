@@ -189,9 +189,9 @@ runs:
 
         echo "js"
         # Combine JavaScript and TypeScript rows into ecma
-        JS_ROW=$(grep -E '^JavaScript' $CLOC_INFO_FILE.tmp | cut -d'|' -f2-)
+        JS_ROW=$(grep -E '^JavaScript' $CLOC_INFO_FILE.tmp | cut -d'|' -f2- || echo "")
         echo $JS_ROW
-        TS_ROW=$(grep -E '^TypeScript' $CLOC_INFO_FILE.tmp | cut -d'|' -f2-)
+        TS_ROW=$(grep -E '^TypeScript' $CLOC_INFO_FILE.tmp | cut -d'|' -f2- || echo "")
         echo $TS_ROW
         echo "JS TS"
         if [[ -n "$JS_ROW" || -n "$TS_ROW" ]]; then
