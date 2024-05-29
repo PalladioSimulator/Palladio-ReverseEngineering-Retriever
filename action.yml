@@ -60,19 +60,6 @@ runs:
           echo "retriever=${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/tags/${{ env.action_version }}" >> $GITHUB_ENV
         fi
 
-    - name: Gather Retriever Info
-      shell: bash
-      run: |
-        RETRIEVER_INFO_FILE=${{ env.tmp_dir }}/retriever_out/retriever_info.md
-
-        echo "RETRIEVER_INFO_FILE=$RETRIEVER_INFO_FILE" >> $GITHUB_ENV
-        {
-          echo "# [Retriever](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever) Report"
-          echo "| Version | Date |"
-          echo "| ------- | ---- |"
-          echo "| $(curl -sL "${{ env.retriever }}" | jq  -r ".tag_name") | $(date -u) |"
-        } > $RETRIEVER_INFO_FILE
-
     - name: Gather Git Repository Info
       shell: bash
       run: |
@@ -265,6 +252,29 @@ runs:
         fi
 
         mv ${{ env.tmp_dir }}/eclipse_tmp/* ${{ env.tmp_dir }}/retriever_out/
+
+    - name: Count Components in Repository
+      shell: bash
+      run: |
+        REPOSITORY_FILE=$(find ${{ env.tmp_dir }}/retriever_out -name '*.repository')
+        pip3 install yq
+        COMPONENT_COUNT=$(xq '.["repository:Repository"]["components__Repository"] | length' $REPOSITORY_FILE)
+        echo "component_count=$COMPONENT_COUNT" >> $GITHUB_ENV
+
+    - name: Gather Retriever Info
+      shell: bash
+      run: |
+        RETRIEVER_INFO_FILE=${{ env.tmp_dir }}/retriever_out/retriever_info.md
+
+        echo "RETRIEVER_INFO_FILE=$RETRIEVER_INFO_FILE" >> $GITHUB_ENV
+        {
+          echo "# [Retriever](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever) Report"
+          echo "| Attribute         | Value |"
+          echo "| ----------------- | ----- |"
+          echo "| Retriever Version | $(curl -sL "${{ env.retriever }}" | jq -r ".tag_name") |"
+          echo "| Date              | $(date -u) |"
+          echo "| #Components       | ${{ env.component_count }} |"
+        } > $RETRIEVER_INFO_FILE
 
     - name: Combine and Clean Up Files
       shell: bash
