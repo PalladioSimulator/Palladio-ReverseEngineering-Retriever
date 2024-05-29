@@ -186,11 +186,38 @@ runs:
           fi
         done < <(head -n -2 $CLOC_INFO_FILE.tmp | grep -v '^$')
 
-        echo "loop done"
-        echo $SUM_FILES
-        echo "sum"
-        # Combine JavaScript and TypeScript rows into ecma
 
+        # Combine JavaScript and TypeScript rows into ecma
+        JS_ROW=$(grep -E '^JavaScript' $CLOC_INFO_FILE.tmp | cut -d'|' -f2-)
+        TS_ROW=$(grep -E '^TypeScript' $CLOC_INFO_FILE.tmp | cut -d'|' -f2-)
+        echo $JS_ROW
+        echo $TS_ROW
+        echo "JS TS"
+        if [[ -n "$JS_ROW" || -n "$TS_ROW" ]]; then
+          js_files=0; js_blank=0; js_comment=0; js_code=0
+          ts_files=0; ts_blank=0; ts_comment=0; ts_code=0
+
+          if [[ -n "$JS_ROW" ]]; then
+            IFS='|' read -r js_files js_blank js_comment js_code <<< "$JS_ROW"
+          fi
+          
+          if [[ -n "$TS_ROW" ]]; then
+            IFS='|' read -r ts_files ts_blank ts_comment ts_code <<< "$TS_ROW"
+          fi
+
+          ecma_files=$((js_files + ts_files))
+          ecma_blank=$((js_blank + ts_blank))
+          ecma_comment=$((js_comment + ts_comment))
+          ecma_code=$((js_code + ts_code))
+
+          SUM_FILES=$((SUM_FILES + ecma_files))
+          SUM_BLANK=$((SUM_BLANK + ecma_blank))
+          SUM_COMMENT=$((SUM_COMMENT + ecma_comment))
+          SUM_CODE=$((SUM_CODE + ecma_code))
+          SUM_TECHNOLOGY=$((SUM_TECHNOLOGY + 1))
+
+          echo "ECMAScript|$ecma_files|$ecma_blank|$ecma_comment|$ecma_code"
+        fi
 
         echo "**SUM:**|**$SUM_FILES**|**$SUM_BLANK**|**$SUM_COMMENT**|**$SUM_CODE**"
 
