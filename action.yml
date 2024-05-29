@@ -129,11 +129,86 @@ runs:
       shell: bash
       run: |
         CLOC_INFO_FILE=${{ env.tmp_dir }}/retriever_out/cloc.md
+
+        # JavaScript and TypeScript always used
+        WHITELIST=("Java" "HTML" "CSS" "YAML") # Define your whitelist of languages here
+
+        cloc ${{ inputs.source_path }} --unicode --autoconf --diff-timeout 300 --docstring-as-code --read-binary-files --md --quiet > $CLOC_INFO_FILE.tmp
+
+        CLOC_VERSION_INFO=$(grep -E '^cloc\|' $CLOC_INFO_FILE.tmp | sed 's/cloc|//')
+
         echo "CLOC_INFO_FILE=$CLOC_INFO_FILE" >> $GITHUB_ENV
         {
+          SUM_FILES=0
+          SUM_BLANK=0
+          SUM_COMMENT=0
+          SUM_CODE=0
+
           echo "## Cloc analysis"
-          cloc ${{ inputs.source_path }} --unicode --autoconf --diff-timeout 300 --docstring-as-code --read-binary-files --md --quiet | \
-          sed -e '1d; 2s/cloc|github.com\/AlDanial\///; /^--- | ---$/d'
+          echo ""
+          echo "<!-- $CLOC_VERSION_INFO -->"
+          echo ""
+          echo "Technology|files|blank|comment|code"
+          echo ":-------|-------:|-------:|-------:|-------:"
+
+          while IFS= read -r line; do
+            
+            # Skip the header line
+            if [[ "$line" =~ Language ]]; then
+              continue
+            fi
+
+            # Split the line into components
+            IFS='|' read -r language files blank comment code <<< "$line"
+            language=$(echo "$language" | xargs)
+            files=$(echo "$files" | xargs)
+            blank=$(echo "$blank" | xargs)
+            comment=$(echo "$comment" | xargs)
+            code=$(echo "$code" | xargs)
+
+            # Check if the language is in the whitelist
+            if [[ " ${WHITELIST[@]} " =~ " ${language} " ]]; then
+              SUM_FILES=$((SUM_FILES + files))
+              SUM_BLANK=$((SUM_BLANK + blank))
+              SUM_COMMENT=$((SUM_COMMENT + comment))
+              SUM_CODE=$((SUM_CODE + code))
+
+              echo "$language|$files|$blank|$comment|$code"
+            fi
+          done < <(head -n -2 $CLOC_INFO_FILE.tmp | grep -v '^$')
+
+
+          # Combine JavaScript and TypeScript rows into ecma
+          JS_ROW=$(grep -E '^JavaScript' $CLOC_INFO_FILE.tmp | cut -d'|' -f2-)
+          TS_ROW=$(grep -E '^TypeScript' $CLOC_INFO_FILE.tmp | cut -d'|' -f2-)
+          if [[ -n "$JS_ROW" || -n "$TS_ROW" ]]; then
+            IFS='|' read -r js_files js_blank js_comment js_code <<< "$JS_ROW"
+            IFS='|' read -r ts_files ts_blank ts_comment ts_code <<< "$TS_ROW"
+
+            js_files=${js_files:-0}
+            js_blank=${js_blank:-0}
+            js_comment=${js_comment:-0}
+            js_code=${js_code:-0}
+            ts_files=${ts_files:-0}
+            ts_blank=${ts_blank:-0}
+            ts_comment=${ts_comment:-0}
+            ts_code=${ts_code:-0}
+
+            ecma_files=$((js_files + ts_files))
+            ecma_blank=$((js_blank + ts_blank))
+            ecma_comment=$((js_comment + ts_comment))
+            ecma_code=$((js_code + ts_code))
+
+            SUM_FILES=$((SUM_FILES + ecma_files))
+            SUM_BLANK=$((SUM_BLANK + ecma_blank))
+            SUM_COMMENT=$((SUM_COMMENT + ecma_comment))
+            SUM_CODE=$((SUM_CODE + ecma_code))
+
+            echo "ECMAScript|$ecma_files|$ecma_blank|$ecma_comment|$ecma_code"
+          fi
+
+          echo "**SUM:**|**$SUM_FILES**|**$SUM_BLANK**|**$SUM_COMMENT**|**$SUM_CODE**"
+
         } > $CLOC_INFO_FILE
 
     - name: Download Retriever
