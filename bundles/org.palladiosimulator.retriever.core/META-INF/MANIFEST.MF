@@ -14,7 +14,8 @@ Require-Bundle: org.eclipse.jdt.core,
  org.palladiosimulator.generator.fluent,
  org.palladiosimulator.somox.ast2seff,
  org.palladiosimulator.retriever.mocore,
- org.palladiosimulator.view.plantuml.generator
+ org.palladiosimulator.view.plantuml.generator,
+ org.palladiosimulator.retriever.services
 Export-Package: org.palladiosimulator.retriever.core.cli;uses:="org.eclipse.equinox.app",
  org.palladiosimulator.retriever.core.configuration,
  org.palladiosimulator.retriever.core.main,

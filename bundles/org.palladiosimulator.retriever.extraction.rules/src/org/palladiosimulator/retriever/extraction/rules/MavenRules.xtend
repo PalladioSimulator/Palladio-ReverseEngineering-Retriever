@@ -4,8 +4,8 @@ import java.nio.file.Path;
 import java.util.HashSet
 import org.eclipse.jdt.core.dom.CompilationUnit
 import java.util.Set
-import org.palladiosimulator.retriever.extraction.engine.Rule
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard
+import org.palladiosimulator.retriever.services.Rule
 
 class MavenRules implements Rule {
 

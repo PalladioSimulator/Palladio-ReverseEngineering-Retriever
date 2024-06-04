@@ -4,7 +4,7 @@
 	<extension
 		id="org.palladiosimulator.retriever.extraction.rules.docker"
 		name="Docker Rules"
-		point="org.palladiosimulator.retriever.extraction.rule">
+		point="org.palladiosimulator.retriever.services.rule">
 		<rule
 			class="org.palladiosimulator.retriever.extraction.rules.DockerRules">
 		</rule>
@@ -12,7 +12,7 @@
 	<extension
 		id="org.palladiosimulator.retriever.extraction.rules.ecmascript"
 		name="ECMAScript Rules"
-		point="org.palladiosimulator.retriever.extraction.rule">
+		point="org.palladiosimulator.retriever.services.rule">
 		<rule
 			class="org.palladiosimulator.retriever.extraction.rules.EcmaScriptRules">
 		</rule>
@@ -20,7 +20,7 @@
 	<extension
 		id="org.palladiosimulator.retriever.extraction.rules.ecmascript"
 		name="Gradle Rules"
-		point="org.palladiosimulator.retriever.extraction.rule">
+		point="org.palladiosimulator.retriever.services.rule">
 		<rule
 			class="org.palladiosimulator.retriever.extraction.rules.GradleRules">
 		</rule>
@@ -28,7 +28,7 @@
 	<extension
 		id="org.palladiosimulator.retriever.extraction.rules.jax_rs"
 		name="Jax RS Rules"
-		point="org.palladiosimulator.retriever.extraction.rule">
+		point="org.palladiosimulator.retriever.services.rule">
 		<rule
 			class="org.palladiosimulator.retriever.extraction.rules.JaxRSRules">
 		</rule>
@@ -36,7 +36,7 @@
 	<extension
 		id="org.palladiosimulator.retriever.extraction.rules.maven"
 		name="Maven Rules"
-		point="org.palladiosimulator.retriever.extraction.rule">
+		point="org.palladiosimulator.retriever.services.rule">
 		<rule
 			class="org.palladiosimulator.retriever.extraction.rules.MavenRules">
 		</rule>
@@ -44,7 +44,7 @@
 	<extension
 		id="org.palladiosimulator.retriever.extraction.rules.spring"
 		name="Spring Rules"
-		point="org.palladiosimulator.retriever.extraction.rule">
+		point="org.palladiosimulator.retriever.services.rule">
 		<rule
 			class="org.palladiosimulator.retriever.extraction.rules.SpringRules">
 		</rule>
@@ -52,7 +52,7 @@
 	<extension
 		id="org.palladiosimulator.retriever.extraction.rules.spring.zuul"
 		name="Spring Zuul Rules"
-		point="org.palladiosimulator.retriever.extraction.rule">
+		point="org.palladiosimulator.retriever.services.rule">
 		<rule
 			class="org.palladiosimulator.retriever.extraction.rules.SpringZuulRules">
 		</rule>
@@ -60,7 +60,7 @@
 	<extension
 		id="org.palladiosimulator.retriever.extraction.rules.spring.cloudgateway"
 		name="Spring Cloud Gateway Rules"
-		point="org.palladiosimulator.retriever.extraction.rule">
+		point="org.palladiosimulator.retriever.services.rule">
 		<rule
 			class="org.palladiosimulator.retriever.extraction.rules.SpringGatewayRules">
 		</rule>
@@ -68,7 +68,7 @@
  <extension
        id="org.palladiosimulator.retriever.extraction.rules.project_specific"
        name="Project-Specific Rules"
-       point="org.palladiosimulator.retriever.extraction.rule">
+       point="org.palladiosimulator.retriever.services.rule">
     <rule
           class="org.palladiosimulator.retriever.extraction.rules.ProjectSpecificRulesProxy">
     </rule>
@@ -76,7 +76,7 @@
  <extension
        id="org.palladiosimulator.retriever.extraction.rules.jax_rs.deployment"
        name="Jax RS Deployment Rules"
-       point="org.palladiosimulator.retriever.extraction.rule">
+       point="org.palladiosimulator.retriever.services.rule">
     <rule
           class="org.palladiosimulator.retriever.extraction.rules.JaxRSDeploymentRules">
     </rule>

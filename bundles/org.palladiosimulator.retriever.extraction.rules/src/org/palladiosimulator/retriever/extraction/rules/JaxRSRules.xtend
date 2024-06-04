@@ -5,12 +5,13 @@ import org.eclipse.jdt.core.dom.CompilationUnit
 import static org.palladiosimulator.retriever.extraction.engine.RuleHelper.*
 import org.palladiosimulator.retriever.extraction.commonalities.CompUnitOrName
 import java.util.Set
-import org.palladiosimulator.retriever.extraction.engine.Rule
 import org.palladiosimulator.retriever.extraction.rules.util.RESTHelper
 import java.util.Map
 import org.palladiosimulator.retriever.extraction.commonalities.HTTPMethod
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard
 import org.palladiosimulator.retriever.extraction.commonalities.RESTOperationName
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard
+import org.palladiosimulator.retriever.services.Rule
+import org.palladiosimulator.retriever.extraction.engine.PCMDetector
 
 class JaxRSRules implements Rule {
 
@@ -43,7 +44,7 @@ class JaxRSRules implements Rule {
 	}
 
 	def processRuleForCompUnit(RetrieverBlackboard blackboard, CompilationUnit unit, String hostname) {
-		val pcmDetector = blackboard.getPCMDetector()
+		val pcmDetector = blackboard.getPCMDetector() as PCMDetector
 		if (pcmDetector === null) {
 			return
 		}
@@ -113,7 +114,7 @@ class JaxRSRules implements Rule {
 	}
 
 	def detectDefault(RetrieverBlackboard blackboard, CompilationUnit unit) {
-		val pcmDetector = blackboard.getPCMDetector()
+		val pcmDetector = blackboard.getPCMDetector() as PCMDetector
 		val identifier = new CompUnitOrName(unit)
 
 		pcmDetector.detectComponent(identifier)

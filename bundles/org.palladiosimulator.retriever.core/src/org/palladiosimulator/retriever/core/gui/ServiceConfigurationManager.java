@@ -6,8 +6,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.palladiosimulator.retriever.extraction.engine.Service;
-import org.palladiosimulator.retriever.extraction.engine.ServiceConfiguration;
+import org.palladiosimulator.retriever.services.Service;
+import org.palladiosimulator.retriever.services.ServiceConfiguration;
 
 import de.uka.ipd.sdq.workflow.launchconfig.LaunchConfigPlugin;
 

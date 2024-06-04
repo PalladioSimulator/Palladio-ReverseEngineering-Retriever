@@ -15,9 +15,9 @@ import org.eclipse.emf.common.CommonPlugin;
 import org.openjdk.nashorn.api.scripting.NashornException;
 import org.openjdk.nashorn.api.tree.CompilationUnitTree;
 import org.openjdk.nashorn.api.tree.Parser;
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
-import org.palladiosimulator.retriever.extraction.engine.Discoverer;
-import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
+import org.palladiosimulator.retriever.services.Discoverer;
+import org.palladiosimulator.retriever.services.RetrieverConfiguration;
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard;
 
 import de.uka.ipd.sdq.workflow.jobs.AbstractBlackboardInteractingJob;
 import de.uka.ipd.sdq.workflow.jobs.CleanupFailedException;

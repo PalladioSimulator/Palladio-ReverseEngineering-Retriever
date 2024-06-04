@@ -19,8 +19,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
-import org.palladiosimulator.retriever.extraction.engine.Service;
-import org.palladiosimulator.retriever.extraction.engine.ServiceConfiguration;
+import org.palladiosimulator.retriever.services.Service;
+import org.palladiosimulator.retriever.services.ServiceConfiguration;
 
 public class ServiceConfigurationView<T extends Service> extends ServiceConfigurationManager<T> {
     private static final int SERVICE_CONFIGURATION_VALUE_COLUMN = 1;

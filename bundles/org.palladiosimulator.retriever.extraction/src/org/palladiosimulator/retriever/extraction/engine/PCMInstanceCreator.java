@@ -32,12 +32,13 @@ import org.palladiosimulator.pcm.repository.OperationRequiredRole;
 import org.palladiosimulator.pcm.repository.ParameterModifier;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.seff.ResourceDemandingSEFF;
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
+import org.palladiosimulator.pcm.seff.ServiceEffectSpecification;
 import org.palladiosimulator.retriever.extraction.commonalities.Component;
 import org.palladiosimulator.retriever.extraction.commonalities.Composite;
 import org.palladiosimulator.retriever.extraction.commonalities.Operation;
 import org.palladiosimulator.retriever.extraction.commonalities.OperationInterface;
 import org.palladiosimulator.retriever.extraction.commonalities.PCMDetectionResult;
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard;
 
 // Class to create a pcm instance out of all results from the detector class
 public class PCMInstanceCreator {
@@ -103,8 +104,7 @@ public class PCMInstanceCreator {
      * @return the PCM repository model
      */
     public Repository createPCM(final Map<String, Set<CompilationUnit>> mapping) {
-        final PCMDetectionResult detectionResult = this.blackboard.getPCMDetector()
-            .getResult();
+        final PCMDetectionResult detectionResult = ((PCMDetector) this.blackboard.getPCMDetector()).getResult();
         final Set<Component> components = detectionResult.getComponents();
         final Map<OperationInterface, Set<Operation>> interfaces = detectionResult.getOperationInterfaces();
         final Set<Composite> composites = detectionResult.getCompositeComponents();
