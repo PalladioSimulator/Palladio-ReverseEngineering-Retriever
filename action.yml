@@ -261,7 +261,8 @@ runs:
           log4j.appender.stdout.layout=org.apache.log4j.PatternLayout \
           # Pattern to output the caller's file name and line number. \
           log4j.appender.stdout.layout.ConversionPattern=%5p [%t] (%F:%L) - %m%n" \
-          >> log4j.properties
+          > log4j.properties
+        echo "log4j.configuration=log4j.properties" >> configuration/config.ini
         if [ "${{ inputs.benchmark }}" = "true" ]; then
           # Execute with Hyperfine
           hyperfine \
