@@ -226,7 +226,7 @@ runs:
         sudo dpkg -i hyperfine_1.16.1_amd64.deb
   
     - name: Install snyk
-      if: inputs.analyzeVulnerabilities == 'true'
+      if: inputs.analyze_vulnerabilities == 'true'
       shell: bash
       run: |
         wget https://static.snyk.io/cli/latest/snyk-linux -o snyk
@@ -241,7 +241,7 @@ runs:
         if [[ "${{ inputs.rules_path }}" != '' ]]; then
           RETRIEVER_COMMAND="${RETRIEVER_COMMAND} -x \"${{ github.workspace }}/${{ inputs.rules_path }}\""
         fi
-        if [[ "${{ inputs.analyzeVulnerabilities }}" == 'true' ]]; then
+        if [[ "${{ inputs.analyze_vulnerabilities }}" == 'true' ]]; then
           RETRIEVER_COMMAND="${RETRIEVER_COMMAND} -a /usr/local/bin/snyk"
         fi
         echo "retriever_command=$RETRIEVER_COMMAND" >> $GITHUB_ENV
