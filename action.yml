@@ -263,6 +263,7 @@ runs:
           log4j.appender.stdout.layout.ConversionPattern=%5p [%t] (%F:%L) - %m%n" \
           > log4j.properties
         echo "log4j.configuration=log4j.properties" >> configuration/config.ini
+        echo "log4j.debug=" >> configuration/config.ini
         if [ "${{ inputs.benchmark }}" = "true" ]; then
           # Execute with Hyperfine
           hyperfine \
