@@ -342,6 +342,10 @@ runs:
             echo "## Retriever execution time"
             cat $TIMING_INFO_FILE
           } > "${TIMING_INFO_FILE}.tmp" && mv "${TIMING_INFO_FILE}.tmp" "$TIMING_INFO_FILE"
+
+          # Extract the mean time without deviation
+          MEAN_TIME=$(awk -F'|' '/^[ ]*\|/{gsub(/[ ]/,""); print $2}' $TIMING_INFO_FILE | sed -n '3p' | awk '{print $1}' | sed 's/±.*//')
+          echo "execution_time=$MEAN_TIME" >> $GITHUB_ENV
                     
         else
           # Execute with /usr/bin/time
@@ -353,7 +357,10 @@ runs:
             echo "| --- | ---: |"
             while IFS= read -r line; do
               case "$line" in
-                real*) echo "| Real CPU Time | ${line#* } |" ;;
+                real*) 
+                  real_time=${line#* }
+                  echo "| Real CPU Time | $real_time |" 
+                  ;;
                 user*) echo "| User CPU Time | ${line#* } |" ;;
                 sys*) echo "| System CPU Time | ${line#* } |" ;;
               esac
@@ -365,6 +372,8 @@ runs:
             echo "- __System CPU Time__: time the command has spent running in system or kernel mode"
             echo "-->"
           } > "${TIMING_INFO_FILE}.tmp" && mv "${TIMING_INFO_FILE}.tmp" "$TIMING_INFO_FILE"
+
+          echo "execution_time=$real_time" >> $GITHUB_ENV
         fi
 
         mv ${{ env.tmp_dir }}/eclipse_tmp/* ${{ env.tmp_dir }}/retriever_out/
@@ -391,15 +400,16 @@ runs:
         echo "RETRIEVER_INFO_FILE=$RETRIEVER_INFO_FILE" >> $GITHUB_ENV
         {
           echo "# [Retriever](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever) Report"
-          echo "| Attribute         | Value |"
-          echo "| ----------------- | ----- |"
-          echo "| Retriever Version | $(curl -sL "${{ env.retriever }}" | jq -r ".tag_name") |"
-          echo "| Date              | $(date -u) |"
-          echo "| #Components       | ${{ env.component_count }} |"
-          echo "| #Source Files     | ${{ env.source_files_count }} |"
-          echo "| Lines of Code     | ${{ env.lines_of_code }} |"
-          echo "| #Technologies     | ${{ env.technology_count }} |"
-          echo "| Abstraction       | $ABSTRACTION |"
+          echo "| Attribute          | Value |"
+          echo "| ------------------ | ----- |"
+          echo "| Retriever Version  | $(curl -sL "${{ env.retriever }}" | jq -r ".tag_name") |"
+          echo "| Date               | $(date -u) |"
+          echo "| #Components        | ${{ env.component_count }} |"
+          echo "| #Source Files      | ${{ env.source_files_count }} |"
+          echo "| Lines of Code      | ${{ env.lines_of_code }} |"
+          echo "| #Technologies      | ${{ env.technology_count }} |"
+          echo "| Abstraction        | $ABSTRACTION |"
+          echo "| Execution Time [s] | ${{env.execution_time }} |"
         } > $RETRIEVER_INFO_FILE
 
     - name: Combine and Clean Up Files
