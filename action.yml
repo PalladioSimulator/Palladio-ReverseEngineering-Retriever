@@ -130,16 +130,12 @@ runs:
       run: |
         CLOC_INFO_FILE=${{ env.tmp_dir }}/retriever_out/cloc.md
 
-        # JavaScript and TypeScript always used
-        WHITELIST=("Java" "HTML" "CSS" "YAML") # Define your whitelist of languages here
+        # Define your whitelist of languages here
+        WHITELIST=("CSV" "Dockerfile" "Gradle" "Java" "JSON" "Maven" "Properties" "XML" "YAML")
 
         cloc ${{ inputs.source_path }} --unicode --autoconf --diff-timeout 300 --docstring-as-code --read-binary-files --md --quiet > $CLOC_INFO_FILE.tmp
 
         CLOC_VERSION_INFO=$(grep -E '^cloc\|' $CLOC_INFO_FILE.tmp | sed 's/cloc|//')
-
-        cat $CLOC_INFO_FILE.tmp
-
-        echo $CLOC_VERSION_INFO
 
         echo "CLOC_INFO_FILE=$CLOC_INFO_FILE" >> $GITHUB_ENV
 
@@ -158,7 +154,6 @@ runs:
           echo "|:-------|-------:|-------:|-------:|-------:|"
 
           while IFS= read -r line; do
-            
             # Skip the header line
             if [[ "$line" =~ Language ]]; then
               continue
@@ -184,8 +179,7 @@ runs:
             fi
           done < <(head -n -2 $CLOC_INFO_FILE.tmp | grep -v '^$')
 
-
-          # Combine JavaScript and TypeScript rows into ecma
+          # Combine JavaScript and TypeScript rows into ECMAScript
           JS_ROW=$(grep -E '^JavaScript' $CLOC_INFO_FILE.tmp | cut -d'|' -f2- || echo "")
           TS_ROW=$(grep -E '^TypeScript' $CLOC_INFO_FILE.tmp | cut -d'|' -f2- || echo "")
           if [[ -n "$JS_ROW" || -n "$TS_ROW" ]]; then
@@ -212,6 +206,41 @@ runs:
             SUM_TECHNOLOGY=$((SUM_TECHNOLOGY + 1))
 
             echo "|ECMAScript|$ecma_files|$ecma_blank|$ecma_comment|$ecma_code|"
+          fi
+
+          # Combine SQL, SQL Data, and SQL Stored Procedure rows into SQL
+          SQL_ROW=$(grep -E '^SQL' $CLOC_INFO_FILE.tmp | cut -d'|' -f2- || echo "")
+          SQL_DATA_ROW=$(grep -E '^SQL Data' $CLOC_INFO_FILE.tmp | cut -d'|' -f2- || echo "")
+          SQL_SP_ROW=$(grep -E '^SQL Stored Procedure' $CLOC_INFO_FILE.tmp | cut -d'|' -f2- || echo "")
+          if [[ -n "$SQL_ROW" || -n "$SQL_DATA_ROW" || -n "$SQL_SP_ROW" ]]; then
+            sql_files=0; sql_blank=0; sql_comment=0; sql_code=0
+            sql_data_files=0; sql_data_blank=0; sql_data_comment=0; sql_data_code=0
+            sql_sp_files=0; sql_sp_blank=0; sql_sp_comment=0; sql_sp_code=0
+
+            if [[ -n "$SQL_ROW" ]]; then
+              IFS='|' read -r sql_files sql_blank sql_comment sql_code <<< "$SQL_ROW"
+            fi
+            
+            if [[ -n "$SQL_DATA_ROW" ]]; then
+              IFS='|' read -r sql_data_files sql_data_blank sql_data_comment sql_data_code <<< "$SQL_DATA_ROW"
+            fi
+            
+            if [[ -n "$SQL_SP_ROW" ]]; then
+              IFS='|' read -r sql_sp_files sql_sp_blank sql_sp_comment sql_sp_code <<< "$SQL_SP_ROW"
+            fi
+
+            total_sql_files=$((sql_files + sql_data_files + sql_sp_files))
+            total_sql_blank=$((sql_blank + sql_data_blank + sql_sp_blank))
+            total_sql_comment=$((sql_comment + sql_data_comment + sql_sp_comment))
+            total_sql_code=$((sql_code + sql_data_code + sql_sp_code))
+
+            SUM_FILES=$((SUM_FILES + total_sql_files))
+            SUM_BLANK=$((SUM_BLANK + total_sql_blank))
+            SUM_COMMENT=$((SUM_COMMENT + total_sql_comment))
+            SUM_CODE=$((SUM_CODE + total_sql_code))
+            SUM_TECHNOLOGY=$((SUM_TECHNOLOGY + 1))
+
+            echo "|SQL|$total_sql_files|$total_sql_blank|$total_sql_comment|$total_sql_code|"
           fi
 
           echo "|**SUM:**|**$SUM_FILES**|**$SUM_BLANK**|**$SUM_COMMENT**|**$SUM_CODE**|"
