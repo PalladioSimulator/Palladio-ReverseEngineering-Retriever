@@ -80,7 +80,7 @@ runs:
           # Get the number of commits using GitHub API and pagination info
           NUM_COMMITS=$(curl -s -I "${API_URL}/commits?per_page=1" | grep -i 'link:' | sed -E 's/.*page=([0-9]+)>; rel="last".*/\1/')
           NUM_STARS=$(curl -s $API_URL | jq '.stargazers_count // 0')
-          NUM_CONTRIBUTORS=$(curl -s $API_URL/contributors | jq 'length // 0')
+          NUM_CONTRIBUTORS=$(curl -s -I "${API_URL}/contributors?per_page=1" | grep -i 'link:' | sed -E 's/.*page=([0-9]+)>; rel="last".*/\1/')
 
           echo "|      Attribute    | Value |"
           echo "| ----------------- | ----- |"
