@@ -5,12 +5,13 @@ import java.util.Collection;
 import java.util.List;
 
 import org.palladiosimulator.retriever.core.configuration.RetrieverBlackboardKeys;
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
-import org.palladiosimulator.retriever.extraction.engine.Analyst;
-import org.palladiosimulator.retriever.extraction.engine.Discoverer;
-import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
-import org.palladiosimulator.retriever.extraction.engine.Rule;
+import org.palladiosimulator.retriever.extraction.engine.PCMDetector;
 import org.palladiosimulator.retriever.mocore.workflow.MoCoReJob;
+import org.palladiosimulator.retriever.services.Analyst;
+import org.palladiosimulator.retriever.services.Discoverer;
+import org.palladiosimulator.retriever.services.RetrieverConfiguration;
+import org.palladiosimulator.retriever.services.Rule;
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard;
 import org.palladiosimulator.somox.ast2seff.jobs.Ast2SeffJob;
 
 import de.uka.ipd.sdq.workflow.extension.AbstractExtendableJob;
@@ -20,7 +21,7 @@ import de.uka.ipd.sdq.workflow.jobs.ParallelJob;
 public class RetrieverJob extends AbstractExtendableJob<RetrieverBlackboard> {
 
     public RetrieverJob(final RetrieverConfiguration configuration) {
-        super.setBlackboard(new RetrieverBlackboard());
+        super.setBlackboard(new RetrieverBlackboard(new PCMDetector()));
 
         super.addAll(this.createDiscovererJobs(configuration));
 

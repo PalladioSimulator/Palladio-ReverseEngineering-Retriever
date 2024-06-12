@@ -15,16 +15,16 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.palladiosimulator.generator.fluent.shared.util.ModelSaver;
 import org.palladiosimulator.generator.fluent.system.api.ISystem;
 import org.palladiosimulator.generator.fluent.system.factory.FluentSystemFactory;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.repository.RepositoryComponent;
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
 import org.palladiosimulator.retriever.extraction.engine.DockerParser;
+import org.palladiosimulator.retriever.extraction.engine.PCMDetector;
 import org.palladiosimulator.retriever.extraction.engine.PCMInstanceCreator;
-import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
-import org.palladiosimulator.retriever.extraction.engine.Rule;
+import org.palladiosimulator.retriever.services.RetrieverConfiguration;
+import org.palladiosimulator.retriever.services.Rule;
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard;
 
 /**
  * Retriever identifies PCM elements like components and interfaces inside source code via rules
@@ -107,7 +107,7 @@ public class Retriever {
 
         // Parses the docker-compose file to get a mapping between microservice names and
         // components for creating composite components for each microservice
-        final DockerParser dockerParser = new DockerParser(projectPath, blackboard.getPCMDetector());
+        final DockerParser dockerParser = new DockerParser(projectPath, (PCMDetector) blackboard.getPCMDetector());
         final Map<String, Set<CompilationUnit>> mapping = dockerParser.getMapping();
 
         pcm = new PCMInstanceCreator(blackboard).createPCM(mapping);

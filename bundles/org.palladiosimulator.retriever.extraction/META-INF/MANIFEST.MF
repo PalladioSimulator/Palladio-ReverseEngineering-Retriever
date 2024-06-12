@@ -6,9 +6,10 @@ Bundle-Version: 5.2.0.qualifier
 Bundle-Vendor: palladiosimulator.org
 Automatic-Module-Name: org.palladiosimulator.retriever.extraction.engine
 Bundle-RequiredExecutionEnvironment: JavaSE-17
-Export-Package: org.palladiosimulator.retriever.extraction.blackboard,
- org.palladiosimulator.retriever.extraction.commonalities,
+Export-Package: org.palladiosimulator.retriever.extraction.commonalities,
  org.palladiosimulator.retriever.extraction.engine
 Require-Bundle: org.eclipse.jdt.core,
  org.palladiosimulator.generator.fluent,
- de.uka.ipd.sdq.workflow
+ de.uka.ipd.sdq.workflow,
+ org.palladiosimulator.retriever.services,
+ org.palladiosimulator.pcm

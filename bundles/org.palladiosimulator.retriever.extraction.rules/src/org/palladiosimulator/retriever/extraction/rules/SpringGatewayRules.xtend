@@ -10,11 +10,11 @@ import java.util.Properties
 import java.util.Set
 import java.util.function.Function
 import org.apache.log4j.Logger
-import org.palladiosimulator.retriever.extraction.engine.Rule
 import org.palladiosimulator.retriever.extraction.rules.util.SpringHelper
 import org.palladiosimulator.retriever.extraction.rules.data.GatewayRoute
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard
 import org.palladiosimulator.retriever.extraction.rules.util.ProjectHelper
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard
+import org.palladiosimulator.retriever.services.Rule
 
 class SpringGatewayRules implements Rule {
 	static final Logger LOG = Logger.getLogger(SpringGatewayRules)

@@ -1,6 +1,6 @@
 package org.palladiosimulator.retriever.core.configuration;
 
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard;
 
 public final class RetrieverBlackboardKeys {
     private static final String CONFIG_PREFIX = "org.palladiosimulator.retriever.core.configuration.";

@@ -17,7 +17,7 @@ import org.eclipse.emf.common.util.URI;
 import org.palladiosimulator.pcm.allocation.Allocation;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.system.System;
-import org.palladiosimulator.retriever.extraction.blackboard.RetrieverBlackboard;
+import org.palladiosimulator.retriever.services.blackboard.RetrieverBlackboard;
 import org.palladiosimulator.view.plantuml.generator.PcmAllocationDiagramGenerator;
 import org.palladiosimulator.view.plantuml.generator.PcmComponentDiagramGenerator;
 import org.palladiosimulator.view.plantuml.generator.PcmSystemDiagramGenerator;

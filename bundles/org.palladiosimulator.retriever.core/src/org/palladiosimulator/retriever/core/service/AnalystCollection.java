@@ -7,11 +7,11 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-import org.palladiosimulator.retriever.extraction.engine.Analyst;
-import org.palladiosimulator.retriever.extraction.engine.ServiceCollection;
+import org.palladiosimulator.retriever.services.Analyst;
+import org.palladiosimulator.retriever.services.ServiceCollection;
 
 public class AnalystCollection implements ServiceCollection<Analyst> {
-    public static final String EXTENSION_POINT = "org.palladiosimulator.retriever.extraction.analyst";
+    public static final String EXTENSION_POINT = "org.palladiosimulator.retriever.services.analyst";
     private final Set<Analyst> analysts = new HashSet<>();
 
     public AnalystCollection() throws CoreException {

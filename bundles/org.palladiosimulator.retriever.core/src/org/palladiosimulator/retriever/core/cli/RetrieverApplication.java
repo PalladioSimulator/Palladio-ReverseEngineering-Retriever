@@ -22,11 +22,11 @@ import org.palladiosimulator.retriever.core.configuration.RetrieverConfiguration
 import org.palladiosimulator.retriever.core.service.DiscovererCollection;
 import org.palladiosimulator.retriever.core.service.RuleCollection;
 import org.palladiosimulator.retriever.core.workflow.RetrieverJob;
-import org.palladiosimulator.retriever.extraction.engine.Analyst;
-import org.palladiosimulator.retriever.extraction.engine.Discoverer;
-import org.palladiosimulator.retriever.extraction.engine.RetrieverConfiguration;
-import org.palladiosimulator.retriever.extraction.engine.Rule;
-import org.palladiosimulator.retriever.extraction.engine.ServiceConfiguration;
+import org.palladiosimulator.retriever.services.Analyst;
+import org.palladiosimulator.retriever.services.Discoverer;
+import org.palladiosimulator.retriever.services.RetrieverConfiguration;
+import org.palladiosimulator.retriever.services.Rule;
+import org.palladiosimulator.retriever.services.ServiceConfiguration;
 
 public class RetrieverApplication implements IApplication {
 

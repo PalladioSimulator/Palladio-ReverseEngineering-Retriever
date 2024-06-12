@@ -101,5 +101,25 @@
 			<repository
 				location="https://updatesite.palladio-simulator.com/palladio-addons-plantuml/nightly/" />
 		</location>
+		<location includeAllPlatforms="false" includeConfigurePhase="true"
+			includeMode="planner" includeSource="false" refresh="true"
+			type="InstallableUnit">
+			<unit id="org.palladiosimulator.retriever.vulnerability.feature.feature.group"
+				version="0.0.0" />
+			<repository
+				location="https://updatesite.palladio-simulator.com/palladio-reverseengineering-retriever-vulnerability/nightly/" />
+		</location>
+		<location includeAllPlatforms="false" includeConfigurePhase="true"
+			includeMode="planner" includeSource="false" refresh="true"
+			type="InstallableUnit">
+			<unit id="org.palladiosimulator.pcm.confidentiality.context.model.feature.feature.group"
+				version="0.0.0" />
+			<repository
+				location="https://updatesite.palladio-simulator.com/palladio-addons-vulnerability-metamodel/nightly/" />
+		</location>
+    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="false" refresh="true" type="InstallableUnit">
+        <repository location="https://updatesite.palladio-simulator.com/palladio-reverseengineering-retriever-services/nightly/"/>
+        <unit id="org.palladiosimulator.retriever.services.feature.feature.group" version="0.0.0"/>
+    </location>
 	</locations>
 </target>

@@ -41,7 +41,7 @@
 	<extension
 		id="org.palladiosimulator.retriever.core.service.performance_analyst"
 		name="Performance Analyst"
-		point="org.palladiosimulator.retriever.extraction.analyst">
+		point="org.palladiosimulator.retriever.services.analyst">
 		<analyst
 			class="org.palladiosimulator.retriever.core.service.PerformanceAnalyst">
 		</analyst>
