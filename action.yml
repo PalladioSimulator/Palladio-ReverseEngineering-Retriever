@@ -233,7 +233,7 @@ runs:
       if: inputs.analyze_vulnerabilities == 'true'
       shell: bash
       run: |
-        wget https://static.snyk.io/cli/latest/snyk-linux -o snyk
+        curl --compressed https://static.snyk.io/cli/latest/snyk-linux -o snyk
         chmod +x ./snyk
         mv ./snyk /usr/local/bin/
         snyk auth ${{ inputs.snyk_token }}
