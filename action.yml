@@ -259,6 +259,7 @@ runs:
         SNYK_TOKEN: ${{ inputs.snyk_token }}
         NIST_NVD_API_KEY: ${{ inputs.nist_nvd_token }}
       run: |
+        echo "$SNYK_TOKEN: {#SNYK_TOKEN}"
         echo "TIMING_INFO_FILE=$TIMING_INFO_FILE" >> $GITHUB_ENV
         mkdir "${{ env.tmp_dir }}/eclipse_tmp"
         echo "log4j.rootLogger=debug, stdout 
