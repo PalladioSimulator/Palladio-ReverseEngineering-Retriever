@@ -31,6 +31,10 @@ inputs:
     description: "snyk API token"
     required: false
     default: ""
+  nist_nvd_token:
+    description: "NIST NVD API token"
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -253,6 +257,7 @@ runs:
         NO_AT_BRIDGE: 1 # avoid eclipse error "AT-SPI: Error retrieving accessibility bus address"
         TIMING_INFO_FILE: ${{ env.tmp_dir }}/retriever_out/timing.md
         SNYK_TOKEN: ${{ inputs.snyk_token }}
+        NIST_NVD_API_KEY: ${{ inputs.nist_nvd_token }}
       run: |
         echo "TIMING_INFO_FILE=$TIMING_INFO_FILE" >> $GITHUB_ENV
         mkdir "${{ env.tmp_dir }}/eclipse_tmp"
