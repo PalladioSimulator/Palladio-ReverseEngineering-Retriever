@@ -232,13 +232,11 @@ runs:
     - name: Install snyk
       if: inputs.analyze_vulnerabilities == 'true'
       shell: bash
-      env:
-        SNYK_TOKEN: ${{ inputs.snyk_token }}
       run: |
         wget https://static.snyk.io/cli/latest/snyk-linux -o snyk
         chmod +x ./snyk
         mv ./snyk /usr/local/bin/
-        snyk auth
+        snyk auth ${{ inputs.snyk_token }}
 
     - name: Prepare Retriever Command
       shell: bash
