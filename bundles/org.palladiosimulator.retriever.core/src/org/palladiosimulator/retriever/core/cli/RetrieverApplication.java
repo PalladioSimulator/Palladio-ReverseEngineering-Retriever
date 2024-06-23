@@ -44,7 +44,7 @@ public class RetrieverApplication implements IApplication {
         options.addOption("x", "rules-directory", true,
                 "Path to the directory with additional project specific rules.");
 
-        options.addOption("a", "analyze-vulnerabilites", true, "Path to the snyk executable.");
+        options.addOption("a", "analyze-vulnerabilities", true, "Path to the snyk executable.");
 
         options.addOption("h", "help", false, "Print this help message.");
 
@@ -155,7 +155,7 @@ public class RetrieverApplication implements IApplication {
             ruleConfig.select(projectSpecificRulesProxy.get());
         }
 
-        if (cmd.hasOption("analyze-vulnerabilites")) {
+        if (cmd.hasOption("analyze-vulnerabilities")) {
             final ServiceConfiguration<Analyst> analystConfig = configuration.getConfig(Analyst.class);
             final Collection<Analyst> availableAnalysts = analystConfig.getAvailable();
             final Optional<Analyst> vulnerabilityAnalyst = availableAnalysts.stream()
