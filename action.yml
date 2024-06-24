@@ -23,6 +23,18 @@ inputs:
     description: "Whether use hyperfine to benchmark the execution of the retriever, otherwise just the one time execution time is reported"
     required: false
     default: "false"
+  analyze_vulnerabilities:
+    description: "Whether use analyze vulnerabilities using snyk"
+    required: false
+    default: "false"
+  snyk_token:
+    description: "snyk API token"
+    required: false
+    default: ""
+  nist_nvd_token:
+    description: "NIST NVD API token"
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -216,6 +228,15 @@ runs:
       run: |
         wget https://github.com/sharkdp/hyperfine/releases/download/v1.16.1/hyperfine_1.16.1_amd64.deb
         sudo dpkg -i hyperfine_1.16.1_amd64.deb
+  
+    - name: Install snyk
+      if: inputs.analyze_vulnerabilities == 'true'
+      shell: bash
+      run: |
+        curl --compressed https://static.snyk.io/cli/latest/snyk-linux -o snyk
+        chmod +x ./snyk
+        mv ./snyk /usr/local/bin/
+        snyk auth ${{ inputs.snyk_token }}
 
     - name: Prepare Retriever Command
       shell: bash
@@ -225,6 +246,9 @@ runs:
         if [[ "${{ inputs.rules_path }}" != '' ]]; then
           RETRIEVER_COMMAND="${RETRIEVER_COMMAND} -x \"${{ github.workspace }}/${{ inputs.rules_path }}\""
         fi
+        if [[ "${{ inputs.analyze_vulnerabilities }}" == 'true' ]]; then
+          RETRIEVER_COMMAND="${RETRIEVER_COMMAND} -a /usr/local/bin/snyk"
+        fi
         echo "retriever_command=$RETRIEVER_COMMAND" >> $GITHUB_ENV
 
     - name: Execute Retriever
@@ -233,9 +257,17 @@ runs:
       env:
         NO_AT_BRIDGE: 1 # avoid eclipse error "AT-SPI: Error retrieving accessibility bus address"
         TIMING_INFO_FILE: ${{ env.tmp_dir }}/retriever_out/timing.md
+        NIST_NVD_API_KEY: ${{ inputs.nist_nvd_token }}
       run: |
         echo "TIMING_INFO_FILE=$TIMING_INFO_FILE" >> $GITHUB_ENV
         mkdir "${{ env.tmp_dir }}/eclipse_tmp"
+        echo "log4j.rootLogger=debug, stdout 
+          log4j.appender.stdout=org.apache.log4j.ConsoleAppender 
+          log4j.appender.stdout.layout=org.apache.log4j.PatternLayout 
+          # Pattern to output the caller's file name and line number. 
+          log4j.appender.stdout.layout.ConversionPattern=%5p [%t] (%F:%L) - %m%n" \
+          > log4j.properties
+        echo "log4j.configuration=file://${{ env.tmp_dir }}/retriever/log4j.properties" >> configuration/config.ini
         if [ "${{ inputs.benchmark }}" = "true" ]; then
           # Execute with Hyperfine
           hyperfine \
