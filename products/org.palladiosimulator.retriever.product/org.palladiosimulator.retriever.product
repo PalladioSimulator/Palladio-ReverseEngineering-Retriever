@@ -42,6 +42,7 @@
 		<plugin id="org.palladiosimulator.retriever.core" />
 		<plugin id="org.palladiosimulator.retriever.extraction.discoverers" />
 		<plugin id="org.palladiosimulator.retriever.extraction.rules" />
+		<plugin id="org.palladiosimulator.retriever.vulnerability.analyst" />
 	</plugins>
 
 	<configurations>
