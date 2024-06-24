@@ -67,9 +67,9 @@ runs:
       # Uses the latest Retriever or the Retriever with the same version that this action has
       run: |
         if [[ "${{ env.action_version }}" == "main" ]]; then
-          echo "retriever=${{ github.api_url }}/repos/FloBoJa/Palladio-ReverseEngineering-Retriever/releases/latest" >> $GITHUB_ENV
+          echo "retriever=${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/latest" >> $GITHUB_ENV
         else
-          echo "retriever=${{ github.api_url }}/repos/FloBoJa/Palladio-ReverseEngineering-Retriever/releases/tags/${{ env.action_version }}" >> $GITHUB_ENV
+          echo "retriever=${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/tags/${{ env.action_version }}" >> $GITHUB_ENV
         fi
 
     - name: Gather Retriever Info
@@ -268,7 +268,6 @@ runs:
           log4j.appender.stdout.layout.ConversionPattern=%5p [%t] (%F:%L) - %m%n" \
           > log4j.properties
         echo "log4j.configuration=file://${{ env.tmp_dir }}/retriever/log4j.properties" >> configuration/config.ini
-        echo "log4j.debug=" >> configuration/config.ini
         if [ "${{ inputs.benchmark }}" = "true" ]; then
           # Execute with Hyperfine
           hyperfine \
