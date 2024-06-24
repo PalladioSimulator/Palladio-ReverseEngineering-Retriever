@@ -72,19 +72,6 @@ runs:
           echo "retriever=${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/tags/${{ env.action_version }}" >> $GITHUB_ENV
         fi
 
-    - name: Gather Retriever Info
-      shell: bash
-      run: |
-        RETRIEVER_INFO_FILE=${{ env.tmp_dir }}/retriever_out/retriever_info.md
-
-        echo "RETRIEVER_INFO_FILE=$RETRIEVER_INFO_FILE" >> $GITHUB_ENV
-        {
-          echo "# [Retriever](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever) Report"
-          echo "| Version | Date |"
-          echo "| ------- | ---- |"
-          echo "| $(curl -sL "${{ env.retriever }}" | jq  -r ".tag_name") | $(date -u) |"
-        } > $RETRIEVER_INFO_FILE
-
     - name: Gather Git Repository Info
       shell: bash
       run: |
@@ -105,7 +92,7 @@ runs:
           # Get the number of commits using GitHub API and pagination info
           NUM_COMMITS=$(curl -s -I "${API_URL}/commits?per_page=1" | grep -i 'link:' | sed -E 's/.*page=([0-9]+)>; rel="last".*/\1/')
           NUM_STARS=$(curl -s $API_URL | jq '.stargazers_count // 0')
-          NUM_CONTRIBUTORS=$(curl -s $API_URL/contributors | jq 'length // 0')
+          NUM_CONTRIBUTORS=$(curl -s -I "${API_URL}/contributors?per_page=1" | grep -i 'link:' | sed -E 's/.*page=([0-9]+)>; rel="last".*/\1/')
 
           echo "|      Attribute    | Value |"
           echo "| ----------------- | ----- |"
@@ -170,11 +157,126 @@ runs:
       shell: bash
       run: |
         CLOC_INFO_FILE=${{ env.tmp_dir }}/retriever_out/cloc.md
+
+        # Define your whitelist of languages here
+        WHITELIST=("CSV" "Dockerfile" "Gradle" "Java" "JSON" "Maven" "Properties" "XML" "YAML")
+
+        cloc ${{ inputs.source_path }} --unicode --autoconf --diff-timeout 300 --docstring-as-code --read-binary-files --md --quiet > $CLOC_INFO_FILE.tmp
+
+        CLOC_VERSION_INFO=$(grep -E '^cloc\|' $CLOC_INFO_FILE.tmp | sed 's/cloc|//')
+
         echo "CLOC_INFO_FILE=$CLOC_INFO_FILE" >> $GITHUB_ENV
+
         {
+          SUM_FILES=0
+          SUM_BLANK=0
+          SUM_COMMENT=0
+          SUM_CODE=0
+          SUM_TECHNOLOGY=0
+
           echo "## Cloc analysis"
-          cloc ${{ inputs.source_path }} --unicode --autoconf --diff-timeout 300 --docstring-as-code --read-binary-files --md --quiet | \
-          sed -e '1d; 2s/cloc|github.com\/AlDanial\///; /^--- | ---$/d'
+          echo ""
+          echo "<!-- $CLOC_VERSION_INFO -->"
+          echo ""
+          echo "|Technology|files|blank|comment|code|"
+          echo "|:-------|-------:|-------:|-------:|-------:|"
+
+          while IFS= read -r line; do
+            # Skip the header line
+            if [[ "$line" =~ Language ]]; then
+              continue
+            fi
+
+            # Split the line into components
+            IFS='|' read -r language files blank comment code <<< "$line"
+            language=$(echo "$language" | xargs)
+            files=$(echo "$files" | xargs)
+            blank=$(echo "$blank" | xargs)
+            comment=$(echo "$comment" | xargs)
+            code=$(echo "$code" | xargs)
+
+            # Check if the language is in the whitelist
+            if [[ " ${WHITELIST[@]} " =~ " ${language} " ]]; then
+              SUM_FILES=$((SUM_FILES + files))
+              SUM_BLANK=$((SUM_BLANK + blank))
+              SUM_COMMENT=$((SUM_COMMENT + comment))
+              SUM_CODE=$((SUM_CODE + code))
+              SUM_TECHNOLOGY=$((SUM_TECHNOLOGY + 1))
+
+              echo "|$language|$files|$blank|$comment|$code|"
+            fi
+          done < <(head -n -2 $CLOC_INFO_FILE.tmp | grep -v '^$')
+
+          # Combine JavaScript and TypeScript rows into ECMAScript
+          JS_ROW=$(grep -E '^JavaScript' $CLOC_INFO_FILE.tmp | cut -d'|' -f2- || echo "")
+          TS_ROW=$(grep -E '^TypeScript' $CLOC_INFO_FILE.tmp | cut -d'|' -f2- || echo "")
+          if [[ -n "$JS_ROW" || -n "$TS_ROW" ]]; then
+            js_files=0; js_blank=0; js_comment=0; js_code=0
+            ts_files=0; ts_blank=0; ts_comment=0; ts_code=0
+
+            if [[ -n "$JS_ROW" ]]; then
+              IFS='|' read -r js_files js_blank js_comment js_code <<< "$JS_ROW"
+            fi
+            
+            if [[ -n "$TS_ROW" ]]; then
+              IFS='|' read -r ts_files ts_blank ts_comment ts_code <<< "$TS_ROW"
+            fi
+
+            ecma_files=$((js_files + ts_files))
+            ecma_blank=$((js_blank + ts_blank))
+            ecma_comment=$((js_comment + ts_comment))
+            ecma_code=$((js_code + ts_code))
+
+            SUM_FILES=$((SUM_FILES + ecma_files))
+            SUM_BLANK=$((SUM_BLANK + ecma_blank))
+            SUM_COMMENT=$((SUM_COMMENT + ecma_comment))
+            SUM_CODE=$((SUM_CODE + ecma_code))
+            SUM_TECHNOLOGY=$((SUM_TECHNOLOGY + 1))
+
+            echo "|ECMAScript|$ecma_files|$ecma_blank|$ecma_comment|$ecma_code|"
+          fi
+
+          # Combine SQL, SQL Data, and SQL Stored Procedure rows into SQL
+          SQL_ROW=$(grep -E '^SQL' $CLOC_INFO_FILE.tmp | cut -d'|' -f2- || echo "")
+          SQL_DATA_ROW=$(grep -E '^SQL Data' $CLOC_INFO_FILE.tmp | cut -d'|' -f2- || echo "")
+          SQL_SP_ROW=$(grep -E '^SQL Stored Procedure' $CLOC_INFO_FILE.tmp | cut -d'|' -f2- || echo "")
+          if [[ -n "$SQL_ROW" || -n "$SQL_DATA_ROW" || -n "$SQL_SP_ROW" ]]; then
+            sql_files=0; sql_blank=0; sql_comment=0; sql_code=0
+            sql_data_files=0; sql_data_blank=0; sql_data_comment=0; sql_data_code=0
+            sql_sp_files=0; sql_sp_blank=0; sql_sp_comment=0; sql_sp_code=0
+
+            if [[ -n "$SQL_ROW" ]]; then
+              IFS='|' read -r sql_files sql_blank sql_comment sql_code <<< "$SQL_ROW"
+            fi
+            
+            if [[ -n "$SQL_DATA_ROW" ]]; then
+              IFS='|' read -r sql_data_files sql_data_blank sql_data_comment sql_data_code <<< "$SQL_DATA_ROW"
+            fi
+            
+            if [[ -n "$SQL_SP_ROW" ]]; then
+              IFS='|' read -r sql_sp_files sql_sp_blank sql_sp_comment sql_sp_code <<< "$SQL_SP_ROW"
+            fi
+
+            total_sql_files=$((sql_files + sql_data_files + sql_sp_files))
+            total_sql_blank=$((sql_blank + sql_data_blank + sql_sp_blank))
+            total_sql_comment=$((sql_comment + sql_data_comment + sql_sp_comment))
+            total_sql_code=$((sql_code + sql_data_code + sql_sp_code))
+
+            SUM_FILES=$((SUM_FILES + total_sql_files))
+            SUM_BLANK=$((SUM_BLANK + total_sql_blank))
+            SUM_COMMENT=$((SUM_COMMENT + total_sql_comment))
+            SUM_CODE=$((SUM_CODE + total_sql_code))
+            SUM_TECHNOLOGY=$((SUM_TECHNOLOGY + 1))
+
+            echo "|SQL|$total_sql_files|$total_sql_blank|$total_sql_comment|$total_sql_code|"
+          fi
+
+          echo "|**SUM:**|**$SUM_FILES**|**$SUM_BLANK**|**$SUM_COMMENT**|**$SUM_CODE**|"
+
+          echo "source_files_count=$SUM_FILES" >> $GITHUB_ENV
+          echo "lines_of_code=$SUM_CODE" >> $GITHUB_ENV
+          echo "technology_count=$SUM_TECHNOLOGY" >> $GITHUB_ENV
+
         } > $CLOC_INFO_FILE
 
     - name: Download Retriever
@@ -288,6 +390,10 @@ runs:
             echo "## Retriever execution time"
             cat $TIMING_INFO_FILE
           } > "${TIMING_INFO_FILE}.tmp" && mv "${TIMING_INFO_FILE}.tmp" "$TIMING_INFO_FILE"
+
+          # Extract the mean time without deviation
+          MEAN_TIME=$(awk -F'|' '/^[ ]*\|/{gsub(/[ ]/,""); print $2}' $TIMING_INFO_FILE | sed -n '3p' | awk '{print $1}' | sed 's/±.*//')
+          echo "execution_time=$MEAN_TIME" >> $GITHUB_ENV
                     
         else
           # Execute with /usr/bin/time
@@ -299,7 +405,10 @@ runs:
             echo "| --- | ---: |"
             while IFS= read -r line; do
               case "$line" in
-                real*) echo "| Real CPU Time | ${line#* } |" ;;
+                real*) 
+                  real_time=${line#* }
+                  echo "| Real CPU Time | $real_time |" 
+                  ;;
                 user*) echo "| User CPU Time | ${line#* } |" ;;
                 sys*) echo "| System CPU Time | ${line#* } |" ;;
               esac
@@ -311,9 +420,45 @@ runs:
             echo "- __System CPU Time__: time the command has spent running in system or kernel mode"
             echo "-->"
           } > "${TIMING_INFO_FILE}.tmp" && mv "${TIMING_INFO_FILE}.tmp" "$TIMING_INFO_FILE"
+
+          echo "execution_time=$real_time" >> $GITHUB_ENV
         fi
 
         mv ${{ env.tmp_dir }}/eclipse_tmp/* ${{ env.tmp_dir }}/retriever_out/
+
+    - name: Count Components in Repository
+      shell: bash
+      run: |
+        REPOSITORY_FILE=$(find ${{ env.tmp_dir }}/retriever_out -name '*.repository')
+        pip3 install yq
+        COMPONENT_COUNT=$(xq '.["repository:Repository"]["components__Repository"] | length' $REPOSITORY_FILE)
+        echo "component_count=$COMPONENT_COUNT" >> $GITHUB_ENV
+
+    - name: Gather Retriever Info
+      shell: bash
+      run: |
+        RETRIEVER_INFO_FILE=${{ env.tmp_dir }}/retriever_out/retriever_info.md
+
+        ABSTRACTION=$(echo "scale=2; ${{ env.source_files_count }} / ${{ env.component_count }}" | bc -l)
+        if [[ "$ABSTRACTION" == .* ]]; then
+          # add leading zero
+          ABSTRACTION="0$ABSTRACTION" 
+        fi
+
+        echo "RETRIEVER_INFO_FILE=$RETRIEVER_INFO_FILE" >> $GITHUB_ENV
+        {
+          echo "# [Retriever](https://github.com/PalladioSimulator/Palladio-ReverseEngineering-Retriever) Report"
+          echo "| Attribute          | Value |"
+          echo "| ------------------ | ----- |"
+          echo "| Retriever Version  | $(curl -sL "${{ env.retriever }}" | jq -r ".tag_name") |"
+          echo "| Date               | $(date -u) |"
+          echo "| #Components        | ${{ env.component_count }} |"
+          echo "| #Source Files      | ${{ env.source_files_count }} |"
+          echo "| Lines of Code      | ${{ env.lines_of_code }} |"
+          echo "| #Technologies      | ${{ env.technology_count }} |"
+          echo "| Abstraction        | $ABSTRACTION |"
+          echo "| Execution Time [s] | ${{env.execution_time }} |"
+        } > $RETRIEVER_INFO_FILE
 
     - name: Combine and Clean Up Files
       shell: bash
