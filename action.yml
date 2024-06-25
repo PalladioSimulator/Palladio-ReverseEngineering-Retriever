@@ -94,6 +94,14 @@ runs:
           NUM_STARS=$(curl -s $API_URL | jq '.stargazers_count // 0')
           NUM_CONTRIBUTORS=$(curl -s -I "${API_URL}/contributors?per_page=1" | grep -i 'link:' | sed -E 's/.*page=([0-9]+)>; rel="last".*/\1/')
 
+          # Get number of contributors, handle the case where pagination info might not be present (less than 30 contributors)
+          CONTRIBUTORS_LINK_HEADER=$(curl -s -I "${API_URL}/contributors?per_page=1" | grep -i 'link:')
+          if [ -z "$CONTRIBUTORS_LINK_HEADER" ]; then
+            NUM_CONTRIBUTORS=$(curl -s "${API_URL}/contributors" | jq 'length')
+          else
+            NUM_CONTRIBUTORS=$(echo "$CONTRIBUTORS_LINK_HEADER" | sed -E 's/.*page=([0-9]+)>; rel="last".*/\1/' || echo "1")
+          fi
+
           echo "|      Attribute    | Value |"
           echo "| ----------------- | ----- |"
           echo "| Repository URL    | $REPO_URL |"
