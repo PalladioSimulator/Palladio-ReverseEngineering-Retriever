@@ -92,14 +92,14 @@ runs:
           NUM_STARS=$(curl -s $API_URL | jq '.stargazers_count // 0')
           
           # Get number of commits, handle the case where pagination info might not be present (less than 30 commits)
-          COMMITS_LINK_HEADER=$(curl -I "${API_URL}/commits?per_page=1" | grep -i 'link:' || true)
+          COMMITS_LINK_HEADER=$(curl -s -I "${API_URL}/commits?per_page=1" | grep -i 'link:' || true)
           if [ -z "$COMMITS_LINK_HEADER" ]; then
             NUM_COMMITS=$(curl -s "${API_URL}/commits" | jq 'length')
           else
             NUM_COMMITS=$(echo "$COMMITS_LINK_HEADER" | sed -E 's/.*page=([0-9]+)>; rel="last".*/\1/' || echo "1")
           fi
           
-          # Get number of contributors, handle the case where pagination info might not be present (less than 30 contributors)          
+          # Get number of contributors, handle the case where pagination info might not be present (less than 30 contributors)
           CONTRIBUTORS_LINK_HEADER=$(curl -s -I "${API_URL}/contributors?per_page=1" | grep -i 'link:' || true)
           if [ -z "$CONTRIBUTORS_LINK_HEADER" ]; then
             NUM_CONTRIBUTORS=$(curl -s "${API_URL}/contributors" | jq 'length')
@@ -136,7 +136,6 @@ runs:
                 print_header >> "$GIT_INFO_FILE"
               fi
               gather_git_info >> "$GIT_INFO_FILE"
-              gather_git_info
               FOUND_REPO=true
             fi
           done
