@@ -115,7 +115,7 @@ runs:
           
           # Get number of contributors, handle the case where pagination info might not be present (less than 30 contributors)
 
-          curl -I "${API_URL}/contributors?per_page=1
+          curl -I "${API_URL}/contributors?per_page=1"
           
           CONTRIBUTORS_LINK_HEADER=$(curl -s -I "${API_URL}/contributors?per_page=1" | grep -i 'link:' || true)
           echo "contributors link"
