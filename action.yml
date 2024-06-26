@@ -101,11 +101,9 @@ runs:
 
           RATE_LIMIT=$(curl -s https://api.github.com/rate_limit | jq '.rate.remaining')
           echo "GitHub API rate limit remaining: $RATE_LIMIT"
-
-          curl -I "${API_URL}/commits?per_page=1"
           
           # Get number of commits, handle the case where pagination info might not be present (less than 30 commits)
-          COMMITS_LINK_HEADER=$(curl -I "${API_URL}/commits?per_page=1" | grep -i 'link:')
+          COMMITS_LINK_HEADER=$(curl -I "${API_URL}/commits?per_page=1" | grep -i 'link:' || true)
           echo "commits link"
           echo $COMMITS_LINK_HEADER
           if [ -z "$COMMITS_LINK_HEADER" ]; then
@@ -116,7 +114,10 @@ runs:
           echo $NUM_COMMITS
           
           # Get number of contributors, handle the case where pagination info might not be present (less than 30 contributors)
-          CONTRIBUTORS_LINK_HEADER=$(curl -s -I "${API_URL}/contributors?per_page=1" | grep -i 'link:')
+
+          curl -I "${API_URL}/contributors?per_page=1
+          
+          CONTRIBUTORS_LINK_HEADER=$(curl -s -I "${API_URL}/contributors?per_page=1" | grep -i 'link:' || true)
           echo "contributors link"
           echo $CONTRIBUTORS_LINK_HEADER
           if [ -z "$CONTRIBUTORS_LINK_HEADER" ]; then
