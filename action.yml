@@ -66,11 +66,12 @@ runs:
       shell: bash
       # Uses the latest Retriever or the Retriever with the same version that this action has
       run: |
-        if [[ "${{ env.action_version }}" == "main" ]]; then
-          echo "retriever=${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/latest" >> $GITHUB_ENV
-        else
-          echo "retriever=${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/tags/${{ env.action_version }}" >> $GITHUB_ENV
-        fi
+        echo "retriever=${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/latest" >> $GITHUB_ENV
+        #if [[ "${{ env.action_version }}" == "main" ]]; then
+        #  echo "retriever=${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/latest" >> $GITHUB_ENV
+        #else
+        #  echo "retriever=${{ github.api_url }}/repos/PalladioSimulator/Palladio-ReverseEngineering-Retriever/releases/tags/${{ env.action_version }}" >> $GITHUB_ENV
+        #fi
 
     - name: Gather Git Repository Info
       shell: bash
@@ -88,24 +89,35 @@ runs:
           OWNER=$(echo $REPO_PATH | cut -d'/' -f1)
           REPO_NAME=$(echo $REPO_PATH | cut -d'/' -f2 | sed 's/\.git$//')
           API_URL="https://api.github.com/repos/$OWNER/$REPO_NAME"
+
+          echo "variables worked"
           
           NUM_STARS=$(curl -s $API_URL | jq '.stargazers_count // 0')
           
+          echo "stars"
+          echo $NUM_STARS
+          
           # Get number of commits, handle the case where pagination info might not be present (less than 30 commits)
           COMMITS_LINK_HEADER=$(curl -s -I "${API_URL}/commits?per_page=1" | grep -i 'link:')
+          echo "commits link"
+          echo $COMMITS_LINK_HEADER
           if [ -z "$COMMITS_LINK_HEADER" ]; then
             NUM_COMMITS=$(curl -s "${API_URL}/commits" | jq 'length')
           else
             NUM_COMMITS=$(echo "$COMMITS_LINK_HEADER" | sed -E 's/.*page=([0-9]+)>; rel="last".*/\1/' || echo "1")
           fi
+          echo $NUM_COMMITS
           
           # Get number of contributors, handle the case where pagination info might not be present (less than 30 contributors)
           CONTRIBUTORS_LINK_HEADER=$(curl -s -I "${API_URL}/contributors?per_page=1" | grep -i 'link:')
+          echo "contributors link"
+          echo $CONTRIBUTORS_LINK_HEADER
           if [ -z "$CONTRIBUTORS_LINK_HEADER" ]; then
             NUM_CONTRIBUTORS=$(curl -s "${API_URL}/contributors" | jq 'length')
           else
             NUM_CONTRIBUTORS=$(echo "$CONTRIBUTORS_LINK_HEADER" | sed -E 's/.*page=([0-9]+)>; rel="last".*/\1/' || echo "1")
           fi
+          echo $CONTRIBUTORS_LINK_HEADER
 
           echo "|      Attribute    | Value |"
           echo "| ----------------- | ----- |"
@@ -126,7 +138,8 @@ runs:
         if [ -d "$SOURCE_PATH/.git" ]; then
           cd "$SOURCE_PATH"
           print_header >> "$GIT_INFO_FILE"
-          gather_git_info >> "$GIT_INFO_FILE"
+          # gather_git_info >> "$GIT_INFO_FILE"
+          gather_git_info
         else
           FOUND_REPO=false
           for d in "$SOURCE_PATH"/*; do
@@ -135,7 +148,8 @@ runs:
               if [ "$FOUND_REPO" = false ]; then
                 print_header >> "$GIT_INFO_FILE"
               fi
-              gather_git_info >> "$GIT_INFO_FILE"
+              # gather_git_info >> "$GIT_INFO_FILE"
+              gather_git_info
               FOUND_REPO=true
             fi
           done
