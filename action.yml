@@ -405,7 +405,7 @@ runs:
           } > "${TIMING_INFO_FILE}.tmp" && mv "${TIMING_INFO_FILE}.tmp" "$TIMING_INFO_FILE"
 
           # Extract the mean time without deviation
-          MEAN_TIME=$(awk -F'|' '/^[ ]*\|/{gsub(/[ ]/,""); print $2}' $TIMING_INFO_FILE | sed -n '3p' | awk '{print $1}' | sed 's/±.*//')
+          MEAN_TIME=$(awk -F'|' '/^[ ]*\|/{gsub(/[ ]/,""); print $2}' $TIMING_INFO_FILE | sed -n '3p')
           echo "execution_time=$MEAN_TIME" >> $GITHUB_ENV
                     
         else
