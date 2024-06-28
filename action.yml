@@ -92,7 +92,7 @@ runs:
           NUM_STARS=$(curl -s $API_URL | jq '.stargazers_count // 0')
           
           # Get number of commits, handle the case where pagination info might not be present (less than 30 commits)
-          COMMITS_LINK_HEADER=$(curl -s -I "${API_URL}/commits?per_page=1" | grep -i 'link:')
+          COMMITS_LINK_HEADER=$(curl -s -I "${API_URL}/commits?per_page=1" | grep -i 'link:' || true)
           if [ -z "$COMMITS_LINK_HEADER" ]; then
             NUM_COMMITS=$(curl -s "${API_URL}/commits" | jq 'length')
           else
@@ -100,7 +100,7 @@ runs:
           fi
           
           # Get number of contributors, handle the case where pagination info might not be present (less than 30 contributors)
-          CONTRIBUTORS_LINK_HEADER=$(curl -s -I "${API_URL}/contributors?per_page=1" | grep -i 'link:')
+          CONTRIBUTORS_LINK_HEADER=$(curl -s -I "${API_URL}/contributors?per_page=1" | grep -i 'link:' || true)
           if [ -z "$CONTRIBUTORS_LINK_HEADER" ]; then
             NUM_CONTRIBUTORS=$(curl -s "${API_URL}/contributors" | jq 'length')
           else
@@ -405,7 +405,7 @@ runs:
           } > "${TIMING_INFO_FILE}.tmp" && mv "${TIMING_INFO_FILE}.tmp" "$TIMING_INFO_FILE"
 
           # Extract the mean time without deviation
-          MEAN_TIME=$(awk -F'|' '/^[ ]*\|/{gsub(/[ ]/,""); print $2}' $TIMING_INFO_FILE | sed -n '3p' | awk '{print $1}' | sed 's/±.*//')
+          MEAN_TIME=$(awk -F'|' '/^[ ]*\|/{print $2}' $TIMING_INFO_FILE | sed -n '3p' | sed 's/^[ ]*//')
           echo "execution_time=$MEAN_TIME" >> $GITHUB_ENV
                     
         else
