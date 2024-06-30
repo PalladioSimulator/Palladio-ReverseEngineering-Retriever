@@ -39,10 +39,16 @@ class JaxRSDeploymentRules implements Rule {
 			val xml = xmlEntry.value
 			if (xmlPath.endsWith("WEB-INF/web.xml")) {
 				val servlets = xml.rootElement.getChildren("servlet", xml.rootElement.namespace).stream.collect(
-					Collectors.
-						toMap( [servlet|servlet.getChildTextTrim("servlet-class", servlet.namespace)], [ servlet |
-							servlet.getChildTextTrim("servlet-name", servlet.namespace)
-						])
+					Collectors.toMap( [ servlet |
+						val classTag = servlet.getChildTextTrim("servlet-class", servlet.namespace);
+						if (classTag !== null) {
+							return classTag
+						} else {
+							return servlet.getChildTextTrim("servlet-name", servlet.namespace)
+						}
+					], [ servlet |
+						servlet.getChildTextTrim("servlet-name", servlet.namespace)
+					])
 				)
 
 				val servletMappings = xml.rootElement.getChildren("servlet-mapping", xml.rootElement.namespace).stream.
