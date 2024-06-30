@@ -512,7 +512,9 @@ runs:
       working-directory: ${{ env.tmp_dir }}
       run: |
         mkdir -p eclipse_logs/${{ inputs.source_path }}
-        mv retriever/configuration/*.log retriever/workspace/.metadata/.log eclipse_logs/${{ inputs.source_path }}
+        # Move log files, if they exist.
+        find retriever/configuration/ -maxdepth 1 -name "*.log" -exec mv -t eclipse_logs/${{ inputs.source_path }} {} +
+        find retriever/workspace/.metadata/ -maxdepth 1 -name ".log" -exec mv -t eclipse_logs/${{ inputs.source_path }} {}
 
     - name: Upload Eclipse Logs
       if: failure()
