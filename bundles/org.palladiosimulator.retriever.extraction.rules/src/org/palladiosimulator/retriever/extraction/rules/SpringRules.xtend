@@ -198,7 +198,10 @@ class SpringRules implements Rule {
 		}
 
 		if (isClient) {
-			val serviceIdentifier = getUnitAnnotationStringValue(unit, "FeignClient", "name");
+			var serviceIdentifier = getUnitAnnotationStringValue(unit, "FeignClient", "name");
+			if (serviceIdentifier === null) {
+				serviceIdentifier = getUnitAnnotationStringValue(unit, "FeignClient");
+			}
 			val requestedUnitMapping = getUnitAnnotationStringValue(unit, "RequestMapping");
 			// Do not include the context path since client requests are expressed as uniquely identifiable paths.
 			var ifaceName = "";
