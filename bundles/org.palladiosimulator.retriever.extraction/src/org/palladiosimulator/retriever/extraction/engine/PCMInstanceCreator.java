@@ -268,8 +268,11 @@ public class PCMInstanceCreator {
 
                 if (method != null) {
                     // parameter type
-                    for (final ITypeBinding parameter : method.getParameterTypes()) {
-                        signature = this.handleSignatureDataType(signature, parameter.getName(), parameter,
+                    ITypeBinding[] parameterTypes = method.getParameterTypes();
+                    String[] parameterNames = method.getParameterNames();
+                    for (int i = 0; i < parameterTypes.length; i++) {
+                        final ITypeBinding parameter = parameterTypes[i];
+                        signature = this.handleSignatureDataType(signature, parameterNames[i], parameter,
                                 parameter.getDimensions(), false);
                     }
 
