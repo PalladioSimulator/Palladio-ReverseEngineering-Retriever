@@ -32,7 +32,6 @@ import org.palladiosimulator.pcm.repository.OperationRequiredRole;
 import org.palladiosimulator.pcm.repository.ParameterModifier;
 import org.palladiosimulator.pcm.repository.Repository;
 import org.palladiosimulator.pcm.seff.ResourceDemandingSEFF;
-import org.palladiosimulator.pcm.seff.ServiceEffectSpecification;
 import org.palladiosimulator.retriever.extraction.commonalities.Component;
 import org.palladiosimulator.retriever.extraction.commonalities.Composite;
 import org.palladiosimulator.retriever.extraction.commonalities.Operation;
@@ -272,7 +271,9 @@ public class PCMInstanceCreator {
                     String[] parameterNames = method.getParameterNames();
                     for (int i = 0; i < parameterTypes.length; i++) {
                         final ITypeBinding parameter = parameterTypes[i];
-                        signature = this.handleSignatureDataType(signature, parameterNames[i], parameter,
+                        // If a constructor is detected, its parameter names might not be included.
+                        final String parameterName = i < parameterNames.length ? parameterNames[i] : "parameter" + i;
+                        signature = this.handleSignatureDataType(signature, parameterName, parameter,
                                 parameter.getDimensions(), false);
                     }
 
