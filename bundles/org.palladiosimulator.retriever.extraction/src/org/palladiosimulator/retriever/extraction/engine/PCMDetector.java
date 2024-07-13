@@ -259,6 +259,14 @@ public class PCMDetector {
         }
     }
 
+    public void detectSeparatingIdentifier(final CompUnitOrName unit, final String separatingIdentifier) {
+        if (this.components.get(unit) == null) {
+            this.components.put(unit, new ComponentBuilder(unit));
+        }
+        this.components.get(unit)
+            .setSeparatingIdentifier(separatingIdentifier);
+    }
+
     public void detectPartOfComposite(final CompUnitOrName unit, final String compositeName) {
         if (this.components.get(unit) == null) {
             this.components.put(unit, new ComponentBuilder(unit));
@@ -301,5 +309,14 @@ public class PCMDetector {
                 sb.append("\t\t}\n");
             });
         return sb.toString();
+    }
+
+    public boolean isPartOfComposite(CompUnitOrName name) {
+        for (CompositeBuilder composite : this.composites.values()) {
+            if (composite.hasPart(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

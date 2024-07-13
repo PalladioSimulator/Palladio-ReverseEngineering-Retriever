@@ -15,12 +15,14 @@ public class Component {
     private final CompUnitOrName compUnitOrName;
     private final Requirements requirements;
     private final Provisions provisions;
+    private final Optional<String> separatingIdentifier;
 
-    public Component(final CompUnitOrName compUnitOrName, final Requirements requirements,
-            final Provisions provisions) {
+    public Component(final CompUnitOrName compUnitOrName, final Requirements requirements, final Provisions provisions,
+            final Optional<String> separatingIdentifier) {
         this.compUnitOrName = compUnitOrName;
         this.requirements = requirements;
         this.provisions = provisions;
+        this.separatingIdentifier = separatingIdentifier;
     }
 
     public Requirements requirements() {
@@ -41,6 +43,10 @@ public class Component {
 
     public CompUnitOrName identifier() {
         return this.compUnitOrName;
+    }
+
+    public Optional<String> separatingIdentifier() {
+        return this.separatingIdentifier;
     }
 
     @Override

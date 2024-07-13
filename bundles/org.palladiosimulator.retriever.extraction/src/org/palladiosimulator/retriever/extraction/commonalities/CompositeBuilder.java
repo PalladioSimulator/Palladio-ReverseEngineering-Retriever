@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
@@ -215,6 +216,8 @@ public class CompositeBuilder {
             .filter(x -> !compositeProvisions.containsEntire(x))
             .forEach(provisions::add);
 
+        final Optional<String> separatingIdentifier = providingComponent.separatingIdentifier();
+
         final List<OperationInterface> traversedOperations = new ArrayList<>();
         while (!provisions.isEmpty()) {
             final OperationInterface provision = provisions.pop();
@@ -222,6 +225,10 @@ public class CompositeBuilder {
                 .filter(x -> x.requirements()
                     .containsPartOf(provision))
                 .filter(x -> !providingComponent.equals(x))
+                .filter(x -> x.separatingIdentifier()
+                    .isEmpty() || separatingIdentifier.isEmpty()
+                        || x.separatingIdentifier()
+                            .equals(separatingIdentifier))
                 .collect(Collectors.toSet());
 
             // Skip this provision if no unit requires it.
@@ -250,6 +257,8 @@ public class CompositeBuilder {
             .filter(x -> !compositeProvisions.containsEntire(x))
             .forEach(requirements::add);
 
+        final Optional<String> separatingIdentifier = requiringComponent.separatingIdentifier();
+
         final List<OperationInterface> traversedOperations = new ArrayList<>();
         while (!requirements.isEmpty()) {
             final OperationInterface requirement = requirements.pop();
@@ -257,6 +266,10 @@ public class CompositeBuilder {
                 .filter(x -> x.provisions()
                     .containsPartOf(requirement))
                 .filter(x -> !requiringComponent.equals(x))
+                .filter(x -> x.separatingIdentifier()
+                    .isEmpty() || separatingIdentifier.isEmpty()
+                        || x.separatingIdentifier()
+                            .equals(separatingIdentifier))
                 .collect(Collectors.toSet());
 
             // Skip this requirement if no unit provides it.
