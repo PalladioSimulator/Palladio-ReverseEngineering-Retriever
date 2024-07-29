@@ -81,13 +81,5 @@
           class="org.palladiosimulator.retriever.extraction.rules.JaxRSDeploymentRules">
     </rule>
  </extension>
- <extension
-       id="org.palladiosimulator.retriever.extraction.rules.teastore"
-       name="TeaStore Rules"
-       point="org.palladiosimulator.retriever.services.rule">
-    <rule
-          class="org.palladiosimulator.retriever.extraction.rules.TeaStoreRules">
-    </rule>
- </extension>
 
 </plugin>
