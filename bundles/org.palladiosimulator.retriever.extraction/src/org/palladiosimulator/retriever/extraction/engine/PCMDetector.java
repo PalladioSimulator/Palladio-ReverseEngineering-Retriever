@@ -2,6 +2,8 @@ package org.palladiosimulator.retriever.extraction.engine;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,6 +49,7 @@ public class PCMDetector {
     private final RequirementsBuilder compositeRequirements = new RequirementsBuilder();
     private final Map<CompUnitOrName, List<String>> weakComponents = new ConcurrentHashMap<>();
     private final Map<CompUnitOrName, String> separatingIdentifiers = new ConcurrentHashMap<>();
+    private final Set<String> blacklist = new HashSet<>();
 
     private static String getFullUnitName(final CompUnitOrName unit) {
         // TODO this is potentially problematic, maybe restructure
@@ -76,18 +79,13 @@ public class PCMDetector {
 
     public void detectComponent(final CompUnitOrName unit) {
         if (!unit.isUnit()) {
-            if (this.components.get(unit) == null) {
-                this.components.put(unit, new ComponentBuilder(unit));
-            }
+            tryAddComponent(unit);
             return;
         }
         for (final Object type : unit.compilationUnit()
             .get()
             .types()) {
-            if (type instanceof TypeDeclaration) {
-                if (this.components.get(unit) == null) {
-                    this.components.put(unit, new ComponentBuilder(unit));
-                }
+            if (type instanceof TypeDeclaration && tryAddComponent(unit)) {
                 final ITypeBinding binding = ((TypeDeclaration) type).resolveBinding();
                 this.detectProvidedInterfaceWeakly(unit, binding);
             }
@@ -100,8 +98,8 @@ public class PCMDetector {
 
     private void detectRequiredInterface(final CompUnitOrName unit, final InterfaceName interfaceName,
             final boolean compositeRequired) {
-        if (this.components.get(unit) == null) {
-            this.components.put(unit, new ComponentBuilder(unit));
+        if (!tryAddComponent(unit)) {
+            return;
         }
         final EntireInterface iface = new EntireInterface(interfaceName);
         this.detectRequiredInterface(unit, compositeRequired, false, iface);
@@ -117,8 +115,8 @@ public class PCMDetector {
 
     private void detectRequiredInterface(final CompUnitOrName unit, final FieldDeclaration field,
             final boolean compositeRequired, final boolean detectWeakly) {
-        if (this.components.get(unit) == null) {
-            this.components.put(unit, new ComponentBuilder(unit));
+        if (!tryAddComponent(unit)) {
+            return;
         }
         @SuppressWarnings("unchecked")
         final List<OperationInterface> ifaces = ((List<VariableDeclaration>) field.fragments()).stream()
@@ -136,8 +134,8 @@ public class PCMDetector {
             return;
         }
         final ITypeBinding type = method.getDeclaringClass();
-        if (this.components.get(unit) == null) {
-            this.components.put(unit, new ComponentBuilder(unit));
+        if (!tryAddComponent(unit)) {
+            return;
         }
         final EntireInterface iface = new EntireInterface(type,
                 new JavaInterfaceName(NameConverter.toPCMIdentifier(type)));
@@ -145,8 +143,8 @@ public class PCMDetector {
     }
 
     public void detectRequiredInterface(final CompUnitOrName unit, final SingleVariableDeclaration parameter) {
-        if (this.components.get(unit) == null) {
-            this.components.put(unit, new ComponentBuilder(unit));
+        if (!tryAddComponent(unit)) {
+            return;
         }
         final IVariableBinding parameterBinding = parameter.resolveBinding();
         if (parameterBinding == null) {
@@ -245,8 +243,8 @@ public class PCMDetector {
 
     private void detectProvidedOperation(final CompUnitOrName unit, final IMethodBinding method,
             final OperationName name, final boolean compositeProvided, final boolean detectWeakly) {
-        if (this.components.get(unit) == null) {
-            this.components.put(unit, new ComponentBuilder(unit));
+        if (!tryAddComponent(unit)) {
+            return;
         }
         final OperationInterface provision = new Operation(method, name);
         this.detectProvidedInterface(unit, provision, compositeProvided, detectWeakly);
@@ -290,8 +288,8 @@ public class PCMDetector {
     }
 
     public void detectPartOfComposite(final CompUnitOrName unit, final String compositeName) {
-        if (this.components.get(unit) == null) {
-            this.components.put(unit, new ComponentBuilder(unit));
+        if (!tryAddComponent(unit)) {
+            return;
         }
         if (!this.composites.containsKey(compositeName)) {
             this.composites.put(compositeName, new CompositeBuilder(compositeName));
@@ -379,5 +377,32 @@ public class PCMDetector {
             }
         }
         return false;
+    }
+
+    public void addToBlacklist(String string) {
+        this.blacklist.add(string);
+
+        // Clean up already added but now blacklisted components
+        List<CompUnitOrName> toDelete = new LinkedList<>();
+        for (CompUnitOrName unit : this.components.keySet()) {
+            if (unit.name()
+                .equals(string)) {
+                toDelete.add(unit);
+            }
+        }
+        for (CompUnitOrName unit : toDelete) {
+            this.components.remove(unit);
+        }
+    }
+
+    private boolean tryAddComponent(CompUnitOrName unit) {
+        if (this.components.get(unit) != null) {
+            return true;
+        }
+        if (this.blacklist.contains(unit.name())) {
+            return false;
+        }
+        this.components.put(unit, new ComponentBuilder(unit));
+        return true;
     }
 }
