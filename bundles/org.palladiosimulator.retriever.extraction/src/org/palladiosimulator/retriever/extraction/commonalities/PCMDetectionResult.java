@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -93,19 +94,16 @@ public class PCMDetectionResult {
         final Set<Composite> redundantComposites = new HashSet<>();
         final Set<Composite> remainingComposites = new HashSet<>();
 
-        for (int i = 0; i < allComposites.size(); ++i) {
-            final Composite subject = allComposites.get(i);
-            final long subsetCount = allComposites.subList(i + 1, allComposites.size())
-                .stream()
+        for (final Composite subject : allComposites) {
+            final Optional<Composite> other = allComposites.stream()
+                .filter(x -> !subject.equals(x))
                 .filter(x -> !redundantComposites.contains(x))
-                .filter(x -> subject.isSubsetOf(x) || x.isSubsetOf(subject))
-                .count();
+                .filter(x -> subject.isSubsetOf(x))
+                .findFirst();
 
-            // Any composite is guaranteed to be the subset of at least one composite in the
-            // list, namely itself. If it is the subset of any composites other than itself, it is
-            // redundant.
-            if (subsetCount > 0) {
+            if (other.isPresent()) {
                 redundantComposites.add(subject);
+                continue;
             } else {
                 // TODO: Is there any merging necessary, like adapting the redundant composite's
                 // requirements to its peer?
@@ -113,7 +111,46 @@ public class PCMDetectionResult {
             }
         }
 
+        // Remove composite components contained in multiple other composites, according to a
+        // conservative heuristic.
+        // TODO: A comprehensive solution would require e.g. graph traversal and tie-breaking in
+        // cycles.
+
+        final Set<Composite> collectivelyContainedComposites = new HashSet<>();
+        for (final Composite subject : remainingComposites) {
+            final Set<Component> allOtherParts = remainingComposites.stream()
+                .filter(x -> !subject.equals(x))
+                .map(Composite::parts)
+                .flatMap(Set::stream)
+                .collect(Collectors.toSet());
+            final boolean isContainedInOthers = subject.parts()
+                .stream()
+                .allMatch(allOtherParts::contains);
+            if (isContainedInOthers) {
+                collectivelyContainedComposites.add(subject);
+            }
+        }
+
+        final Set<Composite> actuallyContainedComposites = new HashSet<>();
+        for (final Composite subject : collectivelyContainedComposites) {
+            final Set<Component> allOtherParts = remainingComposites.stream()
+                .filter(x -> !subject.equals(x))
+                .filter(x -> !collectivelyContainedComposites.contains(x))
+                .map(Composite::parts)
+                .flatMap(Set::stream)
+                .collect(Collectors.toSet());
+            final boolean isContainedInOthers = subject.parts()
+                .stream()
+                .allMatch(allOtherParts::contains);
+            if (isContainedInOthers) {
+                actuallyContainedComposites.add(subject);
+            }
+        }
+
+        remainingComposites.removeAll(actuallyContainedComposites);
+
         return remainingComposites;
+
     }
 
     private static Set<OperationInterface> collectVisibleProvisions(final Set<Component> components,
