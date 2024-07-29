@@ -2,6 +2,7 @@ package org.palladiosimulator.retriever.extraction.commonalities;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Used to build {@code Component}s.
@@ -13,11 +14,13 @@ public class ComponentBuilder {
     private final CompUnitOrName compUnitOrName;
     private final RequirementsBuilder requirements;
     private final ProvisionsBuilder provisions;
+    private Optional<String> separatingIdentifier;
 
     public ComponentBuilder(final CompUnitOrName compUnitOrName) {
         this.compUnitOrName = compUnitOrName;
         this.requirements = new RequirementsBuilder();
         this.provisions = new ProvisionsBuilder();
+        this.separatingIdentifier = Optional.empty();
     }
 
     public CompUnitOrName identifier() {
@@ -32,10 +35,14 @@ public class ComponentBuilder {
         return this.provisions;
     }
 
+    public void setSeparatingIdentifier(final String separatingIdentifier) {
+        this.separatingIdentifier = Optional.of(separatingIdentifier);
+    }
+
     public Component create(final Collection<OperationInterface> allDependencies,
             final Collection<OperationInterface> visibleProvisions) {
         return new Component(this.compUnitOrName, this.requirements.create(allDependencies, visibleProvisions),
-                this.provisions.create(allDependencies));
+                this.provisions.create(allDependencies), this.separatingIdentifier);
     }
 
     @Override

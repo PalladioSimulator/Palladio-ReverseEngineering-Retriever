@@ -57,5 +57,13 @@
 			class="org.palladiosimulator.retriever.extraction.discoverers.EcmaScriptDiscoverer">
 		</discoverer>
 	</extension>
+ <extension
+       id="org.palladiosimulator.retriever.extraction.discoverers.docker"
+       name="Dockerfile Discoverer"
+       point="org.palladiosimulator.retriever.services.discoverer">
+    <discoverer
+          class="org.palladiosimulator.retriever.extraction.discoverers.DockerfileDiscoverer">
+    </discoverer>
+ </extension>
 
 </plugin>

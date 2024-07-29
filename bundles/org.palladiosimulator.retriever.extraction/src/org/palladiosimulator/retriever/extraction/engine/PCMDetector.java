@@ -2,6 +2,8 @@ package org.palladiosimulator.retriever.extraction.engine;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +16,7 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -44,6 +47,9 @@ public class PCMDetector {
     private final Map<String, CompositeBuilder> composites = new ConcurrentHashMap<>();
     private final ProvisionsBuilder compositeProvisions = new ProvisionsBuilder();
     private final RequirementsBuilder compositeRequirements = new RequirementsBuilder();
+    private final Map<CompUnitOrName, List<String>> weakComponents = new ConcurrentHashMap<>();
+    private final Map<CompUnitOrName, String> separatingIdentifiers = new ConcurrentHashMap<>();
+    private final Set<String> blacklist = new HashSet<>();
 
     private static String getFullUnitName(final CompUnitOrName unit) {
         // TODO this is potentially problematic, maybe restructure
@@ -73,14 +79,13 @@ public class PCMDetector {
 
     public void detectComponent(final CompUnitOrName unit) {
         if (!unit.isUnit()) {
-            this.components.put(unit, new ComponentBuilder(unit));
+            tryAddComponent(unit);
             return;
         }
         for (final Object type : unit.compilationUnit()
             .get()
             .types()) {
-            if (type instanceof TypeDeclaration) {
-                this.components.put(unit, new ComponentBuilder(unit));
+            if (type instanceof TypeDeclaration && tryAddComponent(unit)) {
                 final ITypeBinding binding = ((TypeDeclaration) type).resolveBinding();
                 this.detectProvidedInterfaceWeakly(unit, binding);
             }
@@ -93,8 +98,8 @@ public class PCMDetector {
 
     private void detectRequiredInterface(final CompUnitOrName unit, final InterfaceName interfaceName,
             final boolean compositeRequired) {
-        if (this.components.get(unit) == null) {
-            this.components.put(unit, new ComponentBuilder(unit));
+        if (!tryAddComponent(unit)) {
+            return;
         }
         final EntireInterface iface = new EntireInterface(interfaceName);
         this.detectRequiredInterface(unit, compositeRequired, false, iface);
@@ -110,8 +115,8 @@ public class PCMDetector {
 
     private void detectRequiredInterface(final CompUnitOrName unit, final FieldDeclaration field,
             final boolean compositeRequired, final boolean detectWeakly) {
-        if (this.components.get(unit) == null) {
-            this.components.put(unit, new ComponentBuilder(unit));
+        if (!tryAddComponent(unit)) {
+            return;
         }
         @SuppressWarnings("unchecked")
         final List<OperationInterface> ifaces = ((List<VariableDeclaration>) field.fragments()).stream()
@@ -123,9 +128,23 @@ public class PCMDetector {
         this.detectRequired(unit, compositeRequired, detectWeakly, ifaces);
     }
 
+    public void detectCompositeRequiredInterfaceWeakly(final CompUnitOrName unit, final MethodInvocation invocation) {
+        final IMethodBinding method = invocation.resolveMethodBinding();
+        if (method == null) {
+            return;
+        }
+        final ITypeBinding type = method.getDeclaringClass();
+        if (!tryAddComponent(unit)) {
+            return;
+        }
+        final EntireInterface iface = new EntireInterface(type,
+                new JavaInterfaceName(NameConverter.toPCMIdentifier(type)));
+        this.detectRequiredInterface(unit, true, true, iface);
+    }
+
     public void detectRequiredInterface(final CompUnitOrName unit, final SingleVariableDeclaration parameter) {
-        if (this.components.get(unit) == null) {
-            this.components.put(unit, new ComponentBuilder(unit));
+        if (!tryAddComponent(unit)) {
+            return;
         }
         final IVariableBinding parameterBinding = parameter.resolveBinding();
         if (parameterBinding == null) {
@@ -224,8 +243,8 @@ public class PCMDetector {
 
     private void detectProvidedOperation(final CompUnitOrName unit, final IMethodBinding method,
             final OperationName name, final boolean compositeProvided, final boolean detectWeakly) {
-        if (this.components.get(unit) == null) {
-            this.components.put(unit, new ComponentBuilder(unit));
+        if (!tryAddComponent(unit)) {
+            return;
         }
         final OperationInterface provision = new Operation(method, name);
         this.detectProvidedInterface(unit, provision, compositeProvided, detectWeakly);
@@ -259,15 +278,63 @@ public class PCMDetector {
         }
     }
 
-    public void detectPartOfComposite(final CompUnitOrName unit, final String compositeName) {
+    public void detectSeparatingIdentifier(final CompUnitOrName unit, final String separatingIdentifier) {
         if (this.components.get(unit) == null) {
-            this.components.put(unit, new ComponentBuilder(unit));
+            this.separatingIdentifiers.put(unit, separatingIdentifier);
+        } else {
+            this.components.get(unit)
+                .setSeparatingIdentifier(separatingIdentifier);
+        }
+    }
+
+    public void detectPartOfComposite(final CompUnitOrName unit, final String compositeName) {
+        if (!tryAddComponent(unit)) {
+            return;
         }
         if (!this.composites.containsKey(compositeName)) {
             this.composites.put(compositeName, new CompositeBuilder(compositeName));
         }
         this.composites.get(compositeName)
             .addPart(this.components.get(unit));
+
+        // Setting the separating identifier is sufficient if the component is part of a composite
+        if (separatingIdentifiers.containsKey(unit)) {
+            this.components.get(unit)
+                .setSeparatingIdentifier(separatingIdentifiers.get(unit));
+        }
+
+        // Realize weak composite components that this component is part of
+        if (this.weakComponents.containsKey(unit)) {
+            for (String weakCompositeName : weakComponents.get(unit)) {
+                if (!this.composites.containsKey(weakCompositeName)) {
+                    this.composites.put(weakCompositeName, new CompositeBuilder(weakCompositeName));
+                }
+                this.composites.get(weakCompositeName)
+                    .addPart(this.components.get(unit));
+            }
+        }
+    }
+
+    // Weak composite components only get created if at least one of their components is part of
+    // another composite. This allows for e.g. composite components based on build files that
+    // do not require direct dependencies between their parts.
+    public void detectPartOfWeakComposite(CompUnitOrName unit, String compositeName) {
+        if (!this.weakComponents.containsKey(unit)) {
+            this.weakComponents.put(unit, new ArrayList<>());
+        }
+        this.weakComponents.get(unit)
+            .add(compositeName);
+
+        final boolean isPartOfStrongComposite = this.composites.values()
+            .stream()
+            .anyMatch(x -> x.hasPart(unit));
+        if (isPartOfStrongComposite) {
+            if (!this.composites.containsKey(compositeName)) {
+                this.composites.put(compositeName, new CompositeBuilder(compositeName));
+            }
+            this.composites.get(compositeName)
+                .addPart(this.components.get(unit));
+        }
     }
 
     public void detectCompositeRequiredInterface(final CompUnitOrName unit, final InterfaceName interfaceName) {
@@ -301,5 +368,41 @@ public class PCMDetector {
                 sb.append("\t\t}\n");
             });
         return sb.toString();
+    }
+
+    public boolean isPartOfComposite(CompUnitOrName name) {
+        for (CompositeBuilder composite : this.composites.values()) {
+            if (composite.hasPart(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void addToBlacklist(String string) {
+        this.blacklist.add(string);
+
+        // Clean up already added but now blacklisted components
+        List<CompUnitOrName> toDelete = new LinkedList<>();
+        for (CompUnitOrName unit : this.components.keySet()) {
+            if (unit.name()
+                .equals(string)) {
+                toDelete.add(unit);
+            }
+        }
+        for (CompUnitOrName unit : toDelete) {
+            this.components.remove(unit);
+        }
+    }
+
+    private boolean tryAddComponent(CompUnitOrName unit) {
+        if (this.components.get(unit) != null) {
+            return true;
+        }
+        if (this.blacklist.contains(unit.name())) {
+            return false;
+        }
+        this.components.put(unit, new ComponentBuilder(unit));
+        return true;
     }
 }
