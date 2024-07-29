@@ -81,13 +81,5 @@
           class="org.palladiosimulator.retriever.extraction.rules.JaxRSDeploymentRules">
     </rule>
  </extension>
- <extension
-       id="org.palladiosimulator.retriever.extraction.rules.teammates"
-       name="Teammates Rules"
-       point="org.palladiosimulator.retriever.services.rule">
-    <rule
-          class="org.palladiosimulator.retriever.extraction.rules.TeammatesRules">
-    </rule>
- </extension>
 
 </plugin>
