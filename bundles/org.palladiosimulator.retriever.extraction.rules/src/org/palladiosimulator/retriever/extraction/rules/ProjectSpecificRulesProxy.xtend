@@ -54,8 +54,8 @@ class ProjectSpecificRulesProxy implements Rule {
 		val configuredValue = config.getConfig(Rule).getConfig(RULE_ID, RULE_PATH_KEY)
 		if (configuredValue !== null && !configuredValue.blank) {
 			return new File(configuredValue)
-		} else if (config.getOutputFolder() !== null) {
-			val localURI = CommonPlugin.asLocalURI(config.getOutputFolder())
+		} else if (config.rulesFolder !== null) {
+			val localURI = CommonPlugin.asLocalURI(config.rulesFolder)
 			return new File(localURI.devicePath())
 		}
 		throw new IllegalArgumentException("No path for project-specific rules is specified");
