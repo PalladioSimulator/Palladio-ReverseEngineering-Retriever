@@ -120,7 +120,7 @@ public class CompositeBuilder {
             .warn("Chose name " + chosenPrefix + " supported by " + maxSupport + "/" + parts.size() + " parts.");
 
         final Set<OperationInterface> externalRequirements = requirements.stream()
-            .filter(x -> compositeRequirements.containsEntire(x))
+            .filter(x -> compositeRequirements.containsEntire(x) || compositeProvisions.containsEntire(x))
             .collect(Collectors.toSet());
 
         final Set<OperationInterface> externalProvisions = MapMerger.merge(provisions)
@@ -128,7 +128,7 @@ public class CompositeBuilder {
             .stream()
             .filter(entry -> entry.getValue()
                 .stream()
-                .anyMatch(operation -> compositeProvisions.containsEntire(operation)))
+                .anyMatch(operation -> compositeRequirements.containsEntire(operation) || compositeProvisions.containsEntire(operation)))
             .map(entry -> entry.getKey())
             .collect(Collectors.toSet());
 
