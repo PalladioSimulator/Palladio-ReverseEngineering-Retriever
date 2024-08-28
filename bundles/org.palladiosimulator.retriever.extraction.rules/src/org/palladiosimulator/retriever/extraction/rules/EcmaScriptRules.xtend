@@ -34,6 +34,7 @@ class EcmaScriptRules implements Rule {
 	public static final String ECMASCRIPT_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverers.ecmascript"
 	public static final String HOSTNAMES_ID = "org.palladiosimulator.retriever.extraction.rules.ecmascript.hostnames"
 	public static final String GATEWAY_ROUTES_ID = "org.palladiosimulator.retriever.extraction.rules.ecmascript.routes"
+	public static final String DONE_ID = "org.palladiosimulator.retriever.extraction.rules.ecmascript.done"
 
 	static final CompUnitOrName GATEWAY_NAME = new CompUnitOrName("Gateway")
 	static final String START_NONWORD_CHARS = "^[\\W]+"
@@ -46,9 +47,13 @@ class EcmaScriptRules implements Rule {
 	static final String BLANK = ""
 
 	override processRules(RetrieverBlackboard blackboard, Path path) {
+		if (blackboard.hasPartition(DONE_ID)) return
+
 		val compilationUnits = blackboard.getDiscoveredFiles(ECMASCRIPT_DISCOVERER_ID, typeof(CompilationUnitTree))
 		val compilationUnit = compilationUnits.get(path)
-		if(compilationUnit === null) return
+		if (compilationUnit === null && !compilationUnits.empty) {
+			return
+		}
 
 		var gatewayRouteMap = blackboard.getPartition(GATEWAY_ROUTES_ID) as Map<Path, List<GatewayRoute>>
 		if (gatewayRouteMap === null) {
@@ -77,17 +82,32 @@ class EcmaScriptRules implements Rule {
 				mostSpecificHostnamePath = hostnamePath
 			}
 		}
-
+		
+		var httpRequests = Map.of
 		val pcmDetector = blackboard.getPCMDetector as PCMDetector
-		val httpRequests = findAllHttpRequests(blackboard, compilationUnit)
-		for (key : httpRequests.keySet) {
-			for (url : httpRequests.get(key)) {
-				val mappedURL = mapURL(hostname, "/" + url, gatewayRoutes)
-				if (!mappedURL.isPartOf("/" + hostname)) {
-					pcmDetector.detectRequiredInterface(GATEWAY_NAME, mappedURL)
+		if (!compilationUnits.empty) {
+			httpRequests = findAllHttpRequests(blackboard, compilationUnit)
+			for (key : httpRequests.keySet) {
+				for (url : httpRequests.get(key)) {
+					val mappedURL = mapURL(hostname, "/" + url, gatewayRoutes)
+					if (!mappedURL.isPartOf("/" + hostname)) {
+						pcmDetector.detectCompositeRequiredInterface(GATEWAY_NAME, mappedURL)
+					}
+					pcmDetector.detectProvidedOperation(GATEWAY_NAME, null, new RESTOperationName(hostname, "/" + url))
 				}
-				pcmDetector.detectProvidedOperation(GATEWAY_NAME, null, new RESTOperationName(hostname, "/" + url))
 			}
+		}
+		
+		// Require all routes if no requests could be parsed
+		if (httpRequests.empty) {
+			for (route : gatewayRoutes) {
+				val mappedURL = new RESTName(route.targetHost, "/")
+				if (!mappedURL.isPartOf("/" + hostname)) {
+					pcmDetector.detectCompositeRequiredInterface(GATEWAY_NAME, mappedURL)
+				}
+				pcmDetector.detectProvidedOperation(GATEWAY_NAME, null, new RESTOperationName(hostname, "/"))
+			}
+			blackboard.addPartition(DONE_ID, true)
 		}
 	}
 

@@ -17,6 +17,7 @@ import org.palladiosimulator.retriever.services.Rule
 
 class JaxRSDeploymentRules implements Rule {
 	public static final String RULE_ID = "org.palladiosimulator.retriever.extraction.rules.jax_rs.deployment"
+	public static final String DONE_ID = "org.palladiosimulator.retriever.extraction.rules.jax_rs.deployment.done"
 	public static final String XML_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverers.xml"
 	public static final String JAVA_DISCOVERER_ID = "org.palladiosimulator.retriever.extraction.discoverers.java";
 	public static final String ECMASCRIPT_RULE_ID = "org.palladiosimulator.retriever.extraction.rules.ecmascript"
@@ -24,7 +25,7 @@ class JaxRSDeploymentRules implements Rule {
 	public static final String ECMASCRIPT_HOSTNAMES_ID = "org.palladiosimulator.retriever.extraction.rules.ecmascript.hostnames"
 
 	override processRules(RetrieverBlackboard blackboard, Path path) {
-		// TODO: run only once per project
+		if (blackboard.hasPartition(DONE_ID)) return
 		val xmls = blackboard.getDiscoveredFiles(XML_DISCOVERER_ID, typeof(Document))
 
 		var Map<Path, String> hostnames = new HashMap();
@@ -107,6 +108,8 @@ class JaxRSDeploymentRules implements Rule {
 		if (!blackboard.hasPartition(ECMASCRIPT_HOSTNAMES_ID)) {
 			blackboard.addPartition(ECMASCRIPT_HOSTNAMES_ID, hostnameMap)
 		}
+		
+		blackboard.addPartition(DONE_ID, true)
 	}
 
 	override isBuildRule() {
