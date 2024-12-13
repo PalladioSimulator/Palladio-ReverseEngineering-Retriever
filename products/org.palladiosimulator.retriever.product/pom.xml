@@ -13,7 +13,7 @@
 	<groupId>org.palladiosimulator.retriever</groupId>
 	<artifactId>org.palladiosimulator.retriever.product</artifactId>
 	<name>[product] Retriever CLI</name>
-	<version>5.2.0-SNAPSHOT</version>
+	<version>5.2.1-SNAPSHOT</version>
 	<packaging>eclipse-repository</packaging>
 
 	<!-- Without this, the native launcher artifacts can not be found -->

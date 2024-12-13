@@ -3,7 +3,7 @@
 
 <product name="Retriever CLI" uid="org.palladiosimulator.retriever.product"
 	application="org.palladiosimulator.retriever.core.application"
-	version="5.2.0.qualifier" type="bundles" includeLaunchers="true"
+	version="5.2.1.qualifier" type="bundles" includeLaunchers="true"
 	autoIncludeRequirements="true">
 
 	<configIni use="default">
