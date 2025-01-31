@@ -13,7 +13,7 @@
 	<groupId>org.palladiosimulator.retriever</groupId>
 	<artifactId>org.palladiosimulator.retriever.test</artifactId>
 	<name>[test-bundle] Retriever</name>
-	<version>5.2.1-SNAPSHOT</version>
+	<version>5.3.0-SNAPSHOT</version>
 	<packaging>eclipse-test-plugin</packaging>
 
 	<build>
