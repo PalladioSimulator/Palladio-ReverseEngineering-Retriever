@@ -2,7 +2,7 @@ package org.palladiosimulator.retriever.core.configuration;
 
 import org.palladiosimulator.retriever.services.RetrieverConfiguration;
 
-import de.uka.ipd.sdq.workflow.launchconfig.AbstractWorkflowBasedRunConfiguration;
+import de.uka.ipd.sdq.workflow.launchconfig.core.AbstractWorkflowBasedRunConfiguration;
 
 /**
  * An adapter for RetrieverConfiguration, not more than a formality for use as a type parameter in
