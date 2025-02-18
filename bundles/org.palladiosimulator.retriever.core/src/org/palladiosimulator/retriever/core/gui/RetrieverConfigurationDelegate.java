@@ -9,7 +9,7 @@ import org.palladiosimulator.retriever.core.workflow.RetrieverJob;
 
 import de.uka.ipd.sdq.workflow.Workflow;
 import de.uka.ipd.sdq.workflow.jobs.IJob;
-import de.uka.ipd.sdq.workflow.launchconfig.AbstractWorkflowBasedLaunchConfigurationDelegate;
+import de.uka.ipd.sdq.workflow.launchconfig.core.AbstractWorkflowBasedLaunchConfigurationDelegate;
 
 public class RetrieverConfigurationDelegate
         extends AbstractWorkflowBasedLaunchConfigurationDelegate<RetrieverWorkflowConfiguration, Workflow> {

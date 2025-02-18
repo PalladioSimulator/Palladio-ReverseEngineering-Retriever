@@ -8,7 +8,7 @@ import de.uka.ipd.sdq.workflow.launchconfig.core.AbstractWorkflowBasedRunConfigu
  * An adapter for RetrieverConfiguration, not more than a formality for use as a type parameter in
  * AbstractWorkflowBasedLaunchConfigurationDelegate
  *
- * @see de.uka.ipd.sdq.workflow.launchconfig.AbstractWorkflowBasedLaunchConfigurationDelegate
+ * @see de.uka.ipd.sdq.workflow.launchconfig.core.AbstractWorkflowBasedLaunchConfigurationDelegate
  */
 public class RetrieverWorkflowConfiguration extends AbstractWorkflowBasedRunConfiguration {
 
