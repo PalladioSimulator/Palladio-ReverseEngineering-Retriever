@@ -1,3 +1,4 @@
+/** */
 package org.palladiosimulator.retriever.core.gui;
 
 import org.eclipse.core.runtime.CoreException;
@@ -8,11 +9,17 @@ import org.palladiosimulator.retriever.core.configuration.RetrieverWorkflowConfi
 import org.palladiosimulator.retriever.core.workflow.RetrieverJob;
 
 import de.uka.ipd.sdq.workflow.Workflow;
+import de.uka.ipd.sdq.workflow.WorkflowExceptionHandler;
 import de.uka.ipd.sdq.workflow.jobs.IJob;
-import de.uka.ipd.sdq.workflow.launchconfig.AbstractWorkflowBasedLaunchConfigurationDelegate;
+import de.uka.ipd.sdq.workflow.launchconfig.core.AbstractWorkflowBasedLaunchConfigurationDelegate;
+import de.uka.ipd.sdq.workflow.ui.UIBasedWorkflowExceptionHandler;
 
 public class RetrieverConfigurationDelegate
         extends AbstractWorkflowBasedLaunchConfigurationDelegate<RetrieverWorkflowConfiguration, Workflow> {
+    @Override
+    protected WorkflowExceptionHandler createExceptionHandler(boolean interactive) {
+        return new UIBasedWorkflowExceptionHandler(!interactive);
+    }
 
     @Override
     protected IJob createWorkflowJob(final RetrieverWorkflowConfiguration config, final ILaunch launch)
