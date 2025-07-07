@@ -4,16 +4,15 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.palladiosimulator</groupId>
-		<artifactId>eclipse-parent-updatesite</artifactId>
-		<version>0.8.9</version>
+		<groupId>org.palladiosimulator.retriever</groupId>
+		<artifactId>parent</artifactId>
+		<version>5.2.1-SNAPSHOT</version>
 		<relativePath>../../</relativePath>
 	</parent>
 
 	<groupId>org.palladiosimulator.retriever</groupId>
 	<artifactId>org.palladiosimulator.retriever.product</artifactId>
 	<name>[product] Retriever CLI</name>
-	<version>5.2.1-SNAPSHOT</version>
 	<packaging>eclipse-repository</packaging>
 
 	<!-- Without this, the native launcher artifacts can not be found -->
