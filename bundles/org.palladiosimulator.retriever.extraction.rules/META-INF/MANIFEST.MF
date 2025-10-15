@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Retriever Rules
 Bundle-SymbolicName: org.palladiosimulator.retriever.extraction.rules;singleton:=true
-Bundle-Version: 5.2.1.qualifier
+Bundle-Version: 5.2.2
 Bundle-Vendor: palladiosimulator.org
 Automatic-Module-Name: org.palladiosimulator.retriever.extraction.rules
 Bundle-RequiredExecutionEnvironment: JavaSE-17
@@ -16,5 +16,5 @@ Require-Bundle: org.eclipse.core.resources,
  org.openjdk.nashorn.core;bundle-version="15.4.0",
  org.eclipse.xtend.core,
  org.palladiosimulator.retriever.services,
- org.palladiosimulator.commons.stoex;bundle-version="5.2.1"
+ org.palladiosimulator.commons.stoex;bundle-version="5.2.2"
 Export-Package: org.palladiosimulator.retriever.extraction.rules

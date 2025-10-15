@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Retriever Core
 Bundle-SymbolicName: org.palladiosimulator.retriever.core;singleton:=true
-Bundle-Version: 5.2.1.qualifier
+Bundle-Version: 5.2.2
 Bundle-Vendor: palladiosimulator.org
 Automatic-Module-Name: org.palladiosimulator.retriever.core
 Bundle-RequiredExecutionEnvironment: JavaSE-17
