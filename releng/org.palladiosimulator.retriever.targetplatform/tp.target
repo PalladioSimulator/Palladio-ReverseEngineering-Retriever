@@ -34,12 +34,12 @@
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="false" type="InstallableUnit">
 			<unit id="tools.mdsd.library.emfeditutils" version="0.0.0"/>
-			<repository location="https://updatesite.mdsd.tools/library-emfeditutils/nightly/"/>
+			<repository location="https://updatesite.mdsd.tools/library-emfeditutils/releases/1.0.0/"/>
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="false" type="InstallableUnit">
 			<unit id="tools.mdsd.mocore.framework" version="0.0.0"/>
 			<unit id="tools.mdsd.mocore.framework.test" version="0.0.0"/>
-			<repository location="https://updatesite.mdsd.tools/library-modelcompositionrefinement/nightly/"/>
+			<repository location="https://updatesite.mdsd.tools/library-modelcompositionrefinement/releases/1.0.0/"/>
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="false" type="InstallableUnit">
 			<unit id="org.eclipse.wildwebdeveloper.feature.feature.group" version="0.0.0"/>
