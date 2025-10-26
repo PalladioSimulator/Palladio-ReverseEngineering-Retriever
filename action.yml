@@ -501,7 +501,7 @@ runs:
         rmdir tmp
 
     - name: Upload Analysis Results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v5
       with:
         name: retriever
         path: ${{ env.tmp_dir }}/retriever_out
@@ -518,7 +518,7 @@ runs:
 
     - name: Upload Eclipse Logs
       if: failure()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v5
       with:
         name: eclipse_logs
         path: ${{ env.tmp_dir }}/eclipse_logs
