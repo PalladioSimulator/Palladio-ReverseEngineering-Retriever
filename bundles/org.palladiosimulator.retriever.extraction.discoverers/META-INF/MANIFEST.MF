@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.palladiosimulator.retriever.extraction.discoverers;sing
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: palladiosimulator.org
 Automatic-Module-Name: org.palladiosimulator.retriever.extraction.rules
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Export-Package: org.palladiosimulator.retriever.extraction.discoverers
 Require-Bundle: org.palladiosimulator.pcm,
  org.palladiosimulator.retriever.extraction,
