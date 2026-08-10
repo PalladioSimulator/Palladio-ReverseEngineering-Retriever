@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.palladiosimulator.retriever.test;singleton:=true
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: palladiosimulator.org
 Automatic-Module-Name: org.palladiosimulator.retriever.extraction.engine.test
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Require-Bundle: com.google.guava,
  de.uka.ipd.sdq.workflow,
  org.eclipse.core.resources,

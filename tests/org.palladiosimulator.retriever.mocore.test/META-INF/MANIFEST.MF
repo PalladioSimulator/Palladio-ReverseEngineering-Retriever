@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.palladiosimulator.retriever.mocore.test;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: palladiosimulator.org
 Automatic-Module-Name: org.palladiosimulator.retriever.mocore.test
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Export-Package: org.palladiosimulator.retriever.mocore.utility
 Require-Bundle: org.junit,
