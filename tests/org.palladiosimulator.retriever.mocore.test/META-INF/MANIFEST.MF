@@ -18,5 +18,5 @@ Require-Bundle: org.junit,
  org.palladiosimulator.generator.fluent,
  org.palladiosimulator.retriever.mocore,
  org.apache.log4j,
- org.apache.commons.io,
+ org.apache.commons.commons-io,
  de.uka.ipd.sdq.workflow
